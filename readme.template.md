@@ -10,7 +10,7 @@
 > <u>I am now in college, working on some great projects</u>
 
 <div>
-  <img align="left" width="300"  src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
+  <img align="left" width="200" src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
   <div style="margin: 30px">
 
   ### *Hi! I'm Rishi! I am Freelancer and into SAAS products (working on one rn)*
