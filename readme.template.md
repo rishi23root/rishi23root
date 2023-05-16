@@ -22,12 +22,12 @@
 </div>
 <br>
 
-<p>
+<!-- <p>
   <img src="https://visitor-badge.glitch.me/badge?page_id=rishi23root">
-  <a href="https://blog.wibus.ren" align="center"><img src="https://img.shields.io/badge/Blog-blog.iucky.cn-yellow"></a>
   <a href="https://wakatime.com/@5c293fcd-9bec-4609-946b-c06b5fbf192c"><img src="https://wakatime.com/badge/user/5c293fcd-9bec-4609-946b-c06b5fbf192c.svg" alt="Total time coded since Apr 24 2021" /></a>
-</p>
+</p> -->
 
+---
 ---
 
 <br />
@@ -42,7 +42,7 @@
 
 <br />
 
-**Stacks**
+## **Stacks**
 
 <p>
 <img alt="React" src="https://img.shields.io/badge/-React-45b8d8?style=flat-square&logo=react&logoColor=white" />
@@ -66,24 +66,24 @@
 </p>
 <br>
 
-**open sourse**
+---
+## **Open Source**
 
 <!-- opensource_dashboard:active -->
 
-<!-- **目前在...**
+<!-- opensource_dashboard:gs  -->
 
-opensource_dashboard:gs -->
-
-**recent likes...**
+---
+## **Recently liked**
 
 <!-- recent_star_inject -->
 
 
 
 ---
-<div style="text-align: center">
+<p style="text-align: center;">
 <!-- footer_inject -->
-</div>
+</p>
 
 <a href="https://github.com/rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=rishi23root&theme=github" width="100%">
