@@ -80,11 +80,9 @@ opensource_dashboard:gs -->
 
 
 
-<div style="align: center">
-
 ---
+<div style="text-align: center">
 <!-- footer_inject -->
-
 </div>
 
 <a href="https://github.com/rishi23root#gh-light-mode-only">

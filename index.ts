@@ -157,14 +157,15 @@ ${topStar5}
     newContent = newContent.replace(
       gc('FOOTER'),
       m`
+
     This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>
-    refreshed on：${now.toLocaleString(undefined, {
+    refreshed on : ${now.toLocaleString(undefined, {
       timeStyle: 'short',
       dateStyle: 'short',
       timeZone,
     })}
     <br/>
-    Next refresh: ${next.toLocaleString(undefined, {
+    Next refresh : ${next.toLocaleString(undefined, {
       timeStyle: 'short',
       dateStyle: 'short',
       timeZone,
