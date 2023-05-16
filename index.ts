@@ -157,7 +157,7 @@ ${topStar5}
     newContent = newContent.replace(
       gc('FOOTER'),
       m`
-
+    <p align="center">
     This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>
     refreshed on : ${now.toLocaleString(undefined, {
       timeStyle: 'short',

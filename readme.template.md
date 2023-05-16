@@ -11,7 +11,7 @@
 
 <div>
   <img align="left" width="300"  src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
-  <div style="margin-right: 30px">
+  <div style="margin: 30px">
 
   ### *Hi! I'm Rishi! I am Freelancer and into SAAS products (working on one rn)*
 
@@ -27,10 +27,14 @@
   <a href="https://wakatime.com/@5c293fcd-9bec-4609-946b-c06b5fbf192c"><img src="https://wakatime.com/badge/user/5c293fcd-9bec-4609-946b-c06b5fbf192c.svg" alt="Total time coded since Apr 24 2021" /></a>
 </p> -->
 
----
----
-
 <br />
+<br />
+
+
+
+<!-- new line -->
+---
+## **Stacks**
 
 <a href="https://github.com/rishi23root#gh-light-mode-only">
 <img align="right" width="450" src="https://github-readme-stats.vercel.app/api?username=rishi23root&show_icons=true&icon_color=0078e7&title_color=0078e7&include_all_commits=true"/>
@@ -41,9 +45,6 @@
 </a>
 
 <br />
-
-## **Stacks**
-
 <p>
 <img alt="React" src="https://img.shields.io/badge/-React-45b8d8?style=flat-square&logo=react&logoColor=white" />
 <img alt="TypeScript"
@@ -81,9 +82,7 @@
 
 
 ---
-<p style="text-align: center;">
 <!-- footer_inject -->
-</p>
 
 <a href="https://github.com/rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=rishi23root&theme=github" width="100%">
