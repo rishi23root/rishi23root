@@ -10,17 +10,21 @@
 > <u>I am now in college, working on some great projects</u>
 
 <div>
-  <img align="left" width="200" src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
+  <img align="left" width="350" src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
+  <br />
+  <br />  
   <div style="margin: 30px">
 
   ### *Hi! I'm Rishi! I am Freelancer and into SAAS products (working on one rn)*
 
   - 🌱 I’m currently learning svg animations.
   - 🤔 I’m looking for help with 🥚 MicroService Module design and webtorrent.
+  - ⚡️🏃🏻 working into the field of cybersecurity and web penetration testing.
+  - 😎 did some heavy tasks easy using python and bash automations, scripts in repositories.
   - 🎵 I am currently focusing on the working with webtorrent and building a SAAS product. 
   </div>
 </div>
-<br>
+
 
 <!-- <p>
   <img src="https://visitor-badge.glitch.me/badge?page_id=rishi23root">

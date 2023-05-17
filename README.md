@@ -10,17 +10,21 @@
 > <u>I am now in college, working on some great projects</u>
 
 <div>
-  <img align="left" width="400"  src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
-  <div style="margin-right: 30px">
+  <img align="left" width="350" src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
+  <br />
+  <br />  
+  <div style="margin: 30px">
 
   ### *Hi! I'm Rishi! I am Freelancer and into SAAS products (working on one rn)*
 
   - 🌱 I’m currently learning svg animations.
   - 🤔 I’m looking for help with 🥚 MicroService Module design and webtorrent.
+  - ⚡️🏃🏻 working into the field of cybersecurity and web penetration testing.
+  - 😎 did some heavy tasks easy using python and bash automations, scripts in repositories.
   - 🎵 I am currently focusing on the working with webtorrent and building a SAAS product. 
   </div>
 </div>
-<br>
+
 
 <!-- <p>
   <img src="https://visitor-badge.glitch.me/badge?page_id=rishi23root">
@@ -82,7 +86,7 @@
 
 
 ---
-<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 5/17/23, 5:24 AM<br>Next refresh : 5/17/23, 8:24 AM</p>
+<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 5/17/23, 5:35 AM<br>Next refresh : 5/17/23, 8:35 AM</p>
 
 <a href="https://github.com/rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=rishi23root&theme=github" width="100%">
