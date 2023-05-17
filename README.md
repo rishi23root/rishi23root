@@ -3,6 +3,9 @@
 <a href="mailto:rishabhjainfinal@gmail.com" align="center">
   <img alt="Email me." width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/email.svg" />
 </a>&nbsp;
+<a href="https://www.linkedin.com/in/rishi23jain/" align="center">
+  <img alt="rishi on Twitter" width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/linkedin.svg" />
+</a> &nbsp;
 <a href="https://twitter.com/rishi23jain" align="center">
   <img alt="rishi on Twitter" width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/twitter.svg" />
 </a> &nbsp;)</h1>
@@ -66,7 +69,7 @@
     src="https://img.shields.io/badge/-MySQL-13aa52?style=flat-square&logo=Mysql&logoColor=white" />
       <img alt="github actions"
     src="https://img.shields.io/badge/-Github_Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white" />
-      <img alt="macOS" src="https://img.shields.io/badge/-macOS-333?style=flat-square&logo=apple&logoColor=white" />
+      <img alt="ubantu" src="https://img.shields.io/badge/-ubantu-333?style=flat-square&logo=ubuntu&logoColor=white" />
   <img alt="vscode" src="https://img.shields.io/badge/Visual%20Studio%20Code-blue?style=flat-square&logo=visual-studio-code&logoColor=ffffff" />
 </p>
 <br>
@@ -86,7 +89,7 @@
 
 
 ---
-<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 5/17/23, 11:48 PM<br>Next refresh : 5/18/23, 2:48 AM</p>
+<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 5/18/23, 1:46 AM<br>Next refresh : 5/18/23, 4:46 AM</p>
 
 <a href="https://github.com/rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=rishi23root&theme=github" width="100%">
