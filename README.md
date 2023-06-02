@@ -1,5 +1,5 @@
 <!-- user name -->
-<h1> Rishi23root 👨‍💻 &nbsp;&nbsp; ( &nbsp;
+<h1> RISHI23ROOT 👨‍💻 &nbsp;&nbsp; ( &nbsp;
 <a href="mailto:rishabhjainfinal@gmail.com" align="center">
   <img alt="Email me." width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/email.svg" />
 </a>&nbsp;
@@ -30,7 +30,7 @@
 
 
 <!-- <p>
-  <img src="https://visitor-badge.glitch.me/badge?page_id=rishi23root">
+  <img src="https://visitor-badge.glitch.me/badge?page_id=RISHI23ROOT">
   <a href="https://wakatime.com/@5c293fcd-9bec-4609-946b-c06b5fbf192c"><img src="https://wakatime.com/badge/user/5c293fcd-9bec-4609-946b-c06b5fbf192c.svg" alt="Total time coded since Apr 24 2021" /></a>
 </p> -->
 
@@ -43,12 +43,12 @@
 ---
 ## **Stacks**
 
-<a href="https://github.com/rishi23root#gh-light-mode-only">
-<img align="right" width="450" src="https://github-readme-stats.vercel.app/api?username=rishi23root&show_icons=true&icon_color=0078e7&title_color=0078e7&include_all_commits=true"/>
+<a href="https://github.com/RISHI23ROOT#gh-light-mode-only">
+<img align="right" width="450" src="https://github-readme-stats.vercel.app/api?username=RISHI23ROOT&show_icons=true&icon_color=0078e7&title_color=0078e7&include_all_commits=true"/>
 </a>
 
-<a href="https://github.com/rishi23root#gh-dark-mode-only">
-<img align="right" width="450" src="https://github-readme-stats.vercel.app/api?username=rishi23root&show_icons=true&icon_color=0078e7&title_color=0078e7&include_all_commits=true&theme=dark"/>
+<a href="https://github.com/RISHI23ROOT#gh-dark-mode-only">
+<img align="right" width="450" src="https://github-readme-stats.vercel.app/api?username=RISHI23ROOT&show_icons=true&icon_color=0078e7&title_color=0078e7&include_all_commits=true&theme=dark"/>
 </a>
 
 <br />
@@ -84,34 +84,34 @@
 ---
 ## **Recently liked**
 
-<ul><li><a href=https://github.com/adnanedrief/linkedin-job-apply-automation>adnanedrief/linkedin-job-apply-automation</a> -- <span>LinkedIn job apply bot that automates job applications on LinkedIn using puppeteer(nodejs)</span></li><li><a href=https://github.com/rishi23root/Maryam>rishi23root/Maryam</a> -- <span>Maryam: Open-source Intelligence(OSINT) Framework</span></li><li><a href=https://github.com/rishi23root/opencv>rishi23root/opencv</a></li><li><a href=https://github.com/pyhopper/pyhopper>pyhopper/pyhopper</a> -- <span>PyHopper is a hyperparameter optimizer, made specifically for high-dimensional problems arising in machine learning research.</span></li><li><a href=https://github.com/rishi23root/pyblink>rishi23root/pyblink</a> -- <span>it is a program that addresses eye strain from prolonged computer use. By counting blinks, providing notifications, and recording data, it helps users develop healthier habits. Work comfortably on screens for longer periods while prioritizing eye health with PyBlink</span></li></ul>
+<ul><li><a href=https://github.com/idosal/assistant-chat-gpt>idosal/assistant-chat-gpt</a> -- <span>A Chrome browser extension that embeds ChatGPT as a hands-free voice assistant</span></li><li><a href=https://github.com/adnanedrief/linkedin-job-apply-automation>adnanedrief/linkedin-job-apply-automation</a> -- <span>LinkedIn job apply bot that automates job applications on LinkedIn using puppeteer(nodejs)</span></li><li><a href=https://github.com/rishi23root/Maryam>rishi23root/Maryam</a> -- <span>Maryam: Open-source Intelligence(OSINT) Framework</span></li><li><a href=https://github.com/rishi23root/opencv>rishi23root/opencv</a></li><li><a href=https://github.com/pyhopper/pyhopper>pyhopper/pyhopper</a> -- <span>PyHopper is a hyperparameter optimizer, made specifically for high-dimensional problems arising in machine learning research.</span></li></ul>
 
 
 
 ---
-<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 6/2/23, 2:44 PM<br>Next refresh : 6/2/23, 5:44 PM</p>
+<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 6/2/23, 6:00 PM<br>Next refresh : 6/2/23, 9:00 PM</p>
 
-<a href="https://github.com/rishi23root#gh-light-mode-only">
-  <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=rishi23root&theme=github" width="100%">
+<a href="https://github.com/RISHI23ROOT#gh-light-mode-only">
+  <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=RISHI23ROOT&theme=github" width="100%">
 </a>
 
-<a href="https://github.com/rishi23root#gh-dark-mode-only">
-  <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=rishi23root&theme=github_dark" width="100%">
+<a href="https://github.com/RISHI23ROOT#gh-dark-mode-only">
+  <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=RISHI23ROOT&theme=github_dark" width="100%">
 </a>
 
-<a href="https://github.com/rishi23root#gh-light-mode-only">
+<a href="https://github.com/RISHI23ROOT#gh-light-mode-only">
 
 | Top Language by Repo                                                                                                                  | My Stats                                                                                                                 |
 | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| <img src="http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=rishi23root&theme=github" width="800"> | <img src="http://github-profile-summary-cards.vercel.app/api/cards/stats?username=rishi23root&theme=github" width="800"> |
+| <img src="http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=RISHI23ROOT&theme=github" width="800"> | <img src="http://github-profile-summary-cards.vercel.app/api/cards/stats?username=RISHI23ROOT&theme=github" width="800"> |
 
 </a>
 
-<a href="https://github.com/rishi23root#gh-dark-mode-only">
+<a href="https://github.com/RISHI23ROOT#gh-dark-mode-only">
   
 | Top Language by Repo                                         | My Stats                                                     |
 | ------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| <img src="http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=rishi23root&theme=github_dark" width="800"> | <img src="http://github-profile-summary-cards.vercel.app/api/cards/stats?username=rishi23root&theme=github_dark" width="800"> |
+| <img src="http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=RISHI23ROOT&theme=github_dark" width="800"> | <img src="http://github-profile-summary-cards.vercel.app/api/cards/stats?username=RISHI23ROOT&theme=github_dark" width="800"> |
   
   
 </a>

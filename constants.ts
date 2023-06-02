@@ -1,4 +1,4 @@
-export const COMMNETS = Object.freeze({
+export default Object.freeze({
   OPENSOURCE_DASHBOARD_ACTIVE: 'opensource_dashboard:active',
   OPENSOURCE_DASHBOARD_GS: 'opensource_dashboard:gs',
   RECENT_POSTS: 'recent_posts_inject',

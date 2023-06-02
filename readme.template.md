@@ -1,5 +1,5 @@
 <!-- user name -->
-<h1> Rishi23root 👨‍💻 &nbsp;&nbsp; ( &nbsp;
+<h1> {USERNAME_HERE} 👨‍💻 &nbsp;&nbsp; ( &nbsp;
 <a href="mailto:rishabhjainfinal@gmail.com" align="center">
   <img alt="Email me." width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/email.svg" />
 </a>&nbsp;
@@ -10,7 +10,8 @@
   <img alt="rishi on Twitter" width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/twitter.svg" />
 </a> &nbsp;)</h1>
 
-> <u>I am now in college, working on some great projects</u>
+ <!--user discriptions   -->
+<u>I am now in college, working on some great projects</u>
 
 <div>
   <img align="left" width="350" src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
@@ -30,7 +31,7 @@
 
 
 <!-- <p>
-  <img src="https://visitor-badge.glitch.me/badge?page_id=rishi23root">
+  <img src="https://visitor-badge.glitch.me/badge?page_id={USERNAME_HERE}">
   <a href="https://wakatime.com/@5c293fcd-9bec-4609-946b-c06b5fbf192c"><img src="https://wakatime.com/badge/user/5c293fcd-9bec-4609-946b-c06b5fbf192c.svg" alt="Total time coded since Apr 24 2021" /></a>
 </p> -->
 
@@ -43,12 +44,12 @@
 ---
 ## **Stacks**
 
-<a href="https://github.com/rishi23root#gh-light-mode-only">
-<img align="right" width="450" src="https://github-readme-stats.vercel.app/api?username=rishi23root&show_icons=true&icon_color=0078e7&title_color=0078e7&include_all_commits=true"/>
+<a href="https://github.com/{USERNAME_HERE}#gh-light-mode-only">
+<img align="right" width="450" src="https://github-readme-stats.vercel.app/api?username={USERNAME_HERE}&show_icons=true&icon_color=0078e7&title_color=0078e7&include_all_commits=true"/>
 </a>
 
-<a href="https://github.com/rishi23root#gh-dark-mode-only">
-<img align="right" width="450" src="https://github-readme-stats.vercel.app/api?username=rishi23root&show_icons=true&icon_color=0078e7&title_color=0078e7&include_all_commits=true&theme=dark"/>
+<a href="https://github.com/{USERNAME_HERE}#gh-dark-mode-only">
+<img align="right" width="450" src="https://github-readme-stats.vercel.app/api?username={USERNAME_HERE}&show_icons=true&icon_color=0078e7&title_color=0078e7&include_all_commits=true&theme=dark"/>
 </a>
 
 <br />
@@ -91,27 +92,27 @@
 ---
 <!-- footer_inject -->
 
-<a href="https://github.com/rishi23root#gh-light-mode-only">
-  <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=rishi23root&theme=github" width="100%">
+<a href="https://github.com/{USERNAME_HERE}#gh-light-mode-only">
+  <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username={USERNAME_HERE}&theme=github" width="100%">
 </a>
 
-<a href="https://github.com/rishi23root#gh-dark-mode-only">
-  <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=rishi23root&theme=github_dark" width="100%">
+<a href="https://github.com/{USERNAME_HERE}#gh-dark-mode-only">
+  <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username={USERNAME_HERE}&theme=github_dark" width="100%">
 </a>
 
-<a href="https://github.com/rishi23root#gh-light-mode-only">
+<a href="https://github.com/{USERNAME_HERE}#gh-light-mode-only">
 
 | Top Language by Repo                                                                                                                  | My Stats                                                                                                                 |
 | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| <img src="http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=rishi23root&theme=github" width="800"> | <img src="http://github-profile-summary-cards.vercel.app/api/cards/stats?username=rishi23root&theme=github" width="800"> |
+| <img src="http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username={USERNAME_HERE}&theme=github" width="800"> | <img src="http://github-profile-summary-cards.vercel.app/api/cards/stats?username={USERNAME_HERE}&theme=github" width="800"> |
 
 </a>
 
-<a href="https://github.com/rishi23root#gh-dark-mode-only">
+<a href="https://github.com/{USERNAME_HERE}#gh-dark-mode-only">
   
 | Top Language by Repo                                         | My Stats                                                     |
 | ------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| <img src="http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=rishi23root&theme=github_dark" width="800"> | <img src="http://github-profile-summary-cards.vercel.app/api/cards/stats?username=rishi23root&theme=github_dark" width="800"> |
+| <img src="http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username={USERNAME_HERE}&theme=github_dark" width="800"> | <img src="http://github-profile-summary-cards.vercel.app/api/cards/stats?username={USERNAME_HERE}&theme=github_dark" width="800"> |
   
   
 </a>

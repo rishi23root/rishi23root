@@ -5,7 +5,7 @@ import { minify } from 'html-minifier'
 import { shuffle } from 'lodash'
 import rax from 'retry-axios'
 import { github, opensource, timeZone } from './config'
-import { COMMNETS } from './constants'
+import commnets  from './constants'
 const githubAPIEndPoint = 'https://api.github.com'
 
 rax.attach()
@@ -19,14 +19,14 @@ axios.defaults.raxConfig = {
   },
 }
 
-const userAgent =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
+const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
 
 axios.defaults.headers.common['User-Agent'] = userAgent
-const gh = axios.create({
+const githubReq = axios.create({
   baseURL: githubAPIEndPoint,
   timeout: 4000,
 })
+
 type GHItem = {
   name: string
   id: number
@@ -35,48 +35,37 @@ type GHItem = {
   html_url: string
 }
 
-type PostItem = {
-  title: string
-  summary: string
-  created: string
-  modified: string
-  id: string
-  slug: string
-  category: {
-    name: string
-    slug: string
-  }
-}
-
 function generateOpenSourceSectionHtml<T extends GHItem>(list: T[]) {
   const tbody = list.reduce(
-    (str, cur) =>
+    (str, cur) => 
       str +
       ` <tr>
-  <td><a href="${cur.html_url}"><b>
-  ${cur.full_name}</b></a></td>
-  <td><img alt="Stars" src="https://img.shields.io/github/stars/${cur.full_name}?style=flat-square&labelColor=343b41"/></td>
-  <td><img alt="Forks" src="https://img.shields.io/github/forks/${cur.full_name}?style=flat-square&labelColor=343b41"/></td>
-  <td><a href="https://github.com/${cur.full_name}/issues" target="_blank"><img alt="Issues" src="https://img.shields.io/github/issues/${cur.full_name}?style=flat-square&labelColor=343b41"/></a></td>
-  <td><a href="https://github.com/${cur.full_name}/pulls" target="_blank"><img alt="Pull Requests" src="https://img.shields.io/github/issues-pr/${cur.full_name}?style=flat-square&labelColor=343b41"/></a></td>
-</tr>`,
+        <td><a href="${cur.html_url}"><b>
+        ${cur.full_name}</b></a></td>
+        <td><img alt="Stars" src="https://img.shields.io/github/stars/${cur.full_name}?style=flat-square&labelColor=343b41"/></td>
+        <td><img alt="Forks" src="https://img.shields.io/github/forks/${cur.full_name}?style=flat-square&labelColor=343b41"/></td>
+        <td><a href="https://github.com/${cur.full_name}/issues" target="_blank"><img alt="Issues" src="https://img.shields.io/github/issues/${cur.full_name}?style=flat-square&labelColor=343b41"/></a></td>
+        <td><a href="https://github.com/${cur.full_name}/pulls" target="_blank"><img alt="Pull Requests" src="https://img.shields.io/github/issues-pr/${cur.full_name}?style=flat-square&labelColor=343b41"/></a></td>
+      </tr>`,
     ``,
   )
 
-  return m`<table>
-  <thead align="center">
-    <tr border: none;>
-      <td><b>🎁 Projects</b></td>
-      <td><b>⭐ Stars</b></td>
-      <td><b>📚 Forks</b></td>
-      <td><b>🛎 Issues</b></td>
-      <td><b>📬 Pull requests</b></td>
-    </tr>
-  </thead>
-  <tbody>
-  ${tbody}
-  </tbody>
-</table>`
+  return minifyMarkdown`
+    <table>
+      <thead align="center">
+        <tr border: none;>
+          <td><b>🎁 Projects</b></td>
+          <td><b>⭐ Stars</b></td>
+          <td><b>📚 Forks</b></td>
+          <td><b>🛎 Issues</b></td>
+          <td><b>📬 Pull requests</b></td>
+        </tr>
+      </thead>
+      <tbody>
+      ${tbody}
+      </tbody>
+    </table>
+  `
 }
 
 /**
@@ -89,33 +78,42 @@ function generateRepoHTML<T extends GHItem>(item: T) {
   }</li>`
 }
 
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 async function main() {
   const template = await readFile('./readme.template.md', { encoding: 'utf-8' })
   let newContent = template
-  // 获取活跃的开源项目详情
+
+  // replave the name section with the github name find all the instances of USERNAME_HERE 
+  newContent = newContent.replace(/{USERNAME_HERE}/gm, capitalizeFirstLetter(github.name))
+
+  //  Get active open source project details
   const activeOpenSourceDetail = await Promise.all(
     opensource.active.map((name) => {
-      return gh.get('/repos/' + name).then((data) => data.data)
+      return githubReq.get('/repos/' + name).then((data) => data.data)
     }),
   )
 
   newContent = newContent.replace(
-    gc('OPENSOURCE_DASHBOARD_ACTIVE'),
+    gitCommit('OPENSOURCE_DASHBOARD_ACTIVE'),
     generateOpenSourceSectionHtml(activeOpenSourceDetail),
   )
   // // 获取活跃的开源项目Gs详情
   // const activeOpenSourceDetailGs = await Promise.all(
   //   opensource.gs.map((name) => {
-  //     return gh.get('/repos/' + name).then((data) => data.data)
+  //     return githubReq.get('/repos/' + name).then((data) => data.data)
   //   }),
   // )
 
   // newContent = newContent.replace(
-  //   gc('OPENSOURCE_DASHBOARD_GS'),
+  //   gitCommits('OPENSOURCE_DASHBOARD_GS'),
   //   generateOpenSourceSectionHtml(activeOpenSourceDetailGs),
   // )
-  // 获取 Star
-  const star: any[] = await gh
+
+  // Star
+  const star: any[] = await githubReq
     .get('/users/' + github.name + '/starred')
     .then((data) => data.data)
 
@@ -126,10 +124,10 @@ async function main() {
       .reduce((str, cur) => str + generateRepoHTML(cur), '')
 
     newContent = newContent.replace(
-      gc('RECENT_STAR'),
-      m`
+      gitCommit('RECENT_STAR'),
+      minifyMarkdown`
     <ul>
-${topStar5}
+      ${topStar5}
     </ul>
     `,
     )
@@ -140,10 +138,10 @@ ${topStar5}
       .reduce((str, cur) => str + generateRepoHTML(cur), '')
 
     newContent = newContent.replace(
-      gc('RANDOM_GITHUB_STARS'),
-      m`
+      gitCommit('RANDOM_GITHUB_STARS'),
+      minifyMarkdown`
       <ul>
-  ${random}
+        ${random}
       </ul>
       `,
     )
@@ -155,8 +153,8 @@ ${topStar5}
     const next = dayjs().add(3, 'h').toDate()
 
     newContent = newContent.replace(
-      gc('FOOTER'),
-      m`
+      gitCommit('FOOTER'),
+      minifyMarkdown`
     <p align="center">
     This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>
     refreshed on : ${now.toLocaleString(undefined, {
@@ -178,11 +176,11 @@ ${topStar5}
   await writeFile('./README.md', newContent, { encoding: 'utf-8' })
 }
 
-function gc(token: keyof typeof COMMNETS) {
-  return `<!-- ${COMMNETS[token]} -->`
+function gitCommit(token: keyof typeof commnets) {
+  return `<!-- ${commnets[token]} -->`
 }
 
-function m(html: TemplateStringsArray, ...args: any[]) {
+function minifyMarkdown(html: TemplateStringsArray, ...args: any[]) {
   const str = html.reduce((s, h, i) => s + h + (args[i] ?? ''), '')
   return minify(str, {
     removeAttributeQuotes: true,
