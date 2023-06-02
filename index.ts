@@ -4,7 +4,7 @@ import { readFile, rm, writeFile } from 'fs/promises'
 import { minify } from 'html-minifier'
 import { shuffle } from 'lodash'
 import rax from 'retry-axios'
-import { github, opensource, timeZone } from './config'
+import { github,shortBio,fullDiscription, opensource, timeZone } from './config'
 import commnets  from './constants'
 const githubAPIEndPoint = 'https://api.github.com'
 
@@ -78,16 +78,24 @@ function generateRepoHTML<T extends GHItem>(item: T) {
   }</li>`
 }
 
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+function capitalizeFirstLetter(stringText:string) {
+    return stringText.charAt(0).toUpperCase() + stringText.slice(1);
 }
 
 async function main() {
   const template = await readFile('./readme.template.md', { encoding: 'utf-8' })
   let newContent = template
 
-  // replave the name section with the github name find all the instances of USERNAME_HERE 
-  newContent = newContent.replace(/{USERNAME_HERE}/gm, capitalizeFirstLetter(github.name))
+  // console.log(newContent.match(/{shortBio}/gm));
+  
+  newContent = newContent
+    // replace the name section with the github name find all the instances of USERNAME_HERE 
+    .replace(/{USERNAME_HERE}/gm, capitalizeFirstLetter(github.name))
+    // replace the bio section with info from the config file 
+    .replace(/{shortBio}/gm, shortBio)
+    // replace the discription section with info from the config file 
+    .replace(/{fullDiscription}/gm, fullDiscription)
+
 
   //  Get active open source project details
   const activeOpenSourceDetail = await Promise.all(
