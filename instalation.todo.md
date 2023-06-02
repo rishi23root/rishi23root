@@ -1,8 +1,8 @@
-## steps to setup
+# Steps to setup
 1. clone the repo
 2. workflow settings
     - give read and write permissions to the workflow form the repo settings - /settings/actions
-    - create a `GITHUB_TOKEN` in  
+    <!-- - create a `GITHUB_TOKEN` in your profile - /settings/tokens -->
 3. update the `config.ts` # you are done here just push the code with the updated config.ts
 4. run `npm install` # if tesing locally
 5. run `npm run build` # if tesing locally
