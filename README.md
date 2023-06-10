@@ -86,12 +86,12 @@
 ---
 ## **Recently liked**
 
-<ul><li><a href=https://github.com/idosal/assistant-chat-gpt>idosal/assistant-chat-gpt</a> -- <span>A Chrome browser extension that embeds ChatGPT as a hands-free voice assistant</span></li><li><a href=https://github.com/adnanedrief/linkedin-job-apply-automation>adnanedrief/linkedin-job-apply-automation</a> -- <span>LinkedIn job apply bot that automates job applications on LinkedIn using puppeteer(nodejs)</span></li><li><a href=https://github.com/rishi23root/Maryam>rishi23root/Maryam</a> -- <span>Maryam: Open-source Intelligence(OSINT) Framework</span></li><li><a href=https://github.com/rishi23root/opencv>rishi23root/opencv</a></li><li><a href=https://github.com/pyhopper/pyhopper>pyhopper/pyhopper</a> -- <span>PyHopper is a hyperparameter optimizer, made specifically for high-dimensional problems arising in machine learning research.</span></li></ul>
+<ul><li><a href=https://github.com/deedy/Deedy-Resume>deedy/Deedy-Resume</a> -- <span>A one page , two asymmetric column resume template in XeTeX that caters to an undergraduate Computer Science student</span></li><li><a href=https://github.com/idosal/assistant-chat-gpt>idosal/assistant-chat-gpt</a> -- <span>A Chrome browser extension that embeds ChatGPT as a hands-free voice assistant</span></li><li><a href=https://github.com/adnanedrief/linkedin-job-apply-automation>adnanedrief/linkedin-job-apply-automation</a> -- <span>LinkedIn job apply bot that automates job applications on LinkedIn using puppeteer(nodejs)</span></li><li><a href=https://github.com/rishi23root/Maryam>rishi23root/Maryam</a> -- <span>Maryam: Open-source Intelligence(OSINT) Framework</span></li><li><a href=https://github.com/rishi23root/opencv>rishi23root/opencv</a></li></ul>
 
 
 
 ---
-<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 6/10/23, 2:42 AM<br>Next refresh : 6/10/23, 5:42 AM</p>
+<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 6/10/23, 6:55 AM<br>Next refresh : 6/10/23, 9:55 AM</p>
 
 <a href="https://github.com/Rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=Rishi23root&theme=github" width="100%">
