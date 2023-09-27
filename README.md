@@ -86,12 +86,12 @@
 ---
 ## **Recently liked**
 
-<ul><li><a href=https://github.com/vzhou842/profanity-check>vzhou842/profanity-check</a> -- <span>A fast, robust Python library to check for offensive language in strings.</span></li><li><a href=https://github.com/rajannpatel/Pi-Hole-on-Google-Compute-Engine-Free-Tier-with-Full-Tunnel-and-Split-Tunnel-Wireguard-VPN-Configs>rajannpatel/Pi-Hole-on-Google-Compute-Engine-Free-Tier-with-Full-Tunnel-and-Split-Tunnel-Wireguard-VPN-Configs</a> -- <span>Run your own privacy-first ad blocking service at home, or in the cloud for free with Google Cloud Services.</span></li><li><a href=https://github.com/PipedreamHQ/pipedream>PipedreamHQ/pipedream</a> -- <span>Connect APIs, remarkably fast. Free for developers.</span></li><li><a href=https://github.com/cyb3rzest/Burp-Suite-Pro>cyb3rzest/Burp-Suite-Pro</a> -- <span>A bash and powershell script to download the latest version of Burp-Suite Professional and use it for free.</span></li><li><a href=https://github.com/deedy/Deedy-Resume>deedy/Deedy-Resume</a> -- <span>A one page , two asymmetric column resume template in XeTeX that caters to an undergraduate Computer Science student</span></li></ul>
+<ul><li><a href=https://github.com/KillianLucas/open-interpreter>KillianLucas/open-interpreter</a> -- <span>OpenAI's Code Interpreter in your terminal, running locally</span></li><li><a href=https://github.com/vzhou842/profanity-check>vzhou842/profanity-check</a> -- <span>A fast, robust Python library to check for offensive language in strings.</span></li><li><a href=https://github.com/rajannpatel/Pi-Hole-on-Google-Compute-Engine-Free-Tier-with-Full-Tunnel-and-Split-Tunnel-Wireguard-VPN-Configs>rajannpatel/Pi-Hole-on-Google-Compute-Engine-Free-Tier-with-Full-Tunnel-and-Split-Tunnel-Wireguard-VPN-Configs</a> -- <span>Run your own privacy-first ad blocking service at home, or in the cloud for free with Google Cloud Services.</span></li><li><a href=https://github.com/PipedreamHQ/pipedream>PipedreamHQ/pipedream</a> -- <span>Connect APIs, remarkably fast. Free for developers.</span></li><li><a href=https://github.com/cyb3rzest/Burp-Suite-Pro>cyb3rzest/Burp-Suite-Pro</a> -- <span>A bash and powershell script to download the latest version of Burp-Suite Professional and use it for free.</span></li></ul>
 
 
 
 ---
-<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 9/27/23, 8:46 PM<br>Next refresh : 9/27/23, 11:46 PM</p>
+<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 9/27/23, 11:49 PM<br>Next refresh : 9/28/23, 2:49 AM</p>
 
 <a href="https://github.com/Rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=Rishi23root&theme=github" width="100%">
