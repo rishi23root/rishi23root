@@ -86,12 +86,12 @@
 ---
 ## **Recently liked**
 
-<ul><li><a href=https://github.com/R-s0n/ars0n-framework>R-s0n/ars0n-framework</a> -- <span>A Modern Framework for Bug Bounty Hunting</span></li><li><a href=https://github.com/KillianLucas/open-interpreter>KillianLucas/open-interpreter</a> -- <span>OpenAI's Code Interpreter in your terminal, running locally</span></li><li><a href=https://github.com/vzhou842/profanity-check>vzhou842/profanity-check</a> -- <span>A fast, robust Python library to check for offensive language in strings.</span></li><li><a href=https://github.com/rajannpatel/Pi-Hole-on-Google-Compute-Engine-Free-Tier-with-Full-Tunnel-and-Split-Tunnel-Wireguard-VPN-Configs>rajannpatel/Pi-Hole-on-Google-Compute-Engine-Free-Tier-with-Full-Tunnel-and-Split-Tunnel-Wireguard-VPN-Configs</a> -- <span>Run your own privacy-first ad blocking service at home, or in the cloud for free with Google Cloud Services.</span></li><li><a href=https://github.com/PipedreamHQ/pipedream>PipedreamHQ/pipedream</a> -- <span>Connect APIs, remarkably fast. Free for developers.</span></li></ul>
+<ul><li><a href=https://github.com/xitanggg/open-resume>xitanggg/open-resume</a> -- <span>OpenResume is a powerful open-source resume builder and resume parser. https://open-resume.com/</span></li><li><a href=https://github.com/R-s0n/ars0n-framework>R-s0n/ars0n-framework</a> -- <span>A Modern Framework for Bug Bounty Hunting</span></li><li><a href=https://github.com/KillianLucas/open-interpreter>KillianLucas/open-interpreter</a> -- <span>OpenAI's Code Interpreter in your terminal, running locally</span></li><li><a href=https://github.com/vzhou842/profanity-check>vzhou842/profanity-check</a> -- <span>A fast, robust Python library to check for offensive language in strings.</span></li><li><a href=https://github.com/rajannpatel/Pi-Hole-on-Google-Compute-Engine-Free-Tier-with-Full-Tunnel-and-Split-Tunnel-Wireguard-VPN-Configs>rajannpatel/Pi-Hole-on-Google-Compute-Engine-Free-Tier-with-Full-Tunnel-and-Split-Tunnel-Wireguard-VPN-Configs</a> -- <span>Run your own privacy-first ad blocking service at home, or in the cloud for free with Google Cloud Services.</span></li></ul>
 
 
 
 ---
-<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 11/29/23, 8:46 AM<br>Next refresh : 11/29/23, 11:46 AM</p>
+<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 11/29/23, 11:50 AM<br>Next refresh : 11/29/23, 2:50 PM</p>
 
 <a href="https://github.com/Rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=Rishi23root&theme=github" width="100%">
