@@ -86,12 +86,12 @@
 ---
 ## **Recently liked**
 
-<ul><li><a href=https://github.com/rishi23root/opencv.wrap>rishi23root/opencv.wrap</a></li><li><a href=https://github.com/divapriya/Language_Processing>divapriya/Language_Processing</a></li><li><a href=https://github.com/xitanggg/open-resume>xitanggg/open-resume</a> -- <span>OpenResume is a powerful open-source resume builder and resume parser. https://open-resume.com/</span></li><li><a href=https://github.com/R-s0n/ars0n-framework>R-s0n/ars0n-framework</a> -- <span>A Modern Framework for Bug Bounty Hunting</span></li><li><a href=https://github.com/KillianLucas/open-interpreter>KillianLucas/open-interpreter</a> -- <span>A natural language interface for computers</span></li></ul>
+<ul><li><a href=https://github.com/rishi23root/Maryam>rishi23root/Maryam</a> -- <span>Maryam: Open-source Intelligence(OSINT) Framework</span></li><li><a href=https://github.com/rishi23root/opencv.wrap>rishi23root/opencv.wrap</a></li><li><a href=https://github.com/divapriya/Language_Processing>divapriya/Language_Processing</a></li><li><a href=https://github.com/xitanggg/open-resume>xitanggg/open-resume</a> -- <span>OpenResume is a powerful open-source resume builder and resume parser. https://open-resume.com/</span></li><li><a href=https://github.com/R-s0n/ars0n-framework>R-s0n/ars0n-framework</a> -- <span>A Modern Framework for Bug Bounty Hunting</span></li></ul>
 
 
 
 ---
-<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 3/10/24, 8:46 AM<br>Next refresh : 3/10/24, 11:46 AM</p>
+<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 3/10/24, 11:47 AM<br>Next refresh : 3/10/24, 2:47 PM</p>
 
 <a href="https://github.com/Rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=Rishi23root&theme=github" width="100%">
