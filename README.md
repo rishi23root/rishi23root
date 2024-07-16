@@ -86,12 +86,12 @@
 ---
 ## **Recently liked**
 
-<ul><li><a href=https://github.com/WhiskeySockets/Baileys>WhiskeySockets/Baileys</a> -- <span>Lightweight full-featured typescript/javascript WhatsApp Web API</span></li><li><a href=https://github.com/pashpashpash/manga-reader>pashpashpash/manga-reader</a> -- <span>Generate a video recap of any manga volume PDF with GPT Vision and Elevenlabs narration. Discord: https://discord.gg/MMqcuDe2WZ</span></li><li><a href=https://github.com/Jackett/Jackett>Jackett/Jackett</a> -- <span>API Support for your favorite torrent trackers</span></li><li><a href=https://github.com/rishi23root/Maryam>rishi23root/Maryam</a> -- <span>Maryam: Open-source Intelligence(OSINT) Framework</span></li><li><a href=https://github.com/rishi23root/opencv_wrap>rishi23root/opencv_wrap</a></li></ul>
+<ul><li><a href=https://github.com/danielmiessler/fabric>danielmiessler/fabric</a> -- <span>fabric is an open-source framework for augmenting humans using AI. It provides a modular framework for solving specific problems using a crowdsourced set of AI prompts that can be used anywhere.</span></li><li><a href=https://github.com/WhiskeySockets/Baileys>WhiskeySockets/Baileys</a> -- <span>Lightweight full-featured typescript/javascript WhatsApp Web API</span></li><li><a href=https://github.com/pashpashpash/manga-reader>pashpashpash/manga-reader</a> -- <span>Generate a video recap of any manga volume PDF with GPT Vision and Elevenlabs narration. Discord: https://discord.gg/MMqcuDe2WZ</span></li><li><a href=https://github.com/Jackett/Jackett>Jackett/Jackett</a> -- <span>API Support for your favorite torrent trackers</span></li><li><a href=https://github.com/rishi23root/Maryam>rishi23root/Maryam</a> -- <span>Maryam: Open-source Intelligence(OSINT) Framework</span></li></ul>
 
 
 
 ---
-<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 7/16/24, 6:02 PM<br>Next refresh : 7/16/24, 9:02 PM</p>
+<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 7/16/24, 8:45 PM<br>Next refresh : 7/16/24, 11:45 PM</p>
 
 <a href="https://github.com/Rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=Rishi23root&theme=github" width="100%">
