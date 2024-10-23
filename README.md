@@ -91,7 +91,7 @@
 
 
 ---
-<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 10/23/24, 8:50 PM<br>Next refresh : 10/23/24, 11:50 PM</p>
+<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 10/23/24, 11:56 PM<br>Next refresh : 10/24/24, 2:56 AM</p>
 
 <a href="https://github.com/Rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=Rishi23root&theme=github" width="100%">
