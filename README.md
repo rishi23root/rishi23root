@@ -1,6 +1,6 @@
 <!-- user name -->
 <h1> Rishi23root 👨‍💻 &nbsp;&nbsp; ( &nbsp;
-<a href="mailto:rishabhjainfinal@gmail.com" align="center">
+<!-- <a href="mailto:rishabhjainfinal@gmail.com" align="center">
   <img alt="Email me." width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/email.svg" />
 </a>&nbsp;
 <a href="https://www.linkedin.com/in/rishi23jain/" align="center">
@@ -10,7 +10,6 @@
   <img alt="rishi on Twitter" width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/twitter.svg" />
 </a> &nbsp;)</h1>
 
- <!--user discriptions   -->
 <u>I am now in college, working on some great projects</u>
 
 <div>
@@ -28,7 +27,7 @@
   - 🎵 I am currently focusing on the working with webtorrent and building a SAAS product. 
 
   </div>
-</div>
+</div> -->
 
 
 <!-- <p>
