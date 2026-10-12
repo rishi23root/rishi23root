@@ -29,12 +29,4 @@ Hi — I'm Rishi. I build SaaS products, automate the boring parts, and keep sec
 
 ---
 
-## Languages
-
-<p align="center">
-  <img src="assets/languages.svg" alt="Most used languages" width="420" />
-</p>
-
----
-
-<p align=center>Updated <b>daily</b> (and on push / manual dispatch).<br>Last refresh: 10/12/26, 7:06 AM · Next: 10/13/26, 7:06 AM</p>
+<p align=center>Updated <b>daily</b> (and on push / manual dispatch).<br>Last refresh: 10/12/26, 7:12 AM · Next: 10/13/26, 7:12 AM</p>

@@ -27,12 +27,4 @@
 
 ---
 
-## Languages
-
-<p align="center">
-  <img src="assets/languages.svg" alt="Most used languages" width="420" />
-</p>
-
----
-
 <!-- footer_inject -->
