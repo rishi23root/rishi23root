@@ -1,32 +1,38 @@
-<!-- identity -->
-<h1>
-  Rishi23root&nbsp;&nbsp;
+```bash
+$ whoami
+rishi23root — freelancer · SaaS · security · automation
+I build SaaS products, automate the boring parts, and keep security in the loop.
+
+$ echo $STACK
+TypeScript · Python · Node.js · React · Bash
+```
+
+<p>
   <a href="mailto:rishabhjainfinal@gmail.com">
-    <img alt="Email" width="22" height="22" src="https://cdn.simpleicons.org/gmail/EA4335" />
+    <img alt="Email" width="20" height="20" src="https://cdn.simpleicons.org/gmail/EA4335" />
   </a>&nbsp;
   <a href="https://x.com/rishi23jain">
-    <img alt="X" width="20" height="20" src="https://cdn.simpleicons.org/x/111111" />
+    <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/111111" />
   </a>
-</h1>
+</p>
 
-<p><em>Freelancer · SaaS · security · automation</em></p>
+### Featured Work
 
+- **[monkeytypegame/monkeytype](https://github.com/monkeytypegame/monkeytype)** — Minimal, highly customizable typing test ★20869
+- **[saeeddhqan/Maryam](https://github.com/saeeddhqan/Maryam)** — Open-source OSINT framework ★1230
+- **[rishi23root/opencv_wrap](https://github.com/rishi23root/opencv_wrap)** — Thin OpenCV wrappers for everyday CV scripts ★4
+- **[rishi23root/ASCII_video](https://github.com/rishi23root/ASCII_video)** — Turn video into ASCII art ★0
+- **[rishi23root/git-commit-drawing](https://github.com/rishi23root/git-commit-drawing)** — Draw on your GitHub contribution graph ★0
+- **[rishi23root/class_automations](https://github.com/rishi23root/class_automations)** — Python/bash automations for repetitive class workflows ★1
 
-Hi — I'm Rishi. I build SaaS products, automate the boring parts, and keep security in the loop.
+### Recently liked
 
+- [rishi23root/opencv_wrap](https://github.com/rishi23root/opencv_wrap)
+- [OpenCut-app/OpenCut](https://github.com/OpenCut-app/OpenCut) — The open-source CapCut alternative
+- [DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) — High-performance code intelligence MCP server. Indexes codebases into a persistent knowledge graph — average repo in milliseconds. 158 languages, sub-ms queries, 99% fewer tokens. Single static binary, zero dependencies.
+- [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — Taste-Skill - gives your AI good taste. stops the AI from generating boring, generic slop
+- [mattpocock/skills](https://github.com/mattpocock/skills) — Skills for Real Engineers. Straight from my .agents directory.
 
----
+<br />
 
-## Open Source
-
-<table><thead><tr><th align=left>Project</th><th align=center>Stars</th></tr></thead><tbody><tr><td><a href=https://github.com/monkeytypegame/monkeytype><b>monkeytypegame/monkeytype</b></a><br><sub>The most customizable typing website with a minimalistic design and a ton of features. Test yourself in various modes, track your progress and improve your speed.</sub></td><td align=center><img alt=Stars src="https://img.shields.io/github/stars/monkeytypegame/monkeytype?style=flat-square&labelColor=343b41"></td></tr><tr><td><a href=https://github.com/saeeddhqan/Maryam><b>saeeddhqan/Maryam</b></a><br><sub>Maryam: Open-source Intelligence(OSINT) Framework</sub></td><td align=center><img alt=Stars src="https://img.shields.io/github/stars/saeeddhqan/Maryam?style=flat-square&labelColor=343b41"></td></tr><tr><td><a href=https://github.com/rishi23root/opencv_wrap><b>rishi23root/opencv_wrap</b></a></td><td align=center><img alt=Stars src="https://img.shields.io/github/stars/rishi23root/opencv_wrap?style=flat-square&labelColor=343b41"></td></tr><tr><td><a href=https://github.com/rishi23root/ASCII_video><b>rishi23root/ASCII_video</b></a><br><sub>create vidoe in the ascii format</sub></td><td align=center><img alt=Stars src="https://img.shields.io/github/stars/rishi23root/ASCII_video?style=flat-square&labelColor=343b41"></td></tr><tr><td><a href=https://github.com/rishi23root/git-commit-drawing><b>rishi23root/git-commit-drawing</b></a><br><sub>this repo is for drawing on the git contributions chart</sub></td><td align=center><img alt=Stars src="https://img.shields.io/github/stars/rishi23root/git-commit-drawing?style=flat-square&labelColor=343b41"></td></tr><tr><td><a href=https://github.com/rishi23root/class_automations><b>rishi23root/class_automations</b></a><br><sub>Automations to complete all the repeated works of classes</sub></td><td align=center><img alt=Stars src="https://img.shields.io/github/stars/rishi23root/class_automations?style=flat-square&labelColor=343b41"></td></tr></tbody></table>
-
----
-
-## Recently liked
-
-<ul><li><a href=https://github.com/OpenCut-app/OpenCut>OpenCut-app/OpenCut</a> — <span>The open-source CapCut alternative</span></li><li><a href=https://github.com/DeusData/codebase-memory-mcp>DeusData/codebase-memory-mcp</a> — <span>High-performance code intelligence MCP server. Indexes codebases into a persistent knowledge graph — average repo in milliseconds. 158 languages, sub-ms queries, 99% fewer tokens. Single static binary, zero dependencies.</span></li><li><a href=https://github.com/Leonxlnx/taste-skill>Leonxlnx/taste-skill</a> — <span>Taste-Skill - gives your AI good taste. stops the AI from generating boring, generic slop</span></li><li><a href=https://github.com/mattpocock/skills>mattpocock/skills</a> — <span>Skills for Real Engineers. Straight from my .agents directory.</span></li><li><a href=https://github.com/dgr8akki/nano-ffmpeg>dgr8akki/nano-ffmpeg</a> — <span>nano-ffmpeg wraps the full power of ffmpeg in a beautiful, keyboard-driven terminal dashboard. No more googling flags. Browse your files, pick what you want to do, tweak settings with presets, and watch a live progress bar while it encodes.</span></li></ul>
-
----
-
-<p align=center>Updated <b>daily</b> (and on push / manual dispatch).<br>Last refresh: 10/12/26, 7:12 AM · Next: 10/13/26, 7:12 AM</p>
+<p align=center><a href=https://github.com/rishi23root>GitHub</a> · <a href=https://x.com/rishi23jain>X</a> · <a href=mailto:rishabhjainfinal@gmail.com>Email</a></p><p align=center><sub>Updated daily · 10/12/26, 8:33 AM · next 10/13/26, 8:33 AM</sub></p>

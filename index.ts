@@ -3,7 +3,14 @@ import dayjs from 'dayjs'
 import { readFile, rm, writeFile } from 'fs/promises'
 import { minify } from 'html-minifier'
 import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
-import { github, shortBio, fullDescription, opensource, timeZone } from './config'
+import {
+  github,
+  shortBio,
+  fullDescription,
+  stackLine,
+  opensource,
+  timeZone,
+} from './config'
 import comments from './constants'
 
 const githubAPIEndPoint = 'https://api.github.com'
@@ -43,57 +50,34 @@ type GHItem = {
   full_name: string
   description: string | null
   html_url: string
+  stargazers_count?: number
 }
 
-function escapeHtml(text: string) {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+function escapeMd(text: string) {
+  return text.replace(/\r?\n/g, ' ').trim()
 }
 
-function generateOpenSourceSectionHtml<T extends GHItem>(list: T[]) {
-  const rows = list.reduce((str, cur) => {
-    const description = cur.description
-      ? `<br/><sub>${escapeHtml(cur.description)}</sub>`
-      : ''
-    return (
-      str +
-      `<tr>
-        <td>
-          <a href="${cur.html_url}"><b>${escapeHtml(cur.full_name)}</b></a>${description}
-        </td>
-        <td align="center">
-          <img alt="Stars" src="https://img.shields.io/github/stars/${cur.full_name}?style=flat-square&labelColor=343b41"/>
-        </td>
-      </tr>`
-    )
-  }, '')
-
-  return minifyMarkdown`
-    <table>
-      <thead>
-        <tr>
-          <th align="left">Project</th>
-          <th align="center">Stars</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-  `
+/** Innei-style: **[name](url)** — blurb ★stars */
+function generateFeaturedWorkMarkdown(
+  list: GHItem[],
+  blurbs: Record<string, string>,
+) {
+  return list
+    .map((cur) => {
+      const blurb =
+        blurbs[cur.full_name] ||
+        (cur.description ? escapeMd(cur.description) : '')
+      const desc = blurb ? ` — ${blurb}` : ''
+      const stars =
+        typeof cur.stargazers_count === 'number' ? ` ★${cur.stargazers_count}` : ''
+      return `- **[${cur.full_name}](${cur.html_url})**${desc}${stars}`
+    })
+    .join('\n')
 }
 
-function generateRepoHTML<T extends GHItem>(item: T) {
-  return `<li><a href="${item.html_url}">${escapeHtml(item.full_name)}</a>${
-    item.description ? ` — <span>${escapeHtml(item.description)}</span>` : ''
-  }</li>`
-}
-
-function capitalizeFirstLetter(stringText: string) {
-  return stringText.charAt(0).toUpperCase() + stringText.slice(1)
+function generateRepoMarkdown(item: GHItem) {
+  const desc = item.description ? ` — ${escapeMd(item.description)}` : ''
+  return `- [${item.full_name}](${item.html_url})${desc}`
 }
 
 async function main() {
@@ -101,12 +85,13 @@ async function main() {
   let newContent = template
 
   newContent = newContent
-    .replace(/{USERNAME_HERE}/gm, capitalizeFirstLetter(github.name))
+    .replace(/{USERNAME_HERE}/gm, github.name)
     .replace(/{shortBio}/gm, shortBio)
     .replace(/{fullDescription}/gm, fullDescription)
     .replace(/{fullDiscription}/gm, fullDescription)
+    .replace(/{stackLine}/gm, stackLine)
 
-  const activeOpenSourceDetail = await Promise.all(
+  const activeOpenSourceDetail: GHItem[] = await Promise.all(
     opensource.active.map((name) => {
       return githubReq.get('/repos/' + name).then((data) => data.data)
     }),
@@ -114,7 +99,7 @@ async function main() {
 
   newContent = newContent.replace(
     gitCommit('OPENSOURCE_DASHBOARD_ACTIVE'),
-    generateOpenSourceSectionHtml(activeOpenSourceDetail),
+    generateFeaturedWorkMarkdown(activeOpenSourceDetail, opensource.blurbs),
   )
 
   const star: GHItem[] = await githubReq
@@ -122,40 +107,30 @@ async function main() {
     .then((data) => data.data)
 
   {
-    const topStar5 = star
-      .slice(0, 5)
-      .reduce((str, cur) => str + generateRepoHTML(cur), '')
+    const topStar5 = star.slice(0, 5).map(generateRepoMarkdown).join('\n')
 
-    newContent = newContent.replace(
-      gitCommit('RECENT_STAR'),
-      minifyMarkdown`
-    <ul>
-      ${topStar5}
-    </ul>
-    `,
-    )
+    newContent = newContent.replace(gitCommit('RECENT_STAR'), topStar5)
   }
 
   {
     const now = new Date()
     const next = dayjs().add(1, 'day').toDate()
+    const when = (d: Date) =>
+      d.toLocaleString(undefined, {
+        timeStyle: 'short',
+        dateStyle: 'short',
+        timeZone,
+      })
 
     newContent = newContent.replace(
       gitCommit('FOOTER'),
       minifyMarkdown`
     <p align="center">
-    Updated <b>daily</b> (and on push / manual dispatch).<br>
-    Last refresh: ${now.toLocaleString(undefined, {
-      timeStyle: 'short',
-      dateStyle: 'short',
-      timeZone,
-    })}
-    · Next: ${next.toLocaleString(undefined, {
-      timeStyle: 'short',
-      dateStyle: 'short',
-      timeZone,
-    })}
+      <a href="https://github.com/${github.name}">GitHub</a> ·
+      <a href="https://x.com/rishi23jain">X</a> ·
+      <a href="mailto:rishabhjainfinal@gmail.com">Email</a>
     </p>
+    <p align="center"><sub>Updated daily · ${when(now)} · next ${when(next)}</sub></p>
     `,
     )
   }
