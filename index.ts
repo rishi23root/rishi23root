@@ -3,28 +3,39 @@ import dayjs from 'dayjs'
 import { readFile, rm, writeFile } from 'fs/promises'
 import { minify } from 'html-minifier'
 import { shuffle } from 'lodash'
-import rax from 'retry-axios'
-import { github,shortBio,fullDiscription, opensource, timeZone } from './config'
-import commnets  from './constants'
+import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
+import { github, shortBio, fullDescription, opensource, timeZone } from './config'
+import comments from './constants'
+
 const githubAPIEndPoint = 'https://api.github.com'
 
-rax.attach()
+raxAttach()
 axios.defaults.raxConfig = {
   retry: 5,
   retryDelay: 4000,
   onRetryAttempt: (err) => {
-    const cfg = rax.getConfig(err)
+    const cfg = raxGetConfig(err)
     console.log('request: \n', err.request)
-    console.log(`Retry attempt #${cfg.currentRetryAttempt}`)
+    console.log(`Retry attempt #${cfg?.currentRetryAttempt}`)
   },
 }
 
-const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
+const userAgent =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
 
 axios.defaults.headers.common['User-Agent'] = userAgent
+
+const githubHeaders: Record<string, string> = {
+  Accept: 'application/vnd.github+json',
+}
+if (process.env.GITHUB_TOKEN) {
+  githubHeaders.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
+}
+
 const githubReq = axios.create({
   baseURL: githubAPIEndPoint,
-  timeout: 4000,
+  timeout: 10000,
+  headers: githubHeaders,
 })
 
 type GHItem = {
@@ -37,7 +48,7 @@ type GHItem = {
 
 function generateOpenSourceSectionHtml<T extends GHItem>(list: T[]) {
   const tbody = list.reduce(
-    (str, cur) => 
+    (str, cur) =>
       str +
       ` <tr>
         <td><a href="${cur.html_url}"><b>
@@ -68,36 +79,27 @@ function generateOpenSourceSectionHtml<T extends GHItem>(list: T[]) {
   `
 }
 
-/**
- * Repo  HTML 
- */
-
 function generateRepoHTML<T extends GHItem>(item: T) {
   return `<li><a href="${item.html_url}">${item.full_name}</a>${
     item.description ? ` -- <span>${item.description}</span>` : ''
   }</li>`
 }
 
-function capitalizeFirstLetter(stringText:string) {
-    return stringText.charAt(0).toUpperCase() + stringText.slice(1);
+function capitalizeFirstLetter(stringText: string) {
+  return stringText.charAt(0).toUpperCase() + stringText.slice(1)
 }
 
 async function main() {
   const template = await readFile('./readme.template.md', { encoding: 'utf-8' })
   let newContent = template
 
-  // console.log(newContent.match(/{shortBio}/gm));
-  
   newContent = newContent
-    // replace the name section with the github name find all the instances of USERNAME_HERE 
     .replace(/{USERNAME_HERE}/gm, capitalizeFirstLetter(github.name))
-    // replace the bio section with info from the config file 
     .replace(/{shortBio}/gm, shortBio)
-    // replace the discription section with info from the config file 
-    .replace(/{fullDiscription}/gm, fullDiscription)
+    .replace(/{fullDescription}/gm, fullDescription)
+    // Back-compat if an older template still uses the typo token
+    .replace(/{fullDiscription}/gm, fullDescription)
 
-
-  //  Get active open source project details
   const activeOpenSourceDetail = await Promise.all(
     opensource.active.map((name) => {
       return githubReq.get('/repos/' + name).then((data) => data.data)
@@ -108,25 +110,12 @@ async function main() {
     gitCommit('OPENSOURCE_DASHBOARD_ACTIVE'),
     generateOpenSourceSectionHtml(activeOpenSourceDetail),
   )
-  // // 获取活跃的开源项目Gs详情
-  // const activeOpenSourceDetailGs = await Promise.all(
-  //   opensource.gs.map((name) => {
-  //     return githubReq.get('/repos/' + name).then((data) => data.data)
-  //   }),
-  // )
 
-  // newContent = newContent.replace(
-  //   gitCommits('OPENSOURCE_DASHBOARD_GS'),
-  //   generateOpenSourceSectionHtml(activeOpenSourceDetailGs),
-  // )
-
-  // Star
   const star: any[] = await githubReq
     .get('/users/' + github.name + '/starred')
     .then((data) => data.data)
 
   {
-    // TOP 5
     const topStar5 = star
       .slice(0, 5)
       .reduce((str, cur) => str + generateRepoHTML(cur), '')
@@ -140,7 +129,6 @@ async function main() {
     `,
     )
 
-    // even order Star
     const random = shuffle(star.slice(5))
       .slice(0, 5)
       .reduce((str, cur) => str + generateRepoHTML(cur), '')
@@ -155,16 +143,15 @@ async function main() {
     )
   }
 
-  // adding FOOTER
   {
     const now = new Date()
-    const next = dayjs().add(3, 'h').toDate()
+    const next = dayjs().add(1, 'day').toDate()
 
     newContent = newContent.replace(
       gitCommit('FOOTER'),
       minifyMarkdown`
     <p align="center">
-    This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>
+    This file <i>README</i> is automatically refreshed <b>daily</b> (and on push / manual dispatch)!<br>
     refreshed on : ${now.toLocaleString(undefined, {
       timeStyle: 'short',
       dateStyle: 'short',
@@ -184,8 +171,8 @@ async function main() {
   await writeFile('./README.md', newContent, { encoding: 'utf-8' })
 }
 
-function gitCommit(token: keyof typeof commnets) {
-  return `<!-- ${commnets[token]} -->`
+function gitCommit(token: keyof typeof comments) {
+  return `<!-- ${comments[token]} -->`
 }
 
 function minifyMarkdown(html: TemplateStringsArray, ...args: any[]) {

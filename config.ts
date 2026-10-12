@@ -6,24 +6,23 @@ export const opensource = {
   active: [
     'monkeytypegame/monkeytype',
     'saeeddhqan/Maryam',
-    'rishi23root/opencv',
+    'rishi23root/opencv_wrap',
     'rishi23root/ASCII_video',
     'rishi23root/git-commit-drawing',
-    'rishi23root/class_automations'
+    'rishi23root/class_automations',
   ],
 }
 
-export const shortBio = "I am now in college, working on some great projects"
+export const shortBio =
+  'Freelancer building SaaS products — security, automation, and shipping tools that save time.'
 
-export const fullDiscription = `
-  ### *Hi! I'm Rishi! I am Freelancer and into SAAS products (working on one rn)*
+export const fullDescription = `
+  ### *Hi! I'm Rishi — freelancer, SaaS builder, and security-minded automator.*
 
-  - 🌱 I’m currently learning svg animations.
-  - 🤔 I’m looking for help with 🥚 MicroService Module design and webtorrent.
-  - ⚡️🏃🏻 working into the field of cybersecurity and web penetration testing.
-  - 😎 did some heavy tasks easy using python and bash automations, scripts in repositories.
-  - 🎵 I am currently focusing on the working with webtorrent and building a SAAS product. 
+  - 💼 Freelancer shipping SaaS products and client work.
+  - 🔐 Working in cybersecurity and web penetration testing.
+  - ⚙️ Automating repetitive work with Python, bash, and scripts.
+  - 🌱 Always learning — sharpening product craft and security tooling.
 `
 
-
-export const timeZone = 'Asia/kolkata'
+export const timeZone = 'Asia/Kolkata'

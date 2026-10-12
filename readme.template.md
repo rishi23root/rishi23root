@@ -10,15 +10,15 @@
   <img alt="rishi on Twitter" width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/twitter.svg" />
 </a> &nbsp;)</h1>
 
- <!--user discriptions   -->
+<!-- identity / bio (Innei-style: whoami before stacks) -->
 <u>{shortBio}</u>
 
 <div>
-  <img align="left" width="350" src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
+  <img align="left" width="350" alt="Avatar" src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
   <br />
   <br />  
   <div style="margin: 30px">
-  {fullDiscription}
+  {fullDescription}
   </div>
 </div>
 

@@ -1,6 +1,6 @@
 <!-- user name -->
 <h1> Rishi23root 👨‍💻 &nbsp;&nbsp; ( &nbsp;
-<!-- <a href="mailto:rishabhjainfinal@gmail.com" align="center">
+<a href="mailto:rishabhjainfinal@gmail.com" align="center">
   <img alt="Email me." width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/email.svg" />
 </a>&nbsp;
 <a href="https://www.linkedin.com/in/rishi23jain/" align="center">
@@ -10,24 +10,24 @@
   <img alt="rishi on Twitter" width="22px" src="https://cdn.jsdelivr.net/gh/edent/SuperTinyIcons/images/svg/twitter.svg" />
 </a> &nbsp;)</h1>
 
-<u>I am now in college, working on some great projects</u>
+<!-- identity / bio (Innei-style: whoami before stacks) -->
+<u>Freelancer building SaaS products — security, automation, and shipping tools that save time.</u>
 
 <div>
-  <img align="left" width="350" src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
+  <img align="left" width="350" alt="Avatar" src="https://avatars.githubusercontent.com/u/66913499?v=4"/>
   <br />
   <br />  
   <div style="margin: 30px">
   
-  ### *Hi! I'm Rishi! I am Freelancer and into SAAS products (working on one rn)*
+  ### *Hi! I'm Rishi — freelancer, SaaS builder, and security-minded automator.*
 
-  - 🌱 I’m currently learning svg animations.
-  - 🤔 I’m looking for help with 🥚 MicroService Module design and webtorrent.
-  - ⚡️🏃🏻 working into the field of cybersecurity and web penetration testing.
-  - 😎 did some heavy tasks easy using python and bash automations, scripts in repositories.
-  - 🎵 I am currently focusing on the working with webtorrent and building a SAAS product. 
+  - 💼 Freelancer shipping SaaS products and client work.
+  - 🔐 Working in cybersecurity and web penetration testing.
+  - ⚙️ Automating repetitive work with Python, bash, and scripts.
+  - 🌱 Always learning — sharpening product craft and security tooling.
 
   </div>
-</div> -->
+</div>
 
 
 <!-- <p>
@@ -85,12 +85,12 @@
 ---
 ## **Recently liked**
 
-<ul><li><a href=https://github.com/PyAV-Org/PyAV>PyAV-Org/PyAV</a> -- <span>﻿﻿Pythonic bindings for FFmpeg's libraries.</span></li><li><a href=https://github.com/KoljaB/RealtimeTTS>KoljaB/RealtimeTTS</a> -- <span>Converts text to speech in realtime</span></li><li><a href=https://github.com/gkamradt/QuickAgent>gkamradt/QuickAgent</a></li><li><a href=https://github.com/computervisioneng/ask-question-image-web-app-streamlit-langchain>computervisioneng/ask-question-image-web-app-streamlit-langchain</a></li><li><a href=https://github.com/jiaaro/pydub>jiaaro/pydub</a> -- <span>Manipulate audio with a simple and easy high level interface</span></li></ul>
+<ul><li><a href=https://github.com/OpenCut-app/OpenCut>OpenCut-app/OpenCut</a> -- <span>The open-source CapCut alternative</span></li><li><a href=https://github.com/DeusData/codebase-memory-mcp>DeusData/codebase-memory-mcp</a> -- <span>High-performance code intelligence MCP server. Indexes codebases into a persistent knowledge graph — average repo in milliseconds. 158 languages, sub-ms queries, 99% fewer tokens. Single static binary, zero dependencies.</span></li><li><a href=https://github.com/Leonxlnx/taste-skill>Leonxlnx/taste-skill</a> -- <span>Taste-Skill - gives your AI good taste. stops the AI from generating boring, generic slop</span></li><li><a href=https://github.com/mattpocock/skills>mattpocock/skills</a> -- <span>Skills for Real Engineers. Straight from my .agents directory.</span></li><li><a href=https://github.com/dgr8akki/nano-ffmpeg>dgr8akki/nano-ffmpeg</a> -- <span>nano-ffmpeg wraps the full power of ffmpeg in a beautiful, keyboard-driven terminal dashboard. No more googling flags. Browse your files, pick what you want to do, tweak settings with presets, and watch a live progress bar while it encodes.</span></li></ul>
 
 
 
 ---
-<p align=center>This file <i>README</i> is automatically refreshed <b>every 3 hours</b>!<br>refreshed on : 3/3/25, 11:59 AM<br>Next refresh : 3/3/25, 2:59 PM</p>
+<p align=center>This file <i>README</i> is automatically refreshed <b>daily</b> (and on push / manual dispatch)!<br>refreshed on : 10/12/26, 6:41 AM<br>Next refresh : 10/13/26, 6:41 AM</p>
 
 <a href="https://github.com/Rishi23root#gh-light-mode-only">
   <img src="http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=Rishi23root&theme=github" width="100%">
