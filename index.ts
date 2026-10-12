@@ -2,7 +2,6 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import { readFile, rm, writeFile } from 'fs/promises'
 import { minify } from 'html-minifier'
-import { shuffle } from 'lodash'
 import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
 import { github, shortBio, fullDescription, opensource, timeZone } from './config'
 import comments from './constants'
@@ -42,46 +41,54 @@ type GHItem = {
   name: string
   id: number
   full_name: string
-  description: string
+  description: string | null
   html_url: string
 }
 
+function escapeHtml(text: string) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 function generateOpenSourceSectionHtml<T extends GHItem>(list: T[]) {
-  const tbody = list.reduce(
-    (str, cur) =>
+  const rows = list.reduce((str, cur) => {
+    const description = cur.description
+      ? `<br/><sub>${escapeHtml(cur.description)}</sub>`
+      : ''
+    return (
       str +
-      ` <tr>
-        <td><a href="${cur.html_url}"><b>
-        ${cur.full_name}</b></a></td>
-        <td><img alt="Stars" src="https://img.shields.io/github/stars/${cur.full_name}?style=flat-square&labelColor=343b41"/></td>
-        <td><img alt="Forks" src="https://img.shields.io/github/forks/${cur.full_name}?style=flat-square&labelColor=343b41"/></td>
-        <td><a href="https://github.com/${cur.full_name}/issues" target="_blank"><img alt="Issues" src="https://img.shields.io/github/issues/${cur.full_name}?style=flat-square&labelColor=343b41"/></a></td>
-        <td><a href="https://github.com/${cur.full_name}/pulls" target="_blank"><img alt="Pull Requests" src="https://img.shields.io/github/issues-pr/${cur.full_name}?style=flat-square&labelColor=343b41"/></a></td>
-      </tr>`,
-    ``,
-  )
+      `<tr>
+        <td>
+          <a href="${cur.html_url}"><b>${escapeHtml(cur.full_name)}</b></a>${description}
+        </td>
+        <td align="center">
+          <img alt="Stars" src="https://img.shields.io/github/stars/${cur.full_name}?style=flat-square&labelColor=343b41"/>
+        </td>
+      </tr>`
+    )
+  }, '')
 
   return minifyMarkdown`
     <table>
-      <thead align="center">
-        <tr border: none;>
-          <td><b>🎁 Projects</b></td>
-          <td><b>⭐ Stars</b></td>
-          <td><b>📚 Forks</b></td>
-          <td><b>🛎 Issues</b></td>
-          <td><b>📬 Pull requests</b></td>
+      <thead>
+        <tr>
+          <th align="left">Project</th>
+          <th align="center">Stars</th>
         </tr>
       </thead>
       <tbody>
-      ${tbody}
+        ${rows}
       </tbody>
     </table>
   `
 }
 
 function generateRepoHTML<T extends GHItem>(item: T) {
-  return `<li><a href="${item.html_url}">${item.full_name}</a>${
-    item.description ? ` -- <span>${item.description}</span>` : ''
+  return `<li><a href="${item.html_url}">${escapeHtml(item.full_name)}</a>${
+    item.description ? ` — <span>${escapeHtml(item.description)}</span>` : ''
   }</li>`
 }
 
@@ -97,7 +104,6 @@ async function main() {
     .replace(/{USERNAME_HERE}/gm, capitalizeFirstLetter(github.name))
     .replace(/{shortBio}/gm, shortBio)
     .replace(/{fullDescription}/gm, fullDescription)
-    // Back-compat if an older template still uses the typo token
     .replace(/{fullDiscription}/gm, fullDescription)
 
   const activeOpenSourceDetail = await Promise.all(
@@ -111,7 +117,7 @@ async function main() {
     generateOpenSourceSectionHtml(activeOpenSourceDetail),
   )
 
-  const star: any[] = await githubReq
+  const star: GHItem[] = await githubReq
     .get('/users/' + github.name + '/starred')
     .then((data) => data.data)
 
@@ -128,19 +134,6 @@ async function main() {
     </ul>
     `,
     )
-
-    const random = shuffle(star.slice(5))
-      .slice(0, 5)
-      .reduce((str, cur) => str + generateRepoHTML(cur), '')
-
-    newContent = newContent.replace(
-      gitCommit('RANDOM_GITHUB_STARS'),
-      minifyMarkdown`
-      <ul>
-        ${random}
-      </ul>
-      `,
-    )
   }
 
   {
@@ -151,22 +144,22 @@ async function main() {
       gitCommit('FOOTER'),
       minifyMarkdown`
     <p align="center">
-    This file <i>README</i> is automatically refreshed <b>daily</b> (and on push / manual dispatch)!<br>
-    refreshed on : ${now.toLocaleString(undefined, {
+    Updated <b>daily</b> (and on push / manual dispatch).<br>
+    Last refresh: ${now.toLocaleString(undefined, {
       timeStyle: 'short',
       dateStyle: 'short',
       timeZone,
     })}
-    <br/>
-    Next refresh : ${next.toLocaleString(undefined, {
+    · Next: ${next.toLocaleString(undefined, {
       timeStyle: 'short',
       dateStyle: 'short',
       timeZone,
-    })}</p>
+    })}
+    </p>
     `,
     )
   }
-  newContent = newContent.toString()
+
   await rm('./README.md', { force: true })
   await writeFile('./README.md', newContent, { encoding: 'utf-8' })
 }

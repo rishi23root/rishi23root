@@ -14,15 +14,10 @@ export const opensource = {
 }
 
 export const shortBio =
-  'Freelancer building SaaS products — security, automation, and shipping tools that save time.'
+  'Freelancer · SaaS · security · automation'
 
 export const fullDescription = `
-  ### *Hi! I'm Rishi — freelancer, SaaS builder, and security-minded automator.*
-
-  - 💼 Freelancer shipping SaaS products and client work.
-  - 🔐 Working in cybersecurity and web penetration testing.
-  - ⚙️ Automating repetitive work with Python, bash, and scripts.
-  - 🌱 Always learning — sharpening product craft and security tooling.
+Hi — I'm Rishi. I build SaaS products, automate the boring parts, and keep security in the loop.
 `
 
 export const timeZone = 'Asia/Kolkata'
