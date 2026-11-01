@@ -114,11 +114,7 @@ async function main() {
 
   {
     const now = dayjs()
-    // Next scheduled run: 11th of this month, or next month if already on/after the 11th
-    let next = now.date(11).startOf('day')
-    if (now.date() >= 11) {
-      next = now.add(1, 'month').date(11).startOf('day')
-    }
+    const next = now.add(1, 'day').toDate()
     const when = (d: dayjs.Dayjs | Date) =>
       dayjs(d).toDate().toLocaleString(undefined, {
         timeStyle: 'short',
@@ -134,7 +130,7 @@ async function main() {
       <a href="https://x.com/rishi23jain">X</a> ·
       <a href="mailto:rishabhjainfinal@gmail.com">Email</a>
     </p>
-    <p align="center"><sub>Updated on the 11th of each month · ${when(now)} · next ${when(next)}</sub></p>
+    <p align="center"><sub>Updated daily at 11:11 AM IST · ${when(now)} · next ${when(next)}</sub></p>
     `,
     )
   }
