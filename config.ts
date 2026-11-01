@@ -2,28 +2,39 @@ export const github = {
   name: 'rishi23root',
 }
 
+/** Curated featured repos (Innei-style Featured Work). */
 export const opensource = {
   active: [
     'monkeytypegame/monkeytype',
     'saeeddhqan/Maryam',
-    'rishi23root/opencv',
+    'rishi23root/opencv_wrap',
     'rishi23root/ASCII_video',
     'rishi23root/git-commit-drawing',
-    'rishi23root/class_automations'
+    'rishi23root/class_automations',
   ],
+  /** Short value props; fall back to GitHub description when missing. */
+  blurbs: {
+    'monkeytypegame/monkeytype':
+      'Minimal, highly customizable typing test',
+    'saeeddhqan/Maryam': 'Open-source OSINT framework',
+    'rishi23root/opencv_wrap':
+      'Thin OpenCV wrappers for everyday CV scripts',
+    'rishi23root/ASCII_video': 'Turn video into ASCII art',
+    'rishi23root/git-commit-drawing':
+      'Draw on your GitHub contribution graph',
+    'rishi23root/class_automations':
+      'Python/bash automations for repetitive class workflows',
+  } as Record<string, string>,
 }
 
-export const shortBio = "I am now in college, working on some great projects"
+/** `$ whoami` role line (not Innei’s copy). */
+export const shortBio = 'freelancer · SaaS · security · automation'
 
-export const fullDiscription = `
-  ### *Hi! I'm Rishi! I am Freelancer and into SAAS products (working on one rn)*
+/** Second line under whoami. */
+export const fullDescription =
+  'I build SaaS products, automate the boring parts, and keep security in the loop.'
 
-  - 🌱 I’m currently learning svg animations.
-  - 🤔 I’m looking for help with 🥚 MicroService Module design and webtorrent.
-  - ⚡️🏃🏻 working into the field of cybersecurity and web penetration testing.
-  - 😎 did some heavy tasks easy using python and bash automations, scripts in repositories.
-  - 🎵 I am currently focusing on the working with webtorrent and building a SAAS product. 
-`
+/** `$ echo $STACK` — plain text, not badges. */
+export const stackLine = 'TypeScript · Python · Node.js · React · Bash'
 
-
-export const timeZone = 'Asia/kolkata'
+export const timeZone = 'Asia/Kolkata'

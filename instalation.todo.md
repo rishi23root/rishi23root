@@ -1,12 +1,12 @@
-# Steps to setup
-1. clone the repo
-2. workflow settings
-    - give read and write permissions to the workflow form the repo settings - /settings/actions
-    <!-- - create a `GITHUB_TOKEN` in your profile - /settings/tokens -->
-3. update the `config.ts` # you are done here just push the code with the updated config.ts
-4. run `npm install` # if tesing locally
-5. run `npm run build` # if tesing locally
+# Setup
+
+1. Clone the repo.
+2. Repo **Settings → Actions → General**: allow GitHub Actions read and write permissions (needed for the README build to commit).
+3. Edit `config.ts` (bio, opensource list), push to `master`.
+4. Local test: `npm install` then `GITHUB_TOKEN=… npm run build`.
+
+README build uses the automatic `GITHUB_TOKEN` — no extra secrets.
 
 ---
-### This repo is a fork of -: 
-- *Thanks to - https://github.com/Innei/Innei for the awasome repo and the idea*
+
+Fork credit: [Innei/Innei](https://github.com/Innei/Innei)
