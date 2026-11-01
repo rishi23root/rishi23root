@@ -13,8 +13,6 @@ export const contact = {
     linkedin: `https://www.linkedin.com/in/${socialHandle}`,
     github: `https://github.com/${socialHandle}`,
     pypi: `https://pypi.org/user/${socialHandle}`,
-    // Stack Overflow profiles need user id + slug; slug alone 404s
-    stackoverflow: 'https://stackoverflow.com/users/11915284/rishi23root',
   },
 }
 

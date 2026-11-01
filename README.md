@@ -22,9 +22,6 @@ TypeScript · Python · Node.js · React · Bash
   </a>&nbsp;
   <a href="https://pypi.org/user/rishi23root">
     <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/3775A9" />
-  </a>&nbsp;
-  <a href="https://stackoverflow.com/users/11915284/rishi23root">
-    <img alt="Stack Overflow" width="18" height="18" src="https://cdn.simpleicons.org/stackoverflow/F58025" />
   </a>
 </p>
 
@@ -68,4 +65,4 @@ TypeScript · Python · Node.js · React · Bash
 
 <br />
 
-<p align=center><a href=https://github.com/rishi23root>GitHub</a> · <a href=https://x.com/rishi23root>X</a> · <a href=https://www.linkedin.com/in/rishi23root>LinkedIn</a> · <a href=https://pypi.org/user/rishi23root>PyPI</a> · <a href=https://stackoverflow.com/users/11915284/rishi23root>Stack Overflow</a> · <a href=mailto:rishabhjainfinal@gmail.com>Email</a></p><p align=center><sub>Updated daily at 11:11 AM IST (Asia/Kolkata) · 11/1/26, 9:58 PM · next 11/2/26, 9:58 PM</sub></p>
+<p align=center><a href=https://github.com/rishi23root>GitHub</a> · <a href=https://x.com/rishi23root>X</a> · <a href=https://www.linkedin.com/in/rishi23root>LinkedIn</a> · <a href=https://pypi.org/user/rishi23root>PyPI</a> · <a href=mailto:rishabhjainfinal@gmail.com>Email</a></p><p align=center><sub>Updated daily at 11:11 AM IST (Asia/Kolkata) · 11/1/26, 10:17 PM · next 11/2/26, 10:17 PM</sub></p>

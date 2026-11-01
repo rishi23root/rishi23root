@@ -22,9 +22,6 @@ $ echo $STACK
   </a>&nbsp;
   <a href="{PYPI_URL}">
     <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/3775A9" />
-  </a>&nbsp;
-  <a href="{STACKOVERFLOW_URL}">
-    <img alt="Stack Overflow" width="18" height="18" src="https://cdn.simpleicons.org/stackoverflow/F58025" />
   </a>
 </p>
 

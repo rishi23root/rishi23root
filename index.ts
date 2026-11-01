@@ -96,7 +96,6 @@ async function main() {
     .replace(/{LINKEDIN_URL}/gm, contact.socials.linkedin)
     .replace(/{GITHUB_URL}/gm, contact.socials.github)
     .replace(/{PYPI_URL}/gm, contact.socials.pypi)
-    .replace(/{STACKOVERFLOW_URL}/gm, contact.socials.stackoverflow)
 
   const activeOpenSourceDetail: GHItem[] = await Promise.all(
     opensource.active.map((name) => {
@@ -142,7 +141,6 @@ async function main() {
       <a href="${contact.socials.x}">X</a> ·
       <a href="${contact.socials.linkedin}">LinkedIn</a> ·
       <a href="${contact.socials.pypi}">PyPI</a> ·
-      <a href="${contact.socials.stackoverflow}">Stack Overflow</a> ·
       <a href="mailto:${contact.email}">Email</a>
     </p>
     <p align="center"><sub>Updated daily at 11:11 AM IST (Asia/Kolkata) · ${when(now)} · next ${when(next)}</sub></p>
