@@ -5,7 +5,7 @@ on:
     branches:
       - master
   schedule:
-    # Daily at 11:11 AM IST (Asia/Kolkata = UTC+5:30) → 05:41 UTC
+    # Matches config.ts `schedule.cronUtc` (11:11 Asia/Kolkata / IST → 05:41 UTC)
     - cron: '41 5 * * *'
   workflow_dispatch:
 

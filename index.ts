@@ -1,5 +1,7 @@
 import axios from 'axios'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import { readFile, rm, writeFile } from 'fs/promises'
 import { minify } from 'html-minifier'
 import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
@@ -11,9 +13,12 @@ import {
   stackLine,
   opensource,
   recentLikedCount,
-  timeZone,
+  schedule,
 } from './config'
 import comments from './constants'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const githubAPIEndPoint = 'https://api.github.com'
 
@@ -124,14 +129,22 @@ async function main() {
   }
 
   {
-    const now = dayjs()
-    const next = now.add(1, 'day').toDate()
-    const when = (d: dayjs.Dayjs | Date) =>
-      dayjs(d).toDate().toLocaleString(undefined, {
+    const now = dayjs().tz(schedule.timeZone)
+    // Next run: +1 day at the configured local clock time
+    const next = now
+      .add(1, 'day')
+      .hour(schedule.hour)
+      .minute(schedule.minute)
+      .second(0)
+      .millisecond(0)
+    const when = (d: dayjs.Dayjs) =>
+      d.toDate().toLocaleString(undefined, {
         timeStyle: 'short',
         dateStyle: 'short',
-        timeZone,
+        timeZone: schedule.timeZone,
       })
+    const localClock = formatLocalClock(schedule.hour, schedule.minute)
+    const scheduleLine = `Updated daily at ${localClock} ${schedule.timeZoneLabel} (${schedule.timeZone})`
 
     newContent = newContent.replace(
       gitCommit('FOOTER'),
@@ -143,13 +156,20 @@ async function main() {
       <a href="${contact.socials.pypi}">PyPI</a> ·
       <a href="mailto:${contact.email}">Email</a>
     </p>
-    <p align="center"><sub>Updated daily at 11:11 AM IST (Asia/Kolkata) · ${when(now)} · next ${when(next)}</sub></p>
+    <p align="center"><sub>${scheduleLine} · ${when(now)} · next ${when(next)}</sub></p>
     `,
     )
   }
 
   await rm('./README.md', { force: true })
   await writeFile('./README.md', newContent, { encoding: 'utf-8' })
+}
+
+/** 11, 11 → "11:11 AM" */
+function formatLocalClock(hour: number, minute: number) {
+  const h12 = hour % 12 || 12
+  const ampm = hour < 12 ? 'AM' : 'PM'
+  return `${h12}:${String(minute).padStart(2, '0')} ${ampm}`
 }
 
 function gitCommit(token: keyof typeof comments) {
