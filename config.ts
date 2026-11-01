@@ -2,17 +2,26 @@ export const github = {
   name: 'rishi23root',
 }
 
-/** Mail + X shown in the identity row and footer. */
+/** Shared handle for social profile URLs. */
+export const socialHandle = 'rishi23root'
+
+/** Mail + socials (identity icons + footer). */
 export const contact = {
   email: 'rishabhjainfinal@gmail.com',
-  xUrl: 'https://x.com/rishi23jain',
-  xHandle: 'rishi23jain',
+  socials: {
+    x: `https://x.com/${socialHandle}`,
+    linkedin: `https://www.linkedin.com/in/${socialHandle}`,
+    github: `https://github.com/${socialHandle}`,
+    pypi: `https://pypi.org/user/${socialHandle}`,
+    // Stack Overflow profiles need user id + slug; slug alone 404s
+    stackoverflow: 'https://stackoverflow.com/users/11915284/rishi23root',
+  },
 }
 
 /** Curated featured repos (Innei-style Featured Work). */
 export const opensource = {
   active: [
-    'monkeytypegame/monkeytype',
+    'saeeddhqan/Maryam',
     'rishi23root/opencv_wrap',
     'rishi23root/pyblink',
     'rishi23root/resume-editor',
@@ -21,8 +30,7 @@ export const opensource = {
   ],
   /** Short value props; fall back to GitHub description when missing. */
   blurbs: {
-    'monkeytypegame/monkeytype':
-      'Minimal, highly customizable typing test',
+    'saeeddhqan/Maryam': 'Open-source OSINT framework',
     'rishi23root/opencv_wrap':
       'Thin OpenCV wrappers for everyday CV scripts',
     'rishi23root/pyblink':

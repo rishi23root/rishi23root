@@ -92,8 +92,11 @@ async function main() {
     .replace(/{fullDescription}/gm, fullDescription)
     .replace(/{stackLine}/gm, stackLine)
     .replace(/{EMAIL}/gm, contact.email)
-    .replace(/{X_URL}/gm, contact.xUrl)
-    .replace(/{X_HANDLE}/gm, contact.xHandle)
+    .replace(/{X_URL}/gm, contact.socials.x)
+    .replace(/{LINKEDIN_URL}/gm, contact.socials.linkedin)
+    .replace(/{GITHUB_URL}/gm, contact.socials.github)
+    .replace(/{PYPI_URL}/gm, contact.socials.pypi)
+    .replace(/{STACKOVERFLOW_URL}/gm, contact.socials.stackoverflow)
 
   const activeOpenSourceDetail: GHItem[] = await Promise.all(
     opensource.active.map((name) => {
@@ -135,11 +138,14 @@ async function main() {
       gitCommit('FOOTER'),
       minifyMarkdown`
     <p align="center">
-      <a href="https://github.com/${github.name}">GitHub</a> ·
-      <a href="${contact.xUrl}">X</a> ·
+      <a href="${contact.socials.github}">GitHub</a> ·
+      <a href="${contact.socials.x}">X</a> ·
+      <a href="${contact.socials.linkedin}">LinkedIn</a> ·
+      <a href="${contact.socials.pypi}">PyPI</a> ·
+      <a href="${contact.socials.stackoverflow}">Stack Overflow</a> ·
       <a href="mailto:${contact.email}">Email</a>
     </p>
-    <p align="center"><sub>Updated daily at 11:11 AM IST · ${when(now)} · next ${when(next)}</sub></p>
+    <p align="center"><sub>Updated daily at 11:11 AM IST (Asia/Kolkata) · ${when(now)} · next ${when(next)}</sub></p>
     `,
     )
   }

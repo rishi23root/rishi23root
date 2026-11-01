@@ -11,14 +11,26 @@ TypeScript · Python · Node.js · React · Bash
   <a href="mailto:rishabhjainfinal@gmail.com">
     <img alt="Email" width="20" height="20" src="https://cdn.simpleicons.org/gmail/EA4335" />
   </a>&nbsp;
-  <a href="https://x.com/rishi23jain">
+  <a href="https://x.com/rishi23root">
     <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/111111" />
+  </a>&nbsp;
+  <a href="https://www.linkedin.com/in/rishi23root">
+    <img alt="LinkedIn" width="18" height="18" src="https://cdn.simpleicons.org/linkedin/0A66C2" />
+  </a>&nbsp;
+  <a href="https://github.com/rishi23root">
+    <img alt="GitHub" width="18" height="18" src="https://cdn.simpleicons.org/github/181717" />
+  </a>&nbsp;
+  <a href="https://pypi.org/user/rishi23root">
+    <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/3775A9" />
+  </a>&nbsp;
+  <a href="https://stackoverflow.com/users/11915284/rishi23root">
+    <img alt="Stack Overflow" width="18" height="18" src="https://cdn.simpleicons.org/stackoverflow/F58025" />
   </a>
 </p>
 
 ### Featured Work
 
-- **[monkeytypegame/monkeytype](https://github.com/monkeytypegame/monkeytype)** — Minimal, highly customizable typing test ★20974
+- **[saeeddhqan/Maryam](https://github.com/saeeddhqan/Maryam)** — Open-source OSINT framework ★1228
 - **[rishi23root/opencv_wrap](https://github.com/rishi23root/opencv_wrap)** — Thin OpenCV wrappers for everyday CV scripts ★4
 - **[rishi23root/pyblink](https://github.com/rishi23root/pyblink)** — Blink-counter automation to ease eye strain ★4
 - **[rishi23root/resume-editor](https://github.com/rishi23root/resume-editor)** — Web app for crafting professional resumes fast ★3
@@ -56,4 +68,4 @@ TypeScript · Python · Node.js · React · Bash
 
 <br />
 
-<p align=center><a href=https://github.com/rishi23root>GitHub</a> · <a href=https://x.com/rishi23jain>X</a> · <a href=mailto:rishabhjainfinal@gmail.com>Email</a></p><p align=center><sub>Updated daily at 11:11 AM IST · 11/1/26, 9:41 PM · next 11/2/26, 9:41 PM</sub></p>
+<p align=center><a href=https://github.com/rishi23root>GitHub</a> · <a href=https://x.com/rishi23root>X</a> · <a href=https://www.linkedin.com/in/rishi23root>LinkedIn</a> · <a href=https://pypi.org/user/rishi23root>PyPI</a> · <a href=https://stackoverflow.com/users/11915284/rishi23root>Stack Overflow</a> · <a href=mailto:rishabhjainfinal@gmail.com>Email</a></p><p align=center><sub>Updated daily at 11:11 AM IST (Asia/Kolkata) · 11/1/26, 9:58 PM · next 11/2/26, 9:58 PM</sub></p>

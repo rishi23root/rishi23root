@@ -13,6 +13,18 @@ $ echo $STACK
   </a>&nbsp;
   <a href="{X_URL}">
     <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/111111" />
+  </a>&nbsp;
+  <a href="{LINKEDIN_URL}">
+    <img alt="LinkedIn" width="18" height="18" src="https://cdn.simpleicons.org/linkedin/0A66C2" />
+  </a>&nbsp;
+  <a href="{GITHUB_URL}">
+    <img alt="GitHub" width="18" height="18" src="https://cdn.simpleicons.org/github/181717" />
+  </a>&nbsp;
+  <a href="{PYPI_URL}">
+    <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/3775A9" />
+  </a>&nbsp;
+  <a href="{STACKOVERFLOW_URL}">
+    <img alt="Stack Overflow" width="18" height="18" src="https://cdn.simpleicons.org/stackoverflow/F58025" />
   </a>
 </p>
 
