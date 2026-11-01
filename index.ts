@@ -5,10 +5,12 @@ import { minify } from 'html-minifier'
 import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
 import {
   github,
+  contact,
   shortBio,
   fullDescription,
   stackLine,
   opensource,
+  recentLikedCount,
   timeZone,
 } from './config'
 import comments from './constants'
@@ -88,8 +90,10 @@ async function main() {
     .replace(/{USERNAME_HERE}/gm, github.name)
     .replace(/{shortBio}/gm, shortBio)
     .replace(/{fullDescription}/gm, fullDescription)
-    .replace(/{fullDiscription}/gm, fullDescription)
     .replace(/{stackLine}/gm, stackLine)
+    .replace(/{EMAIL}/gm, contact.email)
+    .replace(/{X_URL}/gm, contact.xUrl)
+    .replace(/{X_HANDLE}/gm, contact.xHandle)
 
   const activeOpenSourceDetail: GHItem[] = await Promise.all(
     opensource.active.map((name) => {
@@ -103,13 +107,18 @@ async function main() {
   )
 
   const star: GHItem[] = await githubReq
-    .get('/users/' + github.name + '/starred')
+    .get('/users/' + github.name + '/starred', {
+      params: { per_page: recentLikedCount },
+    })
     .then((data) => data.data)
 
   {
-    const topStar5 = star.slice(0, 5).map(generateRepoMarkdown).join('\n')
+    const topLiked = star
+      .slice(0, recentLikedCount)
+      .map(generateRepoMarkdown)
+      .join('\n')
 
-    newContent = newContent.replace(gitCommit('RECENT_STAR'), topStar5)
+    newContent = newContent.replace(gitCommit('RECENT_STAR'), topLiked)
   }
 
   {
@@ -127,8 +136,8 @@ async function main() {
       minifyMarkdown`
     <p align="center">
       <a href="https://github.com/${github.name}">GitHub</a> ·
-      <a href="https://x.com/rishi23jain">X</a> ·
-      <a href="mailto:rishabhjainfinal@gmail.com">Email</a>
+      <a href="${contact.xUrl}">X</a> ·
+      <a href="mailto:${contact.email}">Email</a>
     </p>
     <p align="center"><sub>Updated daily at 11:11 AM IST · ${when(now)} · next ${when(next)}</sub></p>
     `,

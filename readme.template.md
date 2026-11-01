@@ -8,10 +8,10 @@ $ echo $STACK
 ```
 
 <p>
-  <a href="mailto:rishabhjainfinal@gmail.com">
+  <a href="mailto:{EMAIL}">
     <img alt="Email" width="20" height="20" src="https://cdn.simpleicons.org/gmail/EA4335" />
   </a>&nbsp;
-  <a href="https://x.com/rishi23jain">
+  <a href="{X_URL}">
     <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/111111" />
   </a>
 </p>
