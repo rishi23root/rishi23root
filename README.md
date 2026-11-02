@@ -7,7 +7,7 @@ $ echo $STACK
 TypeScript · Python · Node.js · React · React Native
 
 $ stats
-1.9k commits · 125 PRs · 103 issues
+1.9k commits · 126 PRs · 103 issues
 ```
 
 <p align="center">
@@ -17,6 +17,7 @@ $ stats
 ### Featured Work
 
 - **[saeeddhqan/Maryam](https://github.com/saeeddhqan/Maryam)** — Open-source OSINT framework ★1228
+- **[rishi23root/PixelStreamingInfrastructure](https://github.com/rishi23root/PixelStreamingInfrastructure)** — Epic Games Unreal Pixel Streaming servers and frontend ★0
 - **[rishi23root/opencv_wrap](https://github.com/rishi23root/opencv_wrap)** — Thin OpenCV wrappers for everyday CV scripts ★4
 - **[rishi23root/pyblink](https://github.com/rishi23root/pyblink)** — Blink-counter automation to ease eye strain ★4
 - **[rishi23root/resume-editor](https://github.com/rishi23root/resume-editor)** — Web app for crafting professional resumes fast ★3
