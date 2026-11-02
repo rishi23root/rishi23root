@@ -111,12 +111,9 @@ async function main() {
 
   newContent = newContent.replace(
     gitCommit('MOTTOS'),
-    mottos
-      .map(
-        (line) =>
-          `<p align="center">\n  「<strong><samp>${line}</samp></strong>」\n</p>`,
-      )
-      .join('\n'),
+    `<p align="center">\n  ${mottos
+      .map((line) => `「<strong><samp>${line}</samp></strong>」`)
+      .join(' · ')}\n</p>`,
   )
 
   newContent = newContent.replace(
