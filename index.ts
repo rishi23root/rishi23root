@@ -1,17 +1,25 @@
 import axios from 'axios'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import { readFile, rm, writeFile } from 'fs/promises'
 import { minify } from 'html-minifier'
 import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
 import {
   github,
+  contact,
+  mottos,
   shortBio,
   fullDescription,
   stackLine,
   opensource,
-  timeZone,
+  recentLikedCount,
+  schedule,
 } from './config'
 import comments from './constants'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const githubAPIEndPoint = 'https://api.github.com'
 
@@ -88,8 +96,12 @@ async function main() {
     .replace(/{USERNAME_HERE}/gm, github.name)
     .replace(/{shortBio}/gm, shortBio)
     .replace(/{fullDescription}/gm, fullDescription)
-    .replace(/{fullDiscription}/gm, fullDescription)
     .replace(/{stackLine}/gm, stackLine)
+    .replace(/{EMAIL}/gm, contact.email)
+    .replace(/{X_URL}/gm, contact.socials.x)
+    .replace(/{LINKEDIN_URL}/gm, contact.socials.linkedin)
+    .replace(/{GITHUB_URL}/gm, contact.socials.github)
+    .replace(/{PYPI_URL}/gm, contact.socials.pypi)
 
   const activeOpenSourceDetail: GHItem[] = await Promise.all(
     opensource.active.map((name) => {
@@ -98,45 +110,77 @@ async function main() {
   )
 
   newContent = newContent.replace(
+    gitCommit('MOTTOS'),
+    mottos
+      .map(
+        (line) =>
+          `<p align="center">\n  「<strong><samp>${line}</samp></strong>」\n</p>`,
+      )
+      .join('\n'),
+  )
+
+  newContent = newContent.replace(
     gitCommit('OPENSOURCE_DASHBOARD_ACTIVE'),
     generateFeaturedWorkMarkdown(activeOpenSourceDetail, opensource.blurbs),
   )
 
   const star: GHItem[] = await githubReq
-    .get('/users/' + github.name + '/starred')
+    .get('/users/' + github.name + '/starred', {
+      params: { per_page: recentLikedCount },
+    })
     .then((data) => data.data)
 
   {
-    const topStar5 = star.slice(0, 5).map(generateRepoMarkdown).join('\n')
+    const topLiked = star
+      .slice(0, recentLikedCount)
+      .map(generateRepoMarkdown)
+      .join('\n')
 
-    newContent = newContent.replace(gitCommit('RECENT_STAR'), topStar5)
+    newContent = newContent.replace(gitCommit('RECENT_STAR'), topLiked)
   }
 
   {
-    const now = new Date()
-    const next = dayjs().add(1, 'day').toDate()
-    const when = (d: Date) =>
-      d.toLocaleString(undefined, {
+    const now = dayjs().tz(schedule.timeZone)
+    // Next run: +1 day at the configured local clock time
+    const next = now
+      .add(1, 'day')
+      .hour(schedule.hour)
+      .minute(schedule.minute)
+      .second(0)
+      .millisecond(0)
+    const when = (d: dayjs.Dayjs) =>
+      d.toDate().toLocaleString(undefined, {
         timeStyle: 'short',
         dateStyle: 'short',
-        timeZone,
+        timeZone: schedule.timeZone,
       })
+    const localClock = formatLocalClock(schedule.hour, schedule.minute)
+    const scheduleLine = `Updated daily at ${localClock} ${schedule.timeZoneLabel} (${schedule.timeZone})`
 
     newContent = newContent.replace(
       gitCommit('FOOTER'),
       minifyMarkdown`
     <p align="center">
-      <a href="https://github.com/${github.name}">GitHub</a> ·
-      <a href="https://x.com/rishi23jain">X</a> ·
-      <a href="mailto:rishabhjainfinal@gmail.com">Email</a>
+      <a href="${contact.socials.github}">GitHub</a> ·
+      <a href="${contact.socials.x}">X</a> ·
+      <a href="${contact.socials.linkedin}">LinkedIn</a> ·
+      <a href="${contact.socials.pypi}">PyPI</a> ·
+      <a href="mailto:${contact.email}">Email</a>
     </p>
-    <p align="center"><sub>Updated daily · ${when(now)} · next ${when(next)}</sub></p>
+    <p align="center"><sub>${scheduleLine} · ${when(now)} · next ${when(next)}</sub></p>
     `,
     )
   }
 
   await rm('./README.md', { force: true })
   await writeFile('./README.md', newContent, { encoding: 'utf-8' })
+}
+
+/** 11, 11 → "11:11 AM" */
+function formatLocalClock(hour: number, minute: number) {
+  const h12 = hour % 12 || 12
+  const ampm = hour < 12 ? 'AM' : 'PM'
+  return `${h12}:${String(minute).padStart(2, '0')} ${ampm}`
 }
 
 function gitCommit(token: keyof typeof comments) {
