@@ -137,7 +137,7 @@ $ stats
 <br />
 
 <p align="center">
-  <a href="mailto:rishabhjainfinal@gmail.com">Email</a> ·
+  <a href="mailto:hi@rishi23root.in">Email</a> ·
   <a href="https://x.com/rishi23root">X</a> ·
   <a href="https://www.linkedin.com/in/rishi23root">LinkedIn</a> ·
   <a href="https://github.com/rishi23root">GitHub</a> ·
