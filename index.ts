@@ -145,12 +145,8 @@ async function main() {
       .minute(schedule.minute)
       .second(0)
       .millisecond(0)
-    const when = (d: dayjs.Dayjs) =>
-      d.toDate().toLocaleString(undefined, {
-        timeStyle: 'short',
-        dateStyle: 'short',
-        timeZone: schedule.timeZone,
-      })
+    // Local wall times from schedule.timeZone — no zone name/label in the footer
+    const when = (d: dayjs.Dayjs) => d.format('M/D/YY, h:mm A')
 
     newContent = newContent.replace(
       gitCommit('FOOTER'),
