@@ -10,27 +10,6 @@ $ stats
 <!-- GH_STATS_NODE -->
 ```
 
-<p align="center">
-  <a href="mailto:{EMAIL}">
-    <img alt="Email" width="20" height="20" src="https://cdn.simpleicons.org/gmail/EA4335" />
-  </a>&nbsp;
-  <a href="{X_URL}">
-    <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/111111#gh-light-mode-only" />
-    <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/ffffff#gh-dark-mode-only" />
-  </a>&nbsp;
-  <a href="{LINKEDIN_URL}">
-    <img alt="LinkedIn" width="18" height="18" src="https://cdn.simpleicons.org/linkedin/0A66C2" />
-  </a>&nbsp;
-  <a href="{GITHUB_URL}">
-    <img alt="GitHub" width="18" height="18" src="https://cdn.simpleicons.org/github/181717#gh-light-mode-only" />
-    <img alt="GitHub" width="18" height="18" src="https://cdn.simpleicons.org/github/ffffff#gh-dark-mode-only" />
-  </a>&nbsp;
-  <a href="{PYPI_URL}">
-    <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/3775A9#gh-light-mode-only" />
-    <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/ffd43b#gh-dark-mode-only" />
-  </a>
-</p>
-
 <!-- mottos_inject -->
 
 ### Featured Work
@@ -57,4 +36,12 @@ $ stats
   <img alt="GitHub Actions" src="https://img.shields.io/badge/-Github_Actions-2088FF?style=flat-square&logo=github-actions&logoColor=white" />
   <img alt="Ubuntu" src="https://img.shields.io/badge/-Ubuntu-333?style=flat-square&logo=ubuntu&logoColor=white" />
   <img alt="VS Code" src="https://img.shields.io/badge/Visual%20Studio%20Code-blue?style=flat-square&logo=visual-studio-code&logoColor=ffffff" />
+</p>
+
+<p align="center">
+  <a href="mailto:{EMAIL}">Email</a> ·
+  <a href="{X_URL}">X</a> ·
+  <a href="{LINKEDIN_URL}">LinkedIn</a> ·
+  <a href="{GITHUB_URL}">GitHub</a> ·
+  <a href="{PYPI_URL}">PyPI</a>
 </p>
