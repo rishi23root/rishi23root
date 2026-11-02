@@ -21,7 +21,7 @@ export const contact = {
 export const opensource = {
   active: [
     'saeeddhqan/Maryam',
-    'rishi23root/PixelStreamingInfrastructure',
+    'EpicGames/PixelStreamingInfrastructure',
     'rishi23root/opencv_wrap',
     'rishi23root/pyblink',
     'rishi23root/resume-editor',
@@ -30,7 +30,7 @@ export const opensource = {
   /** Short value props; fall back to GitHub description when missing. */
   blurbs: {
     'saeeddhqan/Maryam': 'Open-source OSINT framework',
-    'rishi23root/PixelStreamingInfrastructure':
+    'EpicGames/PixelStreamingInfrastructure':
       'Epic Games Unreal Pixel Streaming servers and frontend',
     'rishi23root/opencv_wrap':
       'Thin OpenCV wrappers for everyday CV scripts',
