@@ -154,8 +154,6 @@ async function main() {
         dateStyle: 'short',
         timeZone: schedule.timeZone,
       })
-    const localClock = formatLocalClock(schedule.hour, schedule.minute)
-    const scheduleLine = `Updated daily at ${localClock} ${schedule.timeZoneLabel} (${schedule.timeZone})`
 
     newContent = newContent.replace(
       gitCommit('FOOTER'),
@@ -167,20 +165,13 @@ async function main() {
       <a href="${contact.socials.pypi}">PyPI</a> ·
       <a href="mailto:${contact.email}">Email</a>
     </p>
-    <p align="center"><sub>${scheduleLine} · ${when(now)} · next ${when(next)}</sub></p>
+    <p align="center"><sub>Updated daily · ${when(now)} · next ${when(next)}</sub></p>
     `,
     )
   }
 
   await rm('./README.md', { force: true })
   await writeFile('./README.md', newContent, { encoding: 'utf-8' })
-}
-
-/** 11, 11 → "11:11 AM" */
-function formatLocalClock(hour: number, minute: number) {
-  const h12 = hour % 12 || 12
-  const ampm = hour < 12 ? 'AM' : 'PM'
-  return `${h12}:${String(minute).padStart(2, '0')} ${ampm}`
 }
 
 function gitCommit(token: keyof typeof comments) {
