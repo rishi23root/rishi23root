@@ -5,6 +5,9 @@ I build SaaS products, automate the boring parts, and keep security in the loop.
 
 $ echo $STACK
 TypeScript · Python · Node.js · React · Bash
+
+$ rank
+███ B-
 ```
 
 <p align="center">

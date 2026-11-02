@@ -5,6 +5,9 @@ $ whoami
 
 $ echo $STACK
 {stackLine}
+
+$ rank
+<!-- GH_RANK_NODE -->
 ```
 
 <p align="center">
