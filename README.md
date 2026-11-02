@@ -7,21 +7,24 @@ $ echo $STACK
 TypeScript · Python · Node.js · React · Bash
 ```
 
-<p>
+<p align="center">
   <a href="mailto:rishabhjainfinal@gmail.com">
     <img alt="Email" width="20" height="20" src="https://cdn.simpleicons.org/gmail/EA4335" />
   </a>&nbsp;
   <a href="https://x.com/rishi23root">
-    <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/111111" />
+    <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/111111#gh-light-mode-only" />
+    <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/ffffff#gh-dark-mode-only" />
   </a>&nbsp;
   <a href="https://www.linkedin.com/in/rishi23root">
     <img alt="LinkedIn" width="18" height="18" src="https://cdn.simpleicons.org/linkedin/0A66C2" />
   </a>&nbsp;
   <a href="https://github.com/rishi23root">
-    <img alt="GitHub" width="18" height="18" src="https://cdn.simpleicons.org/github/181717" />
+    <img alt="GitHub" width="18" height="18" src="https://cdn.simpleicons.org/github/181717#gh-light-mode-only" />
+    <img alt="GitHub" width="18" height="18" src="https://cdn.simpleicons.org/github/ffffff#gh-dark-mode-only" />
   </a>&nbsp;
   <a href="https://pypi.org/user/rishi23root">
-    <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/3775A9" />
+    <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/3775A9#gh-light-mode-only" />
+    <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/ffd43b#gh-dark-mode-only" />
   </a>
 </p>
 
@@ -66,7 +69,3 @@ TypeScript · Python · Node.js · React · Bash
 - [mattpocock/skills](https://github.com/mattpocock/skills) — Skills for Real Engineers. Straight from my .agents directory.
 - [dgr8akki/nano-ffmpeg](https://github.com/dgr8akki/nano-ffmpeg) — nano-ffmpeg wraps the full power of ffmpeg in a beautiful, keyboard-driven terminal dashboard. No more googling flags. Browse your files, pick what you want to do, tweak settings with presets, and watch a live progress bar while it encodes.
 - [lobehub/lobehub](https://github.com/lobehub/lobehub) — 🤯 LobeHub is your Chief Agent Operator, organizing your agents into 7×24 operations by hiring, scheduling, and reporting on your entire AI team.
-
-<br />
-
-<p align=center><a href=https://github.com/rishi23root>GitHub</a> · <a href=https://x.com/rishi23root>X</a> · <a href=https://www.linkedin.com/in/rishi23root>LinkedIn</a> · <a href=https://pypi.org/user/rishi23root>PyPI</a> · <a href=mailto:rishabhjainfinal@gmail.com>Email</a></p><p align=center><sub>Updated daily · 11/2/26, 10:44 AM · next 11/3/26, 11:11 AM</sub></p>

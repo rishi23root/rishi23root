@@ -7,21 +7,24 @@ $ echo $STACK
 {stackLine}
 ```
 
-<p>
+<p align="center">
   <a href="mailto:{EMAIL}">
     <img alt="Email" width="20" height="20" src="https://cdn.simpleicons.org/gmail/EA4335" />
   </a>&nbsp;
   <a href="{X_URL}">
-    <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/111111" />
+    <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/111111#gh-light-mode-only" />
+    <img alt="X" width="18" height="18" src="https://cdn.simpleicons.org/x/ffffff#gh-dark-mode-only" />
   </a>&nbsp;
   <a href="{LINKEDIN_URL}">
     <img alt="LinkedIn" width="18" height="18" src="https://cdn.simpleicons.org/linkedin/0A66C2" />
   </a>&nbsp;
   <a href="{GITHUB_URL}">
-    <img alt="GitHub" width="18" height="18" src="https://cdn.simpleicons.org/github/181717" />
+    <img alt="GitHub" width="18" height="18" src="https://cdn.simpleicons.org/github/181717#gh-light-mode-only" />
+    <img alt="GitHub" width="18" height="18" src="https://cdn.simpleicons.org/github/ffffff#gh-dark-mode-only" />
   </a>&nbsp;
   <a href="{PYPI_URL}">
-    <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/3775A9" />
+    <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/3775A9#gh-light-mode-only" />
+    <img alt="PyPI" width="18" height="18" src="https://cdn.simpleicons.org/pypi/ffd43b#gh-dark-mode-only" />
   </a>
 </p>
 
@@ -52,7 +55,3 @@ $ echo $STACK
 ### Recently liked
 
 <!-- recent_star_inject -->
-
-<br />
-
-<!-- footer_inject -->

@@ -5,7 +5,7 @@ export const github = {
 /** Shared handle for social profile URLs. */
 export const socialHandle = 'rishi23root'
 
-/** Mail + socials (identity icons + footer). */
+/** Mail + socials (identity icons). */
 export const contact = {
   email: 'rishabhjainfinal@gmail.com',
   socials: {
@@ -57,21 +57,3 @@ export const stackLine = 'TypeScript · Python · Node.js · React · Bash'
 
 /** How many starred repos to show under Recently liked. */
 export const recentLikedCount = 8
-
-/**
- * Daily README refresh schedule.
- * Keep `.github/workflows/build.yml` cron in sync with `cronUtc`.
- */
-export const schedule = {
-  /** Local wall-clock hour/minute for the daily run. */
-  hour: 11,
-  minute: 11,
-  /** IANA timezone + short label used in footer copy. */
-  timeZone: 'Asia/Kolkata',
-  timeZoneLabel: 'IST',
-  /**
-   * GitHub Actions cron (UTC). 11:11 Asia/Kolkata (UTC+5:30) → 05:41 UTC.
-   * Must match `hour` / `minute` / `timeZone` above.
-   */
-  cronUtc: '41 5 * * *',
-}

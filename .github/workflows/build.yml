@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - master
-  schedule:
-    # Matches config.ts `schedule.cronUtc` (11:11 Asia/Kolkata / IST → 05:41 UTC)
-    - cron: '41 5 * * *'
   workflow_dispatch:
 
 permissions:

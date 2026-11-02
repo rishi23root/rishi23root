@@ -1,9 +1,5 @@
 import axios from 'axios'
-import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
-import timezone from 'dayjs/plugin/timezone'
 import { readFile, rm, writeFile } from 'fs/promises'
-import { minify } from 'html-minifier'
 import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
 import {
   github,
@@ -14,12 +10,8 @@ import {
   stackLine,
   opensource,
   recentLikedCount,
-  schedule,
 } from './config'
 import comments from './constants'
-
-dayjs.extend(utc)
-dayjs.extend(timezone)
 
 const githubAPIEndPoint = 'https://api.github.com'
 
@@ -103,17 +95,17 @@ async function main() {
     .replace(/{GITHUB_URL}/gm, contact.socials.github)
     .replace(/{PYPI_URL}/gm, contact.socials.pypi)
 
-  const activeOpenSourceDetail: GHItem[] = await Promise.all(
-    opensource.active.map((name) => {
-      return githubReq.get('/repos/' + name).then((data) => data.data)
-    }),
-  )
-
   newContent = newContent.replace(
     gitCommit('MOTTOS'),
     `<p align="center">\n  ${mottos
       .map((line) => `「<strong><samp>${line}</samp></strong>」`)
       .join(' · ')}\n</p>`,
+  )
+
+  const activeOpenSourceDetail: GHItem[] = await Promise.all(
+    opensource.active.map((name) => {
+      return githubReq.get('/repos/' + name).then((data) => data.data)
+    }),
   )
 
   newContent = newContent.replace(
@@ -127,41 +119,12 @@ async function main() {
     })
     .then((data) => data.data)
 
-  {
-    const topLiked = star
-      .slice(0, recentLikedCount)
-      .map(generateRepoMarkdown)
-      .join('\n')
+  const topLiked = star
+    .slice(0, recentLikedCount)
+    .map(generateRepoMarkdown)
+    .join('\n')
 
-    newContent = newContent.replace(gitCommit('RECENT_STAR'), topLiked)
-  }
-
-  {
-    const now = dayjs().tz(schedule.timeZone)
-    // Next run: +1 day at the configured local clock time
-    const next = now
-      .add(1, 'day')
-      .hour(schedule.hour)
-      .minute(schedule.minute)
-      .second(0)
-      .millisecond(0)
-    // Local wall times from schedule.timeZone — no zone name/label in the footer
-    const when = (d: dayjs.Dayjs) => d.format('M/D/YY, h:mm A')
-
-    newContent = newContent.replace(
-      gitCommit('FOOTER'),
-      minifyMarkdown`
-    <p align="center">
-      <a href="${contact.socials.github}">GitHub</a> ·
-      <a href="${contact.socials.x}">X</a> ·
-      <a href="${contact.socials.linkedin}">LinkedIn</a> ·
-      <a href="${contact.socials.pypi}">PyPI</a> ·
-      <a href="mailto:${contact.email}">Email</a>
-    </p>
-    <p align="center"><sub>Updated daily · ${when(now)} · next ${when(next)}</sub></p>
-    `,
-    )
-  }
+  newContent = newContent.replace(gitCommit('RECENT_STAR'), topLiked)
 
   await rm('./README.md', { force: true })
   await writeFile('./README.md', newContent, { encoding: 'utf-8' })
@@ -169,16 +132,6 @@ async function main() {
 
 function gitCommit(token: keyof typeof comments) {
   return `<!-- ${comments[token]} -->`
-}
-
-function minifyMarkdown(html: TemplateStringsArray, ...args: any[]) {
-  const str = html.reduce((s, h, i) => s + h + (args[i] ?? ''), '')
-  return minify(str, {
-    removeAttributeQuotes: true,
-    removeEmptyAttributes: true,
-    removeTagWhitespace: true,
-    collapseWhitespace: true,
-  }).trim()
 }
 
 main()
