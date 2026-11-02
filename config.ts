@@ -53,7 +53,8 @@ export const fullDescription =
   'I build SaaS products, automate the boring parts, and keep security in the loop.'
 
 /** `$ echo $STACK` — plain text companion to the Stacks badge row. */
-export const stackLine = 'TypeScript · Python · Node.js · React · Bash'
+export const stackLine =
+  'TypeScript · Python · Node.js · React · React Native'
 
 /** How many starred repos to show under Recently liked. */
 export const recentLikedCount = 8
