@@ -24,7 +24,6 @@ export const opensource = {
     'rishi23root/pyblink',
     'rishi23root/resume-editor',
     'rishi23root/selenium-automations',
-    'rishi23root/class_automations',
   ],
   /** Short value props; fall back to GitHub description when missing. */
   blurbs: {
@@ -37,8 +36,6 @@ export const opensource = {
       'Web app for crafting professional resumes fast',
     'rishi23root/selenium-automations':
       'Selenium scripts for repetitive browser workflows',
-    'rishi23root/class_automations':
-      'Python/bash automations for repetitive class workflows',
   } as Record<string, string>,
 }
 

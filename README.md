@@ -21,7 +21,6 @@ $ stats
 - **[rishi23root/pyblink](https://github.com/rishi23root/pyblink)** — Blink-counter automation to ease eye strain ★4
 - **[rishi23root/resume-editor](https://github.com/rishi23root/resume-editor)** — Web app for crafting professional resumes fast ★3
 - **[rishi23root/selenium-automations](https://github.com/rishi23root/selenium-automations)** — Selenium scripts for repetitive browser workflows ★2
-- **[rishi23root/class_automations](https://github.com/rishi23root/class_automations)** — Python/bash automations for repetitive class workflows ★1
 
 ### Recently liked
 
