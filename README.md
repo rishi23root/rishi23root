@@ -1,18 +1,17 @@
-`$ whoami`
-
-**rishi23root** — freelancer · SaaS · security · automation  
+```bash
+$ whoami
+rishi23root — freelancer · SaaS · security · automation
 I build SaaS products, automate the boring parts, and keep security in the loop.
 
-`$ echo $STACK`
-
+$ echo $STACK
 TypeScript · Python · Node.js · React · React Native
 
-`$ stats`
-
+$ stats
 1.9k commits · 125 PRs · 103 issues
+```
 
 <p align="center">
-  「<samp>timshel</samp>」 · 「<samp>fac quod debes</samp>」
+  「<strong><samp>timshel</samp></strong>」 · 「<strong><samp>fac quod debes</samp></strong>」
 </p>
 
 ### Featured Work

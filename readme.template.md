@@ -1,15 +1,14 @@
-`$ whoami`
-
-**{USERNAME_HERE}** — {shortBio}  
+```bash
+$ whoami
+{USERNAME_HERE} — {shortBio}
 {fullDescription}
 
-`$ echo $STACK`
-
+$ echo $STACK
 {stackLine}
 
-`$ stats`
-
+$ stats
 <!-- GH_STATS_NODE -->
+```
 
 <!-- mottos_inject -->
 

@@ -131,7 +131,7 @@ async function main() {
   newContent = newContent.replace(
     gitCommit('MOTTOS'),
     `<p align="center">\n  ${mottos
-      .map((line) => `「<samp>${line}</samp>」`)
+      .map((line) => `「<strong><samp>${line}</samp></strong>」`)
       .join(' · ')}\n</p>`,
   )
 
