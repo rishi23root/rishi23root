@@ -1,6 +1,6 @@
 ```bash
 $ whoami
-{USERNAME_HERE} — {shortBio}
+**{USERNAME_HERE}** — {shortBio}
 {fullDescription}
 
 $ echo $STACK

@@ -1,6 +1,6 @@
 ```bash
 $ whoami
-rishi23root — freelancer · SaaS · security · automation
+**rishi23root** — freelancer · SaaS · security · automation
 I build SaaS products, automate the boring parts, and keep security in the loop.
 
 $ echo $STACK
