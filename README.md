@@ -133,6 +133,8 @@ $ stats
   <img alt="Claude" src="https://img.shields.io/badge/Claude-D97757?style=flat&logo=anthropic&logoColor=white" />
 </p>
 
+<br />
+
 <p align="center">
   <a href="mailto:rishabhjainfinal@gmail.com">Email</a> ·
   <a href="https://x.com/rishi23root">X</a> ·
@@ -140,3 +142,5 @@ $ stats
   <a href="https://github.com/rishi23root">GitHub</a> ·
   <a href="https://pypi.org/user/rishi23root">PyPI</a>
 </p>
+
+<br />

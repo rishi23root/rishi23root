@@ -112,7 +112,8 @@ function renderContact(): string {
     `<a href="${socials.github}">GitHub</a>`,
     `<a href="${socials.pypi}">PyPI</a>`,
   ]
-  return `<p align="center">\n  ${links.join(' ·\n  ')}\n</p>`
+  // Light vertical space so bottom socials stay readable against Toolbox.
+  return `<br />\n\n<p align="center">\n  ${links.join(' ·\n  ')}\n</p>\n\n<br />`
 }
 
 function renderMottos(): string {
