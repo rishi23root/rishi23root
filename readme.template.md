@@ -25,6 +25,10 @@ $ echo $STACK
   </a>
 </p>
 
+<p align="center">
+  「<strong><samp>{motto}</samp></strong>」
+</p>
+
 ### Featured Work
 
 <!-- opensource_dashboard:active -->

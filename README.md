@@ -25,6 +25,10 @@ TypeScript · Python · Node.js · React · Bash
   </a>
 </p>
 
+<p align="center">
+  「<strong><samp>timshel</samp></strong>」
+</p>
+
 ### Featured Work
 
 - **[saeeddhqan/Maryam](https://github.com/saeeddhqan/Maryam)** — Open-source OSINT framework ★1228
@@ -65,4 +69,4 @@ TypeScript · Python · Node.js · React · Bash
 
 <br />
 
-<p align=center><a href=https://github.com/rishi23root>GitHub</a> · <a href=https://x.com/rishi23root>X</a> · <a href=https://www.linkedin.com/in/rishi23root>LinkedIn</a> · <a href=https://pypi.org/user/rishi23root>PyPI</a> · <a href=mailto:rishabhjainfinal@gmail.com>Email</a></p><p align=center><sub>Updated daily at 11:11 AM IST (Asia/Kolkata) · 11/1/26, 10:18 PM · next 11/2/26, 11:11 AM</sub></p>
+<p align=center><a href=https://github.com/rishi23root>GitHub</a> · <a href=https://x.com/rishi23root>X</a> · <a href=https://www.linkedin.com/in/rishi23root>LinkedIn</a> · <a href=https://pypi.org/user/rishi23root>PyPI</a> · <a href=mailto:rishabhjainfinal@gmail.com>Email</a></p><p align=center><sub>Updated daily at 11:11 AM IST (Asia/Kolkata) · 11/2/26, 10:37 AM · next 11/3/26, 11:11 AM</sub></p>

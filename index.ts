@@ -8,6 +8,7 @@ import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
 import {
   github,
   contact,
+  motto,
   shortBio,
   fullDescription,
   stackLine,
@@ -96,6 +97,7 @@ async function main() {
     .replace(/{shortBio}/gm, shortBio)
     .replace(/{fullDescription}/gm, fullDescription)
     .replace(/{stackLine}/gm, stackLine)
+    .replace(/{motto}/gm, motto)
     .replace(/{EMAIL}/gm, contact.email)
     .replace(/{X_URL}/gm, contact.socials.x)
     .replace(/{LINKEDIN_URL}/gm, contact.socials.linkedin)
