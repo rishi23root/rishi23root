@@ -8,7 +8,7 @@ import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
 import {
   github,
   contact,
-  motto,
+  mottos,
   shortBio,
   fullDescription,
   stackLine,
@@ -97,7 +97,6 @@ async function main() {
     .replace(/{shortBio}/gm, shortBio)
     .replace(/{fullDescription}/gm, fullDescription)
     .replace(/{stackLine}/gm, stackLine)
-    .replace(/{motto}/gm, motto)
     .replace(/{EMAIL}/gm, contact.email)
     .replace(/{X_URL}/gm, contact.socials.x)
     .replace(/{LINKEDIN_URL}/gm, contact.socials.linkedin)
@@ -108,6 +107,16 @@ async function main() {
     opensource.active.map((name) => {
       return githubReq.get('/repos/' + name).then((data) => data.data)
     }),
+  )
+
+  newContent = newContent.replace(
+    gitCommit('MOTTOS'),
+    mottos
+      .map(
+        (line) =>
+          `<p align="center">\n  「<strong><samp>${line}</samp></strong>」\n</p>`,
+      )
+      .join('\n'),
   )
 
   newContent = newContent.replace(

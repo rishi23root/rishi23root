@@ -25,9 +25,7 @@ $ echo $STACK
   </a>
 </p>
 
-<p align="center">
-  「<strong><samp>{motto}</samp></strong>」
-</p>
+<!-- mottos_inject -->
 
 ### Featured Work
 

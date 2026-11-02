@@ -42,8 +42,8 @@ export const opensource = {
   } as Record<string, string>,
 }
 
-/** Centered Innei-style motto (「 samp 」) between contacts and Featured Work. */
-export const motto = 'timshel'
+/** Centered Innei-style motto lines (「 samp 」) between contacts and Featured Work. */
+export const mottos = ['timshel', 'fac quod debes']
 
 /** `$ whoami` role line. */
 export const shortBio = 'freelancer · SaaS · security · automation'
