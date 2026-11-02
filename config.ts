@@ -1,11 +1,12 @@
+/** GitHub username — single source for API calls + whoami line. */
 export const github = {
   name: 'rishi23root',
 }
 
-/** Shared handle for social profile URLs. */
-export const socialHandle = 'rishi23root'
+/** Same handle used in social profile URLs. */
+export const socialHandle = github.name
 
-/** Mail + socials (identity icons). */
+/** Mail + socials (bottom text links). */
 export const contact = {
   email: 'rishabhjainfinal@gmail.com',
   socials: {
@@ -39,7 +40,7 @@ export const opensource = {
   } as Record<string, string>,
 }
 
-/** Centered Innei-style motto lines (「 samp 」) between contacts and Featured Work. */
+/** Centered Innei-style motto lines (「 samp 」). */
 export const mottos = ['timshel', 'fac quod debes']
 
 /** `$ whoami` role line. */
@@ -49,7 +50,7 @@ export const shortBio = 'freelancer · SaaS · security · automation'
 export const fullDescription =
   'I build SaaS products, automate the boring parts, and keep security in the loop.'
 
-/** `$ echo $STACK` — plain text companion to the Stacks badge row. */
+/** `$ echo $STACK` — plain text companion to Toolbox. */
 export const stackLine =
   'TypeScript · Python · Node.js · React · React Native'
 

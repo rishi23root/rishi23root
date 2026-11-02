@@ -11,9 +11,17 @@ import {
   opensource,
   recentLikedCount,
 } from './config'
-import comments from './constants'
+import { renderToolbox } from './toolbox'
 
-const githubAPIEndPoint = 'https://api.github.com'
+/** HTML comment markers in readme.template.md replaced at build time. */
+const inject = {
+  OPENSOURCE: 'opensource_dashboard:active',
+  RECENT_STAR: 'recent_star_inject',
+  MOTTOS: 'mottos_inject',
+  GH_STATS: 'GH_STATS_NODE',
+  TOOLBOX: 'toolbox_inject',
+  CONTACT: 'contact_inject',
+} as const
 
 raxAttach()
 axios.defaults.raxConfig = {
@@ -26,10 +34,8 @@ axios.defaults.raxConfig = {
   },
 }
 
-const userAgent =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
-
-axios.defaults.headers.common['User-Agent'] = userAgent
+axios.defaults.headers.common['User-Agent'] =
+  'Mozilla/5.0 (compatible; rishi23root-readme-build)'
 
 const githubHeaders: Record<string, string> = {
   Accept: 'application/vnd.github+json',
@@ -39,7 +45,7 @@ if (process.env.GITHUB_TOKEN) {
 }
 
 const githubReq = axios.create({
-  baseURL: githubAPIEndPoint,
+  baseURL: 'https://api.github.com',
   timeout: 10000,
   headers: githubHeaders,
 })
@@ -53,15 +59,16 @@ type GHItem = {
   stargazers_count?: number
 }
 
+function marker(token: (typeof inject)[keyof typeof inject]) {
+  return `<!-- ${token} -->`
+}
+
 function escapeMd(text: string) {
   return text.replace(/\r?\n/g, ' ').trim()
 }
 
 /** Innei-style: **[name](url)** — blurb ★stars */
-function generateFeaturedWorkMarkdown(
-  list: GHItem[],
-  blurbs: Record<string, string>,
-) {
+function featuredMarkdown(list: GHItem[], blurbs: Record<string, string>) {
   return list
     .map((cur) => {
       const blurb =
@@ -69,13 +76,15 @@ function generateFeaturedWorkMarkdown(
         (cur.description ? escapeMd(cur.description) : '')
       const desc = blurb ? ` — ${blurb}` : ''
       const stars =
-        typeof cur.stargazers_count === 'number' ? ` ★${cur.stargazers_count}` : ''
+        typeof cur.stargazers_count === 'number'
+          ? ` ★${cur.stargazers_count}`
+          : ''
       return `- **[${cur.full_name}](${cur.html_url})**${desc}${stars}`
     })
     .join('\n')
 }
 
-function generateRepoMarkdown(item: GHItem) {
+function likedMarkdown(item: GHItem) {
   const desc = item.description ? ` — ${escapeMd(item.description)}` : ''
   return `- [${item.full_name}](${item.html_url})${desc}`
 }
@@ -83,100 +92,89 @@ function generateRepoMarkdown(item: GHItem) {
 /** 1900 → "1.9k"; small counts stay plain. */
 function formatCount(n: number): string {
   if (n < 1000) return String(n)
-  const rounded = Math.round(n / 100) / 10
-  return Number.isInteger(rounded) ? `${rounded}k` : `${rounded}k`
+  return `${Math.round(n / 100) / 10}k`
 }
 
-async function getTotalCommits(username: string): Promise<number> {
-  const res = await githubReq.get<{ total_count: number }>(
-    `/search/commits?q=author:${username}`,
-    {
-      headers: {
-        Accept: 'application/vnd.github.cloak-preview',
-      },
-    },
-  )
+async function searchCount(
+  path: string,
+  headers?: Record<string, string>,
+): Promise<number> {
+  const res = await githubReq.get<{ total_count: number }>(path, { headers })
   return res.data.total_count
 }
 
-async function getTotalPRs(username: string): Promise<number> {
-  const res = await githubReq.get<{ total_count: number }>(
-    `/search/issues?q=is:pr+author:${username}`,
-  )
-  return res.data.total_count
+function renderContact(): string {
+  const { email, socials } = contact
+  const links = [
+    `<a href="mailto:${email}">Email</a>`,
+    `<a href="${socials.x}">X</a>`,
+    `<a href="${socials.linkedin}">LinkedIn</a>`,
+    `<a href="${socials.github}">GitHub</a>`,
+    `<a href="${socials.pypi}">PyPI</a>`,
+  ]
+  return `<p align="center">\n  ${links.join(' ·\n  ')}\n</p>`
 }
 
-async function getTotalIssues(username: string): Promise<number> {
-  const res = await githubReq.get<{ total_count: number }>(
-    `/search/issues?q=is:issue+author:${username}`,
-  )
-  return res.data.total_count
+function renderMottos(): string {
+  return `<p align="center">\n  ${mottos
+    .map((line) => `「<strong><samp>${line}</samp></strong>」`)
+    .join(' · ')}\n</p>`
 }
 
 async function main() {
-  const template = await readFile('./readme.template.md', { encoding: 'utf-8' })
-  let newContent = template
+  let out = await readFile('./readme.template.md', { encoding: 'utf-8' })
 
-  newContent = newContent
-    .replace(/{USERNAME_HERE}/gm, github.name)
-    .replace(/{shortBio}/gm, shortBio)
-    .replace(/{fullDescription}/gm, fullDescription)
-    .replace(/{stackLine}/gm, stackLine)
-    .replace(/{EMAIL}/gm, contact.email)
-    .replace(/{X_URL}/gm, contact.socials.x)
-    .replace(/{LINKEDIN_URL}/gm, contact.socials.linkedin)
-    .replace(/{GITHUB_URL}/gm, contact.socials.github)
-    .replace(/{PYPI_URL}/gm, contact.socials.pypi)
+  const text: Record<string, string> = {
+    USERNAME_HERE: github.name,
+    shortBio,
+    fullDescription,
+    stackLine,
+  }
+  for (const [key, value] of Object.entries(text)) {
+    out = out.replace(new RegExp(`\\{${key}\\}`, 'g'), value)
+  }
 
-  newContent = newContent.replace(
-    gitCommit('MOTTOS'),
-    `<p align="center">\n  ${mottos
-      .map((line) => `「<strong><samp>${line}</samp></strong>」`)
-      .join(' · ')}\n</p>`,
-  )
+  out = out.replace(marker(inject.MOTTOS), renderMottos())
+  out = out.replace(marker(inject.TOOLBOX), renderToolbox())
+  out = out.replace(marker(inject.CONTACT), renderContact())
 
-  const username = github.name
+  const user = github.name
   const [commits, prs, issues] = await Promise.all([
-    getTotalCommits(username),
-    getTotalPRs(username),
-    getTotalIssues(username),
+    searchCount(`/search/commits?q=author:${user}`, {
+      Accept: 'application/vnd.github.cloak-preview',
+    }),
+    searchCount(`/search/issues?q=is:pr+author:${user}`),
+    searchCount(`/search/issues?q=is:issue+author:${user}`),
   ])
 
-  newContent = newContent.replace(
-    gitCommit('GH_STATS_NODE'),
+  out = out.replace(
+    marker(inject.GH_STATS),
     `${formatCount(commits)} commits · ${formatCount(prs)} PRs · ${formatCount(issues)} issues`,
   )
 
-  const activeOpenSourceDetail: GHItem[] = await Promise.all(
-    opensource.active.map((name) => {
-      return githubReq.get('/repos/' + name).then((data) => data.data)
-    }),
+  const featured = await Promise.all(
+    opensource.active.map((name) =>
+      githubReq.get<GHItem>('/repos/' + name).then((r) => r.data),
+    ),
+  )
+  out = out.replace(
+    marker(inject.OPENSOURCE),
+    featuredMarkdown(featured, opensource.blurbs),
   )
 
-  newContent = newContent.replace(
-    gitCommit('OPENSOURCE_DASHBOARD_ACTIVE'),
-    generateFeaturedWorkMarkdown(activeOpenSourceDetail, opensource.blurbs),
-  )
-
-  const star: GHItem[] = await githubReq
-    .get('/users/' + github.name + '/starred', {
+  const starred: GHItem[] = await githubReq
+    .get('/users/' + user + '/starred', {
       params: { per_page: recentLikedCount },
     })
-    .then((data) => data.data)
+    .then((r) => r.data)
 
-  const topLiked = star
-    .slice(0, recentLikedCount)
-    .map(generateRepoMarkdown)
-    .join('\n')
-
-  newContent = newContent.replace(gitCommit('RECENT_STAR'), topLiked)
+  out = out.replace(
+    marker(inject.RECENT_STAR),
+    starred.slice(0, recentLikedCount).map(likedMarkdown).join('\n'),
+  )
 
   await rm('./README.md', { force: true })
-  await writeFile('./README.md', newContent, { encoding: 'utf-8' })
-}
-
-function gitCommit(token: keyof typeof comments) {
-  return `<!-- ${comments[token]} -->`
+  await writeFile('./README.md', out, { encoding: 'utf-8' })
 }
 
 main()
