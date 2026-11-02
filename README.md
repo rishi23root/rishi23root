@@ -7,7 +7,7 @@ $ echo $STACK
 TypeScript · Python · Node.js · React · React Native
 
 $ stats
-1.9k commits · 127 PRs · 103 issues
+1.9k commits · 128 PRs · 103 issues
 ```
 
 <p align="center">
@@ -17,7 +17,7 @@ $ stats
 ### Featured Work
 
 - **[saeeddhqan/Maryam](https://github.com/saeeddhqan/Maryam)** — Open-source OSINT framework ★1228
-- **[EpicGames/PixelStreamingInfrastructure](https://github.com/EpicGames/PixelStreamingInfrastructure)** — Epic Games Unreal Pixel Streaming servers and frontend ★554
+- **[EpicGames/PixelStreamingInfrastructure](https://github.com/EpicGames/PixelStreamingInfrastructure)** — Epic Games Unreal Pixel Streaming servers and frontend ★555
 - **[rishi23root/opencv_wrap](https://github.com/rishi23root/opencv_wrap)** — Thin OpenCV wrappers for everyday CV scripts ★4
 - **[rishi23root/pyblink](https://github.com/rishi23root/pyblink)** — Blink-counter automation to ease eye strain ★4
 - **[rishi23root/resume-editor](https://github.com/rishi23root/resume-editor)** — Web app for crafting professional resumes fast ★3
@@ -25,6 +25,7 @@ $ stats
 
 ### Recently liked
 
+- [EpicGames/PixelStreamingInfrastructure](https://github.com/EpicGames/PixelStreamingInfrastructure) — The official Pixel Streaming servers and frontend.
 - [agentvivekkumar/dontbemichael](https://github.com/agentvivekkumar/dontbemichael) — A local multi-agent harness that works with your existing Claude Code, Codex subscriptions, allows you to run an office of agents
 - [rishi23root/opencv_wrap](https://github.com/rishi23root/opencv_wrap)
 - [OpenCut-app/OpenCut](https://github.com/OpenCut-app/OpenCut) — The open-source CapCut alternative
@@ -32,7 +33,6 @@ $ stats
 - [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — Agent skills that give coding agents taste: art direction, reference images and a browser check instead of generic AI pages
 - [mattpocock/skills](https://github.com/mattpocock/skills) — Skills for Real Engineers. Straight from my .agents directory.
 - [dgr8akki/nano-ffmpeg](https://github.com/dgr8akki/nano-ffmpeg) — nano-ffmpeg wraps the full power of ffmpeg in a beautiful, keyboard-driven terminal dashboard. No more googling flags. Browse your files, pick what you want to do, tweak settings with presets, and watch a live progress bar while it encodes.
-- [lobehub/lobehub](https://github.com/lobehub/lobehub) — 🤯 LobeHub is your Chief Agent Operator, organizing your agents into 7×24 operations by hiring, scheduling, and reporting on your entire AI team.
 
 ### Toolbox
 
