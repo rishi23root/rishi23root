@@ -132,7 +132,6 @@ $ stats
   <img alt="Discord" src="https://img.shields.io/badge/Discord-5865F2?style=flat&logo=discord&logoColor=white" />
   <img alt="Cursor" src="https://img.shields.io/badge/Cursor-000000?style=flat" />
   <img alt="Claude" src="https://img.shields.io/badge/Claude-D97757?style=flat&logo=anthropic&logoColor=white" />
-  <img alt="Claude Code" src="https://img.shields.io/badge/Claude%20Code-D97757?style=flat&logo=anthropic&logoColor=white" />
 </p>
 
 <p align="center">
