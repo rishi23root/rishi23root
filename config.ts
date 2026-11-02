@@ -1,11 +1,12 @@
+/** GitHub username — single source for API calls + whoami line. */
 export const github = {
   name: 'rishi23root',
 }
 
-/** Shared handle for social profile URLs. */
-export const socialHandle = 'rishi23root'
+/** Same handle used in social profile URLs. */
+export const socialHandle = github.name
 
-/** Mail + socials (identity icons + footer). */
+/** Mail + socials (bottom text links). */
 export const contact = {
   email: 'rishabhjainfinal@gmail.com',
   socials: {
@@ -24,7 +25,6 @@ export const opensource = {
     'rishi23root/pyblink',
     'rishi23root/resume-editor',
     'rishi23root/selenium-automations',
-    'rishi23root/class_automations',
   ],
   /** Short value props; fall back to GitHub description when missing. */
   blurbs: {
@@ -37,12 +37,10 @@ export const opensource = {
       'Web app for crafting professional resumes fast',
     'rishi23root/selenium-automations':
       'Selenium scripts for repetitive browser workflows',
-    'rishi23root/class_automations':
-      'Python/bash automations for repetitive class workflows',
   } as Record<string, string>,
 }
 
-/** Centered Innei-style motto lines (「 samp 」) between contacts and Featured Work. */
+/** Centered Innei-style motto lines (「 samp 」). */
 export const mottos = ['timshel', 'fac quod debes']
 
 /** `$ whoami` role line. */
@@ -52,26 +50,9 @@ export const shortBio = 'freelancer · SaaS · security · automation'
 export const fullDescription =
   'I build SaaS products, automate the boring parts, and keep security in the loop.'
 
-/** `$ echo $STACK` — plain text companion to the Stacks badge row. */
-export const stackLine = 'TypeScript · Python · Node.js · React · Bash'
+/** `$ echo $STACK` — plain text companion to Toolbox. */
+export const stackLine =
+  'TypeScript · Python · Node.js · React · React Native'
 
 /** How many starred repos to show under Recently liked. */
 export const recentLikedCount = 8
-
-/**
- * Daily README refresh schedule.
- * Keep `.github/workflows/build.yml` cron in sync with `cronUtc`.
- */
-export const schedule = {
-  /** Local wall-clock hour/minute for the daily run. */
-  hour: 11,
-  minute: 11,
-  /** IANA timezone + short label used in footer copy. */
-  timeZone: 'Asia/Kolkata',
-  timeZoneLabel: 'IST',
-  /**
-   * GitHub Actions cron (UTC). 11:11 Asia/Kolkata (UTC+5:30) → 05:41 UTC.
-   * Must match `hour` / `minute` / `timeZone` above.
-   */
-  cronUtc: '41 5 * * *',
-}

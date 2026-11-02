@@ -1,9 +1,5 @@
 import axios from 'axios'
-import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
-import timezone from 'dayjs/plugin/timezone'
 import { readFile, rm, writeFile } from 'fs/promises'
-import { minify } from 'html-minifier'
 import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
 import {
   github,
@@ -14,14 +10,18 @@ import {
   stackLine,
   opensource,
   recentLikedCount,
-  schedule,
 } from './config'
-import comments from './constants'
+import { renderToolbox } from './toolbox'
 
-dayjs.extend(utc)
-dayjs.extend(timezone)
-
-const githubAPIEndPoint = 'https://api.github.com'
+/** HTML comment markers in readme.template.md replaced at build time. */
+const inject = {
+  OPENSOURCE: 'opensource_dashboard:active',
+  RECENT_STAR: 'recent_star_inject',
+  MOTTOS: 'mottos_inject',
+  GH_STATS: 'GH_STATS_NODE',
+  TOOLBOX: 'toolbox_inject',
+  CONTACT: 'contact_inject',
+} as const
 
 raxAttach()
 axios.defaults.raxConfig = {
@@ -34,10 +34,8 @@ axios.defaults.raxConfig = {
   },
 }
 
-const userAgent =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
-
-axios.defaults.headers.common['User-Agent'] = userAgent
+axios.defaults.headers.common['User-Agent'] =
+  'Mozilla/5.0 (compatible; rishi23root-readme-build)'
 
 const githubHeaders: Record<string, string> = {
   Accept: 'application/vnd.github+json',
@@ -47,7 +45,7 @@ if (process.env.GITHUB_TOKEN) {
 }
 
 const githubReq = axios.create({
-  baseURL: githubAPIEndPoint,
+  baseURL: 'https://api.github.com',
   timeout: 10000,
   headers: githubHeaders,
 })
@@ -61,15 +59,16 @@ type GHItem = {
   stargazers_count?: number
 }
 
+function marker(token: (typeof inject)[keyof typeof inject]) {
+  return `<!-- ${token} -->`
+}
+
 function escapeMd(text: string) {
   return text.replace(/\r?\n/g, ' ').trim()
 }
 
 /** Innei-style: **[name](url)** — blurb ★stars */
-function generateFeaturedWorkMarkdown(
-  list: GHItem[],
-  blurbs: Record<string, string>,
-) {
+function featuredMarkdown(list: GHItem[], blurbs: Record<string, string>) {
   return list
     .map((cur) => {
       const blurb =
@@ -77,124 +76,105 @@ function generateFeaturedWorkMarkdown(
         (cur.description ? escapeMd(cur.description) : '')
       const desc = blurb ? ` — ${blurb}` : ''
       const stars =
-        typeof cur.stargazers_count === 'number' ? ` ★${cur.stargazers_count}` : ''
+        typeof cur.stargazers_count === 'number'
+          ? ` ★${cur.stargazers_count}`
+          : ''
       return `- **[${cur.full_name}](${cur.html_url})**${desc}${stars}`
     })
     .join('\n')
 }
 
-function generateRepoMarkdown(item: GHItem) {
+function likedMarkdown(item: GHItem) {
   const desc = item.description ? ` — ${escapeMd(item.description)}` : ''
   return `- [${item.full_name}](${item.html_url})${desc}`
 }
 
+/** 1900 → "1.9k"; small counts stay plain. */
+function formatCount(n: number): string {
+  if (n < 1000) return String(n)
+  return `${Math.round(n / 100) / 10}k`
+}
+
+async function searchCount(
+  path: string,
+  headers?: Record<string, string>,
+): Promise<number> {
+  const res = await githubReq.get<{ total_count: number }>(path, { headers })
+  return res.data.total_count
+}
+
+function renderContact(): string {
+  const { email, socials } = contact
+  const links = [
+    `<a href="mailto:${email}">Email</a>`,
+    `<a href="${socials.x}">X</a>`,
+    `<a href="${socials.linkedin}">LinkedIn</a>`,
+    `<a href="${socials.github}">GitHub</a>`,
+    `<a href="${socials.pypi}">PyPI</a>`,
+  ]
+  return `<p align="center">\n  ${links.join(' ·\n  ')}\n</p>`
+}
+
+function renderMottos(): string {
+  return `<p align="center">\n  ${mottos
+    .map((line) => `「<strong><samp>${line}</samp></strong>」`)
+    .join(' · ')}\n</p>`
+}
+
 async function main() {
-  const template = await readFile('./readme.template.md', { encoding: 'utf-8' })
-  let newContent = template
+  let out = await readFile('./readme.template.md', { encoding: 'utf-8' })
 
-  newContent = newContent
-    .replace(/{USERNAME_HERE}/gm, github.name)
-    .replace(/{shortBio}/gm, shortBio)
-    .replace(/{fullDescription}/gm, fullDescription)
-    .replace(/{stackLine}/gm, stackLine)
-    .replace(/{EMAIL}/gm, contact.email)
-    .replace(/{X_URL}/gm, contact.socials.x)
-    .replace(/{LINKEDIN_URL}/gm, contact.socials.linkedin)
-    .replace(/{GITHUB_URL}/gm, contact.socials.github)
-    .replace(/{PYPI_URL}/gm, contact.socials.pypi)
+  const text: Record<string, string> = {
+    USERNAME_HERE: github.name,
+    shortBio,
+    fullDescription,
+    stackLine,
+  }
+  for (const [key, value] of Object.entries(text)) {
+    out = out.replace(new RegExp(`\\{${key}\\}`, 'g'), value)
+  }
 
-  const activeOpenSourceDetail: GHItem[] = await Promise.all(
-    opensource.active.map((name) => {
-      return githubReq.get('/repos/' + name).then((data) => data.data)
+  out = out.replace(marker(inject.MOTTOS), renderMottos())
+  out = out.replace(marker(inject.TOOLBOX), renderToolbox())
+  out = out.replace(marker(inject.CONTACT), renderContact())
+
+  const user = github.name
+  const [commits, prs, issues] = await Promise.all([
+    searchCount(`/search/commits?q=author:${user}`, {
+      Accept: 'application/vnd.github.cloak-preview',
     }),
+    searchCount(`/search/issues?q=is:pr+author:${user}`),
+    searchCount(`/search/issues?q=is:issue+author:${user}`),
+  ])
+
+  out = out.replace(
+    marker(inject.GH_STATS),
+    `${formatCount(commits)} commits · ${formatCount(prs)} PRs · ${formatCount(issues)} issues`,
   )
 
-  newContent = newContent.replace(
-    gitCommit('MOTTOS'),
-    mottos
-      .map(
-        (line) =>
-          `<p align="center">\n  「<strong><samp>${line}</samp></strong>」\n</p>`,
-      )
-      .join('\n'),
+  const featured = await Promise.all(
+    opensource.active.map((name) =>
+      githubReq.get<GHItem>('/repos/' + name).then((r) => r.data),
+    ),
+  )
+  out = out.replace(
+    marker(inject.OPENSOURCE),
+    featuredMarkdown(featured, opensource.blurbs),
   )
 
-  newContent = newContent.replace(
-    gitCommit('OPENSOURCE_DASHBOARD_ACTIVE'),
-    generateFeaturedWorkMarkdown(activeOpenSourceDetail, opensource.blurbs),
-  )
-
-  const star: GHItem[] = await githubReq
-    .get('/users/' + github.name + '/starred', {
+  const starred: GHItem[] = await githubReq
+    .get('/users/' + user + '/starred', {
       params: { per_page: recentLikedCount },
     })
-    .then((data) => data.data)
+    .then((r) => r.data)
 
-  {
-    const topLiked = star
-      .slice(0, recentLikedCount)
-      .map(generateRepoMarkdown)
-      .join('\n')
-
-    newContent = newContent.replace(gitCommit('RECENT_STAR'), topLiked)
-  }
-
-  {
-    const now = dayjs().tz(schedule.timeZone)
-    // Next run: +1 day at the configured local clock time
-    const next = now
-      .add(1, 'day')
-      .hour(schedule.hour)
-      .minute(schedule.minute)
-      .second(0)
-      .millisecond(0)
-    const when = (d: dayjs.Dayjs) =>
-      d.toDate().toLocaleString(undefined, {
-        timeStyle: 'short',
-        dateStyle: 'short',
-        timeZone: schedule.timeZone,
-      })
-    const localClock = formatLocalClock(schedule.hour, schedule.minute)
-    const scheduleLine = `Updated daily at ${localClock} ${schedule.timeZoneLabel} (${schedule.timeZone})`
-
-    newContent = newContent.replace(
-      gitCommit('FOOTER'),
-      minifyMarkdown`
-    <p align="center">
-      <a href="${contact.socials.github}">GitHub</a> ·
-      <a href="${contact.socials.x}">X</a> ·
-      <a href="${contact.socials.linkedin}">LinkedIn</a> ·
-      <a href="${contact.socials.pypi}">PyPI</a> ·
-      <a href="mailto:${contact.email}">Email</a>
-    </p>
-    <p align="center"><sub>${scheduleLine} · ${when(now)} · next ${when(next)}</sub></p>
-    `,
-    )
-  }
+  out = out.replace(
+    marker(inject.RECENT_STAR),
+    starred.slice(0, recentLikedCount).map(likedMarkdown).join('\n'),
+  )
 
   await rm('./README.md', { force: true })
-  await writeFile('./README.md', newContent, { encoding: 'utf-8' })
-}
-
-/** 11, 11 → "11:11 AM" */
-function formatLocalClock(hour: number, minute: number) {
-  const h12 = hour % 12 || 12
-  const ampm = hour < 12 ? 'AM' : 'PM'
-  return `${h12}:${String(minute).padStart(2, '0')} ${ampm}`
-}
-
-function gitCommit(token: keyof typeof comments) {
-  return `<!-- ${comments[token]} -->`
-}
-
-function minifyMarkdown(html: TemplateStringsArray, ...args: any[]) {
-  const str = html.reduce((s, h, i) => s + h + (args[i] ?? ''), '')
-  return minify(str, {
-    removeAttributeQuotes: true,
-    removeEmptyAttributes: true,
-    removeTagWhitespace: true,
-    collapseWhitespace: true,
-  }).trim()
+  await writeFile('./README.md', out, { encoding: 'utf-8' })
 }
 
 main()
