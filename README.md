@@ -50,6 +50,7 @@ $ stats
   <img alt="MySQL" src="https://img.shields.io/badge/MySQL-13aa52?style=flat-square&logo=mysql&logoColor=white" />
   <img alt="GitHub Actions" src="https://img.shields.io/badge/GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white" />
   <img alt="Ubuntu" src="https://img.shields.io/badge/Ubuntu-333?style=flat-square&logo=ubuntu&logoColor=white" />
+  <img alt="Bash" src="https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white" />
   <img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white" />
 </p>
 
