@@ -10,6 +10,7 @@ export const socialHandle = github.name
 export const contact = {
   email: 'hi@rishi23root.in',
   socials: {
+    website: 'https://rishi23root.in',
     x: `https://x.com/${socialHandle}`,
     linkedin: `https://www.linkedin.com/in/${socialHandle}`,
     github: `https://github.com/${socialHandle}`,

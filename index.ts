@@ -107,6 +107,7 @@ function renderContact(): string {
   const { email, socials } = contact
   const links = [
     `<a href="mailto:${email}">Email</a>`,
+    `<a href="${socials.website}">Website</a>`,
     `<a href="${socials.x}">X</a>`,
     `<a href="${socials.linkedin}">LinkedIn</a>`,
     `<a href="${socials.github}">GitHub</a>`,
