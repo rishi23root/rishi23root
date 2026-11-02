@@ -46,6 +46,7 @@ $ stats
   <img alt="React" src="https://img.shields.io/badge/React-45b8d8?style=flat&logo=react&logoColor=white" />
   <img alt="React Native" src="https://img.shields.io/badge/React%20Native-61DAFB?style=flat&logo=react&logoColor=white" />
   <img alt="Expo" src="https://img.shields.io/badge/Expo-000020?style=flat&logo=expo&logoColor=white" />
+  <img alt="TanStack Query" src="https://img.shields.io/badge/TanStack%20Query-FF4154?style=flat&logo=reactquery&logoColor=white" />
   <img alt="Flutter" src="https://img.shields.io/badge/Flutter-02569B?style=flat&logo=flutter&logoColor=white" />
   <img alt="Next.js" src="https://img.shields.io/badge/Next.js-000000?style=flat&logo=nextdotjs&logoColor=white" />
   <img alt="Three.js" src="https://img.shields.io/badge/Three.js-000000?style=flat&logo=threedotjs&logoColor=white" />
@@ -63,6 +64,7 @@ $ stats
   <img alt="tRPC" src="https://img.shields.io/badge/tRPC-2596BE?style=flat&logo=trpc&logoColor=white" />
   <img alt="npm" src="https://img.shields.io/badge/npm-CB3837?style=flat&logo=npm&logoColor=white" />
   <img alt="Prisma" src="https://img.shields.io/badge/Prisma-2D3748?style=flat&logo=prisma&logoColor=white" />
+  <img alt="Drizzle" src="https://img.shields.io/badge/Drizzle-C5F74F?style=flat&logo=drizzle&logoColor=black" />
   <img alt="Socket.io" src="https://img.shields.io/badge/Socket.io-010101?style=flat&logo=socketdotio&logoColor=white" />
   <img alt="LangChain" src="https://img.shields.io/badge/LangChain-1C3C3C?style=flat" />
   <img alt="LlamaIndex" src="https://img.shields.io/badge/LlamaIndex-8B5CF6?style=flat" />
