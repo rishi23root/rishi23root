@@ -1,17 +1,18 @@
-```bash
-$ whoami
-**rishi23root** — freelancer · SaaS · security · automation
+`$ whoami`
+
+**rishi23root** — freelancer · SaaS · security · automation  
 I build SaaS products, automate the boring parts, and keep security in the loop.
 
-$ echo $STACK
+`$ echo $STACK`
+
 TypeScript · Python · Node.js · React · React Native
 
-$ stats
+`$ stats`
+
 1.9k commits · 125 PRs · 103 issues
-```
 
 <p align="center">
-  「<strong><samp>timshel</samp></strong>」 · 「<strong><samp>fac quod debes</samp></strong>」
+  「<samp>timshel</samp>」 · 「<samp>fac quod debes</samp>」
 </p>
 
 ### Featured Work
@@ -39,7 +40,6 @@ $ stats
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white" />
   <img alt="JavaScript" src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black" />
   <img alt="Python" src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white" />
-  <img alt="Swift" src="https://img.shields.io/badge/Swift-F05138?style=flat&logo=swift&logoColor=white" />
   <img alt="HTML5" src="https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white" />
   <img alt="Sass" src="https://img.shields.io/badge/Sass-CC6699?style=flat&logo=sass&logoColor=white" />
   <img alt="React" src="https://img.shields.io/badge/React-45b8d8?style=flat&logo=react&logoColor=white" />
