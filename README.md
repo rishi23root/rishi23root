@@ -6,8 +6,8 @@ I build SaaS products, automate the boring parts, and keep security in the loop.
 $ echo $STACK
 TypeScript · Python · Node.js · React · Bash
 
-$ rank
-███ B-
+$ stats
+1.9k commits · 125 PRs · 103 issues
 ```
 
 <p align="center">
@@ -44,7 +44,18 @@ $ rank
 - **[rishi23root/selenium-automations](https://github.com/rishi23root/selenium-automations)** — Selenium scripts for repetitive browser workflows ★2
 - **[rishi23root/class_automations](https://github.com/rishi23root/class_automations)** — Python/bash automations for repetitive class workflows ★1
 
-### Stacks
+### Recently liked
+
+- [agentvivekkumar/dontbemichael](https://github.com/agentvivekkumar/dontbemichael) — A local multi-agent harness that works with your existing Claude Code, Codex subscriptions, allows you to run an office of agents
+- [rishi23root/opencv_wrap](https://github.com/rishi23root/opencv_wrap)
+- [OpenCut-app/OpenCut](https://github.com/OpenCut-app/OpenCut) — The open-source CapCut alternative
+- [DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) — Local code intelligence for developers and AI agents. Connect code, docs and infrastructure in a persistent graph, with CBM Lens, MCP tools, agent integrations and change-aware test selection.
+- [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — Agent skills that give coding agents taste: art direction, reference images and a browser check instead of generic AI pages
+- [mattpocock/skills](https://github.com/mattpocock/skills) — Skills for Real Engineers. Straight from my .agents directory.
+- [dgr8akki/nano-ffmpeg](https://github.com/dgr8akki/nano-ffmpeg) — nano-ffmpeg wraps the full power of ffmpeg in a beautiful, keyboard-driven terminal dashboard. No more googling flags. Browse your files, pick what you want to do, tweak settings with presets, and watch a live progress bar while it encodes.
+- [lobehub/lobehub](https://github.com/lobehub/lobehub) — 🤯 LobeHub is your Chief Agent Operator, organizing your agents into 7×24 operations by hiring, scheduling, and reporting on your entire AI team.
+
+### Toolbox
 
 <p>
   <img alt="React" src="https://img.shields.io/badge/-React-45b8d8?style=flat-square&logo=react&logoColor=white" />
@@ -61,14 +72,3 @@ $ rank
   <img alt="Ubuntu" src="https://img.shields.io/badge/-Ubuntu-333?style=flat-square&logo=ubuntu&logoColor=white" />
   <img alt="VS Code" src="https://img.shields.io/badge/Visual%20Studio%20Code-blue?style=flat-square&logo=visual-studio-code&logoColor=ffffff" />
 </p>
-
-### Recently liked
-
-- [agentvivekkumar/dontbemichael](https://github.com/agentvivekkumar/dontbemichael) — A local multi-agent harness that works with your existing Claude Code, Codex subscriptions, allows you to run an office of agents
-- [rishi23root/opencv_wrap](https://github.com/rishi23root/opencv_wrap)
-- [OpenCut-app/OpenCut](https://github.com/OpenCut-app/OpenCut) — The open-source CapCut alternative
-- [DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) — Local code intelligence for developers and AI agents. Connect code, docs and infrastructure in a persistent graph, with CBM Lens, MCP tools, agent integrations and change-aware test selection.
-- [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — Agent skills that give coding agents taste: art direction, reference images and a browser check instead of generic AI pages
-- [mattpocock/skills](https://github.com/mattpocock/skills) — Skills for Real Engineers. Straight from my .agents directory.
-- [dgr8akki/nano-ffmpeg](https://github.com/dgr8akki/nano-ffmpeg) — nano-ffmpeg wraps the full power of ffmpeg in a beautiful, keyboard-driven terminal dashboard. No more googling flags. Browse your files, pick what you want to do, tweak settings with presets, and watch a live progress bar while it encodes.
-- [lobehub/lobehub](https://github.com/lobehub/lobehub) — 🤯 LobeHub is your Chief Agent Operator, organizing your agents into 7×24 operations by hiring, scheduling, and reporting on your entire AI team.

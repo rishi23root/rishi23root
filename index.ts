@@ -80,24 +80,16 @@ function generateRepoMarkdown(item: GHItem) {
   return `- [${item.full_name}](${item.html_url})${desc}`
 }
 
-async function getTotalStars(username: string): Promise<number> {
-  let stars = 0
-  let page = 1
-  while (true) {
-    const res = await githubReq.get<GHItem[]>(`/users/${username}/repos`, {
-      params: { per_page: 100, page, type: 'owner' },
-    })
-    if (res.data.length === 0) break
-    stars += res.data.reduce((acc, repo) => acc + (repo.stargazers_count || 0), 0)
-    page++
-  }
-  return stars
+/** 1900 → "1.9k"; small counts stay plain. */
+function formatCount(n: number): string {
+  if (n < 1000) return String(n)
+  const rounded = Math.round(n / 100) / 10
+  return Number.isInteger(rounded) ? `${rounded}k` : `${rounded}k`
 }
 
 async function getTotalCommits(username: string): Promise<number> {
-  const year = new Date().getFullYear()
   const res = await githubReq.get<{ total_count: number }>(
-    `/search/commits?q=author:${username}+author-date:${year}-01-01..${year}-12-31`,
+    `/search/commits?q=author:${username}`,
     {
       headers: {
         Accept: 'application/vnd.github.cloak-preview',
@@ -119,111 +111,6 @@ async function getTotalIssues(username: string): Promise<number> {
     `/search/issues?q=is:issue+author:${username}`,
   )
   return res.data.total_count
-}
-
-async function getFollowers(username: string): Promise<number> {
-  const res = await githubReq.get<{ followers: number }>(`/users/${username}`)
-  return res.data.followers
-}
-
-async function getTotalReviews(username: string): Promise<number> {
-  const res = await githubReq.get<{ total_count: number }>(
-    `/search/issues?q=is:pr+reviewed-by:${username}`,
-  )
-  return res.data.total_count
-}
-
-async function getTotalRepos(username: string): Promise<number> {
-  const res = await githubReq.get<{ public_repos: number }>(`/users/${username}`)
-  return res.data.public_repos
-}
-
-function erf(x: number): number {
-  const a1 = 0.254829592
-  const a2 = -0.284496736
-  const a3 = 1.421413741
-  const a4 = -1.453152027
-  const a5 = 1.061405429
-  const p = 0.3275911
-
-  let sign = 1
-  if (x < 0) sign = -1
-  x = Math.abs(x)
-
-  const t = 1.0 / (1.0 + p * x)
-  const y =
-    1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x)
-
-  return sign * y
-}
-
-function exponential_cdf(x: number): number {
-  if (x < 0) return 0
-  return 1 - 2 ** -x
-}
-
-function log_normal_cdf(x: number): number {
-  if (x < 0) return 0
-  return erf(Math.log(x) / Math.sqrt(2))
-}
-
-/** Innei / github-readme-stats style rank from activity stats. */
-function calculateRank({
-  all_commits,
-  commits,
-  prs,
-  issues,
-  reviews,
-  repos: _repos,
-  stars,
-  followers,
-}: {
-  all_commits: boolean
-  commits: number
-  prs: number
-  issues: number
-  reviews: number
-  repos: number
-  stars: number
-  followers: number
-}): { level: string; percentile: number } {
-  const COMMITS_MEDIAN = all_commits ? 1000 : 250
-  const COMMITS_WEIGHT = 2
-  const PRS_MEDIAN = 50
-  const PRS_WEIGHT = 3
-  const ISSUES_MEDIAN = 25
-  const ISSUES_WEIGHT = 1
-  const REVIEWS_MEDIAN = 2
-  const REVIEWS_WEIGHT = 1
-  const STARS_MEDIAN = 50
-  const STARS_WEIGHT = 4
-  const FOLLOWERS_MEDIAN = 10
-  const FOLLOWERS_WEIGHT = 1
-
-  const TOTAL_WEIGHT =
-    COMMITS_WEIGHT +
-    PRS_WEIGHT +
-    ISSUES_WEIGHT +
-    REVIEWS_WEIGHT +
-    STARS_WEIGHT +
-    FOLLOWERS_WEIGHT
-
-  const THRESHOLDS = [1, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100]
-  const LEVELS = ['S', 'A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C']
-
-  const rank =
-    1 -
-    (COMMITS_WEIGHT * exponential_cdf(commits / COMMITS_MEDIAN) +
-      PRS_WEIGHT * exponential_cdf(prs / PRS_MEDIAN) +
-      ISSUES_WEIGHT * exponential_cdf(issues / ISSUES_MEDIAN) +
-      REVIEWS_WEIGHT * exponential_cdf(reviews / REVIEWS_MEDIAN) +
-      STARS_WEIGHT * log_normal_cdf(stars / STARS_MEDIAN) +
-      FOLLOWERS_WEIGHT * log_normal_cdf(followers / FOLLOWERS_MEDIAN)) /
-      TOTAL_WEIGHT
-
-  const level = LEVELS[THRESHOLDS.findIndex((t) => rank * 100 <= t)]
-
-  return { level, percentile: rank * 100 }
 }
 
 async function main() {
@@ -249,31 +136,15 @@ async function main() {
   )
 
   const username = github.name
-  const [stars, commits, prs, issues, followers, reviews, repos] =
-    await Promise.all([
-      getTotalStars(username),
-      getTotalCommits(username),
-      getTotalPRs(username),
-      getTotalIssues(username),
-      getFollowers(username),
-      getTotalReviews(username),
-      getTotalRepos(username),
-    ])
-
-  const rank = calculateRank({
-    stars,
-    commits,
-    prs,
-    issues,
-    reviews,
-    repos,
-    all_commits: false,
-    followers,
-  })
+  const [commits, prs, issues] = await Promise.all([
+    getTotalCommits(username),
+    getTotalPRs(username),
+    getTotalIssues(username),
+  ])
 
   newContent = newContent.replace(
-    gitCommit('GH_RANK_NODE'),
-    `${'█'.repeat(Math.round((100 - rank.percentile) / 10))} ${rank.level}`,
+    gitCommit('GH_STATS_NODE'),
+    `${formatCount(commits)} commits · ${formatCount(prs)} PRs · ${formatCount(issues)} issues`,
   )
 
   const activeOpenSourceDetail: GHItem[] = await Promise.all(

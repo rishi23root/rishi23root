@@ -6,8 +6,8 @@ $ whoami
 $ echo $STACK
 {stackLine}
 
-$ rank
-<!-- GH_RANK_NODE -->
+$ stats
+<!-- GH_STATS_NODE -->
 ```
 
 <p align="center">
@@ -37,7 +37,11 @@ $ rank
 
 <!-- opensource_dashboard:active -->
 
-### Stacks
+### Recently liked
+
+<!-- recent_star_inject -->
+
+### Toolbox
 
 <p>
   <img alt="React" src="https://img.shields.io/badge/-React-45b8d8?style=flat-square&logo=react&logoColor=white" />
@@ -54,7 +58,3 @@ $ rank
   <img alt="Ubuntu" src="https://img.shields.io/badge/-Ubuntu-333?style=flat-square&logo=ubuntu&logoColor=white" />
   <img alt="VS Code" src="https://img.shields.io/badge/Visual%20Studio%20Code-blue?style=flat-square&logo=visual-studio-code&logoColor=ffffff" />
 </p>
-
-### Recently liked
-
-<!-- recent_star_inject -->
