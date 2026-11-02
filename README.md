@@ -103,6 +103,7 @@ $ stats
   <img alt="Grafana" src="https://img.shields.io/badge/Grafana-F46800?style=flat&logo=grafana&logoColor=white" />
   <img alt="Tempo" src="https://img.shields.io/badge/Tempo-F46800?style=flat&logo=grafana&logoColor=white" />
   <img alt="Mimir" src="https://img.shields.io/badge/Mimir-F46800?style=flat&logo=grafana&logoColor=white" />
+  <img alt="Alloy" src="https://img.shields.io/badge/Alloy-F46800?style=flat&logo=grafana&logoColor=white" />
   <img alt="Sentry" src="https://img.shields.io/badge/Sentry-362D59?style=flat&logo=sentry&logoColor=white" />
   <img alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white" />
   <img alt="Kubernetes" src="https://img.shields.io/badge/Kubernetes-326CE5?style=flat&logo=kubernetes&logoColor=white" />
