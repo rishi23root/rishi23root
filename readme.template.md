@@ -16,6 +16,10 @@ $ stats
 
 <!-- opensource_dashboard:active -->
 
+### Writing
+
+<!-- recent_posts_inject -->
+
 ### Recently liked
 
 <!-- recent_star_inject -->

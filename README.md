@@ -23,6 +23,11 @@ $ stats
 - **[rishi23root/resume-editor](https://github.com/rishi23root/resume-editor)** — Web app for crafting professional resumes fast ★3
 - **[rishi23root/selenium-automations](https://github.com/rishi23root/selenium-automations)** — Selenium scripts for repetitive browser workflows ★2
 
+### Writing
+
+- **[One content tree, two surfaces](https://rishi23root.in/blog/on-shared-content)** — 2026-11-05
+- **[Hello world](https://rishi23root.in/blog/hello-world)** — 2026-11-01
+
 ### Recently liked
 
 - [EpicGames/PixelStreamingInfrastructure](https://github.com/EpicGames/PixelStreamingInfrastructure) — The official Pixel Streaming servers and frontend.

@@ -1,0 +1,61 @@
+---
+import '../styles/global.css'
+import { site } from '../lib/site'
+
+type Props = {
+  title?: string
+  description?: string
+  path?: string
+}
+
+const {
+  title,
+  description = site.fullDescription,
+  path = '/',
+} = Astro.props
+
+const pageTitle = title ? `${title} · ${site.github.name}` : site.github.name
+const canonical = new URL(path, site.siteUrl).toString()
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="site-header">
+        <a class="brand" href="/">{site.github.name}</a>
+        <nav class="nav" aria-label="Primary">
+          <a href="/" aria-current={path === '/' ? 'page' : undefined}>Home</a>
+          <a
+            href="/blog"
+            aria-current={path.startsWith('/blog') ? 'page' : undefined}
+            >Blog</a
+          >
+        </nav>
+      </header>
+      <main>
+        <slot />
+      </main>
+      <footer class="site-footer">
+        <p>{site.shortBio}</p>
+      </footer>
+    </div>
+  </body>
+</html>

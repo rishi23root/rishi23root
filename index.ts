@@ -10,13 +10,16 @@ import {
   stackLine,
   opensource,
   recentLikedCount,
+  siteUrl,
 } from './config'
+import { renderRecentPosts } from './posts'
 import { renderToolbox } from './toolbox'
 
 /** HTML comment markers in readme.template.md replaced at build time. */
 const inject = {
   OPENSOURCE: 'opensource_dashboard:active',
   RECENT_STAR: 'recent_star_inject',
+  RECENT_POSTS: 'recent_posts_inject',
   MOTTOS: 'mottos_inject',
   GH_STATS: 'GH_STATS_NODE',
   TOOLBOX: 'toolbox_inject',
@@ -139,6 +142,10 @@ async function main() {
   out = out.replace(marker(inject.MOTTOS), renderMottos())
   out = out.replace(marker(inject.TOOLBOX), renderToolbox())
   out = out.replace(marker(inject.CONTACT), renderContact())
+  out = out.replace(
+    marker(inject.RECENT_POSTS),
+    await renderRecentPosts(siteUrl, 5),
+  )
 
   const user = github.name
   const [commits, prs, issues] = await Promise.all([

@@ -3,7 +3,10 @@
   "private": true,
   "description": "rishi23root's profile",
   "scripts": {
-    "build": "ts-node index.ts"
+    "build": "npm run build:readme",
+    "build:readme": "ts-node index.ts",
+    "build:web": "npm run build --prefix web",
+    "dev:web": "npm run dev --prefix web"
   },
   "repository": {
     "type": "git",
