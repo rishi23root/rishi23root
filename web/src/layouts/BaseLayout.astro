@@ -52,7 +52,7 @@ const jsonLdBlocks = jsonLd
       rel="alternate"
       type="application/rss+xml"
       title={`${site.github.name} RSS`}
-      href="/rss.xml"
+      href={new URL('/rss.xml', site.siteUrl).toString()}
     />
 
     <meta property="og:title" content={pageTitle} />

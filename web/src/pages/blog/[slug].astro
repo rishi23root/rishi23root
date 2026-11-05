@@ -16,6 +16,8 @@ const { Content } = await render(post)
 const path = `/blog/${post.data.slug}`
 const date = post.data.date.toISOString().slice(0, 10)
 const canonical = new URL(path, site.siteUrl).toString()
+const ogImage = post.data.image ?? '/og-default.png'
+const ogImageAbsolute = new URL(ogImage, site.siteUrl).toString()
 
 const blogPostingJsonLd = {
   '@context': 'https://schema.org',
@@ -25,7 +27,7 @@ const blogPostingJsonLd = {
   datePublished: post.data.date.toISOString(),
   url: canonical,
   mainEntityOfPage: canonical,
-  image: new URL('/og-default.png', site.siteUrl).toString(),
+  image: ogImageAbsolute,
   author: {
     '@type': 'Person',
     name: site.github.name,
@@ -45,6 +47,7 @@ const blogPostingJsonLd = {
   path={path}
   type="article"
   publishedTime={post.data.date}
+  image={ogImage}
   jsonLd={blogPostingJsonLd}
 >
   <a class="back" href="/blog">← Blog</a>
