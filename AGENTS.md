@@ -14,6 +14,10 @@ Generate `README.md` from `readme.template.md` + `content/site.json` (via `confi
 | `readme.template.md` | Static layout + `<!-- … -->` inject markers / `{placeholders}` |
 | `index.ts` | Fetches GitHub data, fills template → writes `README.md` |
 | `web/` | Astro static site (landing, `/blog`, SEO) → `web/dist` |
+| `web/src/pages/rss.xml.ts` | RSS feed from published posts |
+| `web/src/pages/llms.txt.ts` | Generated `llms.txt` from `site.json` + posts (do not hand-edit a public copy) |
+| `web/public/og-default.png` | Default Open Graph / Twitter card image |
+| `web/public/favicon.svg` | Site favicon |
 | `.github/workflows/build.yml` | README: on-demand `push` to `master` + `workflow_dispatch` |
 | `.github/workflows/pages.yml` | Site: build `web/` → GitHub Pages (`rishi23root.in`) |
 
@@ -28,14 +32,33 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Socials / email / site URL | `content/site.json` → `contact`, `siteUrl` | Bottom text links (not icons) |
 | Featured Work | `content/site.json` → `opensource.active` + `blurbs` | `owner/repo` strings |
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
-| Blog post | `content/posts/<slug>.mdx` | Frontmatter required; skip `draft: true` in public lists |
+| Blog post | `content/posts/<slug>.mdx` | Frontmatter required; skip `draft: true` in public lists (see SEO cheat below) |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
 | Landing / blog UI | `web/src/` | Placeholder UI for now; keep sparse |
+| OG / Twitter / JSON-LD | `web/src/layouts/BaseLayout.astro` (+ page props) | Default OG image in `web/public`; posts use `og:type=article` |
+| RSS / llms.txt | `web/src/pages/rss.xml.ts`, `llms.txt.ts` | Built from content — no stale hand copy in `public/` |
 | Regenerate README locally | `GITHUB_TOKEN=… npm run build:readme` | Needs network + token for stats/featured/liked |
 | Preview site locally | `npm run dev:web` (from repo root) | Serves Astro at localhost |
 | Build site locally | `npm run build:web` | Output: `web/dist` |
 | Regenerate README on GitHub | Actions → **README build** → **Run workflow** | Or push to `master` |
 | Deploy site on GitHub | Actions → **Deploy site** → **Run workflow** | Or push `web/` / `content/` to `master` |
+
+## SEO / frontmatter cheat (canonical site)
+
+`https://rishi23root.in` is the **canonical source** for branding and writing. Syndicated copies elsewhere should point back here (canonical / OG / RSS / `llms.txt`).
+
+Post frontmatter (`content/posts/*.mdx`):
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `title` | yes | Page `<title>` + OG/Twitter title stem |
+| `summary` | yes | Meta description + OG/Twitter description + RSS/llms one-liner (keep cite-able, one sentence) |
+| `date` | yes | `article:published_time` + BlogPosting `datePublished` |
+| `slug` | yes | URL path `/blog/<slug>` |
+| `draft` | no | Default `false`; `true` hides from site, RSS, llms, README inject |
+| `image` | no | Path or absolute URL for OG/Twitter; defaults to `/og-default.png` |
+
+Site-wide SEO lives in `web/src/layouts/BaseLayout.astro` (`og:site_name`, absolute `og:image` / Twitter `summary_large_image`, RSS `rel=alternate`). Feeds: `/rss.xml`, generated `/llms.txt`, `robots.txt` (+ AI crawler Allows), sitemap via `@astrojs/sitemap`.
 
 ## Placeholders & inject markers
 
