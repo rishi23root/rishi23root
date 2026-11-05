@@ -16,9 +16,25 @@ const socials = [
   { label: 'GitHub', href: site.contact.socials.github },
   { label: 'PyPI', href: site.contact.socials.pypi },
 ]
+
+const personJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.github.name,
+  url: site.siteUrl,
+  email: site.contact.email,
+  description: site.fullDescription,
+  sameAs: [
+    site.contact.socials.website,
+    site.contact.socials.x,
+    site.contact.socials.linkedin,
+    site.contact.socials.github,
+    site.contact.socials.pypi,
+  ],
+}
 ---
 
-<BaseLayout path="/">
+<BaseLayout path="/" jsonLd={personJsonLd}>
   <section class="hero">
     <p class="prompt">$ whoami</p>
     <h1>

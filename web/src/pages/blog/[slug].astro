@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { publishedPostsFilter } from '../../lib/site'
+import { publishedPostsFilter, site } from '../../lib/site'
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', publishedPostsFilter)
@@ -13,13 +13,39 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props
 const { Content } = await render(post)
+const path = `/blog/${post.data.slug}`
 const date = post.data.date.toISOString().slice(0, 10)
+const canonical = new URL(path, site.siteUrl).toString()
+
+const blogPostingJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.summary,
+  datePublished: post.data.date.toISOString(),
+  url: canonical,
+  mainEntityOfPage: canonical,
+  image: new URL('/og-default.png', site.siteUrl).toString(),
+  author: {
+    '@type': 'Person',
+    name: site.github.name,
+    url: site.siteUrl,
+  },
+  publisher: {
+    '@type': 'Person',
+    name: site.github.name,
+    url: site.siteUrl,
+  },
+}
 ---
 
 <BaseLayout
   title={post.data.title}
   description={post.data.summary}
-  path={`/blog/${post.data.slug}`}
+  path={path}
+  type="article"
+  publishedTime={post.data.date}
+  jsonLd={blogPostingJsonLd}
 >
   <a class="back" href="/blog">← Blog</a>
   <article class="prose">

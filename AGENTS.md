@@ -14,6 +14,10 @@ Generate `README.md` from `readme.template.md` + `content/site.json` (via `confi
 | `readme.template.md` | Static layout + `<!-- … -->` inject markers / `{placeholders}` |
 | `index.ts` | Fetches GitHub data, fills template → writes `README.md` |
 | `web/` | Astro static site (landing, `/blog`, SEO) → `web/dist` |
+| `web/src/pages/rss.xml.ts` | RSS feed from published posts |
+| `web/src/pages/llms.txt.ts` | Generated `llms.txt` from `site.json` + posts (do not hand-edit a public copy) |
+| `web/public/og-default.png` | Default Open Graph / Twitter card image |
+| `web/public/favicon.svg` | Site favicon |
 | `.github/workflows/build.yml` | README: on-demand `push` to `master` + `workflow_dispatch` |
 | `.github/workflows/pages.yml` | Site: build `web/` → GitHub Pages (`rishi23root.in`) |
 
@@ -31,6 +35,8 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Blog post | `content/posts/<slug>.mdx` | Frontmatter required; skip `draft: true` in public lists |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
 | Landing / blog UI | `web/src/` | Placeholder UI for now; keep sparse |
+| OG / Twitter / JSON-LD | `web/src/layouts/BaseLayout.astro` (+ page props) | Default OG image in `web/public`; posts use `og:type=article` |
+| RSS / llms.txt | `web/src/pages/rss.xml.ts`, `llms.txt.ts` | Built from content — no stale hand copy in `public/` |
 | Regenerate README locally | `GITHUB_TOKEN=… npm run build:readme` | Needs network + token for stats/featured/liked |
 | Preview site locally | `npm run dev:web` (from repo root) | Serves Astro at localhost |
 | Build site locally | `npm run build:web` | Output: `web/dist` |
