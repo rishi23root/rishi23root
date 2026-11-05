@@ -1,0 +1,20 @@
+# rishi23root
+
+> Freelancer building SaaS products, automation, and security-minded tooling.
+
+Site: https://rishi23root.in
+Blog: https://rishi23root.in/blog
+GitHub: https://github.com/rishi23root
+Email: hi@rishi23root.in
+
+## Key pages
+
+- https://rishi23root.in/
+- https://rishi23root.in/blog
+- https://rishi23root.in/blog/hello-world
+- https://rishi23root.in/blog/on-shared-content
+
+## Content source
+
+Shared markdown/MDX and site metadata live in the GitHub profile repo under `content/`.
+The profile README and this static site both build from that tree.

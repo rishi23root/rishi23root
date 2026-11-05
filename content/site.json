@@ -1,0 +1,39 @@
+{
+  "siteUrl": "https://rishi23root.in",
+  "github": {
+    "name": "rishi23root"
+  },
+  "contact": {
+    "email": "hi@rishi23root.in",
+    "socials": {
+      "website": "https://rishi23root.in",
+      "x": "https://x.com/rishi23root",
+      "linkedin": "https://www.linkedin.com/in/rishi23root",
+      "github": "https://github.com/rishi23root",
+      "pypi": "https://pypi.org/user/rishi23root"
+    }
+  },
+  "opensource": {
+    "active": [
+      "saeeddhqan/Maryam",
+      "EpicGames/PixelStreamingInfrastructure",
+      "rishi23root/opencv_wrap",
+      "rishi23root/pyblink",
+      "rishi23root/resume-editor",
+      "rishi23root/selenium-automations"
+    ],
+    "blurbs": {
+      "saeeddhqan/Maryam": "Open-source OSINT framework",
+      "EpicGames/PixelStreamingInfrastructure": "Epic Games Unreal Pixel Streaming servers and frontend",
+      "rishi23root/opencv_wrap": "Thin OpenCV wrappers for everyday CV scripts",
+      "rishi23root/pyblink": "Blink-counter automation to ease eye strain",
+      "rishi23root/resume-editor": "Web app for crafting professional resumes fast",
+      "rishi23root/selenium-automations": "Selenium scripts for repetitive browser workflows"
+    }
+  },
+  "mottos": ["timshel", "fac quod debes"],
+  "shortBio": "freelancer · SaaS · security · automation",
+  "fullDescription": "I build SaaS products, automate the boring parts, and keep security in the loop.",
+  "stackLine": "TypeScript · Python · Node.js · React · React Native",
+  "recentLikedCount": 8
+}
