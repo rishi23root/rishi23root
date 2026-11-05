@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css'
-import { site } from '../lib/site'
+import { githubAvatarUrl, site } from '../lib/site'
 
 type Props = {
   title?: string
@@ -84,7 +84,17 @@ const jsonLdBlocks = jsonLd
   <body>
     <div class="shell">
       <header class="site-header">
-        <a class="brand" href="/">{site.github.name}</a>
+        <a class="brand" href="/">
+          <img
+            class="brand-avatar"
+            src={githubAvatarUrl(64)}
+            alt={site.github.name}
+            width="24"
+            height="24"
+            decoding="async"
+          />
+          <span>{site.github.name}</span>
+        </a>
         <nav class="nav" aria-label="Primary">
           <a href="/" aria-current={path === '/' ? 'page' : undefined}>Home</a>
           <a
