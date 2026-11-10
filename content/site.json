@@ -31,23 +31,21 @@
       "rishi23root/selenium-automations": "Selenium scripts for repetitive browser workflows"
     }
   },
-  "mottos": ["timshel", "fac quod debes"],
-  "shortBio": "freelancer · SaaS · security · automation",
+  "mottos": [
+    "timshel",
+    "fac quod debes"
+  ],
+  "shortBio": "freelancer \u00b7 SaaS \u00b7 security \u00b7 automation",
   "fullDescription": "I build SaaS products, automate the boring parts, and keep security in the loop.",
-  "stackLine": "TypeScript · Python · Node.js · React · React Native",
+  "stackLine": "TypeScript \u00b7 Python \u00b7 Node.js \u00b7 React \u00b7 React Native",
   "recentLikedCount": 8,
-  "voiceBio": "I build SaaS products, automate the boring parts, and keep security in the loop. This site is where I write and ship in public — quieter than a résumé, clearer than a README.",
+  "voiceBio": "I build SaaS products, automate the boring parts, and keep security in the loop. This site is where I write and ship in public \u2014 quieter than a r\u00e9sum\u00e9, clearer than a README.",
   "moods": [
     {
       "id": "cyclist",
-      "animated": true,
-      "component": "cyclist-windy",
-      "alt": "Cyclist in green hills with drifting clouds",
-      "layers": {
-        "base": "/mood/cyclist/base.jpg",
-        "clouds": "/mood/cyclist/clouds.png",
-        "shadows": "/mood/cyclist/shadows.png"
-      }
+      "animated": false,
+      "src": "/mood/cyclist/still.png",
+      "alt": "Cyclist in green hills under drifting clouds"
     },
     {
       "id": "forest",
@@ -125,7 +123,7 @@
   "capabilities": [
     {
       "heading": "Product engineering",
-      "body": "TypeScript, React, and Node — shipping SaaS surfaces end to end."
+      "body": "TypeScript, React, and Node \u2014 shipping SaaS surfaces end to end."
     },
     {
       "heading": "Automation & systems",

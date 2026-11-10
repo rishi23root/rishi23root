@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import MoodCyclist from './moods/MoodCyclist'
 import MoodStill from './moods/MoodStill'
 import MoodStub from './moods/MoodStub'
 import type { MoodSlot } from './moods/types'
@@ -43,28 +42,16 @@ function Scene({
   slot: MoodSlot
   reduceMotion: boolean
 }) {
-  if (slot.id === 'cyclist' && slot.layers?.base) {
-    return <MoodCyclist layers={slot.layers} reduceMotion={reduceMotion} />
-  }
-
-  if ((slot.id === 'forest' || slot.id === 'seaside') && slot.src) {
-    return <MoodStill src={slot.src} fade={!reduceMotion} />
-  }
-
   if (slot.src) {
     return <MoodStill src={slot.src} fade={!reduceMotion} />
   }
-
-  if (slot.layers?.base && slot.animated) {
-    return <MoodCyclist layers={slot.layers} reduceMotion={reduceMotion} />
-  }
-
   return <MoodStub id={slot.id} />
 }
 
 /**
  * Widescreen hero host (~70–80% viewport).
- * Random mood on load; real scenes for cyclist / forest / seaside; stubs otherwise.
+ * Random mood on load; still plates for cyclist / forest / seaside; stubs otherwise.
+ * Cyclist is a static landscape still — no layered cloud/shadow animation.
  */
 export default function HeroMoodShell({
   moods,
@@ -92,7 +79,7 @@ export default function HeroMoodShell({
     <div
       className="hero-shell"
       data-mood-id={slot?.id ?? 'none'}
-      data-animated={slot?.animated && !reduceMotion ? 'true' : 'false'}
+      data-animated="false"
       data-component={slot?.component ?? ''}
     >
       <div className="hero-shell-stage" role="img" aria-label={label}>

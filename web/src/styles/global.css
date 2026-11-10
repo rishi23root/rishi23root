@@ -217,18 +217,10 @@ html[data-theme='light'] .theme-toggle-thumb {
     );
 }
 
-/* Mood scenes — CSS motion only (no GSAP/Lottie) */
+/* Mood stills — static plates only (cyclist is landscape still, no layer anim) */
 .mood-scene {
   position: absolute;
   inset: 0;
-  isolation: isolate;
-}
-
-.mood-svg-defs {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
 }
 
 .mood-layer {
@@ -240,108 +232,15 @@ html[data-theme='light'] .theme-toggle-thumb {
   user-select: none;
 }
 
-.mood-layer img,
-.mood-layer svg {
+.mood-layer img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.mood-base,
-.mood-still {
-  z-index: 1;
-}
-
-.mood-grass-displace {
-  z-index: 2;
-  mix-blend-mode: soft-light;
-  opacity: 0.45;
-  transform: scale(1.03);
-}
-
-.mood-grass-hatch {
-  z-index: 3;
-  mix-blend-mode: multiply;
-  opacity: 0.4;
-}
-
-/* Exact source shadow plate — never flattened; multiply preserves hatch */
-.mood-shadows {
-  z-index: 4;
-  width: 118%;
-  left: -9%;
-  mix-blend-mode: multiply;
-  opacity: 0.95;
-}
-
-.mood-clouds {
-  z-index: 5;
-  width: 118%;
-  left: -9%;
-  filter: contrast(1.04);
-}
-
-/* One-way cloud + locked shadow drift (same animation, no reverse) */
-.mood-cyclist.is-animated .mood-wind-locked {
-  will-change: transform;
-  animation: mood-wind-oneway 36s linear infinite;
-}
-
-.mood-shadows.is-static,
-.mood-clouds.is-static {
-  width: 100%;
-  left: 0;
-  animation: none;
-}
-
-/* Brief grass / cyclist pulse — plays once, settles (not continuous loop) */
-.mood-cyclist.is-animated .mood-grass-pulse {
-  animation: mood-grass-moment 2.4s ease-out 0.35s 1 both;
-}
-
-.mood-cyclist.is-animated .mood-cyclist-pulse {
-  animation: mood-cyclist-moment 2.1s ease-out 0.55s 1 both;
-}
-
 .mood-still-scene.is-fade .mood-still {
   animation: mood-still-fade 700ms ease-out both;
-}
-
-@keyframes mood-wind-oneway {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-14%, 0.5%, 0);
-  }
-}
-
-@keyframes mood-grass-moment {
-  0% {
-    opacity: 0.35;
-    transform: scale(1.03) translate3d(0, 0, 0) skewX(0deg);
-  }
-  35% {
-    opacity: 0.58;
-    transform: scale(1.04) translate3d(0.5%, -0.2%, 0) skewX(-1.1deg);
-  }
-  100% {
-    opacity: 0.4;
-    transform: scale(1.03) translate3d(0.15%, 0, 0) skewX(-0.2deg);
-  }
-}
-
-@keyframes mood-cyclist-moment {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  40% {
-    transform: translate3d(0.35%, -0.25%, 0);
-  }
-  100% {
-    transform: translate3d(0.1%, 0, 0);
-  }
 }
 
 @keyframes mood-still-fade {
@@ -554,25 +453,7 @@ html[data-theme='light'] .theme-toggle-thumb {
     transition: none;
   }
 
-  .mood-wind-locked,
-  .mood-grass-pulse,
-  .mood-cyclist-pulse,
   .mood-still-scene.is-fade .mood-still {
     animation: none !important;
-  }
-
-  .mood-shadows,
-  .mood-clouds {
-    transform: none;
-    left: 0;
-    width: 100%;
-  }
-
-  .mood-grass-hatch {
-    opacity: 0.3;
-  }
-
-  .mood-grass-displace {
-    opacity: 0.2;
   }
 }
