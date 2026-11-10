@@ -9,6 +9,8 @@ const posts = defineCollection({
     slug: z.string(),
     summary: z.string(),
     draft: z.boolean().default(false),
+    /** Optional per-post OG/Twitter image path or absolute URL; falls back to site default */
+    image: z.string().optional(),
   }),
 })
 

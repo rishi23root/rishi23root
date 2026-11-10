@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { publishedPostsFilter, site } from '../lib/site'
+import { githubAvatarUrl, publishedPostsFilter, site } from '../lib/site'
 
 const posts = (await getCollection('posts', publishedPostsFilter)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
@@ -16,15 +16,46 @@ const socials = [
   { label: 'GitHub', href: site.contact.socials.github },
   { label: 'PyPI', href: site.contact.socials.pypi },
 ]
+
+const avatarUrl = githubAvatarUrl(320)
+
+const personJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.github.name,
+  url: site.siteUrl,
+  email: site.contact.email,
+  description: site.fullDescription,
+  image: avatarUrl,
+  sameAs: [
+    site.contact.socials.website,
+    site.contact.socials.x,
+    site.contact.socials.linkedin,
+    site.contact.socials.github,
+    site.contact.socials.pypi,
+  ],
+}
 ---
 
-<BaseLayout path="/">
+<BaseLayout path="/" jsonLd={personJsonLd}>
   <section class="hero">
-    <p class="prompt">$ whoami</p>
-    <h1>
-      {site.github.name} — {site.shortBio}
-    </h1>
-    <p class="lede">{site.fullDescription}</p>
+    <div class="hero-identity">
+      <img
+        class="hero-avatar"
+        src={avatarUrl}
+        alt={site.github.name}
+        width="96"
+        height="96"
+        decoding="async"
+      />
+      <div class="hero-copy">
+        <p class="prompt">$ whoami</p>
+        <h1>
+          {site.github.name} — {site.shortBio}
+        </h1>
+        <p class="lede">{site.fullDescription}</p>
+      </div>
+    </div>
   </section>
 
   <section class="section">
