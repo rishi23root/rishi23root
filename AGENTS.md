@@ -34,7 +34,8 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
 | Blog post | `content/posts/<slug>.mdx` | Frontmatter required; skip `draft: true` in public lists (see SEO cheat below) |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
-| Landing / blog UI | `web/src/` | Placeholder UI for now; keep sparse |
+| Landing / blog UI | `web/src/` | Lee soft-dark folio; right wordmark; `HeroMoodShell` island; no on-site avatar |
+| Site-only content | `content/site.json` → `voiceBio`, `moods`, `projects`, `capabilities` | README loaders ignore these; README shape unchanged |
 | OG / Twitter / JSON-LD | `web/src/layouts/BaseLayout.astro` (+ page props) | Default OG image in `web/public`; posts use `og:type=article` |
 | RSS / llms.txt | `web/src/pages/rss.xml.ts`, `llms.txt.ts` | Built from content — no stale hand copy in `public/` |
 | Regenerate README locally | `GITHUB_TOKEN=… npm run build:readme` | Needs network + token for stats/featured/liked |

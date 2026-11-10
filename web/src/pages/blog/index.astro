@@ -9,31 +9,34 @@ const posts = (await getCollection('posts', publishedPostsFilter)).sort(
 ---
 
 <BaseLayout
-  title="Blog"
+  title="Writing"
   description="Notes on SaaS, automation, and security."
   path="/blog"
 >
-  <section class="hero">
-    <p class="prompt">$ ls blog/</p>
-    <h1>Writing</h1>
-    <p class="lede">Short notes. Same content tree as the profile README.</p>
-  </section>
+  <div class="page">
+    <section class="page-intro">
+      <h1>Writing</h1>
+      <p class="lede">Short notes. Same posts tree as the profile README.</p>
+    </section>
 
-  {
-    posts.length ? (
-      <ul class="list">
-        {posts.map((post) => (
-          <li>
-            <a href={`/blog/${post.data.slug}`}>{post.data.title}</a>
-            <span class="meta">
-              {post.data.date.toISOString().slice(0, 10)}
-              {post.data.summary ? ` — ${post.data.summary}` : ''}
-            </span>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p class="empty">No posts yet.</p>
-    )
-  }
+    {
+      posts.length ? (
+        <ul class="quiet-list">
+          {posts.map((post) => (
+            <li>
+              <a href={`/blog/${post.data.slug}`}>{post.data.title}</a>
+              <time datetime={post.data.date.toISOString()}>
+                {post.data.date.toISOString().slice(0, 10)}
+              </time>
+              {post.data.summary ? (
+                <span class="meta">— {post.data.summary}</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No posts yet.</p>
+      )
+    }
+  </div>
 </BaseLayout>
