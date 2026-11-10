@@ -13,7 +13,7 @@ Generate `README.md` from `readme.template.md` + `content/site.json` (via `confi
 | `toolbox.ts` | Flat shields.io badge list + `renderToolbox()` |
 | `readme.template.md` | Static layout + `<!-- … -->` inject markers / `{placeholders}` |
 | `index.ts` | Fetches GitHub data, fills template → writes `README.md` |
-| `web/` | Astro static site (landing, `/blog`, SEO) → `web/dist` |
+| `web/` | Astro static site (landing, `/writing`, SEO) → `web/dist` |
 | `web/src/pages/rss.xml.ts` | RSS feed from published posts |
 | `web/src/pages/llms.txt.ts` | Generated `llms.txt` from `site.json` + posts (do not hand-edit a public copy) |
 | `web/public/og-default.png` | Default Open Graph / Twitter card image |
@@ -55,7 +55,7 @@ Post frontmatter (`content/posts/*.mdx`):
 | `title` | yes | Page `<title>` + OG/Twitter title stem |
 | `summary` | yes | Meta description + OG/Twitter description + RSS/llms one-liner (keep cite-able, one sentence) |
 | `date` | yes | `article:published_time` + BlogPosting `datePublished` |
-| `slug` | yes | URL path `/blog/<slug>` |
+| `slug` | yes | URL path `/writing/<slug>` |
 | `draft` | no | Default `false`; `true` hides from site, RSS, llms, README inject |
 | `image` | no | Path or absolute URL for OG/Twitter; defaults to `/og-default.png` |
 

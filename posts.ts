@@ -80,7 +80,7 @@ export async function renderRecentPosts(
   const base = siteUrl.replace(/\/$/, '')
   return posts
     .map((p) => {
-      const url = `${base}/blog/${p.slug}`
+      const url = `${base}/writing/${p.slug}`
       return `- **[${p.title}](${url})** — ${p.date}`
     })
     .join('\n')

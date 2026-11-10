@@ -25,8 +25,8 @@ $ stats
 
 ### Writing
 
-- **[One content tree, two surfaces](https://rishi23root.in/blog/on-shared-content)** — 2026-11-05
-- **[Hello world](https://rishi23root.in/blog/hello-world)** — 2026-11-01
+- **[One content tree, two surfaces](https://rishi23root.in/writing/on-shared-content)** — 2026-11-05
+- **[Hello world](https://rishi23root.in/writing/hello-world)** — 2026-11-01
 
 ### Recently liked
 

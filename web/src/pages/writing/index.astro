@@ -12,7 +12,7 @@ const posts = (await getCollection('posts', publishedPostsFilter)).sort(
 <BaseLayout
   title="Writing"
   description="Notes on SaaS, automation, and security."
-  path="/blog"
+  path="/writing"
 >
   <div class="page blog-page">
     <section class="page-intro">
@@ -29,7 +29,7 @@ const posts = (await getCollection('posts', publishedPostsFilter)).sort(
                 {post.data.date.toISOString().slice(0, 10)}
               </time>
               <div class="post-list-body">
-                <a class="post-list-title" href={`/blog/${post.data.slug}`}>
+                <a class="post-list-title" href={`/writing/${post.data.slug}`}>
                   {post.data.title}
                 </a>
                 {post.data.summary ? (

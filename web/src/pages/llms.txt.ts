@@ -35,7 +35,7 @@ export const GET: APIRoute = async () => {
     '## Key pages',
     '',
     `- Home: ${site.siteUrl}/`,
-    `- Blog: ${site.siteUrl}/blog`,
+    `- Writing: ${site.siteUrl}/writing`,
     `- RSS: ${site.siteUrl}/rss.xml`,
     `- This file: ${site.siteUrl}/llms.txt`,
     '',
@@ -44,7 +44,7 @@ export const GET: APIRoute = async () => {
     ...(posts.length
       ? posts.map(
           (post) =>
-            `- ${post.data.date.toISOString().slice(0, 10)} — ${post.data.title}: ${post.data.summary} (${site.siteUrl}/blog/${post.data.slug})`,
+            `- ${post.data.date.toISOString().slice(0, 10)} — ${post.data.title}: ${post.data.summary} (${site.siteUrl}/writing/${post.data.slug})`,
         )
       : ['- (no published posts yet)']),
     '',

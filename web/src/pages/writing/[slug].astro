@@ -1,0 +1,72 @@
+---
+import { getCollection, render } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import ContactIcons from '../../components/ContactIcons.astro'
+import { publishedPostsFilter, site } from '../../lib/site'
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', publishedPostsFilter)
+  return posts.map((post) => ({
+    params: { slug: post.data.slug },
+    props: { post },
+  }))
+}
+
+const { post } = Astro.props
+const { Content } = await render(post)
+const path = `/writing/${post.data.slug}`
+const date = post.data.date.toISOString().slice(0, 10)
+const canonical = new URL(path, site.siteUrl).toString()
+const ogImage = post.data.image ?? '/og-default.png'
+const ogImageAbsolute = new URL(ogImage, site.siteUrl).toString()
+
+const blogPostingJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.summary,
+  datePublished: post.data.date.toISOString(),
+  url: canonical,
+  mainEntityOfPage: canonical,
+  image: ogImageAbsolute,
+  author: {
+    '@type': 'Person',
+    name: site.github.name,
+    url: site.siteUrl,
+  },
+  publisher: {
+    '@type': 'Person',
+    name: site.github.name,
+    url: site.siteUrl,
+  },
+}
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.summary}
+  path={path}
+  type="article"
+  publishedTime={post.data.date}
+  image={ogImage}
+  jsonLd={blogPostingJsonLd}
+>
+  <div class="page blog-page">
+    <a class="back" href="/writing">← Writing</a>
+    <article class="prose">
+      <header class="prose-header">
+        <h1>{post.data.title}</h1>
+        <p class="post-meta">
+          <time datetime={post.data.date.toISOString()}>{date}</time>
+        </p>
+        {
+          post.data.summary ? (
+            <p class="prose-deck">{post.data.summary}</p>
+          ) : null
+        }
+      </header>
+      <Content />
+    </article>
+    <ContactIcons />
+  </div>
+</BaseLayout>

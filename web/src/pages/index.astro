@@ -55,7 +55,7 @@ const personJsonLd = {
             <ul class="quiet-list">
               {posts.slice(0, 5).map((post) => (
                 <li>
-                  <a href={`/blog/${post.data.slug}`}>{post.data.title}</a>
+                  <a href={`/writing/${post.data.slug}`}>{post.data.title}</a>
                   <time datetime={post.data.date.toISOString()}>
                     {post.data.date.toISOString().slice(0, 10)}
                   </time>

@@ -7,4 +7,8 @@ export default defineConfig({
   site: 'https://rishi23root.in',
   output: 'static',
   integrations: [mdx(), react(), sitemap()],
+  // Index redirect; per-slug redirects live in pages/blog/[slug].astro
+  redirects: {
+    '/blog': '/writing',
+  },
 })
