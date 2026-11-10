@@ -102,29 +102,31 @@ const wordmark = `@${site.github.name}`
   <body>
     <div class="shell">
       <header class="chrome">
-        <nav class="nav" aria-label="Primary">
-          <a href="/" aria-current={path === '/' ? 'page' : undefined}>Home</a>
-          <a
-            href="/blog"
-            aria-current={path.startsWith('/blog') ? 'page' : undefined}
-            >Writing</a
-          >
-        </nav>
-        <div class="chrome-end">
-          <button
-            type="button"
-            class="theme-toggle"
-            id="themeToggle"
-            aria-label="Toggle light and dark mode"
-            title="Theme"
-          >
-            <span class="theme-toggle-track" aria-hidden="true">
-              <span class="theme-toggle-thumb"></span>
-            </span>
-            <span class="theme-toggle-label" id="themeLabel">Dark</span>
-          </button>
+        <div class="chrome-start">
           <a class="wordmark" href="/">{wordmark}</a>
+          <nav class="nav" aria-label="Primary">
+            <a href="/" aria-current={path === '/' ? 'page' : undefined}
+              >Home</a
+            >
+            <a
+              href="/blog"
+              aria-current={path.startsWith('/blog') ? 'page' : undefined}
+              >Writing</a
+            >
+          </nav>
         </div>
+        <button
+          type="button"
+          class="theme-toggle"
+          id="themeToggle"
+          aria-label="Toggle light and dark mode"
+          title="Theme"
+        >
+          <span class="theme-toggle-track" aria-hidden="true">
+            <span class="theme-toggle-thumb"></span>
+          </span>
+          <span class="theme-toggle-label" id="themeLabel">Dark</span>
+        </button>
       </header>
       <main>
         <slot />
