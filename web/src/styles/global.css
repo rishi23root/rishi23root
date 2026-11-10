@@ -215,8 +215,8 @@ html[data-theme='light'] .theme-icon-moon {
   flex-direction: column;
   min-width: 0;
   width: 100%;
-  /* Type-aware breath above chrome (~1.5–2.4× body), not a tiny token */
-  padding-top: clamp(2rem, 1.5em + 1.1vw, 3rem);
+  /* Equal top/bottom breath vs tall 9:16 mood plate (type-aware) */
+  padding-block: clamp(2rem, 1.5em + 1.1vw, 3rem);
 }
 
 .home-left > .chrome {
@@ -237,7 +237,6 @@ html[data-theme='light'] .theme-icon-moon {
   gap: clamp(2.75rem, 4.5vw, 4.25rem);
   min-width: 0;
   width: 100%;
-  padding-bottom: 1.5rem;
 }
 
 .home-copy .home-section {
@@ -821,6 +820,8 @@ html[data-theme='light'] .theme-icon-moon {
     grid-template-columns: minmax(0, 42rem) minmax(22rem, 1fr);
     column-gap: clamp(3rem, 5.5vw, 6rem);
     align-items: start;
+    /* Vertical pad lives on .home-left (equal block), not shell */
+    padding-bottom: 0;
   }
 
   .shell-home > main {
