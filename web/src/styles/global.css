@@ -213,6 +213,8 @@ html[data-theme='light'] .theme-icon-moon {
   flex-direction: column;
   min-width: 0;
   width: 100%;
+  /* Type-aware breath above chrome (~1.5–2.4× body), not a tiny token */
+  padding-top: clamp(2rem, 1.5em + 1.1vw, 3rem);
 }
 
 .home-left > .chrome {
