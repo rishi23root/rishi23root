@@ -49,9 +49,9 @@ const personJsonLd = {
 
 <BaseLayout path="/" jsonLd={personJsonLd}>
   <div class="page home-split">
-    <h1 class="visually-hidden">{site.github.name}</h1>
-
     <div class="home-copy">
+      <h1 class="visually-hidden">{site.github.name}</h1>
+
       <section class="section">
         <p class="voice-bio">{voiceBio}</p>
       </section>
@@ -128,51 +128,9 @@ const personJsonLd = {
     {
       moods.length ? (
         <aside class="home-mood" aria-label="Mood illustration">
-          {/* In-flow sizer reserves the right column; pin stays below chrome while copy scrolls */}
-          <div class="home-mood-sizer" id="homeMoodSizer" aria-hidden="true" />
-          <div class="home-mood-pin" id="homeMoodPin">
-            <HeroMoodShell client:only="react" moods={moods} />
-          </div>
+          <HeroMoodShell client:only="react" moods={moods} />
         </aside>
       ) : null
     }
   </div>
-
-  {
-    moods.length ? (
-      <script is:inline>
-        ;(function () {
-          var mq = window.matchMedia('(min-width: 1024px)')
-          var sizer = document.getElementById('homeMoodSizer')
-          var pin = document.getElementById('homeMoodPin')
-          if (!sizer || !pin) return
-
-          function sync() {
-            if (!mq.matches) {
-              pin.style.left = ''
-              pin.style.width = ''
-              pin.style.top = ''
-              return
-            }
-            var chrome = document.querySelector('.chrome')
-            var offset = chrome ? chrome.getBoundingClientRect().height : 68
-            document.documentElement.style.setProperty(
-              '--chrome-sticky-offset',
-              offset + 'px',
-            )
-            var r = sizer.getBoundingClientRect()
-            pin.style.left = r.left + 'px'
-            pin.style.width = r.width + 'px'
-            pin.style.top = 'var(--chrome-sticky-offset)'
-          }
-
-          sync()
-          window.addEventListener('resize', sync)
-          window.addEventListener('scroll', sync, { passive: true })
-          if (mq.addEventListener) mq.addEventListener('change', sync)
-          else mq.addListener(sync)
-        })()
-      </script>
-    ) : null
-  }
 </BaseLayout>

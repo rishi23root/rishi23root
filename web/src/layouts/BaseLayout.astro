@@ -100,7 +100,7 @@ const wordmark = `@${site.github.name}`
     </script>
   </head>
   <body>
-    <div class="shell">
+    <div class:list={['shell', path === '/' && 'shell-home']}>
       <header class="chrome">
         <div class="chrome-start">
           <a class="wordmark" href="/">{wordmark}</a>

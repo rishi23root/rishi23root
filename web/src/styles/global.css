@@ -88,8 +88,6 @@ a:hover {
   z-index: 20;
   background: color-mix(in srgb, var(--chrome) 92%, transparent);
   backdrop-filter: blur(8px);
-  /* Used by sticky mood panel so it clears the nav */
-  --chrome-sticky-offset: 4.25rem;
 }
 
 .chrome-start {
@@ -462,75 +460,79 @@ html[data-theme='light'] .theme-toggle-thumb {
   border: 0;
 }
 
-/* Desktop / laptop: text left + tall mood right (~40% width, Lee 9/16) */
+/*
+ * Desktop home (Lee): shell is a 2-col grid.
+ * Left = chrome + copy + footer. Right = mood art only (no nav/footer).
+ */
 @media (min-width: 1024px) {
-  .home-split {
+  .shell-home {
     display: grid;
     width: min(100%, 93.75rem);
     margin-inline: auto;
-    /* Wider right half so 9:16 can reach ~viewport-tall */
     grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 1fr);
     column-gap: 2.75rem;
     align-items: start;
   }
 
-  .home-copy {
+  .shell-home > .chrome {
+    grid-column: 1;
+    grid-row: 1;
+    max-width: 42rem;
+    width: 100%;
+    margin-inline: 0;
+  }
+
+  .shell-home > main {
+    display: contents;
+  }
+
+  .shell-home .home-split {
+    display: contents;
+    width: auto;
+    margin: 0;
+  }
+
+  .shell-home .home-copy {
+    grid-column: 1;
+    grid-row: 2;
     max-width: 42rem;
   }
 
-  .home-mood {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    position: relative;
+  .shell-home > .site-footer {
+    grid-column: 1;
+    grid-row: 3;
+    max-width: 42rem;
+    margin-inline: 0;
     width: 100%;
-    max-width: none;
-    justify-self: stretch;
+  }
+
+  /* Image-only right column — spans full shell height, never hosts chrome/footer */
+  .shell-home .home-mood {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
     align-self: start;
-    margin: 0;
-    padding-top: 0.35rem;
-  }
-
-  /* In-flow spacer — keeps grid column width; pin mirrors its box */
-  .home-mood-sizer {
-    width: min(100%, 30rem);
-    aspect-ratio: 9 / 16;
-    height: min(
-      82vh,
-      calc(100vh - var(--chrome-sticky-offset, 4.25rem) - 1.25rem)
-    );
-    max-width: 100%;
-    pointer-events: none;
-    visibility: hidden;
-  }
-
-  /*
-   * Fixed pin below chrome: copy scrolls, mood stays in the right column
-   * viewport without sliding under the sticky nav (sticky alone can't pin a
-   * ~viewport-tall plate on a short page).
-   */
-  .home-mood-pin {
-    position: fixed;
-    top: var(--chrome-sticky-offset, 4.25rem);
-    z-index: 5;
-    display: flex;
-    justify-content: center;
-    pointer-events: none;
-  }
-
-  .home-mood-pin .hero-shell {
-    pointer-events: auto;
     width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
+  .shell-home .home-mood .hero-shell {
+    width: auto;
     max-width: min(100%, 30rem);
     margin-inline: auto;
   }
 
-  .home-mood-pin .hero-shell-stage {
+  .shell-home .home-mood .hero-shell-stage {
     aspect-ratio: 9 / 16;
-    height: min(
-      82vh,
-      calc(100vh - var(--chrome-sticky-offset, 4.25rem) - 1.25rem)
-    );
+    height: min(88vh, calc(100vh - 1.5rem));
     width: auto;
     max-width: 100%;
     max-height: none;
@@ -539,9 +541,7 @@ html[data-theme='light'] .theme-toggle-thumb {
 }
 
 @media (max-width: 1023px) {
-  .home-mood,
-  .home-mood-sizer,
-  .home-mood-pin {
+  .home-mood {
     display: none !important;
   }
 
