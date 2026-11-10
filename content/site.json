@@ -64,18 +64,6 @@
       "animated": false,
       "src": "/mood/warehouse/still.png",
       "alt": "Dusty warehouse interior with shafts of light"
-    },
-    {
-      "id": "forest",
-      "animated": false,
-      "src": "/mood/forest/still.jpg",
-      "alt": "Reader under a tree in a green field"
-    },
-    {
-      "id": "seaside",
-      "animated": false,
-      "src": "/mood/seaside/still.jpg",
-      "alt": "Walker on a seaside path at dusk"
     }
   ],
   "projects": [

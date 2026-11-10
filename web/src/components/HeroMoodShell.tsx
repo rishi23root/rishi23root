@@ -50,8 +50,8 @@ function Scene({
 
 /**
  * Widescreen hero host (~70–80% viewport).
- * Random mood on load; still plates for cyclist / forest / seaside; stubs otherwise.
- * Cyclist is a static landscape still — no layered cloud/shadow animation.
+ * Random mood on load among static stills: cyclist, park, building, warehouse.
+ * No animation / no seashore / no boy-under-tree.
  */
 export default function HeroMoodShell({
   moods,
