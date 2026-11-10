@@ -460,8 +460,9 @@ html[data-theme='light'] .theme-toggle-thumb {
 @media (min-width: 1024px) {
   .home-split {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(14rem, 0.9fr);
-    column-gap: 2.75rem;
+    /* Wider right half so 9:16 can reach ~viewport-tall */
+    grid-template-columns: minmax(0, 1.25fr) minmax(16rem, 1fr);
+    column-gap: 2.5rem;
     align-items: start;
   }
 
@@ -474,24 +475,27 @@ html[data-theme='light'] .theme-toggle-thumb {
     align-items: center; /* vertical center in right column */
     justify-content: center; /* horizontal center */
     position: sticky;
-    top: 4.5rem;
+    top: 1.25rem;
     width: 100%;
     max-width: none;
     justify-self: stretch;
-    min-height: calc(100vh - 5.5rem);
+    min-height: calc(100vh - 2rem);
     align-self: start;
   }
 
   .home-mood .hero-shell {
-    width: min(100%, 20rem);
-    max-width: 20rem;
+    /* Height-driven: width follows 9:16 so panel can grow tall like Lee */
+    width: auto;
+    max-width: min(100%, 28rem);
     margin-inline: auto;
   }
 
   .home-mood .hero-shell-stage {
     aspect-ratio: 9 / 16;
-    width: 100%;
-    max-height: min(36rem, 78vh);
+    height: min(84vh, calc(100vh - 2.5rem));
+    width: auto;
+    max-width: 100%;
+    max-height: none; /* was min(36rem, 78vh) — too short */
   }
 }
 
