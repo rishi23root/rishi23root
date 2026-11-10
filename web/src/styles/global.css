@@ -1,3 +1,26 @@
+/* Self-hosted Source Sans 3 — no CDN; optional + preload = no late FOUT swap */
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: optional;
+  src: url('/fonts/source-sans-3-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: optional;
+  src: url('/fonts/source-sans-3-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* Charcoal black + beige white — both themes */
 :root,
 html[data-theme='dark'] {
@@ -10,11 +33,10 @@ html[data-theme='dark'] {
   --frame-border: rgba(242, 235, 224, 0.14);
   --frame-radius: 18px;
   --accent: #e6dccb;
-  --serif: 'Source Serif 4', 'Iowan Old Style', 'Palatino Linotype', Palatino,
-    Georgia, serif;
-  --sans: 'IBM Plex Sans', 'Segoe UI', Helvetica, sans-serif;
-  --measure: 42rem;
-  --page-pad: clamp(1.25rem, 3.4vw, 3.25rem);
+  --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
+  --serif: var(--sans);
+  --measure: 38rem;
+  --page-pad: clamp(1.35rem, 3.6vw, 3.5rem);
   color-scheme: dark;
 }
 
@@ -27,11 +49,10 @@ html[data-theme='light'] {
   --frame-bg: #e8dfd0;
   --frame-border: rgba(28, 27, 25, 0.12);
   --accent: #2a2825;
-  --serif: 'Source Serif 4', 'Iowan Old Style', 'Palatino Linotype', Palatino,
-    Georgia, serif;
-  --sans: 'IBM Plex Sans', 'Segoe UI', Helvetica, sans-serif;
-  --measure: 42rem;
-  --page-pad: clamp(1.25rem, 3.4vw, 3.25rem);
+  --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
+  --serif: var(--sans);
+  --measure: 38rem;
+  --page-pad: clamp(1.35rem, 3.6vw, 3.5rem);
   color-scheme: light;
 }
 
@@ -49,8 +70,8 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: var(--sans);
-  font-size: 1.02rem;
-  line-height: 1.65;
+  font-size: 1.25rem;
+  line-height: 1.7;
   color: var(--fg);
   background: var(--bg);
 }
@@ -98,8 +119,8 @@ a:hover {
 }
 
 .wordmark {
-  font-family: var(--serif);
-  font-size: 0.98rem;
+  font-family: var(--sans);
+  font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   text-decoration: none;
@@ -112,8 +133,8 @@ a:hover {
 
 .nav {
   display: flex;
-  gap: 0.65rem;
-  font-size: 0.8rem;
+  gap: 0.75rem;
+  font-size: 0.9rem;
 }
 
 .nav a {
@@ -272,12 +293,13 @@ html[data-theme='light'] .theme-icon-moon {
 
 .voice-bio {
   margin: 0;
-  max-width: none;
+  max-width: 36rem;
   width: 100%;
-  font-family: var(--serif);
-  font-size: 1.12rem;
+  font-family: var(--sans);
+  font-size: clamp(1.32rem, 1.15rem + 0.6vw, 1.55rem);
+  font-weight: 400;
   line-height: 1.55;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.011em;
   color: var(--fg);
   text-wrap: pretty;
 }
@@ -312,9 +334,9 @@ html[data-theme='light'] .theme-icon-moon {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
-  font-size: 0.98rem;
-  line-height: 1.45;
+  gap: 0.65rem;
+  font-size: 1.1rem;
+  line-height: 1.5;
 }
 
 .quiet-list a {
@@ -388,33 +410,217 @@ html[data-theme='light'] .theme-icon-moon {
   display: block;
 }
 
+.blog-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-block: 0.25rem 2.5rem;
+}
+
+.blog-page .contact-icons {
+  max-width: var(--measure);
+  width: 100%;
+  margin-inline: auto;
+  margin-top: 0.75rem;
+}
+
+.post-list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: var(--measure);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.post-list-item {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 0.85rem 1.1rem;
+  align-items: start;
+}
+
+.post-list-item time {
+  font-size: 0.82rem;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+  padding-top: 0.2rem;
+}
+
+.post-list-body {
+  min-width: 0;
+}
+
+.post-list-title {
+  display: inline;
+  font-family: var(--sans);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.post-list-title:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.post-list-summary {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.5;
+  font-family: var(--sans);
+}
+
 .prose {
   max-width: var(--measure);
   margin-inline: auto;
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 1.28rem;
+  line-height: 1.72;
+  font-weight: 400;
+}
+
+.prose-header {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .prose h1 {
   margin: 0 0 0.5rem;
-  font-family: var(--serif);
-  font-size: clamp(1.6rem, 3vw, 2rem);
+  font-family: var(--sans);
+  font-size: clamp(1.75rem, 3.2vw, 2.2rem);
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
 }
 
 .prose .post-meta {
-  margin: 0 0 2rem;
-  font-size: 0.85rem;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  font-weight: 400;
   color: var(--muted);
 }
 
+.prose-deck {
+  margin: 0.85rem 0 0;
+  font-family: var(--sans);
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1.55;
+}
+
+.prose :is(h2, h3, h4) {
+  font-family: var(--sans);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin: 2rem 0 0.65rem;
+}
+
+.prose h2 {
+  font-size: 1.35rem;
+}
+
+.prose h3 {
+  font-size: 1.15rem;
+}
+
+.prose h4 {
+  font-size: 1.05rem;
+}
+
 .prose p {
-  margin: 0 0 1.1rem;
+  margin: 0 0 1.15rem;
 }
 
 .prose :is(ul, ol) {
-  margin: 0 0 1.1rem;
+  margin: 0 0 1.15rem;
   padding-left: 1.25rem;
+}
+
+.prose li + li {
+  margin-top: 0.35rem;
+}
+
+.prose a {
+  color: var(--fg);
+  text-underline-offset: 0.12em;
+}
+
+.prose a:hover {
+  color: var(--accent);
+}
+
+.prose :is(strong, b) {
+  font-weight: 600;
+}
+
+.prose blockquote {
+  margin: 0 0 1.25rem;
+  padding: 0.15rem 0 0.15rem 1rem;
+  border-left: 2px solid var(--border);
+  color: var(--muted);
+}
+
+.prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.prose :is(code, kbd) {
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  padding: 0.12em 0.35em;
+  border-radius: 4px;
+  background: var(--frame-bg);
+}
+
+.prose pre {
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  border-radius: 10px;
+  background: var(--frame-bg);
+  border: 1px solid var(--frame-border);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.prose pre code {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.prose hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.prose :is(img, video) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.25rem 0;
+  border-radius: 10px;
+}
+
+.prose figcaption {
+  margin-top: -0.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .page-intro {
@@ -425,10 +631,10 @@ html[data-theme='light'] .theme-icon-moon {
 
 .page-intro h1 {
   margin: 0 0 0.55rem;
-  font-family: var(--serif);
-  font-size: clamp(1.55rem, 3vw, 1.9rem);
+  font-family: var(--sans);
+  font-size: clamp(1.65rem, 3vw, 2rem);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 .page-intro .lede {
@@ -439,7 +645,10 @@ html[data-theme='light'] .theme-icon-moon {
 
 .back {
   display: inline-block;
-  margin-bottom: 1.5rem;
+  max-width: var(--measure);
+  width: 100%;
+  margin-inline: auto;
+  margin-bottom: 0;
   font-size: 0.9rem;
   color: var(--muted);
   text-decoration: none;
@@ -451,7 +660,9 @@ html[data-theme='light'] .theme-icon-moon {
 
 .empty {
   color: var(--muted);
-  margin: 0;
+  margin: 0 auto;
+  max-width: var(--measure);
+  width: 100%;
 }
 
 .visually-hidden {
@@ -472,18 +683,18 @@ html[data-theme='light'] .theme-icon-moon {
 @media (min-width: 1024px) {
   .shell-home {
     display: grid;
-    width: min(100%, 93.75rem);
+    width: min(100%, 96rem);
     margin-inline: auto;
-    /* Wide: text-led columns + Lee middle gap */
-    grid-template-columns: minmax(0, 1.2fr) minmax(17rem, 0.95fr);
-    column-gap: clamp(2.75rem, 4.5vw, 5rem);
+    /* Text measure + larger mood column + Lee middle gap */
+    grid-template-columns: minmax(0, 34rem) minmax(20rem, 1fr);
+    column-gap: clamp(2.75rem, 5vw, 5.5rem);
     align-items: start;
   }
 
   .shell-home > .chrome {
     grid-column: 1;
     grid-row: 1;
-    max-width: 42rem;
+    max-width: 34rem;
     width: 100%;
     margin-inline: 0;
   }
@@ -501,12 +712,14 @@ html[data-theme='light'] .theme-icon-moon {
   .shell-home .home-copy {
     grid-column: 1;
     grid-row: 2;
-    max-width: 42rem;
+    max-width: 34rem;
   }
 
   /*
    * Image-only right column. Aside is a zero-height grid anchor (no row
    * inflation). Inner plate is fixed in that column — chrome stays col 1.
+   * Sync script sets left/width/top/height so the plate centers in the
+   * column space below chrome.
    */
   .shell-home .home-mood {
     display: block; /* override base mobile hide */
@@ -523,23 +736,23 @@ html[data-theme='light'] .theme-icon-moon {
 
   .shell-home .home-mood-inner {
     position: fixed;
-    top: max(0.75rem, calc((100vh - 88vh) / 2));
     z-index: 1;
     display: flex;
+    align-items: center;
     justify-content: center;
     pointer-events: auto;
   }
 
   .shell-home .home-mood .hero-shell {
-    width: min(100%, 24rem);
-    max-width: min(100%, 24rem);
+    width: min(100%, 32rem);
+    max-width: min(100%, 32rem);
     margin-inline: auto;
   }
 
   .shell-home .home-mood .hero-shell-stage {
-    /* Width-led 9:16; width capped so height stays ≤ ~viewport */
+    /* Width-led 9:16; fill most of the space below chrome */
     aspect-ratio: 9 / 16;
-    width: min(100%, calc((100vh - 1.5rem) * 9 / 16));
+    width: min(100%, calc((100vh - 3.25rem) * 9 / 16));
     height: auto;
     margin-inline: auto;
   }
@@ -548,13 +761,13 @@ html[data-theme='light'] .theme-icon-moon {
 /* Compact desktop: Lee-like wider mood plate + keep middle gap */
 @media (min-width: 1024px) and (max-width: 1399px) {
   .shell-home {
-    grid-template-columns: minmax(0, 1fr) minmax(18rem, 1.12fr);
-    column-gap: clamp(2.25rem, 3.8vw, 4rem);
+    grid-template-columns: minmax(0, 30rem) minmax(21rem, 1fr);
+    column-gap: clamp(2rem, 3.5vw, 3.5rem);
   }
 
   .shell-home .home-copy,
   .shell-home > .chrome {
-    max-width: 36rem;
+    max-width: 30rem;
   }
 
   .shell-home .home-mood .hero-shell {
@@ -563,11 +776,7 @@ html[data-theme='light'] .theme-icon-moon {
   }
 
   .shell-home .home-mood .hero-shell-stage {
-    width: min(100%, calc((100vh - 1.25rem) * 9 / 16));
-  }
-
-  .shell-home .home-mood-inner {
-    top: max(0.5rem, calc((100vh - min(100vw, 100vh)) / 12));
+    width: min(100%, calc((100vh - 2.75rem) * 9 / 16));
   }
 }
 
@@ -585,6 +794,11 @@ html[data-theme='light'] .theme-icon-moon {
 
   .chrome {
     max-width: var(--measure);
+  }
+
+  .post-list-item {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
   }
 }
 

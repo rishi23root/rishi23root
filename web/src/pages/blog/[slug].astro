@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import ContactIcons from '../../components/ContactIcons.astro'
 import { publishedPostsFilter, site } from '../../lib/site'
 
 export async function getStaticPaths() {
@@ -50,10 +51,22 @@ const blogPostingJsonLd = {
   image={ogImage}
   jsonLd={blogPostingJsonLd}
 >
-  <a class="back" href="/blog">← Blog</a>
-  <article class="prose">
-    <h1>{post.data.title}</h1>
-    <p class="post-meta">{date}</p>
-    <Content />
-  </article>
+  <div class="page blog-page">
+    <a class="back" href="/blog">← Writing</a>
+    <article class="prose">
+      <header class="prose-header">
+        <h1>{post.data.title}</h1>
+        <p class="post-meta">
+          <time datetime={post.data.date.toISOString()}>{date}</time>
+        </p>
+        {
+          post.data.summary ? (
+            <p class="prose-deck">{post.data.summary}</p>
+          ) : null
+        }
+      </header>
+      <Content />
+    </article>
+    <ContactIcons />
+  </div>
 </BaseLayout>
