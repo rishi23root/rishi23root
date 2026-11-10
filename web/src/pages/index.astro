@@ -13,7 +13,7 @@ const posts = (await getCollection('posts', publishedPostsFilter)).sort(
 const projects = (site.projects ?? [])
   .slice()
   .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
-  .slice(0, 6)
+  .slice(0, 3)
 
 const capabilities = site.capabilities ?? []
 const moods = site.moods ?? []
@@ -43,68 +43,70 @@ const personJsonLd = {
 <BaseLayout path="/" jsonLd={personJsonLd}>
   <div class="page home-split">
     {/* Left column only: chrome + prose. Mood stays image-only. */}
-    <div class="home-left">
-      <SiteChrome path="/" />
-      <div class="home-copy">
-      <h1 class="visually-hidden">{site.github.name}</h1>
+    <div class="home-left" id="homeLeft">
+      <div class="home-left-stack">
+        <SiteChrome path="/" />
+        <div class="home-copy">
+          <h1 class="visually-hidden">{site.github.name}</h1>
 
-      <section class="section home-section home-section-bio">
-        <p class="voice-bio">{voiceBio}</p>
-      </section>
+          <section class="section home-section home-section-bio">
+            <p class="voice-bio">{voiceBio}</p>
+          </section>
 
-      <section class="section home-section">
-        <h2>Writing</h2>
-        {
-          posts.length ? (
-            <ul class="home-writing-list">
-              {posts.slice(0, 5).map((post) => (
-                <li>
-                  <a href={`/writing/${post.data.slug}`}>{post.data.title}</a>
-                  <time datetime={post.data.date.toISOString()}>
-                    {post.data.date.toISOString().slice(0, 10)}
-                  </time>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p class="empty">No posts yet.</p>
-          )
-        }
-      </section>
-
-      <section class="section home-section">
-        <h2>Work</h2>
-        <ul class="home-stack-list">
-          {
-            projects.map((project) => (
-              <li>
-                <a href={project.url}>{project.title}</a>
-                {project.blurb ? (
-                  <span class="blurb">{project.blurb}</span>
-                ) : null}
-              </li>
-            ))
-          }
-        </ul>
-      </section>
-
-      {
-        capabilities.length ? (
           <section class="section home-section">
-            <h2>Capabilities</h2>
+            <h2>Writing</h2>
+            {
+              posts.length ? (
+                <ul class="home-writing-list">
+                  {posts.slice(0, 5).map((post) => (
+                    <li>
+                      <a href={`/writing/${post.data.slug}`}>{post.data.title}</a>
+                      <time datetime={post.data.date.toISOString()}>
+                        {post.data.date.toISOString().slice(0, 10)}
+                      </time>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="empty">No posts yet.</p>
+              )
+            }
+          </section>
+
+          <section class="section home-section">
+            <h2>Work</h2>
             <ul class="home-stack-list">
-              {capabilities.map((item) => (
-                <li>
-                  <span class="capability-heading">{item.heading}</span>
-                  <span class="blurb">{item.body}</span>
-                </li>
-              ))}
+              {
+                projects.map((project) => (
+                  <li>
+                    <a href={project.url}>{project.title}</a>
+                    {project.blurb ? (
+                      <span class="blurb">{project.blurb}</span>
+                    ) : null}
+                  </li>
+                ))
+              }
             </ul>
           </section>
-        ) : null
-      }
 
-      <ContactIcons />
+          {
+            capabilities.length ? (
+              <section class="section home-section">
+                <h2>Capabilities</h2>
+                <ul class="home-stack-list">
+                  {capabilities.map((item) => (
+                    <li>
+                      <span class="capability-heading">{item.heading}</span>
+                      <span class="blurb">{item.body}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null
+          }
+
+          <ContactIcons />
+        </div>
       </div>
     </div>
 
@@ -126,26 +128,62 @@ const personJsonLd = {
           var mq = window.matchMedia('(min-width: 1024px)')
           var mood = document.getElementById('homeMood')
           var inner = document.getElementById('homeMoodInner')
+          var left = document.getElementById('homeLeft')
           if (!mood || !inner) return
 
-          function sync() {
+          function syncMood() {
             if (!mq.matches) {
               inner.style.left = ''
               inner.style.width = ''
               return
             }
-            /* Pin plate to mood column width; vertical stage is full viewport (CSS) */
             var r = mood.getBoundingClientRect()
             if (!r.width) return
             inner.style.left = r.left + 'px'
             inner.style.width = r.width + 'px'
           }
 
+          /* Equal top/bottom breath vs mood/viewport band when stack is shorter */
+          function syncBalance() {
+            if (!left) return
+            if (!mq.matches) {
+              left.style.minHeight = ''
+              left.style.paddingTop = ''
+              left.style.paddingBottom = ''
+              return
+            }
+            var stage = inner.querySelector('.hero-shell-stage')
+            var bodySize = parseFloat(getComputedStyle(document.body).fontSize) || 16
+            var minPad = Math.round(bodySize * 2) /* type-aware ~2em */
+            var stack = left.querySelector('.home-left-stack')
+            /* Reset to measure natural stack height */
+            left.style.minHeight = '0px'
+            left.style.paddingTop = '0px'
+            left.style.paddingBottom = '0px'
+            var contentH = stack ? stack.scrollHeight : left.scrollHeight
+            var stageH = stage ? stage.getBoundingClientRect().height : 0
+            var band = Math.max(stageH, window.innerHeight)
+            var pad =
+              contentH < band
+                ? (band - contentH) / 2 /* true center vs mood/viewport band */
+                : minPad
+            left.style.paddingTop = pad + 'px'
+            left.style.paddingBottom = pad + 'px'
+            left.style.minHeight = band + 'px'
+          }
+
+          function sync() {
+            syncMood()
+            syncBalance()
+          }
+
           sync()
           window.addEventListener('resize', sync)
-          window.addEventListener('scroll', sync, { passive: true })
+          window.addEventListener('scroll', syncMood, { passive: true })
           if (mq.addEventListener) mq.addEventListener('change', sync)
           else mq.addListener(sync)
+          /* Mood image load can change stage height */
+          window.addEventListener('load', sync)
         })()
       </script>
     ) : null

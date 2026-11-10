@@ -213,13 +213,22 @@ html[data-theme='light'] .theme-icon-moon {
 .home-left {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   min-width: 0;
   width: 100%;
-  /* Equal top/bottom breath vs tall 9:16 mood plate (type-aware) */
+  box-sizing: border-box;
+  /* Desktop JS sets equal padding-block vs mood band; fallback pad here */
   padding-block: clamp(2rem, 1.5em + 1.1vw, 3rem);
 }
 
-.home-left > .chrome {
+.home-left-stack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+.home-left .chrome {
   max-width: none;
   margin-inline: 0;
   /* Scroll away with left column — not sticky/fixed */
@@ -234,7 +243,7 @@ html[data-theme='light'] .theme-icon-moon {
   display: flex;
   flex-direction: column;
   /* Lee vertical rhythm between bio / writing / work / capabilities */
-  gap: clamp(2.75rem, 4.5vw, 4.25rem);
+  gap: clamp(1.5rem, 2.4vw, 2.25rem);
   min-width: 0;
   width: 100%;
 }
@@ -244,7 +253,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .home-copy .home-section h2 {
-  margin: 0 0 1.35rem;
+  margin: 0 0 0.85rem;
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -269,7 +278,7 @@ html[data-theme='light'] .theme-icon-moon {
   align-items: baseline;
   justify-content: space-between;
   gap: 1.5rem 2rem;
-  padding: 1.15rem 0;
+  padding: 0.85rem 0;
   border-bottom: 1px solid var(--border);
   font-size: 1.12rem;
   line-height: 1.45;
@@ -309,13 +318,14 @@ html[data-theme='light'] .theme-icon-moon {
 
 .home-stack-list li {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.3rem;
-  padding: 1.1rem 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.45rem;
+  padding: 0.8rem 0;
   border-bottom: 1px solid var(--border);
-  font-size: 1.08rem;
-  line-height: 1.5;
+  font-size: 1.05rem;
+  line-height: 1.45;
 }
 
 .home-stack-list li:first-child {
@@ -337,12 +347,15 @@ html[data-theme='light'] .theme-icon-moon {
 .home-stack-list .blurb {
   color: var(--muted);
   font-weight: 400;
-  max-width: 38rem;
+}
+
+.home-stack-list .blurb::before {
+  content: '— ';
 }
 
 .home-copy .contact-icons {
-  margin-top: 0.75rem;
-  padding-top: 1.75rem;
+  margin-top: 0.35rem;
+  padding-top: 1.15rem;
 }
 
 .home-mood {
@@ -835,17 +848,15 @@ html[data-theme='light'] .theme-icon-moon {
   }
 
   /*
-   * Left stack vertically complements tall mood plate: match viewport
-   * stage height and center chrome+copy when shorter than the plate.
+   * Left stack complements tall mood plate. JS sets min-height to the
+   * mood/viewport band and equal padding-block when stack is shorter.
    */
   .shell-home .home-left {
     grid-column: 1;
     grid-row: 1;
     max-width: 42rem;
     width: 100%;
-    min-height: 100svh;
     box-sizing: border-box;
-    justify-content: safe center;
   }
 
   /*
