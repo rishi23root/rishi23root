@@ -506,22 +506,30 @@ html[data-theme='light'] .theme-toggle-thumb {
     width: 100%;
   }
 
-  /* Image-only right column — spans full shell height, never hosts chrome/footer */
+  /*
+   * Image-only right column. Aside is a zero-height grid anchor (no row
+   * inflation). Inner plate is fixed in that column — chrome/footer stay col 1.
+   */
   .shell-home .home-mood {
+    display: block; /* override base mobile hide */
     grid-column: 2;
     grid-row: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    align-self: start;
+    align-self: stretch;
     width: 100%;
-    height: 100vh;
-    max-height: 100vh;
+    height: 0;
+    overflow: visible;
     margin: 0;
     padding: 0;
+    pointer-events: none;
+  }
+
+  .shell-home .home-mood-inner {
+    position: fixed;
+    top: max(0.75rem, calc((100vh - 88vh) / 2));
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    pointer-events: auto;
   }
 
   .shell-home .home-mood .hero-shell {
@@ -541,7 +549,8 @@ html[data-theme='light'] .theme-toggle-thumb {
 }
 
 @media (max-width: 1023px) {
-  .home-mood {
+  .home-mood,
+  .home-mood-inner {
     display: none !important;
   }
 

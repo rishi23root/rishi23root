@@ -127,10 +127,44 @@ const personJsonLd = {
 
     {
       moods.length ? (
-        <aside class="home-mood" aria-label="Mood illustration">
-          <HeroMoodShell client:only="react" moods={moods} />
+        <aside class="home-mood" id="homeMood" aria-label="Mood illustration">
+          <div class="home-mood-inner" id="homeMoodInner">
+            <HeroMoodShell client:only="react" moods={moods} />
+          </div>
         </aside>
       ) : null
     }
   </div>
+
+  {
+    moods.length ? (
+      <script is:inline>
+        ;(function () {
+          var mq = window.matchMedia('(min-width: 1024px)')
+          var mood = document.getElementById('homeMood')
+          var inner = document.getElementById('homeMoodInner')
+          if (!mood || !inner) return
+
+          function sync() {
+            if (!mq.matches) {
+              inner.style.left = ''
+              inner.style.width = ''
+              return
+            }
+            /* Use the grid column box even when aside height is 0 */
+            var r = mood.getBoundingClientRect()
+            if (!r.width) return
+            inner.style.left = r.left + 'px'
+            inner.style.width = r.width + 'px'
+          }
+
+          sync()
+          window.addEventListener('resize', sync)
+          window.addEventListener('scroll', sync, { passive: true })
+          if (mq.addEventListener) mq.addEventListener('change', sync)
+          else mq.addListener(sync)
+        })()
+      </script>
+    ) : null
+  }
 </BaseLayout>
