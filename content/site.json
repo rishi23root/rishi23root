@@ -48,6 +48,24 @@
       "alt": "Cyclist in green hills under drifting clouds"
     },
     {
+      "id": "park",
+      "animated": false,
+      "src": "/mood/park/still.png",
+      "alt": "Aerial park lawn with people and long shadows"
+    },
+    {
+      "id": "building",
+      "animated": false,
+      "src": "/mood/building/still.png",
+      "alt": "Terracotta building facade with a walker and dog"
+    },
+    {
+      "id": "warehouse",
+      "animated": false,
+      "src": "/mood/warehouse/still.png",
+      "alt": "Dusty warehouse interior with shafts of light"
+    },
+    {
       "id": "forest",
       "animated": false,
       "src": "/mood/forest/still.jpg",
@@ -58,24 +76,6 @@
       "animated": false,
       "src": "/mood/seaside/still.jpg",
       "alt": "Walker on a seaside path at dusk"
-    },
-    {
-      "id": "workshop",
-      "animated": false,
-      "component": "workshop-still",
-      "alt": "Quiet workshop desk at dusk (placeholder)"
-    },
-    {
-      "id": "transit",
-      "animated": true,
-      "component": "transit-windy",
-      "alt": "Night transit platform with drifting light (placeholder)"
-    },
-    {
-      "id": "ridge",
-      "animated": false,
-      "component": "ridge-still",
-      "alt": "Ridge path under soft cloud (placeholder)"
     }
   ],
   "projects": [
