@@ -44,24 +44,21 @@ const personJsonLd = {
     <div class="home-copy">
       <h1 class="visually-hidden">{site.github.name}</h1>
 
-      <section class="section">
+      <section class="section home-section home-section-bio">
         <p class="voice-bio">{voiceBio}</p>
       </section>
 
-      <section class="section">
+      <section class="section home-section">
         <h2>Writing</h2>
         {
           posts.length ? (
-            <ul class="quiet-list">
+            <ul class="home-writing-list">
               {posts.slice(0, 5).map((post) => (
                 <li>
                   <a href={`/writing/${post.data.slug}`}>{post.data.title}</a>
                   <time datetime={post.data.date.toISOString()}>
                     {post.data.date.toISOString().slice(0, 10)}
                   </time>
-                  {post.data.summary ? (
-                    <span class="meta">— {post.data.summary}</span>
-                  ) : null}
                 </li>
               ))}
             </ul>
@@ -71,15 +68,15 @@ const personJsonLd = {
         }
       </section>
 
-      <section class="section">
+      <section class="section home-section">
         <h2>Work</h2>
-        <ul class="quiet-list">
+        <ul class="home-stack-list">
           {
             projects.map((project) => (
               <li>
                 <a href={project.url}>{project.title}</a>
                 {project.blurb ? (
-                  <span class="blurb"> — {project.blurb}</span>
+                  <span class="blurb">{project.blurb}</span>
                 ) : null}
               </li>
             ))
@@ -89,13 +86,13 @@ const personJsonLd = {
 
       {
         capabilities.length ? (
-          <section class="section">
+          <section class="section home-section">
             <h2>Capabilities</h2>
-            <ul class="quiet-list">
+            <ul class="home-stack-list">
               {capabilities.map((item) => (
                 <li>
                   <span class="capability-heading">{item.heading}</span>
-                  <span class="blurb"> — {item.body}</span>
+                  <span class="blurb">{item.body}</span>
                 </li>
               ))}
             </ul>

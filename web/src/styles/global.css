@@ -99,8 +99,8 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 0.65rem;
-  /* Full shell on desktop split; measure-capped on narrow via media below */
-  max-width: none;
+  /* Writing/other pages: same measure as prose. Home overrides in .shell-home */
+  max-width: var(--measure);
   width: 100%;
   margin-inline: auto;
   padding: 0.7rem 0 0.55rem;
@@ -210,9 +210,117 @@ html[data-theme='light'] .theme-icon-moon {
 .home-copy {
   display: flex;
   flex-direction: column;
-  gap: 2.25rem;
+  /* Lee vertical rhythm between bio / writing / work / capabilities */
+  gap: clamp(2.75rem, 4.5vw, 4.25rem);
   min-width: 0;
   width: 100%;
+  padding-bottom: 1.5rem;
+}
+
+.home-copy .home-section {
+  gap: 0;
+}
+
+.home-copy .home-section h2 {
+  margin: 0 0 1.35rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--fg);
+}
+
+.home-copy .home-section-bio {
+  max-width: 40rem;
+}
+
+/* Writing: title left / date right, hairline rows (Lee Notes rhythm) */
+.home-writing-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.home-writing-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem 2rem;
+  padding: 1.15rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.12rem;
+  line-height: 1.45;
+}
+
+.home-writing-list li:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.home-writing-list a {
+  color: var(--fg);
+  text-decoration: none;
+  font-weight: 500;
+  min-width: 0;
+}
+
+.home-writing-list a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+}
+
+.home-writing-list time {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Work / capabilities: same hairline breathing room */
+.home-stack-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.home-stack-list li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.08rem;
+  line-height: 1.5;
+}
+
+.home-stack-list li:first-child {
+  border-top: 1px solid var(--border);
+}
+
+.home-stack-list a {
+  color: var(--fg);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.home-stack-list a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+}
+
+.home-stack-list .blurb {
+  color: var(--muted);
+  font-weight: 400;
+  max-width: 38rem;
+}
+
+.home-copy .contact-icons {
+  margin-top: 0.75rem;
+  padding-top: 1.75rem;
 }
 
 .home-mood {
@@ -293,7 +401,7 @@ html[data-theme='light'] .theme-icon-moon {
 
 .voice-bio {
   margin: 0;
-  max-width: 36rem;
+  max-width: 40rem;
   width: 100%;
   font-family: var(--sans);
   font-size: clamp(1.32rem, 1.15rem + 0.6vw, 1.55rem);
@@ -683,18 +791,19 @@ html[data-theme='light'] .theme-icon-moon {
 @media (min-width: 1024px) {
   .shell-home {
     display: grid;
-    width: min(100%, 96rem);
+    /* ~1500px Lee home-layout width */
+    width: min(100%, 93.75rem);
     margin-inline: auto;
-    /* Text measure + larger mood column + Lee middle gap */
-    grid-template-columns: minmax(0, 34rem) minmax(20rem, 1fr);
-    column-gap: clamp(2.75rem, 5vw, 5.5rem);
+    /* Breathing text column + mood + Lee middle gap */
+    grid-template-columns: minmax(0, 42rem) minmax(22rem, 1fr);
+    column-gap: clamp(3rem, 5.5vw, 6rem);
     align-items: start;
   }
 
   .shell-home > .chrome {
     grid-column: 1;
     grid-row: 1;
-    max-width: 34rem;
+    max-width: 42rem;
     width: 100%;
     margin-inline: 0;
   }
@@ -712,7 +821,7 @@ html[data-theme='light'] .theme-icon-moon {
   .shell-home .home-copy {
     grid-column: 1;
     grid-row: 2;
-    max-width: 34rem;
+    max-width: 42rem;
   }
 
   /*
@@ -761,13 +870,13 @@ html[data-theme='light'] .theme-icon-moon {
 /* Compact desktop: Lee-like wider mood plate + keep middle gap */
 @media (min-width: 1024px) and (max-width: 1399px) {
   .shell-home {
-    grid-template-columns: minmax(0, 30rem) minmax(21rem, 1fr);
-    column-gap: clamp(2rem, 3.5vw, 3.5rem);
+    grid-template-columns: minmax(0, 36rem) minmax(21rem, 1fr);
+    column-gap: clamp(2.25rem, 4vw, 4rem);
   }
 
   .shell-home .home-copy,
   .shell-home > .chrome {
-    max-width: 30rem;
+    max-width: 36rem;
   }
 
   .shell-home .home-mood .hero-shell {
@@ -790,10 +899,6 @@ html[data-theme='light'] .theme-icon-moon {
   .home-copy .contact-icons {
     max-width: var(--measure);
     margin-inline: auto;
-  }
-
-  .chrome {
-    max-width: var(--measure);
   }
 
   .post-list-item {
