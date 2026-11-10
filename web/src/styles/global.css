@@ -207,6 +207,19 @@ html[data-theme='light'] .theme-icon-moon {
   width: 100%;
 }
 
+/* Left stack: chrome + prose (Lee — chrome never spans the mood col) */
+.home-left {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+}
+
+.home-left > .chrome {
+  max-width: none;
+  margin-inline: 0;
+}
+
 .home-copy {
   display: flex;
   flex-direction: column;
@@ -800,14 +813,6 @@ html[data-theme='light'] .theme-icon-moon {
     align-items: start;
   }
 
-  .shell-home > .chrome {
-    grid-column: 1;
-    grid-row: 1;
-    max-width: 42rem;
-    width: 100%;
-    margin-inline: 0;
-  }
-
   .shell-home > main {
     display: contents;
   }
@@ -818,22 +823,23 @@ html[data-theme='light'] .theme-icon-moon {
     margin: 0;
   }
 
-  .shell-home .home-copy {
+  /* Entire left stack (chrome + copy) — mood never shares this column */
+  .shell-home .home-left {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 1;
     max-width: 42rem;
+    width: 100%;
   }
 
   /*
    * Image-only right column. Aside is a zero-height grid anchor (no row
-   * inflation). Inner plate is fixed in that column — chrome stays col 1.
-   * Sync script sets left/width/top/height so the plate centers in the
-   * column space below chrome.
+   * inflation). Inner plate is fixed in that column — chrome stays in
+   * .home-left. Sync script centers the plate in the column below chrome.
    */
   .shell-home .home-mood {
     display: block; /* override base mobile hide */
     grid-column: 2;
-    grid-row: 1 / -1;
+    grid-row: 1;
     align-self: stretch;
     width: 100%;
     height: 0;
@@ -874,8 +880,7 @@ html[data-theme='light'] .theme-icon-moon {
     column-gap: clamp(2.25rem, 4vw, 4rem);
   }
 
-  .shell-home .home-copy,
-  .shell-home > .chrome {
+  .shell-home .home-left {
     max-width: 36rem;
   }
 
@@ -895,8 +900,7 @@ html[data-theme='light'] .theme-icon-moon {
     display: none !important;
   }
 
-  .home-copy .section,
-  .home-copy .contact-icons {
+  .home-left {
     max-width: var(--measure);
     margin-inline: auto;
   }

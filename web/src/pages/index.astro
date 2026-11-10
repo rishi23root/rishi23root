@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import ContactIcons from '../components/ContactIcons.astro'
+import SiteChrome from '../components/SiteChrome.astro'
 import HeroMoodShell from '../components/HeroMoodShell'
 import { githubAvatarUrl, publishedPostsFilter, site } from '../lib/site'
 
@@ -41,7 +42,10 @@ const personJsonLd = {
 
 <BaseLayout path="/" jsonLd={personJsonLd}>
   <div class="page home-split">
-    <div class="home-copy">
+    {/* Left column only: chrome + prose. Mood stays image-only. */}
+    <div class="home-left">
+      <SiteChrome path="/" />
+      <div class="home-copy">
       <h1 class="visually-hidden">{site.github.name}</h1>
 
       <section class="section home-section home-section-bio">
@@ -101,6 +105,7 @@ const personJsonLd = {
       }
 
       <ContactIcons />
+      </div>
     </div>
 
     {
@@ -131,10 +136,10 @@ const personJsonLd = {
               inner.style.height = ''
               return
             }
-            /* Column box (aside height is 0) + space below sticky chrome */
+            /* Column box (aside height is 0) + space below sticky chrome in left col */
             var r = mood.getBoundingClientRect()
             if (!r.width) return
-            var chrome = document.querySelector('.shell-home > .chrome')
+            var chrome = document.querySelector('.home-left > .chrome')
             var chromeBottom = chrome
               ? chrome.getBoundingClientRect().bottom
               : 0

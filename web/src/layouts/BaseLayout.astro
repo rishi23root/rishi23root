@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+import SiteChrome from '../components/SiteChrome.astro'
 import { site } from '../lib/site'
 
 type Props = {
@@ -38,7 +39,7 @@ const jsonLdBlocks = jsonLd
     : [jsonLd]
   : []
 
-const wordmark = `@${site.github.name}`
+const isHome = path === '/'
 ---
 
 <!doctype html>
@@ -101,46 +102,11 @@ const wordmark = `@${site.github.name}`
     </script>
   </head>
   <body>
-    <div class:list={['shell', path === '/' && 'shell-home']}>
-      <header class="chrome">
-        <div class="chrome-start">
-          <a class="wordmark" href="/">{wordmark}</a>
-          <nav class="nav" aria-label="Primary">
-            <a href="/" aria-current={path === '/' ? 'page' : undefined}
-              >Home</a
-            >
-            <a
-              href="/writing"
-              aria-current={path.startsWith('/writing') ? 'page' : undefined}
-              >Writing</a
-            >
-          </nav>
-        </div>
-        <button
-          type="button"
-          class="theme-toggle"
-          id="themeToggle"
-          aria-label="Switch to light mode"
-          title="Theme"
-        >
-          <span class="theme-icon theme-icon-sun" aria-hidden="true">
-            <svg viewBox="0 0 24 24" focusable="false">
-              <path
-                fill="currentColor"
-                d="M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0-5a1 1 0 0 1 1 1v1.5a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 17a1 1 0 0 1 1 1v1.5a1 1 0 1 1-2 0V20a1 1 0 0 1 1-1zM3 11a1 1 0 0 1 1-1h1.5a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1zm15.5 0a1 1 0 0 1 1-1H21a1 1 0 1 1 0 2h-1.5a1 1 0 0 1-1-1zM5.64 5.64a1 1 0 0 1 1.41 0l1.06 1.06a1 1 0 1 1-1.41 1.41L5.64 7.05a1 1 0 0 1 0-1.41zm10.25 10.25a1 1 0 0 1 1.41 0l1.06 1.06a1 1 0 0 1-1.41 1.41l-1.06-1.06a1 1 0 0 1 0-1.41zM18.36 5.64a1 1 0 0 1 0 1.41l-1.06 1.06a1 1 0 1 1-1.41-1.41l1.06-1.06a1 1 0 0 1 1.41 0zM7.05 16.95a1 1 0 0 1 0 1.41l-1.06 1.06a1 1 0 1 1-1.41-1.41l1.06-1.06a1 1 0 0 1 1.41 0z"
-              />
-            </svg>
-          </span>
-          <span class="theme-icon theme-icon-moon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" focusable="false">
-              <path
-                fill="currentColor"
-                d="M12.1 2.05a1 1 0 0 1 .9 1.45A7.5 7.5 0 1 0 19.5 14a1 1 0 0 1 1.45.9A9.5 9.5 0 1 1 12.1 2.05z"
-              />
-            </svg>
-          </span>
-        </button>
-      </header>
+    <div class:list={['shell', isHome && 'shell-home']}>
+      {
+        /* Home chrome lives inside the left text column (index.astro). */
+        !isHome ? <SiteChrome path={path} /> : null
+      }
       <main>
         <slot />
       </main>
