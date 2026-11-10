@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { site } from '../lib/site'
+
+const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
+---
+
+<BaseLayout
+  title="Moods"
+  description="Homepage mood stills used on rishi23root.in."
+  path="/mood"
+>
+  <div class="page mood-index">
+    <section class="page-intro">
+      <h1>Moods</h1>
+      <p class="lede">
+        Static homepage stills ({moods.length}). Unlisted — not in site chrome.
+      </p>
+    </section>
+
+    {
+      moods.length ? (
+        <ul class="mood-index-grid">
+          {moods.map((mood) => {
+            const jpg =
+              mood.src && mood.src.endsWith('.webp')
+                ? mood.src.slice(0, -5) + '.jpg'
+                : null
+            return (
+              <li class="mood-index-card">
+                <a class="mood-index-link" href={`/?mood=${mood.id}`}>
+                  <div class="mood-index-frame">
+                    {jpg ? (
+                      <picture>
+                        <source srcset={mood.src} type="image/webp" />
+                        <img
+                          src={jpg}
+                          alt={mood.alt || mood.id}
+                          loading="lazy"
+                          decoding="async"
+                          width="720"
+                          height="1280"
+                        />
+                      </picture>
+                    ) : (
+                      <img
+                        src={mood.src}
+                        alt={mood.alt || mood.id}
+                        loading="lazy"
+                        decoding="async"
+                        width="720"
+                        height="1280"
+                      />
+                    )}
+                  </div>
+                  <span class="mood-index-id">{mood.id}</span>
+                </a>
+              </li>
+            )
+          })}
+        </ul>
+      ) : (
+        <p class="empty">No moods configured.</p>
+      )
+    }
+  </div>
+</BaseLayout>

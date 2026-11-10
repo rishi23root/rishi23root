@@ -4,12 +4,38 @@ type Props = {
   fade?: boolean
 }
 
-/** Static mood plate — single image, optional quiet fade. */
-export default function MoodStill({ src, fade = true }: Props) {
+function jpgFallback(src: string): string | null {
+  if (!src.endsWith('.webp')) return null
+  return src.slice(0, -5) + '.jpg'
+}
+
+/** Static mood plate — WebP primary, optional JPG sibling fallback. */
+export default function MoodStill({ src, fade = false }: Props) {
+  const fallback = jpgFallback(src)
+
   return (
     <div className={`mood-scene mood-still-scene${fade ? ' is-fade' : ''}`}>
       <div className="mood-layer mood-still">
-        <img src={src} alt="" decoding="async" fetchPriority="high" draggable={false} />
+        {fallback ? (
+          <picture>
+            <source srcSet={src} type="image/webp" />
+            <img
+              src={fallback}
+              alt=""
+              decoding="async"
+              fetchPriority="high"
+              draggable={false}
+            />
+          </picture>
+        ) : (
+          <img
+            src={src}
+            alt=""
+            decoding="async"
+            fetchPriority="high"
+            draggable={false}
+          />
+        )}
       </div>
     </div>
   )

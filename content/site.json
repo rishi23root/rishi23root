@@ -44,26 +44,32 @@
     {
       "id": "cyclist",
       "animated": false,
-      "src": "/mood/cyclist/still.png",
+      "src": "/mood/cyclist.webp",
       "alt": "Cyclist in green hills under drifting clouds"
     },
     {
       "id": "park",
       "animated": false,
-      "src": "/mood/park/still.png",
+      "src": "/mood/park.webp",
       "alt": "Aerial park lawn with people and long shadows"
     },
     {
       "id": "building",
       "animated": false,
-      "src": "/mood/building/still.png",
+      "src": "/mood/building.webp",
       "alt": "Terracotta building facade with a walker and dog"
     },
     {
       "id": "warehouse",
       "animated": false,
-      "src": "/mood/warehouse/still.png",
+      "src": "/mood/warehouse.webp",
       "alt": "Dusty warehouse interior with shafts of light"
+    },
+    {
+      "id": "seaside",
+      "animated": false,
+      "src": "/mood/seaside.webp",
+      "alt": "Coastal path along cliffs above the sea"
     }
   ],
   "projects": [

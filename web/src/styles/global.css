@@ -245,10 +245,14 @@ html[data-theme='light'] .theme-toggle-thumb {
   user-select: none;
 }
 
+.mood-layer picture,
 .mood-layer img {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.mood-layer img {
   object-fit: cover;
 }
 
@@ -466,23 +470,27 @@ html[data-theme='light'] .theme-toggle-thumb {
   }
 
   .home-mood {
-    display: block;
+    display: flex;
+    align-items: center; /* vertical center in right column */
+    justify-content: center; /* horizontal center */
     position: sticky;
     top: 4.5rem;
     width: 100%;
-    max-width: 22rem;
-    justify-self: end;
+    max-width: none;
+    justify-self: stretch;
+    min-height: calc(100vh - 5.5rem);
+    align-self: start;
   }
 
   .home-mood .hero-shell {
-    max-width: none;
-    margin-inline: 0;
+    width: min(100%, 20rem);
+    max-width: 20rem;
+    margin-inline: auto;
   }
 
   .home-mood .hero-shell-stage {
     aspect-ratio: 9 / 16;
     width: 100%;
-    /* Prefer Lee tall panel height over forcing a wide billboard */
     max-height: min(36rem, 78vh);
   }
 }
@@ -507,6 +515,61 @@ html[data-theme='light'] .theme-toggle-thumb {
   .theme-toggle-label {
     display: none;
   }
+}
+
+/* Unlisted /mood index — all homepage stills */
+.mood-index-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+  gap: 1.25rem 1rem;
+  width: 100%;
+}
+
+.mood-index-card {
+  margin: 0;
+}
+
+.mood-index-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.mood-index-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border-radius: var(--frame-radius);
+  border: 1px solid var(--frame-border);
+  background: var(--frame-bg);
+  overflow: hidden;
+}
+
+.mood-index-frame picture,
+.mood-index-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.mood-index-frame img {
+  object-fit: cover;
+}
+
+.mood-index-id {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.mood-index-link:hover .mood-index-id {
+  color: var(--fg);
 }
 
 @media (prefers-reduced-motion: reduce) {

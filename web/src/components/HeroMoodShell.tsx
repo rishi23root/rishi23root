@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import MoodStill from './moods/MoodStill'
 import MoodStub from './moods/MoodStub'
 import type { MoodSlot } from './moods/types'
@@ -6,7 +6,7 @@ import type { MoodSlot } from './moods/types'
 export type { MoodSlot }
 export type HeroMoodShellProps = {
   moods: MoodSlot[]
-  /** Override random pick (e.g. ?mood=cyclist) — also read from URL once on mount */
+  /** Override random pick (e.g. ?mood=cyclist) — also read from URL once */
   initialMoodId?: string
 }
 
@@ -26,21 +26,16 @@ function readMoodParam(): string | null {
 
 /**
  * Portrait mood panel host (desktop split).
- * One client-only mood pick among static stills: cyclist, park, building, warehouse.
- * No SSR/hydrate/effect triple-random; fade respects prefers-reduced-motion via CSS.
+ * Mounted with client:only — single client pick per full page load
+ * (random or ?mood= / initialMoodId). No SSR random, no effect re-pick, no fade thrash.
  */
 export default function HeroMoodShell({
   moods,
   initialMoodId,
 }: HeroMoodShellProps) {
-  // null on SSR + first paint — pick once after mount (stable; no hydration mismatch)
-  const [slot, setSlot] = useState<MoodSlot | null>(null)
-
-  useEffect(() => {
-    setSlot(pickMood(moods, initialMoodId ?? readMoodParam()))
-    // Static site.json moods — pick exactly once per mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const [slot] = useState<MoodSlot | null>(() =>
+    pickMood(moods, initialMoodId ?? readMoodParam()),
+  )
 
   const label = useMemo(() => {
     if (!slot) return 'Mood illustration placeholder'
@@ -50,14 +45,14 @@ export default function HeroMoodShell({
   return (
     <div
       className="hero-shell"
-      data-mood-id={slot?.id ?? 'pending'}
+      data-mood-id={slot?.id ?? 'none'}
       data-animated="false"
       data-component={slot?.component ?? ''}
     >
       <div className="hero-shell-stage" role="img" aria-label={label}>
         {slot ? (
           slot.src ? (
-            <MoodStill src={slot.src} fade />
+            <MoodStill src={slot.src} fade={false} />
           ) : (
             <MoodStub id={slot.id} />
           )

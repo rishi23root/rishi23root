@@ -128,7 +128,7 @@ const personJsonLd = {
     {
       moods.length ? (
         <aside class="home-mood" aria-label="Mood illustration">
-          <HeroMoodShell client:load moods={moods} />
+          <HeroMoodShell client:only="react" moods={moods} />
         </aside>
       ) : null
     }
