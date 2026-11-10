@@ -132,22 +132,13 @@ const personJsonLd = {
             if (!mq.matches) {
               inner.style.left = ''
               inner.style.width = ''
-              inner.style.top = ''
-              inner.style.height = ''
               return
             }
-            /* Column box (aside height is 0) + space below sticky chrome in left col */
+            /* Pin plate to mood column width; vertical stage is full viewport (CSS) */
             var r = mood.getBoundingClientRect()
             if (!r.width) return
-            var chrome = document.querySelector('.home-left > .chrome')
-            var chromeBottom = chrome
-              ? chrome.getBoundingClientRect().bottom
-              : 0
-            var top = Math.max(0, chromeBottom)
             inner.style.left = r.left + 'px'
             inner.style.width = r.width + 'px'
-            inner.style.top = top + 'px'
-            inner.style.height = Math.max(0, window.innerHeight - top) + 'px'
           }
 
           sync()

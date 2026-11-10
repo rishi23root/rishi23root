@@ -834,18 +834,23 @@ html[data-theme='light'] .theme-icon-moon {
     margin: 0;
   }
 
-  /* Entire left stack (chrome + copy) — mood never shares this column */
+  /*
+   * Left stack vertically complements tall mood plate: match viewport
+   * stage height and center chrome+copy when shorter than the plate.
+   */
   .shell-home .home-left {
     grid-column: 1;
     grid-row: 1;
     max-width: 42rem;
     width: 100%;
+    min-height: 100svh;
+    box-sizing: border-box;
+    justify-content: safe center;
   }
 
   /*
    * Image-only right column. Aside is a zero-height grid anchor (no row
-   * inflation). Inner plate is fixed in that column — chrome stays in
-   * .home-left. Sync script centers the plate in the column below chrome.
+   * inflation). Inner plate is fixed + viewport-tall; sync sets left/width.
    */
   .shell-home .home-mood {
     display: block; /* override base mobile hide */
@@ -862,6 +867,8 @@ html[data-theme='light'] .theme-icon-moon {
 
   .shell-home .home-mood-inner {
     position: fixed;
+    top: 0;
+    height: 100svh;
     z-index: 1;
     display: flex;
     align-items: center;
@@ -876,9 +883,9 @@ html[data-theme='light'] .theme-icon-moon {
   }
 
   .shell-home .home-mood .hero-shell-stage {
-    /* Width-led 9:16; fill most of the space below chrome */
+    /* Width-led 9:16; ~full viewport height budget */
     aspect-ratio: 9 / 16;
-    width: min(100%, calc((100vh - 3.25rem) * 9 / 16));
+    width: min(100%, calc((100svh - 2rem) * 9 / 16));
     height: auto;
     margin-inline: auto;
   }
@@ -901,7 +908,7 @@ html[data-theme='light'] .theme-icon-moon {
   }
 
   .shell-home .home-mood .hero-shell-stage {
-    width: min(100%, calc((100vh - 2.75rem) * 9 / 16));
+    width: min(100%, calc((100svh - 1.5rem) * 9 / 16));
   }
 }
 
