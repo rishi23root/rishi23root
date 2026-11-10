@@ -4,7 +4,7 @@ type Props = {
   fade?: boolean
 }
 
-/** Forest / seaside still plates — single image, optional quiet fade. */
+/** Static mood plate — single image, optional quiet fade. */
 export default function MoodStill({ src, fade = true }: Props) {
   return (
     <div className={`mood-scene mood-still-scene${fade ? ' is-fade' : ''}`}>
