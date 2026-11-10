@@ -48,82 +48,89 @@ const personJsonLd = {
 ---
 
 <BaseLayout path="/" jsonLd={personJsonLd}>
-  <div class="page">
-    <section class="hero" aria-label="Hero">
-      <h1 class="visually-hidden">{site.github.name}</h1>
-      {moods.length ? <HeroMoodShell client:load moods={moods} /> : null}
-    </section>
+  <div class="page home-split">
+    <h1 class="visually-hidden">{site.github.name}</h1>
 
-    <section class="section">
-      <p class="voice-bio">{voiceBio}</p>
-    </section>
+    <div class="home-copy">
+      <section class="section">
+        <p class="voice-bio">{voiceBio}</p>
+      </section>
 
-    <section class="section">
-      <h2>Writing</h2>
-      {
-        posts.length ? (
-          <ul class="quiet-list">
-            {posts.slice(0, 5).map((post) => (
+      <section class="section">
+        <h2>Writing</h2>
+        {
+          posts.length ? (
+            <ul class="quiet-list">
+              {posts.slice(0, 5).map((post) => (
+                <li>
+                  <a href={`/blog/${post.data.slug}`}>{post.data.title}</a>
+                  <time datetime={post.data.date.toISOString()}>
+                    {post.data.date.toISOString().slice(0, 10)}
+                  </time>
+                  {post.data.summary ? (
+                    <span class="meta">— {post.data.summary}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="empty">No posts yet.</p>
+          )
+        }
+      </section>
+
+      <section class="section">
+        <h2>Work</h2>
+        <ul class="quiet-list">
+          {
+            projects.map((project) => (
               <li>
-                <a href={`/blog/${post.data.slug}`}>{post.data.title}</a>
-                <time datetime={post.data.date.toISOString()}>
-                  {post.data.date.toISOString().slice(0, 10)}
-                </time>
-                {post.data.summary ? (
-                  <span class="meta">— {post.data.summary}</span>
+                <a href={project.url}>{project.title}</a>
+                {project.blurb ? (
+                  <span class="blurb"> — {project.blurb}</span>
                 ) : null}
               </li>
-            ))}
-          </ul>
-        ) : (
-          <p class="empty">No posts yet.</p>
-        )
-      }
-    </section>
+            ))
+          }
+        </ul>
+      </section>
 
-    <section class="section">
-      <h2>Work</h2>
-      <ul class="quiet-list">
-        {
-          projects.map((project) => (
-            <li>
-              <a href={project.url}>{project.title}</a>
-              {project.blurb ? (
-                <span class="blurb"> — {project.blurb}</span>
-              ) : null}
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+      {
+        capabilities.length ? (
+          <section class="section">
+            <h2>Capabilities</h2>
+            <ul class="quiet-list">
+              {capabilities.map((item) => (
+                <li>
+                  <span class="capability-heading">{item.heading}</span>
+                  <span class="blurb"> — {item.body}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null
+      }
+
+      <section class="section">
+        <h2>Contact</h2>
+        <ul class="quiet-list contact">
+          {
+            socials.map((item) => (
+              <li>
+                <a href={item.href}>{item.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </div>
 
     {
-      capabilities.length ? (
-        <section class="section">
-          <h2>Capabilities</h2>
-          <ul class="quiet-list">
-            {capabilities.map((item) => (
-              <li>
-                <span class="capability-heading">{item.heading}</span>
-                <span class="blurb"> — {item.body}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+      moods.length ? (
+        <aside class="home-mood" aria-label="Mood illustration">
+          <HeroMoodShell client:load moods={moods} />
+        </aside>
       ) : null
     }
-
-    <section class="section">
-      <h2>Contact</h2>
-      <ul class="quiet-list contact">
-        {
-          socials.map((item) => (
-            <li>
-              <a href={item.href}>{item.label}</a>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
   </div>
 </BaseLayout>

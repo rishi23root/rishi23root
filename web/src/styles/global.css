@@ -64,7 +64,7 @@ a:hover {
 }
 
 .shell {
-  width: min(100% - 2rem, 72rem);
+  width: min(100% - 2rem, 64rem);
   margin-inline: auto;
   padding-bottom: 4rem;
 }
@@ -74,8 +74,8 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  /* Align wordmark with text-column / footer divider measure */
-  max-width: var(--measure);
+  /* Full shell on desktop split; measure-capped on narrow via media below */
+  max-width: none;
   width: 100%;
   margin-inline: auto;
   padding: 1.15rem 0 1rem;
@@ -177,24 +177,37 @@ html[data-theme='light'] .theme-toggle-thumb {
   gap: 2.25rem;
 }
 
-.hero {
+/* Lee-like home: text column + tall mood panel (desktop) */
+.home-split {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 2.25rem;
   width: 100%;
 }
 
-/* Widescreen hero shell — ~70–80% viewport */
+.home-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.home-mood {
+  display: none; /* text-only below 1024px */
+  min-width: 0;
+}
+
 .hero-shell {
-  width: min(100%, 80vw);
-  max-width: 68rem;
+  width: 100%;
+  max-width: none;
   margin-inline: auto;
 }
 
 .hero-shell-stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 9 / 16; /* Lee portrait mood box */
   border-radius: var(--frame-radius);
   border: 1px solid var(--frame-border);
   background: var(--frame-bg);
@@ -240,7 +253,7 @@ html[data-theme='light'] .theme-toggle-thumb {
 }
 
 .mood-still-scene.is-fade .mood-still {
-  animation: mood-still-fade 700ms ease-out both;
+  animation: mood-still-fade 280ms ease-out both;
 }
 
 @keyframes mood-still-fade {
@@ -253,8 +266,8 @@ html[data-theme='light'] .theme-toggle-thumb {
 }
 
 .voice-bio {
-  margin: 0 auto;
-  max-width: var(--measure);
+  margin: 0;
+  max-width: none;
   width: 100%;
   font-family: var(--serif);
   font-size: 1.12rem;
@@ -271,6 +284,11 @@ html[data-theme='light'] .theme-toggle-thumb {
   max-width: var(--measure);
   width: 100%;
   margin-inline: auto;
+}
+
+.home-copy .section {
+  margin-inline: 0;
+  max-width: none;
 }
 
 .section h2 {
@@ -348,7 +366,7 @@ html[data-theme='light'] .theme-toggle-thumb {
   border-top: 1px solid var(--border);
   font-size: 0.85rem;
   color: var(--muted);
-  max-width: var(--measure);
+  max-width: none;
   margin-inline: auto;
   width: 100%;
 }
@@ -434,15 +452,58 @@ html[data-theme='light'] .theme-toggle-thumb {
   border: 0;
 }
 
-@media (max-width: 720px) {
-  .hero-shell {
+/* Desktop / laptop: text left + tall mood right (~40% width, Lee 9/16) */
+@media (min-width: 1024px) {
+  .home-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(14rem, 0.9fr);
+    column-gap: 2.75rem;
+    align-items: start;
+  }
+
+  .home-copy {
+    max-width: 40rem;
+  }
+
+  .home-mood {
+    display: block;
+    position: sticky;
+    top: 4.5rem;
     width: 100%;
+    max-width: 22rem;
+    justify-self: end;
   }
 
-  .hero-shell-stage {
-    aspect-ratio: 4 / 3;
+  .home-mood .hero-shell {
+    max-width: none;
+    margin-inline: 0;
   }
 
+  .home-mood .hero-shell-stage {
+    aspect-ratio: 9 / 16;
+    width: 100%;
+    /* Prefer Lee tall panel height over forcing a wide billboard */
+    max-height: min(36rem, 78vh);
+  }
+}
+
+@media (max-width: 1023px) {
+  .home-mood {
+    display: none !important;
+  }
+
+  .home-copy .section {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+
+  .chrome,
+  .site-footer {
+    max-width: var(--measure);
+  }
+}
+
+@media (max-width: 720px) {
   .theme-toggle-label {
     display: none;
   }
