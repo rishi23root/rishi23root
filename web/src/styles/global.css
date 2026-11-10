@@ -104,12 +104,14 @@ a:hover {
   width: 100%;
   margin-inline: auto;
   padding: 0.7rem 0 0.55rem;
+  /* Sticky only off-home — landing chrome scrolls with .home-left */
   position: sticky;
   top: 0;
   z-index: 20;
   background: color-mix(in srgb, var(--chrome) 92%, transparent);
   backdrop-filter: blur(8px);
 }
+
 
 .chrome-start {
   display: flex;
@@ -220,6 +222,12 @@ html[data-theme='light'] .theme-icon-moon {
 .home-left > .chrome {
   max-width: none;
   margin-inline: 0;
+  /* Scroll away with left column — not sticky/fixed */
+  position: static;
+  top: auto;
+  z-index: auto;
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .home-copy {
