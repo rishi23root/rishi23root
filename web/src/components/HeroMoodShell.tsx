@@ -1,21 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
+import MoodCyclist from './moods/MoodCyclist'
+import MoodStill from './moods/MoodStill'
+import MoodStub from './moods/MoodStub'
+import type { MoodSlot } from './moods/types'
 
-/** Site-content mood slot — assets/layers fill in later; shell is empty for now. */
-export type MoodSlot = {
-  id: string
-  animated?: boolean
-  src?: string
-  layers?: {
-    base: string
-    clouds?: string
-    shadows?: string
-    grass?: string
-  }
-  /** Future named scene component id */
-  component?: string
-  alt?: string
-}
-
+export type { MoodSlot }
 export type HeroMoodShellProps = {
   moods: MoodSlot[]
   /** Override random pick (e.g. ?mood=cyclist) — also read from URL on mount */
@@ -31,15 +20,57 @@ function pickMood(moods: MoodSlot[], preferred?: string | null): MoodSlot | null
   return moods[Math.floor(Math.random() * moods.length)] ?? null
 }
 
+function usePrefersReducedMotion(): boolean {
+  const [reduce, setReduce] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => setReduce(mq.matches)
+    sync()
+    if (mq.addEventListener) mq.addEventListener('change', sync)
+    else mq.addListener(sync)
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', sync)
+      else mq.removeListener(sync)
+    }
+  }, [])
+  return reduce
+}
+
+function Scene({
+  slot,
+  reduceMotion,
+}: {
+  slot: MoodSlot
+  reduceMotion: boolean
+}) {
+  if (slot.id === 'cyclist' && slot.layers?.base) {
+    return <MoodCyclist layers={slot.layers} reduceMotion={reduceMotion} />
+  }
+
+  if ((slot.id === 'forest' || slot.id === 'seaside') && slot.src) {
+    return <MoodStill src={slot.src} fade={!reduceMotion} />
+  }
+
+  if (slot.src) {
+    return <MoodStill src={slot.src} fade={!reduceMotion} />
+  }
+
+  if (slot.layers?.base && slot.animated) {
+    return <MoodCyclist layers={slot.layers} reduceMotion={reduceMotion} />
+  }
+
+  return <MoodStub id={slot.id} />
+}
+
 /**
  * Widescreen hero host (~70–80% viewport).
- * v1: empty placeholder shell + random slot selection.
- * Later: mount windy/still scenes from mood demos into this stage.
+ * Random mood on load; real scenes for cyclist / forest / seaside; stubs otherwise.
  */
 export default function HeroMoodShell({
   moods,
   initialMoodId,
 }: HeroMoodShellProps) {
+  const reduceMotion = usePrefersReducedMotion()
   const [slot, setSlot] = useState<MoodSlot | null>(() =>
     pickMood(moods, initialMoodId ?? null),
   )
@@ -61,12 +92,15 @@ export default function HeroMoodShell({
     <div
       className="hero-shell"
       data-mood-id={slot?.id ?? 'none'}
-      data-animated={slot?.animated ? 'true' : 'false'}
+      data-animated={slot?.animated && !reduceMotion ? 'true' : 'false'}
       data-component={slot?.component ?? ''}
     >
       <div className="hero-shell-stage" role="img" aria-label={label}>
-        {/* Empty stage — animations / layers land incrementally */}
-        <div className="hero-shell-empty" aria-hidden="true" />
+        {slot ? (
+          <Scene slot={slot} reduceMotion={reduceMotion} />
+        ) : (
+          <div className="hero-shell-empty" aria-hidden="true" />
+        )}
       </div>
     </div>
   )
