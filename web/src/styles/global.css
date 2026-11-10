@@ -348,39 +348,47 @@ html[data-theme='light'] .theme-toggle-thumb {
   font-weight: 400;
 }
 
-.quiet-list.contact {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0.85rem 1.15rem;
-}
-
-.quiet-list.contact a {
-  color: var(--muted);
-  font-weight: 400;
-}
-
-.quiet-list.contact a:hover {
-  color: var(--fg);
-}
-
 .capability-heading {
   font-weight: 600;
   color: var(--fg);
 }
 
-.site-footer {
-  margin-top: 3.5rem;
-  padding-top: 1rem;
+/* Compact Lee contact strip — icons only at bottom of text column */
+.contact-icons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem 1.05rem;
+  margin-top: 0.5rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--border);
-  font-size: 0.85rem;
-  color: var(--muted);
-  max-width: none;
-  margin-inline: auto;
-  width: 100%;
 }
 
-.site-footer p {
-  margin: 0;
+.contact-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  color: var(--muted);
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.contact-icon:hover,
+.contact-icon:focus-visible {
+  color: var(--fg);
+}
+
+.contact-icon:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.contact-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  display: block;
 }
 
 .prose {
@@ -462,15 +470,16 @@ html[data-theme='light'] .theme-toggle-thumb {
 
 /*
  * Desktop home (Lee): shell is a 2-col grid.
- * Left = chrome + copy + footer. Right = mood art only (no nav/footer).
+ * Left = chrome + copy (+ contact icons). Right = mood art only.
  */
 @media (min-width: 1024px) {
   .shell-home {
     display: grid;
     width: min(100%, 93.75rem);
     margin-inline: auto;
-    grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 1fr);
-    column-gap: 2.75rem;
+    /* Wide: text-led columns + Lee middle gap */
+    grid-template-columns: minmax(0, 1.2fr) minmax(17rem, 0.95fr);
+    column-gap: clamp(2.75rem, 4.5vw, 5rem);
     align-items: start;
   }
 
@@ -498,17 +507,9 @@ html[data-theme='light'] .theme-toggle-thumb {
     max-width: 42rem;
   }
 
-  .shell-home > .site-footer {
-    grid-column: 1;
-    grid-row: 3;
-    max-width: 42rem;
-    margin-inline: 0;
-    width: 100%;
-  }
-
   /*
    * Image-only right column. Aside is a zero-height grid anchor (no row
-   * inflation). Inner plate is fixed in that column — chrome/footer stay col 1.
+   * inflation). Inner plate is fixed in that column — chrome stays col 1.
    */
   .shell-home .home-mood {
     display: block; /* override base mobile hide */
@@ -533,18 +534,43 @@ html[data-theme='light'] .theme-toggle-thumb {
   }
 
   .shell-home .home-mood .hero-shell {
-    width: auto;
-    max-width: min(100%, 30rem);
+    width: min(100%, 24rem);
+    max-width: min(100%, 24rem);
     margin-inline: auto;
   }
 
   .shell-home .home-mood .hero-shell-stage {
+    /* Width-led 9:16; width capped so height stays ≤ ~viewport */
     aspect-ratio: 9 / 16;
-    height: min(88vh, calc(100vh - 1.5rem));
-    width: auto;
-    max-width: 100%;
-    max-height: none;
+    width: min(100%, calc((100vh - 1.5rem) * 9 / 16));
+    height: auto;
     margin-inline: auto;
+  }
+}
+
+/* Compact desktop: Lee-like wider mood plate + keep middle gap */
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .shell-home {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 1.12fr);
+    column-gap: clamp(2.25rem, 3.8vw, 4rem);
+  }
+
+  .shell-home .home-copy,
+  .shell-home > .chrome {
+    max-width: 36rem;
+  }
+
+  .shell-home .home-mood .hero-shell {
+    width: 100%;
+    max-width: none;
+  }
+
+  .shell-home .home-mood .hero-shell-stage {
+    width: min(100%, calc((100vh - 1.25rem) * 9 / 16));
+  }
+
+  .shell-home .home-mood-inner {
+    top: max(0.5rem, calc((100vh - min(100vw, 100vh)) / 12));
   }
 }
 
@@ -554,13 +580,13 @@ html[data-theme='light'] .theme-toggle-thumb {
     display: none !important;
   }
 
-  .home-copy .section {
+  .home-copy .section,
+  .home-copy .contact-icons {
     max-width: var(--measure);
     margin-inline: auto;
   }
 
-  .chrome,
-  .site-footer {
+  .chrome {
     max-width: var(--measure);
   }
 }
