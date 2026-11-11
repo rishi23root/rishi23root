@@ -2,10 +2,11 @@
 import { getCollection, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ContactIcons from '../../components/ContactIcons.astro'
-import { publishedPostsFilter, site } from '../../lib/site'
+import { assertSlugMatchesFile, publishedPostsFilter, site } from '../../lib/site'
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', publishedPostsFilter)
+  posts.forEach(assertSlugMatchesFile)
   return posts.map((post) => ({
     params: { slug: post.data.slug },
     props: { post },
