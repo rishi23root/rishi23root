@@ -49,7 +49,7 @@ export default function HeroMoodShell({
       data-animated="false"
       data-component={slot?.component ?? ''}
     >
-      <div className="hero-shell-stage" role="img" aria-label={label}>
+      <div className="hero-shell-stage mood-inset" role="img" aria-label={label}>
         {slot ? (
           slot.src ? (
             <MoodStill src={slot.src} fade={false} />
