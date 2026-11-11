@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ContactIcons from '../../components/ContactIcons.astro'
-import { publishedPostsFilter } from '../../lib/site'
+import { formatPostDate, publishedPostsFilter, readingTimeMinutes } from '../../lib/site'
 
 const posts = (await getCollection('posts', publishedPostsFilter)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
@@ -16,8 +16,12 @@ const posts = (await getCollection('posts', publishedPostsFilter)).sort(
 >
   <div class="page blog-page">
     <section class="page-intro reveal" style="--i: 0">
-      <h1>Writing</h1>
-      <p class="lede">Short notes. Same posts tree as the profile README.</p>
+      <p class="page-eyebrow">Writing</p>
+      <h1>Notes from building</h1>
+      <p class="lede">
+        Short, answer-first notes on SaaS, automation and security. Same posts
+        tree as the profile README.
+      </p>
     </section>
 
     {
@@ -25,17 +29,30 @@ const posts = (await getCollection('posts', publishedPostsFilter)).sort(
         <ul class="post-list reveal" style="--i: 1">
           {posts.map((post) => (
             <li class="post-list-item">
-              <time datetime={post.data.date.toISOString()}>
-                {post.data.date.toISOString().slice(0, 10)}
-              </time>
-              <div class="post-list-body">
+              <p class="post-list-meta">
+                <time datetime={post.data.date.toISOString()}>
+                  {formatPostDate(post.data.date)}
+                </time>
+                <span aria-hidden="true">·</span>
+                <span>{readingTimeMinutes(post.body, post.data.faq)} min read</span>
+                {post.data.draft ? (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span class="post-draft">Draft</span>
+                  </>
+                ) : null}
+              </p>
+              <h2 class="post-list-heading">
                 <a class="post-list-title" href={`/writing/${post.data.slug}`}>
                   {post.data.title}
                 </a>
-                {post.data.summary ? (
-                  <p class="post-list-summary">{post.data.summary}</p>
-                ) : null}
-              </div>
+              </h2>
+              {post.data.summary ? (
+                <p class="post-list-summary">{post.data.summary}</p>
+              ) : null}
+              {post.data.tags.length ? (
+                <p class="post-list-tags">{post.data.tags.join(' · ')}</p>
+              ) : null}
             </li>
           ))}
         </ul>
