@@ -40,6 +40,7 @@ html[data-theme='dark'] {
   color-scheme: dark;
 }
 
+
 html[data-theme='light'] {
   --bg: #f2ebe0;
   --fg: #1c1b19;
@@ -205,30 +206,21 @@ html[data-theme='light'] .theme-icon-moon {
 .home-split {
   display: flex;
   flex-direction: column;
-  gap: 2.25rem;
+  gap: clamp(1.5rem, 2.4vw, 2.25rem);
   width: 100%;
 }
 
-/* Left stack: chrome + prose (Lee — chrome never spans the mood col) */
-.home-left {
+/* Text column: chrome + prose (chrome never spans the mood column) */
+.home-text {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   min-width: 0;
   width: 100%;
-  box-sizing: border-box;
-  /* Desktop JS sets equal padding-block vs mood band; fallback pad here */
-  padding-block: clamp(2rem, 1.5em + 1.1vw, 3rem);
+  padding-block: clamp(1.5rem, 4vw, 3rem);
 }
 
-.home-left-stack {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-width: 0;
-}
-
-.home-left .chrome {
+.home-text .chrome {
   max-width: none;
   margin-inline: 0;
   /* Scroll away with left column — not sticky/fixed */
@@ -242,7 +234,6 @@ html[data-theme='light'] .theme-icon-moon {
 .home-copy {
   display: flex;
   flex-direction: column;
-  /* Lee vertical rhythm between bio / writing / work / capabilities */
   gap: clamp(1.5rem, 2.4vw, 2.25rem);
   min-width: 0;
   width: 100%;
@@ -253,12 +244,12 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .home-copy .home-section h2 {
-  margin: 0 0 0.85rem;
-  font-size: 0.95rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: -0.01em;
-  text-transform: none;
-  color: var(--fg);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .home-copy .home-section-bio {
@@ -322,7 +313,7 @@ html[data-theme='light'] .theme-icon-moon {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.25rem 0.45rem;
-  padding: 0.8rem 0;
+  padding: 0.85rem 0;
   border-bottom: 1px solid var(--border);
   font-size: 1.05rem;
   line-height: 1.45;
@@ -354,8 +345,8 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .home-copy .contact-icons {
-  margin-top: 0.35rem;
-  padding-top: 1.15rem;
+  margin-top: 0;
+  padding-top: 1.5rem;
 }
 
 .home-mood {
@@ -372,12 +363,13 @@ html[data-theme='light'] .theme-icon-moon {
 .hero-shell-stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16; /* Lee portrait mood box */
+  aspect-ratio: 9 / 16; /* portrait mood box */
   border-radius: var(--frame-radius);
   border: 1px solid var(--frame-border);
   background: var(--frame-bg);
   overflow: hidden;
 }
+
 
 .hero-shell-empty {
   position: absolute;
@@ -436,13 +428,13 @@ html[data-theme='light'] .theme-icon-moon {
 
 .voice-bio {
   margin: 0;
-  max-width: 40rem;
+  max-width: 34ch;
   width: 100%;
   font-family: var(--sans);
-  font-size: clamp(1.32rem, 1.15rem + 0.6vw, 1.55rem);
+  font-size: clamp(1.38rem, 1.15rem + 0.7vw, 1.7rem);
   font-weight: 400;
-  line-height: 1.55;
-  letter-spacing: -0.011em;
+  line-height: 1.45;
+  letter-spacing: -0.015em;
   color: var(--fg);
   text-wrap: pretty;
 }
@@ -820,106 +812,58 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 /*
- * Desktop home (Lee): shell is a 2-col grid.
- * Left = chrome + copy (+ contact icons). Right = mood art only.
+ * Desktop home: two columns. Mood plate on the LEFT (~40%), text on the
+ * RIGHT (~60%). The mood column is sticky and viewport-tall; no JS sizing.
  */
 @media (min-width: 1024px) {
   .shell-home {
-    display: grid;
-    /* ~1500px Lee home-layout width */
     width: min(100%, 93.75rem);
     margin-inline: auto;
-    /* Breathing text column + mood + Lee middle gap */
-    grid-template-columns: minmax(0, 42rem) minmax(22rem, 1fr);
-    column-gap: clamp(3rem, 5.5vw, 6rem);
-    align-items: start;
-    /* Vertical pad lives on .home-left (equal block), not shell */
     padding-bottom: 0;
   }
 
-  .shell-home > main {
-    display: contents;
-  }
-
   .shell-home .home-split {
-    display: contents;
-    width: auto;
-    margin: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    column-gap: clamp(2rem, 4.5vw, 5rem);
+    align-items: start;
   }
 
-  /*
-   * Left stack complements tall mood plate. JS sets min-height to the
-   * mood/viewport band and equal padding-block when stack is shorter.
-   */
-  .shell-home .home-left {
+  .shell-home .home-mood {
+    display: block;
     grid-column: 1;
     grid-row: 1;
-    max-width: 42rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  /*
-   * Image-only right column. Aside is a zero-height grid anchor (no row
-   * inflation). Inner plate is fixed + viewport-tall; sync sets left/width.
-   */
-  .shell-home .home-mood {
-    display: block; /* override base mobile hide */
-    grid-column: 2;
-    grid-row: 1;
     align-self: stretch;
-    width: 100%;
-    height: 0;
-    overflow: visible;
-    margin: 0;
-    padding: 0;
-    pointer-events: none;
+    min-width: 0;
   }
 
-  .shell-home .home-mood-inner {
-    position: fixed;
+  .shell-home .home-mood-sticky {
+    position: sticky;
     top: 0;
     height: 100svh;
-    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: auto;
-  }
-
-  .shell-home .home-mood .hero-shell {
-    width: min(100%, 32rem);
-    max-width: min(100%, 32rem);
-    margin-inline: auto;
-  }
-
-  .shell-home .home-mood .hero-shell-stage {
-    /* Width-led 9:16; ~full viewport height budget */
-    aspect-ratio: 9 / 16;
-    width: min(100%, calc((100svh - 2rem) * 9 / 16));
-    height: auto;
-    margin-inline: auto;
-  }
-}
-
-/* Compact desktop: Lee-like wider mood plate + keep middle gap */
-@media (min-width: 1024px) and (max-width: 1399px) {
-  .shell-home {
-    grid-template-columns: minmax(0, 36rem) minmax(21rem, 1fr);
-    column-gap: clamp(2.25rem, 4vw, 4rem);
-  }
-
-  .shell-home .home-left {
-    max-width: 36rem;
+    padding-block: clamp(1.5rem, 4vw, 3rem);
   }
 
   .shell-home .home-mood .hero-shell {
     width: 100%;
-    max-width: none;
+    display: flex;
+    justify-content: center;
   }
 
   .shell-home .home-mood .hero-shell-stage {
-    width: min(100%, calc((100svh - 1.5rem) * 9 / 16));
+    width: min(100%, calc((100svh - 2 * clamp(1.5rem, 4vw, 3rem)) * 9 / 16));
+    height: auto;
+  }
+
+  .shell-home .home-text {
+    grid-column: 2;
+    grid-row: 1;
+    max-width: 44rem;
+    min-height: 100svh;
+    justify-content: center;
   }
 }
 
@@ -929,7 +873,7 @@ html[data-theme='light'] .theme-icon-moon {
     display: none !important;
   }
 
-  .home-left {
+  .home-text {
     max-width: var(--measure);
     margin-inline: auto;
   }
@@ -946,8 +890,8 @@ html[data-theme='light'] .theme-icon-moon {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
-  gap: 1.25rem 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: 1.5rem 1rem;
   width: 100%;
 }
 
