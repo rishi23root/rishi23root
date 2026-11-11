@@ -33,6 +33,7 @@ html[data-theme='dark'] {
   --frame-border: rgba(242, 235, 224, 0.14);
   --frame-radius: 18px;
   --accent: #e6dccb;
+  --row-hover: rgba(242, 235, 224, 0.05);
   color-scheme: dark;
 }
 
@@ -60,6 +61,9 @@ html[data-theme='dark'] {
   --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7)); /* top/bottom */
   --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem); /* between sections */
   --row-pad: 0.85rem; /* hairline list rows */
+  --row-pad-tight: 0.6rem; /* home content rows */
+  --row-bleed: 0.75rem; /* hover wash extends past the text column */
+  --row-radius: 10px;
   --home-max: 93.75rem;
   --home-gap: clamp(var(--space-6), 4.5vw, 5rem); /* mood <-> text */
 
@@ -93,6 +97,7 @@ html[data-theme='light'] {
   --frame-bg: #e8dfd0;
   --frame-border: rgba(28, 27, 25, 0.12);
   --accent: #2a2825;
+  --row-hover: rgba(28, 27, 25, 0.05);
   color-scheme: light;
 }
 
@@ -317,92 +322,98 @@ html[data-theme='light'] .theme-icon-moon {
   max-width: 40rem;
 }
 
-/* Writing: title left / date right, hairline rows (Lee Notes rhythm) */
-.home-writing-list {
+/*
+ * Home content lists (Writing / Work / Capabilities): no per-row hairlines.
+ * Rows are spaced cards with a soft hover wash; the bleed keeps text aligned
+ * with the section label while the hover background extends past it.
+ */
+.home-writing-list,
+.home-stack-list {
   list-style: none;
-  margin: 0;
+  margin: 0 calc(-1 * var(--row-bleed));
   padding: 0;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
+.home-writing-list li,
+.home-stack-list li {
+  position: relative;
+  padding: var(--row-pad-tight) var(--row-bleed);
+  border-radius: var(--row-radius);
+  line-height: 1.45;
+  transition: background-color var(--dur-fast) ease;
+}
+
+.home-writing-list li:hover,
+.home-stack-list li:hover,
+.home-writing-list li:focus-within,
+.home-stack-list li:focus-within {
+  background: var(--row-hover);
+}
+
+/* Writing: title left / date right */
 .home-writing-list li {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 1.5rem 2rem;
-  padding: var(--row-pad) 0;
-  border-bottom: 1px solid var(--border);
+  gap: var(--space-2) var(--space-6);
   font-size: 1.12rem;
-  line-height: 1.45;
 }
 
-.home-writing-list li:first-child {
-  border-top: 1px solid var(--border);
-}
-
-.home-writing-list a {
+.home-writing-list a,
+.home-stack-list a {
   color: var(--fg);
   text-decoration: none;
   font-weight: 500;
   min-width: 0;
 }
 
-.home-writing-list a:hover {
+/* Whole row is the click target for linked rows */
+.home-writing-list a::after,
+.home-stack-list a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.home-writing-list li:hover a,
+.home-stack-list li:hover a {
   color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 0.14em;
+}
+
+.home-writing-list a:focus-visible,
+.home-stack-list a:focus-visible {
+  outline: none;
+}
+
+.home-writing-list li:has(a:focus-visible),
+.home-stack-list li:has(a:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
 }
 
 .home-writing-list time {
   flex-shrink: 0;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
 }
 
-/* Work / capabilities: same hairline breathing room */
-.home-stack-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-}
-
+/* Work / capabilities: title, then a muted one-line blurb underneath */
 .home-stack-list li {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 0.45rem;
-  padding: var(--row-pad) 0;
-  border-bottom: 1px solid var(--border);
+  flex-direction: column;
+  gap: 0.1rem;
   font-size: 1.05rem;
-  line-height: 1.45;
-}
-
-.home-stack-list li:first-child {
-  border-top: 1px solid var(--border);
-}
-
-.home-stack-list a {
-  color: var(--fg);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.home-stack-list a:hover {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 0.14em;
 }
 
 .home-stack-list .blurb {
   color: var(--muted);
   font-weight: 400;
-}
-
-.home-stack-list .blurb::before {
-  content: '— ';
+  font-size: 0.95rem;
 }
 
 .home-copy .contact-icons {
@@ -955,10 +966,16 @@ html[data-theme='light'] .theme-icon-moon {
     height: auto;
   }
 
+  /* Intro uses the whole text column on desktop */
+  .shell-home .home-section-bio,
+  .shell-home .voice-bio {
+    max-width: none;
+  }
+
   .shell-home .home-text {
     grid-column: 2;
     grid-row: 1;
-    max-width: 44rem;
+    max-width: none;
     min-height: 100svh;
     justify-content: center;
   }
