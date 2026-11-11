@@ -37,7 +37,7 @@ html[data-theme='dark'] {
 }
 
 /*
- * Layout tokens (shared by every page and both themes).
+ * Layout + motion tokens (shared by every page and both themes).
  * Use these instead of ad-hoc rem values so spacing stays consistent.
  */
 :root {
@@ -67,6 +67,14 @@ html[data-theme='dark'] {
   --nav-height: 3.25rem;
   --nav-gap: var(--space-3);
   --nav-font: 0.9rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 160ms;
+  --dur: 280ms;
+  --dur-slow: 520ms;
+  --stagger: 60ms;
+  --mood-xfade: 420ms;
 
   /*
    * Experiment: inset shadow on the mood plate. Revert with
@@ -177,7 +185,7 @@ a:hover {
   position: relative;
   color: var(--muted);
   text-decoration: none;
-  transition: color 160ms ease;
+  transition: color var(--dur-fast) ease;
 }
 
 /* Quiet active marker under the current page */
@@ -191,7 +199,7 @@ a:hover {
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--dur) var(--ease-out);
 }
 
 .nav a[aria-current='page']::after {
@@ -484,15 +492,15 @@ html[data-theme='light'] .theme-icon-moon {
 
 /* First paint: soft fade. "next": crossfade old -> new. */
 .mood-still-scene {
-  animation: mood-fade-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: mood-fade-in var(--dur-slow) var(--ease-out) both;
 }
 
 .mood-still-scene.is-entering {
-  animation: mood-fade-in 420ms ease both;
+  animation: mood-fade-in var(--mood-xfade) ease both;
 }
 
 .mood-still-scene.is-leaving {
-  animation: mood-fade-out 420ms ease both;
+  animation: mood-fade-out var(--mood-xfade) ease both;
 }
 
 @keyframes mood-fade-in {
@@ -1051,8 +1059,8 @@ html[data-theme='light'] .theme-icon-moon {
   gap: var(--space-2);
   opacity: 0;
   transition:
-    opacity 280ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
 }
 
 .mood-overlay-top {
@@ -1112,8 +1120,8 @@ html[data-theme='light'] .theme-icon-moon {
 .mood-chip-next {
   cursor: pointer;
   transition:
-    background 160ms ease,
-    color 160ms ease;
+    background var(--dur-fast) ease,
+    color var(--dur-fast) ease;
 }
 
 .mood-chip-link:hover,
@@ -1133,7 +1141,7 @@ html[data-theme='light'] .theme-icon-moon {
 .mood-chip-link span,
 .mood-chip-next span {
   display: inline-block;
-  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--dur-fast) var(--ease-out);
 }
 
 .mood-chip-link:hover span,
@@ -1144,8 +1152,8 @@ html[data-theme='light'] .theme-icon-moon {
 /* /mood index: highlight on hover */
 .mood-index-frame {
   transition:
-    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 280ms ease;
+    transform var(--dur) var(--ease-out),
+    border-color var(--dur) ease;
 }
 
 .mood-index-link:hover .mood-index-frame {
@@ -1153,13 +1161,69 @@ html[data-theme='light'] .theme-icon-moon {
   border-color: var(--border);
 }
 
+/* ---------------------------------------------------------------
+ * Motion: page transitions + entrance reveals
+ * ------------------------------------------------------------- */
+
+/* Cross-document view transitions (Chrome/Edge/Safari 18+). No JS. */
+@view-transition {
+  navigation: auto;
+}
+
+/* Nav + wordmark stay put; only page content crossfades */
+.chrome {
+  view-transition-name: site-chrome;
+}
+
+::view-transition-old(root) {
+  animation: vt-out var(--dur-fast) ease both;
+}
+
+::view-transition-new(root) {
+  animation: vt-in var(--dur) var(--ease-out) both;
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Staggered entrance; set --i on the element for its order */
+.reveal {
+  animation: reveal-in var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .mood-still-scene,
-  .mood-overlay-row,
-  .mood-chip,
-  .mood-chip span {
-    animation: none !important;
-    transition: none !important;
+  @view-transition {
+    navigation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
   }
 
   .mood-still-scene.is-leaving {

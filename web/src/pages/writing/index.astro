@@ -15,14 +15,14 @@ const posts = (await getCollection('posts', publishedPostsFilter)).sort(
   path="/writing"
 >
   <div class="page blog-page">
-    <section class="page-intro">
+    <section class="page-intro reveal" style="--i: 0">
       <h1>Writing</h1>
       <p class="lede">Short notes. Same posts tree as the profile README.</p>
     </section>
 
     {
       posts.length ? (
-        <ul class="post-list">
+        <ul class="post-list reveal" style="--i: 1">
           {posts.map((post) => (
             <li class="post-list-item">
               <time datetime={post.data.date.toISOString()}>
