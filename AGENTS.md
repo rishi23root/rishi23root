@@ -44,6 +44,10 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Regenerate README on GitHub | Actions → **README build** → **Run workflow** | Or push to `master` |
 | Deploy site on GitHub | Actions → **Deploy site** → **Run workflow** | Or push `web/` / `content/` to `master` |
 
+## Blog writing rules
+
+Before writing or editing a post, read `web/BLOG_WRITING_GUIDE.md` (voice, answer-first structure, frontmatter rules, FAQ, callouts, guardrails, pre-publish checklist). There's a short Cursor rule for it in `.cursor/rules/blog-writing.mdc`. Start new posts from `content/posts/post-template.mdx` (a draft that never ships).
+
 ## SEO / frontmatter cheat (canonical site)
 
 `https://rishi23root.in` is the **canonical source** for branding and writing. Syndicated copies elsewhere should point back here (canonical / OG / RSS / `llms.txt`).
@@ -57,7 +61,8 @@ Post frontmatter (`content/posts/*.mdx`):
 | `date` | yes | `article:published_time` + BlogPosting `datePublished` |
 | `slug` | yes | URL path `/writing/<slug>` |
 | `draft` | no | Default `false`; `true` hides from site, RSS, llms, README inject |
-| `image` | no | Path or absolute URL for OG/Twitter; defaults to `/og-default.png` |
+| `image` | no | Path or absolute URL for OG/Twitter; falls back to `cover`, then `/og-default.png` |
+| `author`, `updated`, `tags`, `primaryKeyword`, `secondaryKeywords`, `seoTitle`, `cover`, `faq` | no | See `web/BLOG_WRITING_GUIDE.md`; `slug` must equal the file name (build fails otherwise) |
 
 Site-wide SEO lives in `web/src/layouts/BaseLayout.astro` (`og:site_name`, absolute `og:image` / Twitter `summary_large_image`, RSS `rel=alternate`). Feeds: `/rss.xml`, generated `/llms.txt`, `robots.txt` (+ AI crawler Allows), sitemap via `@astrojs/sitemap`.
 

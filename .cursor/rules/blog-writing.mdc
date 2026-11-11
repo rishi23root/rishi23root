@@ -1,0 +1,17 @@
+---
+description: Rules for writing or editing blog posts on rishi23root.in (content/posts)
+globs: content/posts/**/*.mdx,content/posts/**/*.md
+alwaysApply: false
+---
+
+# Blog posts (rishi23root.in)
+
+Follow `web/BLOG_WRITING_GUIDE.md`. Short version:
+
+- Write as Rishabh (first person, plain, specific). No hype or filler.
+- Answer first: the first paragraph answers the title in 1-2 sentences.
+- `##`/`###` headings only (the H1 comes from `title`). Code fences need a language. Images need alt text.
+- Frontmatter: `title` ≤ 90 chars, one-sentence `summary` ≤ 220, kebab-case `slug` equal to the file name, `date` YYYY-MM-DD. Optional: `tags`, `updated`, `primaryKeyword`, `secondaryKeywords`, `seoTitle`, `cover`, `image`, `faq` (2-4 stand-alone Q&A).
+- `<Callout tone="answer|note|warning">` is available in MDX without an import. Use it sparingly.
+- Never publish secrets, client or employer data, other people's personal data, unbacked claims, uncredited copy, or unreviewed AI text.
+- New posts start from `content/posts/post-template.mdx` with `draft: true`. Flip it to `false` only after the checklist in the guide passes and `npm run build:web` is green.
