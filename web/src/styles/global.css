@@ -44,6 +44,7 @@ html[data-theme='dark'] {
 :root {
   --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
   --serif: var(--sans);
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
   /* Spacing scale */
   --space-1: 0.25rem;
@@ -1053,6 +1054,344 @@ html[data-theme='light'] .theme-icon-moon {
 
 .mood-index-link:hover .mood-index-id {
   color: var(--fg);
+}
+
+/* ---------------------------------------------------------------
+ * Post page (style adapted from FlowForge's long-form blog):
+ * breadcrumb, deck, mono meta line, callouts, FAQ, sticky "On this page"
+ * rail with reading progress. Article stays on the reading column; the
+ * rail sits in the right gutter on wide screens.
+ * ------------------------------------------------------------- */
+.post-layout {
+  width: 100%;
+}
+
+.post {
+  max-width: var(--measure);
+  width: 100%;
+  margin-inline: auto;
+}
+
+.post-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.post-crumbs a {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.post-crumbs a:hover {
+  text-decoration: underline;
+}
+
+.post-crumbs-current {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  opacity: 0.75;
+}
+
+.post-header h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 1.4rem + 1.8vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.post-deck {
+  margin: var(--space-4) 0 0;
+  font-size: 1.18rem;
+  line-height: 1.55;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.post-meta,
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.45rem;
+  margin: var(--space-5) 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.post-tags {
+  margin-top: var(--space-2);
+}
+
+.post-draft {
+  color: #e0b25c;
+}
+
+.post-cover {
+  margin: var(--space-6) 0 0;
+}
+
+.post-cover img {
+  display: block;
+  width: 100%;
+  border-radius: var(--row-radius);
+  border: 1px solid var(--frame-border);
+}
+
+.post-body {
+  margin-top: var(--space-7);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+.post-body :is(h2, h3) {
+  scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+}
+
+.post-body h2 {
+  margin-top: var(--space-7);
+}
+
+/* Callouts: <Callout tone="note|warning|answer"> in MDX */
+.callout {
+  margin: 0 0 1.25rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--row-radius);
+  border: 1px solid var(--frame-border);
+  background: var(--frame-bg);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.callout-label {
+  margin: 0 0 var(--space-1) !important;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.callout-body > :last-child {
+  margin-bottom: 0;
+}
+
+.callout-body {
+  color: var(--muted);
+}
+
+.callout-warning {
+  border-color: rgba(224, 178, 92, 0.35);
+  background: rgba(224, 178, 92, 0.06);
+}
+
+.callout-warning .callout-label {
+  color: #e0b25c;
+}
+
+.callout-answer {
+  border-color: color-mix(in srgb, var(--fg) 22%, transparent);
+}
+
+/* FAQ */
+.post-faq {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+.post-faq h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+}
+
+.post-faq dl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: var(--space-5) 0 0;
+}
+
+.post-faq dt {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.post-faq dd {
+  margin: var(--space-1) 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* Rail: hidden on small screens */
+.post-rail {
+  display: none;
+}
+
+.post-rail-label {
+  margin: 0 0 var(--space-3);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.post-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid var(--border);
+}
+
+.post-toc a {
+  display: block;
+  margin-left: -1px;
+  padding: 0.2rem 0 0.2rem var(--space-3);
+  border-left: 2px solid transparent;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--muted);
+  text-decoration: none;
+  transition:
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease;
+}
+
+.post-toc .toc-depth-3 a {
+  padding-left: calc(var(--space-3) + var(--space-3));
+  font-size: 0.8rem;
+}
+
+.post-toc a:hover {
+  color: var(--fg);
+}
+
+.post-toc a[aria-current] {
+  color: var(--fg);
+  border-left-color: var(--fg);
+}
+
+.post-rail-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.post-progress {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.post-progress svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.post-progress circle {
+  fill: none;
+  stroke-width: 2;
+}
+
+.post-progress-track {
+  stroke: var(--border);
+}
+
+.post-progress-bar {
+  stroke: var(--fg);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 150ms ease-out;
+}
+
+.post-progress-pct {
+  position: relative;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.post-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 1.9rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease;
+}
+
+.post-pill:hover,
+.post-pill:focus-visible {
+  color: var(--fg);
+  border-color: var(--frame-border);
+  background: var(--row-hover);
+}
+
+.post-page .contact-icons {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+@media (min-width: 1024px) {
+  .post-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure)) minmax(0, 1fr);
+    column-gap: var(--home-gap);
+  }
+
+  .post {
+    grid-column: 2;
+  }
+
+  .post-rail {
+    display: block;
+    grid-column: 3;
+    max-width: 14rem;
+  }
+
+  .post-rail-sticky {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-6));
+  }
 }
 
 /* ---------------------------------------------------------------
