@@ -33,18 +33,45 @@ html[data-theme='dark'] {
   --frame-border: rgba(242, 235, 224, 0.14);
   --frame-radius: 18px;
   --accent: #e6dccb;
-  --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
-  --serif: var(--sans);
-  --measure: 38rem;
-  --page-pad: clamp(1.35rem, 3.6vw, 3.5rem);
   color-scheme: dark;
 }
 
 /*
- * Experiment: inset shadow on the mood plate. Revert with
- * --mood-inset-shadow: none (or drop the .mood-inset class).
+ * Layout tokens (shared by every page and both themes).
+ * Use these instead of ad-hoc rem values so spacing stays consistent.
  */
 :root {
+  --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
+  --serif: var(--sans);
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Page frame */
+  --measure: 38rem; /* reading column on inner pages */
+  --page-pad: clamp(1.25rem, 3.6vw, 3.5rem); /* left/right gutter, all pages */
+  --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7)); /* top/bottom */
+  --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem); /* between sections */
+  --row-pad: 0.85rem; /* hairline list rows */
+  --home-max: 93.75rem;
+  --home-gap: clamp(var(--space-6), 4.5vw, 5rem); /* mood <-> text */
+
+  /* Nav (same height + spacing on every page) */
+  --nav-height: 3.25rem;
+  --nav-gap: var(--space-3);
+  --nav-font: 0.9rem;
+
+  /*
+   * Experiment: inset shadow on the mood plate. Revert with
+   * --mood-inset-shadow: none (or drop the .mood-inset class).
+   */
   --mood-inset-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18),
     inset 0 2px 18px rgba(0, 0, 0, 0.35), inset 0 -24px 48px -24px rgba(0, 0, 0, 0.45);
 }
@@ -58,10 +85,6 @@ html[data-theme='light'] {
   --frame-bg: #e8dfd0;
   --frame-border: rgba(28, 27, 25, 0.12);
   --accent: #2a2825;
-  --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
-  --serif: var(--sans);
-  --measure: 38rem;
-  --page-pad: clamp(1.35rem, 3.6vw, 3.5rem);
   color-scheme: light;
 }
 
@@ -96,24 +119,26 @@ a:hover {
 }
 
 .shell {
-  /* Full bleed + Lee page pad (no rem/vw max-width caps) */
+  /* Full bleed; every page shares the same gutters */
   width: 100%;
   margin-inline: auto;
   padding-inline: var(--page-pad);
-  padding-bottom: 4rem;
+  padding-bottom: var(--space-8);
 }
 
 .chrome {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.65rem;
+  gap: var(--nav-gap);
   /* Writing/other pages: same measure as prose. Home overrides in .shell-home */
   max-width: var(--measure);
   width: 100%;
+  min-height: var(--nav-height);
   margin-inline: auto;
-  padding: 0.7rem 0 0.55rem;
-  /* Sticky only off-home — landing chrome scrolls with .home-left */
+  margin-bottom: var(--section-gap);
+  padding: 0;
+  /* Sticky only off-home; landing chrome scrolls with .home-text */
   position: sticky;
   top: 0;
   z-index: 20;
@@ -125,7 +150,7 @@ a:hover {
 .chrome-start {
   display: flex;
   align-items: baseline;
-  gap: 0.7rem;
+  gap: var(--space-4);
   min-width: 0;
 }
 
@@ -144,13 +169,33 @@ a:hover {
 
 .nav {
   display: flex;
-  gap: 0.75rem;
-  font-size: 0.9rem;
+  gap: var(--nav-gap);
+  font-size: var(--nav-font);
 }
 
 .nav a {
+  position: relative;
   color: var(--muted);
   text-decoration: none;
+  transition: color 160ms ease;
+}
+
+/* Quiet active marker under the current page */
+.nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.2em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav a[aria-current='page']::after {
+  transform: scaleX(1);
 }
 
 .nav a:hover,
@@ -207,14 +252,14 @@ html[data-theme='light'] .theme-icon-moon {
 .page {
   display: flex;
   flex-direction: column;
-  gap: 2.25rem;
+  gap: var(--section-gap);
 }
 
 /* Lee-like home: text column + tall mood panel (desktop) */
 .home-split {
   display: flex;
   flex-direction: column;
-  gap: clamp(1.5rem, 2.4vw, 2.25rem);
+  gap: var(--section-gap);
   width: 100%;
 }
 
@@ -225,7 +270,7 @@ html[data-theme='light'] .theme-icon-moon {
   justify-content: flex-start;
   min-width: 0;
   width: 100%;
-  padding-block: clamp(1.5rem, 4vw, 3rem);
+  padding-block: var(--page-pad-block);
 }
 
 .home-text .chrome {
@@ -242,7 +287,7 @@ html[data-theme='light'] .theme-icon-moon {
 .home-copy {
   display: flex;
   flex-direction: column;
-  gap: clamp(1.5rem, 2.4vw, 2.25rem);
+  gap: var(--section-gap);
   min-width: 0;
   width: 100%;
 }
@@ -252,7 +297,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .home-copy .home-section h2 {
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--space-3);
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -277,7 +322,7 @@ html[data-theme='light'] .theme-icon-moon {
   align-items: baseline;
   justify-content: space-between;
   gap: 1.5rem 2rem;
-  padding: 0.85rem 0;
+  padding: var(--row-pad) 0;
   border-bottom: 1px solid var(--border);
   font-size: 1.12rem;
   line-height: 1.45;
@@ -321,7 +366,7 @@ html[data-theme='light'] .theme-icon-moon {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.25rem 0.45rem;
-  padding: 0.85rem 0;
+  padding: var(--row-pad) 0;
   border-bottom: 1px solid var(--border);
   font-size: 1.05rem;
   line-height: 1.45;
@@ -354,7 +399,7 @@ html[data-theme='light'] .theme-icon-moon {
 
 .home-copy .contact-icons {
   margin-top: 0;
-  padding-top: 1.5rem;
+  padding-top: var(--space-5);
 }
 
 .home-mood {
@@ -861,7 +906,7 @@ html[data-theme='light'] .theme-icon-moon {
  */
 @media (min-width: 1024px) {
   .shell-home {
-    width: min(100%, 93.75rem);
+    width: min(100%, var(--home-max));
     margin-inline: auto;
     padding-bottom: 0;
   }
@@ -869,7 +914,7 @@ html[data-theme='light'] .theme-icon-moon {
   .shell-home .home-split {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    column-gap: clamp(2rem, 4.5vw, 5rem);
+    column-gap: var(--home-gap);
     align-items: start;
   }
 
@@ -888,7 +933,7 @@ html[data-theme='light'] .theme-icon-moon {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-block: clamp(1.5rem, 4vw, 3rem);
+    padding-block: var(--page-pad-block);
   }
 
   .shell-home .home-mood .hero-shell {
@@ -898,7 +943,7 @@ html[data-theme='light'] .theme-icon-moon {
   }
 
   .shell-home .home-mood .hero-shell-stage {
-    width: min(100%, calc((100svh - 2 * clamp(1.5rem, 4vw, 3rem)) * 9 / 16));
+    width: min(100%, calc((100svh - 2 * var(--page-pad-block)) * 9 / 16));
     height: auto;
   }
 
@@ -935,7 +980,7 @@ html[data-theme='light'] .theme-icon-moon {
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
-  gap: 1.5rem 1rem;
+  gap: var(--space-5) var(--space-4);
   width: 100%;
   max-width: var(--measure);
   margin-inline: auto;
@@ -995,7 +1040,7 @@ html[data-theme='light'] .theme-icon-moon {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 0.75rem;
+  padding: var(--space-3);
   pointer-events: none;
 }
 
@@ -1003,7 +1048,7 @@ html[data-theme='light'] .theme-icon-moon {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--space-2);
   opacity: 0;
   transition:
     opacity 280ms cubic-bezier(0.22, 1, 0.36, 1),
