@@ -70,6 +70,12 @@
       "animated": false,
       "src": "/mood/seaside.webp",
       "alt": "Coastal path along cliffs above the sea"
+    },
+    {
+      "id": "ghat",
+      "animated": false,
+      "src": "/mood/ghat.webp",
+      "alt": "Stone temple ghat with marigold garlands, a boat, and a radiant sun"
     }
   ],
   "projects": [
