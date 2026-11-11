@@ -1,22 +1,14 @@
 import { useMemo, useState } from 'react'
 import MoodStill from './moods/MoodStill'
 import MoodStub from './moods/MoodStub'
+import { advanceMood } from './moods/cycle'
 import type { MoodSlot } from './moods/types'
 
 export type { MoodSlot }
 export type HeroMoodShellProps = {
   moods: MoodSlot[]
-  /** Override random pick (e.g. ?mood=cyclist) — also read from URL once */
+  /** Force a mood (e.g. ?mood=cyclist from /mood). Also read from the URL. */
   initialMoodId?: string
-}
-
-function pickMood(moods: MoodSlot[], preferred?: string | null): MoodSlot | null {
-  if (!moods.length) return null
-  if (preferred) {
-    const hit = moods.find((m) => m.id === preferred)
-    if (hit) return hit
-  }
-  return moods[Math.floor(Math.random() * moods.length)] ?? null
 }
 
 function readMoodParam(): string | null {
@@ -24,17 +16,26 @@ function readMoodParam(): string | null {
   return new URLSearchParams(window.location.search).get('mood')
 }
 
+function initialSlot(moods: MoodSlot[], forced?: string | null): MoodSlot | null {
+  if (!moods.length) return null
+  if (forced) {
+    const hit = moods.find((m) => m.id === forced)
+    if (hit) return hit
+  }
+  const id = advanceMood(moods)
+  return moods.find((m) => m.id === id) ?? moods[0] ?? null
+}
+
 /**
- * Portrait mood panel host (desktop split).
- * Mounted with client:only — single client pick per full page load
- * (random or ?mood= / initialMoodId). No SSR random, no effect re-pick, no fade thrash.
+ * Portrait mood plate. Mounted client:only so each full page load advances the
+ * shuffle-bag cycle (no repeats until every mood has been seen). ?mood= wins.
  */
 export default function HeroMoodShell({
   moods,
   initialMoodId,
 }: HeroMoodShellProps) {
   const [slot] = useState<MoodSlot | null>(() =>
-    pickMood(moods, initialMoodId ?? readMoodParam()),
+    initialSlot(moods, initialMoodId ?? readMoodParam()),
   )
 
   const label = useMemo(() => {
@@ -43,12 +44,7 @@ export default function HeroMoodShell({
   }, [slot])
 
   return (
-    <div
-      className="hero-shell"
-      data-mood-id={slot?.id ?? 'none'}
-      data-animated="false"
-      data-component={slot?.component ?? ''}
-    >
+    <div className="hero-shell" data-mood-id={slot?.id ?? 'none'}>
       <div className="hero-shell-stage mood-inset" role="img" aria-label={label}>
         {slot ? (
           slot.src ? (
