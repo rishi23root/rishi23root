@@ -114,7 +114,7 @@ const personJsonLd = {
       moods.length ? (
         <aside class="home-mood" aria-label="Mood illustration">
           <div class="home-mood-sticky">
-            <HeroMoodShell client:only="react" moods={moods} />
+            <HeroMoodShell client:only="react" moods={moods} allMoodsHref="/mood" />
           </div>
         </aside>
       ) : null

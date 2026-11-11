@@ -379,6 +379,11 @@ html[data-theme='light'] .theme-icon-moon {
   isolation: isolate;
 }
 
+.hero-shell-art {
+  position: absolute;
+  inset: 0;
+}
+
 /* Inset-shadow experiment (see --mood-inset-shadow). Sits above the art. */
 .mood-inset::after {
   content: '';
@@ -432,16 +437,36 @@ html[data-theme='light'] .theme-icon-moon {
   object-fit: cover;
 }
 
-.mood-still-scene.is-fade .mood-still {
-  animation: mood-still-fade 280ms ease-out both;
+/* First paint: soft fade. "next": crossfade old -> new. */
+.mood-still-scene {
+  animation: mood-fade-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes mood-still-fade {
+.mood-still-scene.is-entering {
+  animation: mood-fade-in 420ms ease both;
+}
+
+.mood-still-scene.is-leaving {
+  animation: mood-fade-out 420ms ease both;
+}
+
+@keyframes mood-fade-in {
   from {
     opacity: 0;
+    transform: scale(1.015);
   }
   to {
     opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mood-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -912,6 +937,8 @@ html[data-theme='light'] .theme-icon-moon {
   grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
   gap: 1.5rem 1rem;
   width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
 }
 
 .mood-index-card {
@@ -958,8 +985,139 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--fg);
 }
 
+/* ---------------------------------------------------------------
+ * Mood overlay: tiny chips, hidden until hover / focus / tap.
+ * ------------------------------------------------------------- */
+.mood-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.75rem;
+  pointer-events: none;
+}
+
+.mood-overlay-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  opacity: 0;
+  transition:
+    opacity 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mood-overlay-top {
+  transform: translateY(-4px);
+}
+
+.mood-overlay-bottom {
+  transform: translateY(4px);
+  transition-delay: 40ms;
+}
+
+.hero-shell-stage:hover .mood-overlay-row,
+.hero-shell-stage:focus-within .mood-overlay-row,
+.hero-shell[data-revealed='true'] .mood-overlay-row {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* Touch screens: faintly visible by default, tap the plate for full. */
+@media (hover: none) {
+  .mood-overlay-row {
+    opacity: 0.55;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+.mood-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.18rem 0.5rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(20, 19, 17, 0.38);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.mood-chip-label {
+  opacity: 0.7;
+}
+
+.mood-chip-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.mood-chip-link,
+.mood-chip-next {
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.mood-chip-link:hover,
+.mood-chip-next:hover,
+.mood-chip-link:focus-visible,
+.mood-chip-next:focus-visible {
+  color: #fff;
+  background: rgba(20, 19, 17, 0.6);
+}
+
+.mood-chip-link:focus-visible,
+.mood-chip-next:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 1px;
+}
+
+.mood-chip-link span,
+.mood-chip-next span {
+  display: inline-block;
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mood-chip-link:hover span,
+.mood-chip-next:hover span {
+  transform: translateX(2px);
+}
+
+/* /mood index: highlight on hover */
+.mood-index-frame {
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 280ms ease;
+}
+
+.mood-index-link:hover .mood-index-frame {
+  transform: translateY(-2px);
+  border-color: var(--border);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .mood-still-scene.is-fade .mood-still {
+  .mood-still-scene,
+  .mood-overlay-row,
+  .mood-chip,
+  .mood-chip span {
     animation: none !important;
+    transition: none !important;
+  }
+
+  .mood-still-scene.is-leaving {
+    display: none;
   }
 }
