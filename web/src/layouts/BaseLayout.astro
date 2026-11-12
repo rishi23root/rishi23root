@@ -90,6 +90,27 @@ const isHome = path === '/'
         }
       })()
     </script>
+    {
+      isHome ? (
+        <script is:inline>
+          ;(function () {
+            try {
+              if (
+                window.matchMedia('(min-width: 1024px)').matches &&
+                !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              ) {
+                document.documentElement.classList.add('mood-await')
+              }
+            } catch (e) {}
+            window.addEventListener('pagereveal', function (e) {
+              if (e.viewTransition) {
+                window.__homePageVt = e.viewTransition.finished
+              }
+            })
+          })()
+        </script>
+      ) : null
+    }
   </head>
   <body>
     {
