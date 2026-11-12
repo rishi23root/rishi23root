@@ -1232,7 +1232,7 @@ html[data-theme='light'] .theme-icon-moon {
 
 .post-toc a {
   display: block;
-  padding: 0.2rem 0 0.2rem var(--space-3);
+  padding: 0.28rem 0 0.28rem var(--space-3);
   border-left: 2px solid transparent;
   font-size: 0.85rem;
   line-height: 1.35;
@@ -1243,8 +1243,16 @@ html[data-theme='light'] .theme-icon-moon {
     border-color var(--dur-fast) ease;
 }
 
+/* H3s sit in from the shared H2 spine. The group indent shifts the
+   whole row (and any current bar) inward so a subheading does not
+   draw a competing bar on the H2 line. */
+.post-toc .toc-sub,
+.post-toc > ul > li.toc-depth-3 {
+  padding-left: var(--space-3);
+}
+
 .post-toc .toc-depth-3 a {
-  padding-left: calc(2 * var(--space-3));
+  padding-left: var(--space-4);
   font-size: 0.8rem;
 }
 
@@ -1302,6 +1310,27 @@ html[data-theme='light'] .theme-icon-moon {
 /* No headings: the tools lead the rail */
 .post-rail-tools:first-child {
   margin-top: 0;
+}
+
+/* 1px rule between TOC and tools: solid on the left, fade to the right.
+   Only when a TOC precedes the tools (skipped if tools are first-child). */
+.post-toc + .post-rail-tools {
+  position: relative;
+}
+
+.post-toc + .post-rail-tools::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--space-7) / -2);
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--fg) 28%, transparent),
+    transparent
+  );
 }
 
 .post-progress {
@@ -1415,6 +1444,10 @@ html[data-theme='light'] .theme-icon-moon {
     flex-direction: row;
     align-items: center;
     margin-top: 0;
+  }
+
+  .post-toc + .post-rail-tools::before {
+    content: none;
   }
 }
 
