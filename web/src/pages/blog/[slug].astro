@@ -1,14 +1,11 @@
 ---
-import { getCollection } from 'astro:content'
-import { publishedPostsFilter } from '../../lib/site'
+import { getPublishedPosts, postPath } from '../../lib/posts'
 
 /** Legacy `/blog/<slug>` → `/writing/<slug>` for old links. */
 export async function getStaticPaths() {
-  const posts = await getCollection('posts', publishedPostsFilter)
-  return posts.map((post) => ({
-    params: { slug: post.data.slug },
-  }))
+  const posts = await getPublishedPosts()
+  return posts.map((post) => ({ params: { slug: post.data.slug } }))
 }
 
-return Astro.redirect(`/writing/${Astro.params.slug}/`, 301)
+return Astro.redirect(`${postPath(Astro.params.slug!)}/`, 301)
 ---

@@ -1,14 +1,12 @@
 ---
-import { getCollection } from 'astro:content'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import ContactIcons from '../components/ContactIcons.astro'
 import SiteChrome from '../components/SiteChrome.astro'
 import HeroMoodShell from '../components/HeroMoodShell'
-import { githubAvatarUrl, publishedPostsFilter, site } from '../lib/site'
+import { githubAvatarUrl, site, socialLinks } from '../lib/site'
+import { getPublishedPosts, isoDay, postPath } from '../lib/posts'
 
-const posts = (await getCollection('posts', publishedPostsFilter)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-)
+const posts = (await getPublishedPosts()).slice(0, 5)
 
 const projects = (site.projects ?? [])
   .slice()
@@ -19,9 +17,6 @@ const capabilities = site.capabilities ?? []
 const moods = site.moods ?? []
 const voiceBio = site.voiceBio ?? site.fullDescription
 
-/** Avatar URL for schema/meta only — never rendered as on-page <img>. */
-const avatarUrl = githubAvatarUrl(320)
-
 const personJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -29,14 +24,9 @@ const personJsonLd = {
   url: site.siteUrl,
   email: site.contact.email,
   description: site.fullDescription,
-  image: avatarUrl,
-  sameAs: [
-    site.contact.socials.website,
-    site.contact.socials.x,
-    site.contact.socials.linkedin,
-    site.contact.socials.github,
-    site.contact.socials.pypi,
-  ],
+  // Avatar for schema only — never rendered as an on-page <img>.
+  image: githubAvatarUrl(320),
+  sameAs: socialLinks.filter((link) => link.id !== 'email').map((link) => link.href),
 }
 ---
 
@@ -57,12 +47,10 @@ const personJsonLd = {
           {
             posts.length ? (
               <ul class="home-writing-list">
-                {posts.slice(0, 5).map((post) => (
+                {posts.map((post) => (
                   <li>
-                    <a href={`/writing/${post.data.slug}`}>{post.data.title}</a>
-                    <time datetime={post.data.date.toISOString()}>
-                      {post.data.date.toISOString().slice(0, 10)}
-                    </time>
+                    <a href={postPath(post.data.slug)}>{post.data.title}</a>
+                    <time datetime={post.data.date.toISOString()}>{isoDay(post.data.date)}</time>
                   </li>
                 ))}
               </ul>
@@ -79,9 +67,7 @@ const personJsonLd = {
               projects.map((project) => (
                 <li>
                   <a href={project.url}>{project.title}</a>
-                  {project.blurb ? (
-                    <span class="blurb">{project.blurb}</span>
-                  ) : null}
+                  {project.blurb ? <span class="blurb">{project.blurb}</span> : null}
                 </li>
               ))
             }
@@ -114,7 +100,7 @@ const personJsonLd = {
       moods.length ? (
         <aside class="home-mood reveal" style="--i: 0" aria-label="Mood illustration">
           <div class="home-mood-sticky">
-            <HeroMoodShell client:only="react" moods={moods} allMoodsHref="/mood" />
+            <HeroMoodShell client:only="react" moods={moods} />
           </div>
         </aside>
       ) : null

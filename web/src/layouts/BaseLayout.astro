@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css'
 import SiteChrome from '../components/SiteChrome.astro'
-import { site } from '../lib/site'
+import { absoluteUrl, site } from '../lib/site'
 
 type Props = {
   title?: string
@@ -24,20 +24,10 @@ const {
 } = Astro.props
 
 const pageTitle = title ? `${title} · ${site.github.name}` : site.github.name
-const canonical = new URL(path, site.siteUrl).toString()
-const ogImage = new URL(image, site.siteUrl).toString()
-const published =
-  publishedTime instanceof Date
-    ? publishedTime.toISOString()
-    : publishedTime
-      ? new Date(publishedTime).toISOString()
-      : undefined
-
-const jsonLdBlocks = jsonLd
-  ? Array.isArray(jsonLd)
-    ? jsonLd
-    : [jsonLd]
-  : []
+const canonical = absoluteUrl(path)
+const ogImage = absoluteUrl(image)
+const published = publishedTime ? new Date(publishedTime).toISOString() : undefined
+const jsonLdBlocks = jsonLd ? [jsonLd].flat() : []
 
 const isHome = path === '/'
 ---
@@ -55,7 +45,7 @@ const isHome = path === '/'
       rel="alternate"
       type="application/rss+xml"
       title={`${site.github.name} RSS`}
-      href={new URL('/rss.xml', site.siteUrl).toString()}
+      href={absoluteUrl('/rss.xml')}
     />
 
     <meta property="og:title" content={pageTitle} />
@@ -103,8 +93,8 @@ const isHome = path === '/'
   </head>
   <body>
     {
-      /* Inner pages: full-width top bar; inner row aligns with the content frame.
-         Home chrome lives inside the text column (index.astro). */
+      /* Inner pages: nav bar above the content. Home puts its nav in the
+         text column instead (index.astro). */
       !isHome ? (
         <div class="chrome-bar">
           <SiteChrome path={path} />
@@ -126,14 +116,9 @@ const isHome = path === '/'
           theme = next
           document.documentElement.setAttribute('data-theme', theme)
           if (toggle) {
-            toggle.setAttribute(
-              'aria-label',
-              theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
-            )
-            toggle.setAttribute(
-              'title',
-              theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
-            )
+            var label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+            toggle.setAttribute('aria-label', label)
+            toggle.setAttribute('title', label)
           }
           try {
             localStorage.setItem('theme', theme)

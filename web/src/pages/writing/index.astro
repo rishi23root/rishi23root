@@ -1,19 +1,13 @@
 ---
-import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ContactIcons from '../../components/ContactIcons.astro'
-import { formatPostDate, publishedPostsFilter, readingTimeMinutes } from '../../lib/site'
+import MetaLine from '../../components/MetaLine.astro'
+import { formatPostDate, getPublishedPosts, postPath, readingTimeMinutes } from '../../lib/posts'
 
-const posts = (await getCollection('posts', publishedPostsFilter)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-)
+const posts = await getPublishedPosts()
 ---
 
-<BaseLayout
-  title="Writing"
-  description="Notes on SaaS, automation, and security."
-  path="/writing"
->
+<BaseLayout title="Writing" description="Notes on SaaS, automation, and security." path="/writing">
   <div class="page blog-page">
     <section class="page-intro reveal" style="--i: 0">
       <p class="page-eyebrow">Writing</p>
@@ -29,27 +23,18 @@ const posts = (await getCollection('posts', publishedPostsFilter)).sort(
         <ul class="post-list reveal" style="--i: 1">
           {posts.map((post) => (
             <li class="post-list-item">
-              <p class="post-list-meta">
-                <time datetime={post.data.date.toISOString()}>
-                  {formatPostDate(post.data.date)}
-                </time>
-                <span aria-hidden="true">·</span>
-                <span>{readingTimeMinutes(post.body, post.data.faq)} min read</span>
-                {post.data.draft ? (
-                  <>
-                    <span aria-hidden="true">·</span>
-                    <span class="post-draft">Draft</span>
-                  </>
-                ) : null}
-              </p>
+              <MetaLine
+                class="post-list-meta"
+                items={[
+                  { text: formatPostDate(post.data.date), datetime: post.data.date.toISOString() },
+                  { text: `${readingTimeMinutes(post)} min read` },
+                  post.data.draft && { text: 'Draft', class: 'post-draft' },
+                ]}
+              />
               <h2 class="post-list-heading">
-                <a class="post-list-title" href={`/writing/${post.data.slug}`}>
-                  {post.data.title}
-                </a>
+                <a class="post-list-title" href={postPath(post.data.slug)}>{post.data.title}</a>
               </h2>
-              {post.data.summary ? (
-                <p class="post-list-summary">{post.data.summary}</p>
-              ) : null}
+              <p class="post-list-summary">{post.data.summary}</p>
               {post.data.tags.length ? (
                 <p class="post-list-tags">{post.data.tags.join(' · ')}</p>
               ) : null}
