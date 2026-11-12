@@ -66,6 +66,9 @@ html[data-theme='dark'] {
   --row-bleed: 0.75rem; /* hover wash extends past the text column */
   --row-radius: 10px;
   --home-max: 93.75rem;
+  --frame-max: 72rem; /* inner pages: nav row + content frame */
+  --article-max: 42rem; /* post header/body column inside the frame */
+  --rail-w: 14rem; /* post utility rail */
   --home-gap: clamp(var(--space-6), 4.5vw, 5rem); /* mood <-> text */
 
   /* Nav (same height + spacing on every page) */
@@ -1423,6 +1426,235 @@ html[data-theme='light'] .theme-icon-moon {
 
   .post-rail-sticky {
     position: sticky;
+    top: calc(var(--nav-height) + var(--space-6));
+  }
+}
+
+/* ---------------------------------------------------------------
+ * Inner pages frame (inspired by FlowForge long-form):
+ * full-width top bar whose row shares one padded frame with the content;
+ * content is left-aligned in that frame, not floating mid-viewport.
+ * ------------------------------------------------------------- */
+.chrome-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding-inline: var(--page-pad);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--chrome) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.chrome-bar .chrome {
+  position: static;
+  max-width: var(--frame-max);
+  margin: 0 auto;
+  padding-inline: 0;
+  background: none;
+  backdrop-filter: none;
+}
+
+.shell-inner {
+  padding-top: clamp(var(--space-6), 5vw, var(--space-8));
+}
+
+.shell-inner > main {
+  max-width: var(--frame-max);
+  margin-inline: auto;
+}
+
+/* Align page blocks to the frame's left edge (same x as the wordmark) */
+.shell-inner :is(.page-intro, .post-list, .back, .empty, .mood-index-grid),
+.shell-inner .blog-page .contact-icons,
+.shell-inner .prose {
+  margin-inline: 0;
+}
+
+.shell-inner .page-intro,
+.shell-inner .post-list,
+.shell-inner .blog-page .contact-icons {
+  max-width: var(--article-max);
+}
+
+/* Post: article + rail in one frame */
+.shell-inner .post {
+  max-width: var(--article-max);
+  margin-inline: 0;
+}
+
+.shell-inner .post .prose {
+  max-width: none;
+  font-size: 1.2rem;
+  line-height: 1.75;
+}
+
+.post-header h1 {
+  font-size: clamp(1.85rem, 1.35rem + 1.5vw, 2.4rem);
+  line-height: 1.18;
+  letter-spacing: -0.028em;
+}
+
+.post-deck {
+  margin-top: var(--space-3);
+  font-size: clamp(1.08rem, 1rem + 0.35vw, 1.22rem);
+  max-width: 38rem;
+}
+
+.post-meta {
+  margin-top: var(--space-5);
+  font-size: 0.7rem;
+}
+
+/* Tags as quiet chips */
+.post-crumbs {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.post-tags {
+  list-style: none;
+  padding: 0;
+  margin-top: var(--space-3);
+  gap: var(--space-2);
+}
+
+.post-tag {
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.post-body {
+  margin-top: var(--space-6);
+}
+
+/* Utility rail: own column, quiet, divided from the article */
+.post-rail-label {
+  font-size: 0.6rem;
+}
+
+.post-toc a[aria-current] {
+  color: var(--fg);
+  font-weight: 600;
+  border-left-color: var(--accent);
+}
+
+.post-rail-tools {
+  gap: var(--space-2);
+}
+
+/* No headings: tools lead the rail, no stray divider */
+.post-rail-tools:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.post-tool {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  max-width: 2.25rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    max-width var(--dur) var(--ease-out),
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease;
+}
+
+.post-tool svg {
+  flex: 0 0 2.25rem;
+  width: 2.25rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.post-tool-label {
+  padding-right: var(--space-3);
+  opacity: 0;
+  transition: opacity var(--dur-fast) ease;
+}
+
+.post-tool:hover,
+.post-tool:focus-visible,
+.post-tool.is-open {
+  max-width: 12rem;
+  color: var(--fg);
+  border-color: var(--frame-border);
+  background: var(--row-hover);
+}
+
+.post-tool:hover .post-tool-label,
+.post-tool:focus-visible .post-tool-label,
+.post-tool.is-open .post-tool-label {
+  opacity: 1;
+}
+
+.post-tool:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Mobile/tablet: rail collapses into a quiet tools row after the article */
+@media (max-width: 1023px) {
+  .post-rail {
+    display: block;
+    margin-top: var(--space-7);
+  }
+
+  .post-toc {
+    display: none;
+  }
+
+  .post-rail-tools {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shell-inner .post-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--rail-w);
+    column-gap: clamp(var(--space-7), 6vw, 6rem);
+    align-items: start;
+  }
+
+  .shell-inner .post {
+    grid-column: 1;
+  }
+
+  .shell-inner .post-rail {
+    grid-column: 2;
+    max-width: none;
+    align-self: stretch;
+    padding-left: var(--space-5);
+    border-left: 1px solid var(--border);
+  }
+
+  .post-rail-sticky {
     top: calc(var(--nav-height) + var(--space-6));
   }
 }
