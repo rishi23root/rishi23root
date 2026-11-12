@@ -835,6 +835,14 @@ html[data-theme='light'] .theme-icon-moon {
   gap: var(--space-2);
 }
 
+/* Listing page: intro, posts, and hover wash use the full nav width
+   (the post-group). Individual post pages keep the article measure. */
+.blog-index .page-intro,
+.blog-index .post-list,
+.blog-index .contact-icons {
+  max-width: none;
+}
+
 .post-list-item {
   margin-inline: calc(-1 * var(--row-bleed));
   padding: var(--space-4) var(--row-bleed);
