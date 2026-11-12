@@ -58,7 +58,7 @@ html[data-theme='dark'] {
 
   /* Page frame */
   --measure: 38rem; /* reading column on inner pages */
-  --page-pad: clamp(1.25rem, 3.6vw, 3.5rem); /* left/right gutter, all pages */
+  --page-pad: clamp(1.5rem, 3.6vw, 3.5rem); /* left/right gutter, all pages */
   --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7)); /* top/bottom */
   --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem); /* between sections */
   --row-pad: 0.85rem; /* hairline list rows */
@@ -68,7 +68,10 @@ html[data-theme='dark'] {
   --home-max: 93.75rem;
   --frame-max: 72rem; /* inner pages: nav row + content frame */
   --article-max: 42rem; /* post header/body column inside the frame */
-  --rail-w: 14rem; /* post utility rail */
+  --rail-w: 13rem; /* post utility rail */
+  --rail-gap: clamp(var(--space-7), 5vw, 5rem); /* article <-> rail */
+  /* Article + rail as one centered group; nav row matches it */
+  --post-group: calc(var(--article-max) + var(--rail-gap) + var(--rail-w));
   --home-gap: clamp(var(--space-6), 4.5vw, 5rem); /* mood <-> text */
 
   /* Nav (same height + spacing on every page) */
@@ -1436,19 +1439,15 @@ html[data-theme='light'] .theme-icon-moon {
  * content is left-aligned in that frame, not floating mid-viewport.
  * ------------------------------------------------------------- */
 .chrome-bar {
-  position: sticky;
-  top: 0;
-  z-index: 30;
+  /* Scrolls away with the page (not sticky); spacing instead of a rule */
+  position: static;
   padding-inline: var(--page-pad);
-  border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--chrome) 88%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  padding-top: var(--space-3);
 }
 
 .chrome-bar .chrome {
   position: static;
-  max-width: var(--frame-max);
+  max-width: var(--post-group);
   margin: 0 auto;
   padding-inline: 0;
   background: none;
@@ -1460,7 +1459,8 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .shell-inner > main {
-  max-width: var(--frame-max);
+  /* Centered group: even side margins that grow on wide screens */
+  max-width: var(--post-group);
   margin-inline: auto;
 }
 
@@ -1520,16 +1520,57 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .post-tag {
-  padding: 0.1rem 0.55rem;
-  border: 1px solid var(--border);
+  padding: 0.12rem 0.55rem;
   border-radius: 999px;
+  background: var(--row-hover);
   font-size: 0.66rem;
   letter-spacing: 0.06em;
   color: var(--muted);
 }
 
 .post-body {
-  margin-top: var(--space-6);
+  margin-top: var(--space-7);
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Cleaner long-form: no hairlines; fills and spacing instead */
+.post-cover img {
+  border: 0;
+}
+
+.post-faq {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.shell-inner .post .prose pre {
+  border: 0;
+}
+
+.callout {
+  border: 0;
+  border-left: 2px solid color-mix(in srgb, var(--fg) 28%, transparent);
+  border-radius: 0 var(--row-radius) var(--row-radius) 0;
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+
+.callout-warning {
+  border-left-color: rgba(224, 178, 92, 0.6);
+  background: rgba(224, 178, 92, 0.06);
+}
+
+.shell-inner .blog-page .contact-icons {
+  border-top: 0;
+  padding-top: var(--space-4);
+}
+
+.post-toc ul {
+  border-left: 0;
+}
+
+.post-toc a {
+  margin-left: 0;
 }
 
 /* Utility rail: own column, quiet, divided from the article */
@@ -1545,6 +1586,9 @@ html[data-theme='light'] .theme-icon-moon {
 
 .post-rail-tools {
   gap: var(--space-2);
+  margin-top: var(--space-7);
+  padding-top: 0;
+  border-top: 0;
 }
 
 /* No headings: tools lead the rail, no stray divider */
@@ -1560,9 +1604,9 @@ html[data-theme='light'] .theme-icon-moon {
   height: 2.25rem;
   max-width: 2.25rem;
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 0;
   border-radius: 8px;
-  background: transparent;
+  background: var(--row-hover);
   padding: 0;
   font: inherit;
   font-size: 0.78rem;
@@ -1599,8 +1643,7 @@ html[data-theme='light'] .theme-icon-moon {
 .post-tool.is-open {
   max-width: 12rem;
   color: var(--fg);
-  border-color: var(--frame-border);
-  background: var(--row-hover);
+  background: color-mix(in srgb, var(--fg) 9%, transparent);
 }
 
 .post-tool:hover .post-tool-label,
@@ -1637,8 +1680,8 @@ html[data-theme='light'] .theme-icon-moon {
 @media (min-width: 1024px) {
   .shell-inner .post-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--rail-w);
-    column-gap: clamp(var(--space-7), 6vw, 6rem);
+    grid-template-columns: minmax(0, var(--article-max)) var(--rail-w);
+    column-gap: var(--rail-gap);
     align-items: start;
   }
 
@@ -1650,12 +1693,14 @@ html[data-theme='light'] .theme-icon-moon {
     grid-column: 2;
     max-width: none;
     align-self: stretch;
-    padding-left: var(--space-5);
-    border-left: 1px solid var(--border);
+    padding-left: 0;
+    border-left: 0;
   }
 
   .post-rail-sticky {
-    top: calc(var(--nav-height) + var(--space-6));
+    /* Rail may stick; the nav does not */
+    top: var(--space-7);
+    padding-top: 0.35rem;
   }
 }
 
