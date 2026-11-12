@@ -47,6 +47,8 @@ html[data-theme='light'] {
   --frame-bg: #e8dfd0;
   --accent: #2a2825;
   --row-hover: rgba(28, 27, 25, 0.05);
+  /* The dark inset ring reads as a frame on light art; keep it in dark mode only. */
+  --mood-inset-shadow: none;
   color-scheme: light;
 }
 
