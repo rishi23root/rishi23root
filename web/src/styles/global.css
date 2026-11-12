@@ -996,12 +996,30 @@ html[data-theme='light'] .theme-icon-moon {
 
 .post-cover {
   margin: var(--space-6) 0 0;
+  background: var(--frame-bg);
+  border-radius: var(--row-radius);
+  overflow: hidden;
 }
 
 .post-cover img {
   display: block;
   width: 100%;
+  height: auto;
   border-radius: var(--row-radius);
+}
+
+/* Per-image load fade on writing posts. The box is reserved via width/height
+   (and height: auto); the image starts quiet and fades in once .is-loaded
+   is set. Reduced-motion inherits the global 1ms duration. */
+.post-cover img,
+.post-body img {
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out);
+}
+
+.post-cover img.is-loaded,
+.post-body img.is-loaded {
+  opacity: 1;
 }
 
 .post-body {

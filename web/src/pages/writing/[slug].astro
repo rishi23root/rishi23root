@@ -14,6 +14,7 @@ import {
   readingTimeMinutes,
   type Post,
 } from '../../lib/posts'
+import { publicImageSize } from '../../lib/imageSize'
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts()
@@ -27,6 +28,7 @@ const d = post.data
 const path = postPath(d.slug)
 const canonical = absoluteUrl(path)
 const ogImage = d.image ?? d.cover ?? '/og-default.png'
+const coverSize = d.cover ? publicImageSize(d.cover) : undefined
 // Rail outline: each H2 owns the H3s that follow it. H3s before the first H2
 // have no parent, so they stay top-level and always visible.
 type TocLink = { slug: string; text: string }
@@ -91,6 +93,14 @@ if (d.faq.length) {
   image={ogImage}
   jsonLd={jsonLd}
 >
+  <noscript>
+    <style>
+      .post-cover img,
+      .post-body img {
+        opacity: 1;
+      }
+    </style>
+  </noscript>
   <div class="page blog-page">
     <div class="post-layout">
       <article class="post reveal" style="--i: 0" data-longform>
@@ -127,7 +137,14 @@ if (d.faq.length) {
         {
           d.cover ? (
             <figure class="post-cover">
-              <img src={d.cover} alt={`Cover for ${d.title}`} decoding="async" />
+              <img
+                src={d.cover}
+                alt={`Cover for ${d.title}`}
+                width={coverSize?.width}
+                height={coverSize?.height}
+                decoding="async"
+                fetchpriority="high"
+              />
             </figure>
           ) : null
         }
@@ -215,8 +232,23 @@ if (d.faq.length) {
   <script is:inline>
     ;(function () {
       var root = document.querySelector('[data-longform]')
+      if (!root) return
+      // Fade each post image in once it has decoded. Already-complete
+      // (cached) images get .is-loaded now so they never hide-then-fade.
+      root.querySelectorAll('.post-cover img, .post-body img').forEach(function (img) {
+        var show = function () {
+          img.classList.add('is-loaded')
+        }
+        if (img.complete && img.naturalWidth > 0) {
+          show()
+          return
+        }
+        img.addEventListener('load', show, { once: true })
+        img.addEventListener('error', show, { once: true })
+        if (img.complete) show()
+      })
       var btn = document.getElementById('postProgress')
-      if (!root || !btn) return
+      if (!btn) return
       var bar = btn.querySelector('.post-progress-bar')
       var pct = btn.querySelector('.post-progress-pct')
       var ring = 2 * Math.PI * 14 // circumference; r=14 in the SVG
