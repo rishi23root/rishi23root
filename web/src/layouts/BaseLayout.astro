@@ -79,16 +79,11 @@ const isHome = path === '/'
       crossorigin
     />
     <script is:inline>
-      ;(function () {
-        try {
-          var stored = localStorage.getItem('theme')
-          var theme =
-            stored === 'light' || stored === 'dark' ? stored : 'dark'
-          document.documentElement.setAttribute('data-theme', theme)
-        } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'dark')
-        }
-      })()
+      // <html> ships as dark; only a saved light choice needs applying.
+      try {
+        if (localStorage.getItem('theme') === 'light')
+          document.documentElement.setAttribute('data-theme', 'light')
+      } catch (e) {}
     </script>
     <slot name="head" />
   </head>
@@ -110,28 +105,23 @@ const isHome = path === '/'
     <script is:inline>
       ;(function () {
         var toggle = document.getElementById('themeToggle')
-        var theme =
-          document.documentElement.getAttribute('data-theme') || 'dark'
-
-        function applyTheme(next) {
-          theme = next
-          document.documentElement.setAttribute('data-theme', theme)
-          if (toggle) {
-            var label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
-            toggle.setAttribute('aria-label', label)
-            toggle.setAttribute('title', label)
-          }
+        if (!toggle) return
+        var root = document.documentElement
+        function syncLabel() {
+          var label =
+            root.getAttribute('data-theme') === 'light' ? 'Switch to dark mode' : 'Switch to light mode'
+          toggle.setAttribute('aria-label', label)
+          toggle.setAttribute('title', label)
+        }
+        syncLabel()
+        toggle.addEventListener('click', function () {
+          var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light'
+          root.setAttribute('data-theme', next)
           try {
-            localStorage.setItem('theme', theme)
+            localStorage.setItem('theme', next)
           } catch (e) {}
-        }
-
-        applyTheme(theme === 'light' ? 'light' : 'dark')
-        if (toggle) {
-          toggle.addEventListener('click', function () {
-            applyTheme(theme === 'dark' ? 'light' : 'dark')
-          })
-        }
+          syncLabel()
+        })
       })()
     </script>
   </body>

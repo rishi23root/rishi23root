@@ -4,3 +4,10 @@ export type MoodSlot = {
   src?: string
   alt?: string
 }
+
+declare global {
+  interface Window {
+    /** First mood picked (and preloaded) by the inline head script in index.astro. */
+    __heroMoodFirst?: string
+  }
+}

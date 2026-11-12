@@ -43,37 +43,31 @@
   "moods": [
     {
       "id": "cyclist",
-      "animated": false,
       "src": "/mood/cyclist.webp",
       "alt": "Cyclist in green hills under drifting clouds"
     },
     {
       "id": "park",
-      "animated": false,
       "src": "/mood/park.webp",
       "alt": "Aerial park lawn with people and long shadows"
     },
     {
       "id": "building",
-      "animated": false,
       "src": "/mood/building.webp",
       "alt": "Terracotta building facade with a walker and dog"
     },
     {
       "id": "warehouse",
-      "animated": false,
       "src": "/mood/warehouse.webp",
       "alt": "Dusty warehouse interior with shafts of light"
     },
     {
       "id": "seaside",
-      "animated": false,
       "src": "/mood/seaside.webp",
       "alt": "Coastal path along cliffs above the sea"
     },
     {
       "id": "ghat",
-      "animated": false,
       "src": "/mood/ghat.webp",
       "alt": "Stone temple ghat with marigold garlands, a boat, and a radiant sun"
     }
@@ -83,28 +77,24 @@
       "title": "Maryam",
       "blurb": "Open-source OSINT framework",
       "url": "https://github.com/saeeddhqan/Maryam",
-      "featured": true,
       "order": 1
     },
     {
       "title": "Pixel Streaming Infrastructure",
       "blurb": "Unreal Pixel Streaming servers and frontend",
       "url": "https://github.com/EpicGames/PixelStreamingInfrastructure",
-      "featured": true,
       "order": 2
     },
     {
       "title": "opencv_wrap",
       "blurb": "Thin OpenCV wrappers for everyday CV scripts",
       "url": "https://github.com/rishi23root/opencv_wrap",
-      "featured": true,
       "order": 3
     },
     {
       "title": "pyblink",
       "blurb": "Blink-counter automation to ease eye strain",
       "url": "https://github.com/rishi23root/pyblink",
-      "featured": true,
       "order": 4
     },
     {
