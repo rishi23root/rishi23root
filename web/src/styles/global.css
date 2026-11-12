@@ -34,7 +34,6 @@ html[data-theme='dark'] {
   --muted: rgba(242, 235, 224, 0.68);
   --border: rgba(242, 235, 224, 0.16);
   --frame-bg: #262421;
-  --frame-border: rgba(242, 235, 224, 0.14);
   --accent: #e6dccb;
   --row-hover: rgba(242, 235, 224, 0.05);
   color-scheme: dark;
@@ -46,7 +45,6 @@ html[data-theme='light'] {
   --muted: rgba(28, 27, 25, 0.64);
   --border: rgba(28, 27, 25, 0.14);
   --frame-bg: #e8dfd0;
-  --frame-border: rgba(28, 27, 25, 0.12);
   --accent: #2a2825;
   --row-hover: rgba(28, 27, 25, 0.05);
   color-scheme: light;
@@ -526,7 +524,6 @@ html[data-theme='light'] .theme-icon-moon {
   width: 100%;
   aspect-ratio: 9 / 16;
   border-radius: var(--frame-radius);
-  border: 1px solid var(--frame-border);
   background: var(--frame-bg);
   overflow: hidden;
   isolation: isolate;
@@ -1354,17 +1351,13 @@ html[data-theme='light'] .theme-icon-moon {
   width: 100%;
   aspect-ratio: 9 / 16;
   border-radius: var(--frame-radius);
-  border: 1px solid var(--frame-border);
   background: var(--frame-bg);
   overflow: hidden;
-  transition:
-    transform var(--dur) var(--ease-out),
-    border-color var(--dur) ease;
+  transition: transform var(--dur) var(--ease-out);
 }
 
 .mood-index-link:hover .mood-index-frame {
   transform: translateY(-2px);
-  border-color: var(--border);
 }
 
 .mood-index-id {
