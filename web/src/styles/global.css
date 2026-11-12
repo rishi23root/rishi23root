@@ -156,13 +156,20 @@ a:hover {
   width: 100%;
   margin-inline: auto;
   padding-inline: var(--page-pad);
-  padding-bottom: var(--space-8);
+  /* Same bottom padding as the homepage text column, on every page. */
+  padding-bottom: var(--page-pad-block);
 }
 
-/* Inner pages: the nav sits in its own bar above the shell and scrolls away */
+/* Home's text column already has --page-pad-block, so don't stack another. */
+.shell-home {
+  padding-bottom: 0;
+}
+
+/* Inner pages (writing, posts, later project pages): nav shares the
+   homepage's top padding, then the same gap under the nav as home. */
 .chrome-bar {
   padding-inline: var(--page-pad);
-  padding-top: var(--space-3);
+  padding-top: var(--page-pad-block);
 }
 
 .chrome-bar .chrome {
@@ -171,7 +178,7 @@ a:hover {
 }
 
 .shell-inner {
-  padding-top: clamp(var(--space-6), 5vw, var(--space-8));
+  padding-top: var(--section-gap);
 }
 
 .shell-inner > main {
@@ -187,7 +194,6 @@ a:hover {
 
 .blog-page {
   gap: 1.75rem;
-  padding-block: 0.25rem 2.5rem;
 }
 
 /* ---------------------------------------------------------------
@@ -204,15 +210,15 @@ a:hover {
   view-transition-name: site-chrome;
 }
 
-.chrome-start {
+.chrome-end {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-4);
   min-width: 0;
 }
 
 .wordmark {
-  font-size: 1.05rem;
+  font-size: 1.28rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   text-decoration: none;
@@ -264,14 +270,18 @@ a:hover {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   padding: 0;
   border: 0;
   border-radius: 6px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
+}
+
+html[data-theme='light'] .theme-toggle {
+  color: rgba(28, 27, 25, 0.88);
 }
 
 .theme-toggle:hover {
@@ -285,8 +295,8 @@ a:hover {
 
 .theme-icon {
   display: none;
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.45rem;
+  height: 1.45rem;
 }
 
 .theme-icon svg {
@@ -312,11 +322,13 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .hover-row:hover,
-.hover-row:focus-within {
+.hover-row:focus-within,
+.hover-row:focus-visible {
   background: var(--row-hover);
 }
 
-.hover-row:has(.row-link:focus-visible) {
+.hover-row:has(.row-link:focus-visible),
+.hover-row:focus-visible {
   outline: 2px solid var(--accent);
 }
 
@@ -608,7 +620,7 @@ html[data-theme='light'] .theme-icon-moon {
   }
 }
 
-/* Overlay chips: hidden until hover / focus / tap */
+/* Overlay chips: hidden until hover or a tap on the plate */
 .mood-overlay {
   position: absolute;
   inset: 0;
@@ -641,7 +653,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .hero-shell-stage:hover .mood-overlay-row,
-.hero-shell-stage:focus-within .mood-overlay-row,
+.hero-shell-stage:has(:focus-visible) .mood-overlay-row,
 .hero-shell[data-revealed='true'] .mood-overlay-row {
   opacity: 1;
   transform: none;

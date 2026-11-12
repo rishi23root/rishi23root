@@ -104,7 +104,12 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
                   </span>
                 ) : null}
               </span>
-              <a className="mood-chip mood-chip-link" href={allMoodsHref} aria-label="See all moods">
+              <a
+                className="mood-chip mood-chip-link"
+                href={allMoodsHref}
+                aria-label="See all moods"
+                tabIndex={-1}
+              >
                 all <span aria-hidden="true">→</span>
               </a>
             </div>
@@ -112,7 +117,17 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
               <span className="mood-chip mood-chip-name" aria-live="polite">
                 {slot.id}
               </span>
-              <button type="button" className="mood-chip mood-chip-next" onClick={next}>
+              <button
+                type="button"
+                className="mood-chip mood-chip-next"
+                tabIndex={-1}
+                onClick={(e) => {
+                  next()
+                  // A pointer click focuses the button even with tabIndex={-1},
+                  // which would keep the chips up after the cursor leaves.
+                  if (e.detail > 0) e.currentTarget.blur()
+                }}
+              >
                 next <span aria-hidden="true">›</span>
               </button>
             </div>
