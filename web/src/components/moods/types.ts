@@ -1,8 +1,6 @@
 export type MoodSlot = {
   id: string
-  animated?: boolean
+  /** WebP still in web/public; a .jpg sibling is used as the fallback. */
   src?: string
-  /** Reserved for future named scenes; unused while cyclist is a still */
-  component?: string
   alt?: string
 }

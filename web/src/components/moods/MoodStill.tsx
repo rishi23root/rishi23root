@@ -1,12 +1,9 @@
+import { jpgFallback } from './media'
+
 type Props = {
   src: string
   /** Extra class on the scene (is-entering / is-leaving for crossfade). */
   className?: string
-}
-
-function jpgFallback(src: string): string | null {
-  if (!src.endsWith('.webp')) return null
-  return src.slice(0, -5) + '.jpg'
 }
 
 /** Static mood plate — WebP primary, optional JPG sibling fallback. */

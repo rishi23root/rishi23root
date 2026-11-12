@@ -4,20 +4,17 @@ import MoodStub from './moods/MoodStub'
 import { advanceMood, cyclePosition } from './moods/cycle'
 import type { MoodSlot } from './moods/types'
 
-export type { MoodSlot }
-export type HeroMoodShellProps = {
+type Props = {
   moods: MoodSlot[]
-  /** Force a mood (e.g. ?mood=cyclist from /mood). Also read from the URL. */
-  initialMoodId?: string
-  /** Link for the "all moods" arrow. */
+  /** Link for the "all moods" chip. */
   allMoodsHref?: string
 }
 
 /** Crossfade length; mirrored by --mood-xfade in global.css. */
 const XFADE_MS = 420
 
+/** `?mood=<id>` (links from /mood) forces the first mood shown. */
 function readMoodParam(): string | null {
-  if (typeof window === 'undefined') return null
   return new URLSearchParams(window.location.search).get('mood')
 }
 
@@ -43,14 +40,8 @@ function preload(src?: string) {
  * shuffle-bag cycle (no repeats until every mood has been seen). "next" in the
  * overlay advances the same cycle in place with a crossfade.
  */
-export default function HeroMoodShell({
-  moods,
-  initialMoodId,
-  allMoodsHref = '/mood',
-}: HeroMoodShellProps) {
-  const [slot, setSlot] = useState<MoodSlot | null>(() =>
-    initialSlot(moods, initialMoodId ?? readMoodParam()),
-  )
+export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) {
+  const [slot, setSlot] = useState<MoodSlot | null>(() => initialSlot(moods, readMoodParam()))
   const [leaving, setLeaving] = useState<MoodSlot | null>(null)
   const [pos, setPos] = useState(() => cyclePosition())
   const [revealed, setRevealed] = useState(false)
@@ -76,12 +67,8 @@ export default function HeroMoodShell({
 
   const label = slot ? slot.alt || `${slot.id} mood illustration` : 'Mood illustration placeholder'
 
-  const renderSlot = (s: MoodSlot, key: string, extra: string) =>
-    s.src ? (
-      <MoodStill key={key} src={s.src} className={extra} />
-    ) : (
-      <MoodStub key={key} id={s.id} />
-    )
+  const renderSlot = (s: MoodSlot, key: string, className: string) =>
+    s.src ? <MoodStill key={key} src={s.src} className={className} /> : <MoodStub key={key} id={s.id} />
 
   return (
     <div

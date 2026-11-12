@@ -1,15 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { jpgFallback } from '../components/moods/media'
 import { site } from '../lib/site'
 
 const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
 ---
 
-<BaseLayout
-  title="Moods"
-  description="Homepage mood stills used on rishi23root.in."
-  path="/mood"
->
+<BaseLayout title="Moods" description="Homepage mood stills used on rishi23root.in." path="/mood">
   <div class="page mood-index">
     <a class="back" href="/">← Home</a>
     <section class="page-intro reveal" style="--i: 0">
@@ -23,35 +20,28 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
       moods.length ? (
         <ul class="mood-index-grid reveal" style="--i: 1">
           {moods.map((mood) => {
-            const jpg =
-              mood.src && mood.src.endsWith('.webp')
-                ? mood.src.slice(0, -5) + '.jpg'
-                : null
+            const fallback = jpgFallback(mood.src)
+            const img = (
+              <img
+                src={fallback ?? mood.src}
+                alt={mood.alt || mood.id}
+                loading="lazy"
+                decoding="async"
+                width="720"
+                height="1280"
+              />
+            )
             return (
-              <li class="mood-index-card">
+              <li>
                 <a class="mood-index-link" href={`/?mood=${mood.id}`}>
                   <div class="mood-index-frame">
-                    {jpg ? (
+                    {fallback ? (
                       <picture>
                         <source srcset={mood.src} type="image/webp" />
-                        <img
-                          src={jpg}
-                          alt={mood.alt || mood.id}
-                          loading="lazy"
-                          decoding="async"
-                          width="720"
-                          height="1280"
-                        />
+                        {img}
                       </picture>
                     ) : (
-                      <img
-                        src={mood.src}
-                        alt={mood.alt || mood.id}
-                        loading="lazy"
-                        decoding="async"
-                        width="720"
-                        height="1280"
-                      />
+                      img
                     )}
                   </div>
                   <span class="mood-index-id">{mood.id}</span>
