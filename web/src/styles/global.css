@@ -1008,9 +1008,16 @@ html[data-theme='light'] .theme-icon-moon {
   margin-top: var(--space-7);
 }
 
+/* Land a heading at the same height the sticky rail sits (no sticky nav here). */
 .post-body :is(h2, h3),
 .post-faq h2 {
-  scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+  scroll-margin-top: var(--space-7);
+}
+
+/* Rail clicks focus the heading for keyboard continuity; no ring on the heading itself. */
+.post-body :is(h2, h3)[tabindex='-1']:focus,
+.post-faq h2[tabindex='-1']:focus {
+  outline: none;
 }
 
 /* Long-form body (MDX). Spacing and type instead of rules. */
@@ -1225,6 +1232,39 @@ html[data-theme='light'] .theme-icon-moon {
 
 .post-toc a:hover {
   color: var(--fg);
+}
+
+/* Subheadings show only under the section being read. Grid 0fr -> 1fr animates
+   to the list's real height; visibility flips after the close so collapsed
+   links leave the tab order and accessibility tree. */
+.post-toc.is-collapsible .toc-sub {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-0.25rem);
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--dur) var(--ease-out),
+    opacity var(--dur-fast) ease,
+    transform var(--dur) var(--ease-out),
+    visibility 0s linear var(--dur);
+}
+
+.post-toc.is-collapsible .toc-sub.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  transition:
+    grid-template-rows var(--dur) var(--ease-out),
+    opacity var(--dur) ease 60ms,
+    transform var(--dur) var(--ease-out),
+    visibility 0s;
+}
+
+.post-toc .toc-sub > ul {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .post-toc a[aria-current] {
@@ -1557,5 +1597,10 @@ html.vt-mood-settle::view-transition-new(home-text) {
 
   .mood-still-scene.is-leaving {
     display: none;
+  }
+
+  .post-toc.is-collapsible .toc-sub,
+  .post-toc.is-collapsible .toc-sub.is-open {
+    transition: none;
   }
 }

@@ -27,7 +27,20 @@ const d = post.data
 const path = postPath(d.slug)
 const canonical = absoluteUrl(path)
 const ogImage = d.image ?? d.cover ?? '/og-default.png'
-const toc = headings.filter((h) => h.depth === 2 || h.depth === 3)
+// Rail outline: each H2 owns the H3s that follow it. H3s before the first H2
+// have no parent, so they stay top-level and always visible.
+type TocLink = { slug: string; text: string }
+type TocGroup = TocLink & { depth: 2 | 3; children: TocLink[] }
+const toc: TocGroup[] = []
+for (const h of headings) {
+  if (h.depth === 2) toc.push({ slug: h.slug, text: h.text, depth: 2, children: [] })
+  else if (h.depth === 3) {
+    const parent = toc.at(-1)
+    if (parent?.depth === 2) parent.children.push({ slug: h.slug, text: h.text })
+    else toc.push({ slug: h.slug, text: h.text, depth: 3, children: [] })
+  }
+}
+if (d.faq.length) toc.push({ slug: 'faq', text: 'FAQ', depth: 2, children: [] })
 const keywords = postKeywords(post)
 const author = { '@type': 'Person', name: d.author, alternateName: site.github.name, url: site.siteUrl }
 
@@ -147,20 +160,26 @@ if (d.faq.length) {
               <nav class="post-toc" aria-label="On this page">
                 <p class="post-rail-label">On this page</p>
                 <ul>
-                  {toc.map((h) => (
-                    <li class={`toc-depth-${h.depth}`}>
-                      <a href={`#${h.slug}`} data-toc={h.slug}>
-                        {h.text}
+                  {toc.map((g) => (
+                    <li class={`toc-depth-${g.depth}`}>
+                      <a href={`#${g.slug}`} data-toc={g.slug}>
+                        {g.text}
                       </a>
+                      {g.children.length ? (
+                        <div class="toc-sub" data-toc-sub>
+                          <ul>
+                            {g.children.map((c) => (
+                              <li class="toc-depth-3">
+                                <a href={`#${c.slug}`} data-toc={c.slug}>
+                                  {c.text}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
                     </li>
                   ))}
-                  {d.faq.length ? (
-                    <li class="toc-depth-2">
-                      <a href="#faq" data-toc="faq">
-                        FAQ
-                      </a>
-                    </li>
-                  ) : null}
                 </ul>
               </nav>
             ) : null
@@ -203,7 +222,34 @@ if (d.faq.length) {
       var ring = 2 * Math.PI * 14 // circumference; r=14 in the SVG
       if (bar) bar.style.strokeDasharray = String(ring)
       var links = Array.prototype.slice.call(document.querySelectorAll('[data-toc]'))
-      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      var motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+      var toc = document.querySelector('.post-toc')
+      var subs = Array.prototype.slice.call(document.querySelectorAll('[data-toc-sub]'))
+      // Each link's group: an H3's nested list, or the list an H2 owns.
+      function groupOf(a) {
+        if (!a) return null
+        return a.closest('[data-toc-sub]') || (a.parentElement && a.parentElement.querySelector(':scope > [data-toc-sub]'))
+      }
+      var openSub = null
+      function setOpen(sub) {
+        if (sub === openSub) return
+        openSub = sub
+        subs.forEach(function (s) {
+          var on = s === sub
+          s.classList.toggle('is-open', on)
+          s.inert = !on
+        })
+      }
+      // Collapse only once JS can reopen them; without JS every H3 stays listed.
+      if (toc && subs.length) {
+        subs.forEach(function (s) {
+          s.inert = true
+        })
+        toc.classList.add('is-collapsible')
+      }
+      var pinned = null // link chosen by a rail click, held while its heading is still on screen
+      var pinnedY = 0
+      var animating = false
 
       function sync() {
         var r = root.getBoundingClientRect()
@@ -214,21 +260,90 @@ if (d.faq.length) {
         if (bar) bar.style.strokeDashoffset = String(ring * (1 - p / 100))
         if (pct) pct.textContent = p + '%'
         btn.setAttribute('aria-label', 'Reading progress ' + p + ' percent. Back to top.')
-        var marker = window.innerHeight * 0.28
+        if (animating) return
         var current = null
-        links.forEach(function (a) {
-          var el = document.getElementById(a.getAttribute('data-toc'))
-          if (el && el.getBoundingClientRect().top <= marker) current = a
-        })
+        if (pinned && Math.abs(window.scrollY - pinnedY) < 4) current = pinned
+        else {
+          pinned = null
+          var marker = window.innerHeight * 0.28
+          links.forEach(function (a) {
+            var el = document.getElementById(a.getAttribute('data-toc'))
+            if (el && el.getBoundingClientRect().top <= marker) current = a
+          })
+        }
+        setCurrent(current)
+      }
+      function setCurrent(current) {
         links.forEach(function (a) {
           a.toggleAttribute('aria-current', a === current)
         })
+        setOpen(groupOf(current))
       }
       sync()
       window.addEventListener('scroll', sync, { passive: true })
       window.addEventListener('resize', sync)
       btn.addEventListener('click', function () {
-        window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
+        window.scrollTo({ top: 0, behavior: motion.matches ? 'auto' : 'smooth' })
+      })
+
+      // Rail clicks: eased scroll to the heading (instant with reduced motion).
+      // The clicked item is marked current up front so the rail doesn't flicker
+      // through every section on the way.
+      var raf = 0
+      function ease(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+      }
+      function stop() {
+        if (!animating) return
+        cancelAnimationFrame(raf)
+        animating = false
+        pinned = null
+        sync()
+      }
+      ;['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (type) {
+        window.addEventListener(type, stop, { passive: true })
+      })
+      function scrollToHeading(a, el) {
+        var margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0
+        var max = document.documentElement.scrollHeight - window.innerHeight
+        var to = Math.max(0, Math.min(max, Math.round(window.scrollY + el.getBoundingClientRect().top - margin)))
+        var from = window.scrollY
+        var done = function () {
+          animating = false
+          pinned = a
+          pinnedY = window.scrollY
+          if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1')
+          el.focus({ preventScroll: true })
+        }
+        cancelAnimationFrame(raf)
+        setCurrent(a)
+        var dist = Math.abs(to - from)
+        if (motion.matches || dist < 2) {
+          window.scrollTo(0, to)
+          done()
+          return
+        }
+        var dur = Math.min(800, 480 + dist * 0.08)
+        var t0 = 0
+        animating = true
+        raf = requestAnimationFrame(function step(now) {
+          if (!t0) t0 = now
+          var t = Math.min(1, (now - t0) / dur)
+          window.scrollTo(0, from + (to - from) * ease(t))
+          if (t < 1) raf = requestAnimationFrame(step)
+          else done()
+        })
+      }
+      links.forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+          var id = a.getAttribute('data-toc')
+          var el = document.getElementById(id)
+          if (!el) return
+          e.preventDefault()
+          history.replaceState(history.state, '', '#' + id)
+          scrollToHeading(a, el)
+        })
       })
 
       var share = document.getElementById('postShare')
