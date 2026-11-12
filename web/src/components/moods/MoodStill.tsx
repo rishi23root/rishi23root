@@ -1,7 +1,7 @@
 type Props = {
   src: string
-  /** Soft fade-in when true (off under reduced motion). */
-  fade?: boolean
+  /** Extra class on the scene (is-entering / is-leaving for crossfade). */
+  className?: string
 }
 
 function jpgFallback(src: string): string | null {
@@ -10,31 +10,22 @@ function jpgFallback(src: string): string | null {
 }
 
 /** Static mood plate — WebP primary, optional JPG sibling fallback. */
-export default function MoodStill({ src, fade = false }: Props) {
+export default function MoodStill({ src, className = '' }: Props) {
   const fallback = jpgFallback(src)
+  const img = (
+    <img src={fallback ?? src} alt="" decoding="async" fetchPriority="high" draggable={false} />
+  )
 
   return (
-    <div className={`mood-scene mood-still-scene${fade ? ' is-fade' : ''}`}>
+    <div className={`mood-scene mood-still-scene ${className}`.trim()}>
       <div className="mood-layer mood-still">
         {fallback ? (
           <picture>
             <source srcSet={src} type="image/webp" />
-            <img
-              src={fallback}
-              alt=""
-              decoding="async"
-              fetchPriority="high"
-              draggable={false}
-            />
+            {img}
           </picture>
         ) : (
-          <img
-            src={src}
-            alt=""
-            decoding="async"
-            fetchPriority="high"
-            draggable={false}
-          />
+          img
         )}
       </div>
     </div>

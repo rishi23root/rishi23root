@@ -11,16 +11,17 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
   path="/mood"
 >
   <div class="page mood-index">
-    <section class="page-intro">
+    <a class="back" href="/">← Home</a>
+    <section class="page-intro reveal" style="--i: 0">
       <h1>Moods</h1>
       <p class="lede">
-        Static homepage stills ({moods.length}). Unlisted — not in site chrome.
+        Every homepage mood ({moods.length}). The home page cycles through all of them before repeating. Pick one to open it there.
       </p>
     </section>
 
     {
       moods.length ? (
-        <ul class="mood-index-grid">
+        <ul class="mood-index-grid reveal" style="--i: 1">
           {moods.map((mood) => {
             const jpg =
               mood.src && mood.src.endsWith('.webp')

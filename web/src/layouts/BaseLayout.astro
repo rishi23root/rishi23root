@@ -102,11 +102,16 @@ const isHome = path === '/'
     </script>
   </head>
   <body>
-    <div class:list={['shell', isHome && 'shell-home']}>
-      {
-        /* Home chrome lives inside the left text column (index.astro). */
-        !isHome ? <SiteChrome path={path} /> : null
-      }
+    {
+      /* Inner pages: full-width top bar; inner row aligns with the content frame.
+         Home chrome lives inside the text column (index.astro). */
+      !isHome ? (
+        <div class="chrome-bar">
+          <SiteChrome path={path} />
+        </div>
+      ) : null
+    }
+    <div class:list={['shell', isHome ? 'shell-home' : 'shell-inner']}>
       <main>
         <slot />
       </main>

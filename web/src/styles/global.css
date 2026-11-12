@@ -33,11 +33,66 @@ html[data-theme='dark'] {
   --frame-border: rgba(242, 235, 224, 0.14);
   --frame-radius: 18px;
   --accent: #e6dccb;
+  --row-hover: rgba(242, 235, 224, 0.05);
+  color-scheme: dark;
+}
+
+/*
+ * Layout + motion tokens (shared by every page and both themes).
+ * Use these instead of ad-hoc rem values so spacing stays consistent.
+ */
+:root {
   --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
   --serif: var(--sans);
-  --measure: 38rem;
-  --page-pad: clamp(1.35rem, 3.6vw, 3.5rem);
-  color-scheme: dark;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Page frame */
+  --measure: 38rem; /* reading column on inner pages */
+  --page-pad: clamp(1.5rem, 3.6vw, 3.5rem); /* left/right gutter, all pages */
+  --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7)); /* top/bottom */
+  --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem); /* between sections */
+  --row-pad: 0.85rem; /* hairline list rows */
+  --row-pad-tight: 0.6rem; /* home content rows */
+  --row-bleed: 0.75rem; /* hover wash extends past the text column */
+  --row-radius: 10px;
+  --home-max: 93.75rem;
+  --frame-max: 72rem; /* inner pages: nav row + content frame */
+  --article-max: 42rem; /* post header/body column inside the frame */
+  --rail-w: 13rem; /* post utility rail */
+  --rail-gap: clamp(var(--space-7), 5vw, 5rem); /* article <-> rail */
+  /* Article + rail as one centered group; nav row matches it */
+  --post-group: calc(var(--article-max) + var(--rail-gap) + var(--rail-w));
+  --home-gap: clamp(var(--space-6), 4.5vw, 5rem); /* mood <-> text */
+
+  /* Nav (same height + spacing on every page) */
+  --nav-height: 3.25rem;
+  --nav-gap: var(--space-3);
+  --nav-font: 0.9rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 160ms;
+  --dur: 280ms;
+  --dur-slow: 520ms;
+  --stagger: 60ms;
+  --mood-xfade: 420ms;
+
+  /*
+   * Experiment: inset shadow on the mood plate. Revert with
+   * --mood-inset-shadow: none (or drop the .mood-inset class).
+   */
+  --mood-inset-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+    inset 0 2px 18px rgba(0, 0, 0, 0.35), inset 0 -24px 48px -24px rgba(0, 0, 0, 0.45);
 }
 
 html[data-theme='light'] {
@@ -49,10 +104,7 @@ html[data-theme='light'] {
   --frame-bg: #e8dfd0;
   --frame-border: rgba(28, 27, 25, 0.12);
   --accent: #2a2825;
-  --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
-  --serif: var(--sans);
-  --measure: 38rem;
-  --page-pad: clamp(1.35rem, 3.6vw, 3.5rem);
+  --row-hover: rgba(28, 27, 25, 0.05);
   color-scheme: light;
 }
 
@@ -87,24 +139,26 @@ a:hover {
 }
 
 .shell {
-  /* Full bleed + Lee page pad (no rem/vw max-width caps) */
+  /* Full bleed; every page shares the same gutters */
   width: 100%;
   margin-inline: auto;
   padding-inline: var(--page-pad);
-  padding-bottom: 4rem;
+  padding-bottom: var(--space-8);
 }
 
 .chrome {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.65rem;
+  gap: var(--nav-gap);
   /* Writing/other pages: same measure as prose. Home overrides in .shell-home */
   max-width: var(--measure);
   width: 100%;
+  min-height: var(--nav-height);
   margin-inline: auto;
-  padding: 0.7rem 0 0.55rem;
-  /* Sticky only off-home — landing chrome scrolls with .home-left */
+  margin-bottom: var(--section-gap);
+  padding: 0;
+  /* Sticky only off-home; landing chrome scrolls with .home-text */
   position: sticky;
   top: 0;
   z-index: 20;
@@ -116,7 +170,7 @@ a:hover {
 .chrome-start {
   display: flex;
   align-items: baseline;
-  gap: 0.7rem;
+  gap: var(--space-4);
   min-width: 0;
 }
 
@@ -135,13 +189,33 @@ a:hover {
 
 .nav {
   display: flex;
-  gap: 0.75rem;
-  font-size: 0.9rem;
+  gap: var(--nav-gap);
+  font-size: var(--nav-font);
 }
 
 .nav a {
+  position: relative;
   color: var(--muted);
   text-decoration: none;
+  transition: color var(--dur-fast) ease;
+}
+
+/* Quiet active marker under the current page */
+.nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.2em;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.nav a[aria-current='page']::after {
+  transform: scaleX(1);
 }
 
 .nav a:hover,
@@ -198,37 +272,28 @@ html[data-theme='light'] .theme-icon-moon {
 .page {
   display: flex;
   flex-direction: column;
-  gap: 2.25rem;
+  gap: var(--section-gap);
 }
 
 /* Lee-like home: text column + tall mood panel (desktop) */
 .home-split {
   display: flex;
   flex-direction: column;
-  gap: 2.25rem;
+  gap: var(--section-gap);
   width: 100%;
 }
 
-/* Left stack: chrome + prose (Lee — chrome never spans the mood col) */
-.home-left {
+/* Text column: chrome + prose (chrome never spans the mood column) */
+.home-text {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   min-width: 0;
   width: 100%;
-  box-sizing: border-box;
-  /* Desktop JS sets equal padding-block vs mood band; fallback pad here */
-  padding-block: clamp(2rem, 1.5em + 1.1vw, 3rem);
+  padding-block: var(--page-pad-block);
 }
 
-.home-left-stack {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-width: 0;
-}
-
-.home-left .chrome {
+.home-text .chrome {
   max-width: none;
   margin-inline: 0;
   /* Scroll away with left column — not sticky/fixed */
@@ -242,8 +307,7 @@ html[data-theme='light'] .theme-icon-moon {
 .home-copy {
   display: flex;
   flex-direction: column;
-  /* Lee vertical rhythm between bio / writing / work / capabilities */
-  gap: clamp(1.5rem, 2.4vw, 2.25rem);
+  gap: var(--section-gap);
   min-width: 0;
   width: 100%;
 }
@@ -253,109 +317,115 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .home-copy .home-section h2 {
-  margin: 0 0 0.85rem;
-  font-size: 0.95rem;
+  margin: 0 0 var(--space-3);
+  font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: -0.01em;
-  text-transform: none;
-  color: var(--fg);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .home-copy .home-section-bio {
   max-width: 40rem;
 }
 
-/* Writing: title left / date right, hairline rows (Lee Notes rhythm) */
-.home-writing-list {
+/*
+ * Home content lists (Writing / Work / Capabilities): no per-row hairlines.
+ * Rows are spaced cards with a soft hover wash; the bleed keeps text aligned
+ * with the section label while the hover background extends past it.
+ */
+.home-writing-list,
+.home-stack-list {
   list-style: none;
-  margin: 0;
+  margin: 0 calc(-1 * var(--row-bleed));
   padding: 0;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
+.home-writing-list li,
+.home-stack-list li {
+  position: relative;
+  padding: var(--row-pad-tight) var(--row-bleed);
+  border-radius: var(--row-radius);
+  line-height: 1.45;
+  transition: background-color var(--dur-fast) ease;
+}
+
+.home-writing-list li:hover,
+.home-stack-list li:hover,
+.home-writing-list li:focus-within,
+.home-stack-list li:focus-within {
+  background: var(--row-hover);
+}
+
+/* Writing: title left / date right */
 .home-writing-list li {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 1.5rem 2rem;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--border);
+  gap: var(--space-2) var(--space-6);
   font-size: 1.12rem;
-  line-height: 1.45;
 }
 
-.home-writing-list li:first-child {
-  border-top: 1px solid var(--border);
-}
-
-.home-writing-list a {
+.home-writing-list a,
+.home-stack-list a {
   color: var(--fg);
   text-decoration: none;
   font-weight: 500;
   min-width: 0;
 }
 
-.home-writing-list a:hover {
+/* Whole row is the click target for linked rows */
+.home-writing-list a::after,
+.home-stack-list a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.home-writing-list li:hover a,
+.home-stack-list li:hover a {
   color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 0.14em;
+}
+
+.home-writing-list a:focus-visible,
+.home-stack-list a:focus-visible {
+  outline: none;
+}
+
+.home-writing-list li:has(a:focus-visible),
+.home-stack-list li:has(a:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
 }
 
 .home-writing-list time {
   flex-shrink: 0;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
 }
 
-/* Work / capabilities: same hairline breathing room */
-.home-stack-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-}
-
+/* Work / capabilities: title, then a muted one-line blurb underneath */
 .home-stack-list li {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 0.45rem;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid var(--border);
+  flex-direction: column;
+  gap: 0.1rem;
   font-size: 1.05rem;
-  line-height: 1.45;
-}
-
-.home-stack-list li:first-child {
-  border-top: 1px solid var(--border);
-}
-
-.home-stack-list a {
-  color: var(--fg);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.home-stack-list a:hover {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 0.14em;
 }
 
 .home-stack-list .blurb {
   color: var(--muted);
   font-weight: 400;
-}
-
-.home-stack-list .blurb::before {
-  content: '— ';
+  font-size: 0.95rem;
 }
 
 .home-copy .contact-icons {
-  margin-top: 0.35rem;
-  padding-top: 1.15rem;
+  margin-top: 0;
+  padding-top: var(--space-5);
 }
 
 .home-mood {
@@ -372,11 +442,28 @@ html[data-theme='light'] .theme-icon-moon {
 .hero-shell-stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16; /* Lee portrait mood box */
+  aspect-ratio: 9 / 16; /* portrait mood box */
   border-radius: var(--frame-radius);
   border: 1px solid var(--frame-border);
   background: var(--frame-bg);
   overflow: hidden;
+  isolation: isolate;
+}
+
+.hero-shell-art {
+  position: absolute;
+  inset: 0;
+}
+
+/* Inset-shadow experiment (see --mood-inset-shadow). Sits above the art. */
+.mood-inset::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: var(--mood-inset-shadow);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .hero-shell-empty {
@@ -421,28 +508,48 @@ html[data-theme='light'] .theme-icon-moon {
   object-fit: cover;
 }
 
-.mood-still-scene.is-fade .mood-still {
-  animation: mood-still-fade 280ms ease-out both;
+/* First paint: soft fade. "next": crossfade old -> new. */
+.mood-still-scene {
+  animation: mood-fade-in var(--dur-slow) var(--ease-out) both;
 }
 
-@keyframes mood-still-fade {
+.mood-still-scene.is-entering {
+  animation: mood-fade-in var(--mood-xfade) ease both;
+}
+
+.mood-still-scene.is-leaving {
+  animation: mood-fade-out var(--mood-xfade) ease both;
+}
+
+@keyframes mood-fade-in {
   from {
     opacity: 0;
+    transform: scale(1.015);
   }
   to {
     opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes mood-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
 .voice-bio {
   margin: 0;
-  max-width: 40rem;
+  max-width: 34ch;
   width: 100%;
   font-family: var(--sans);
-  font-size: clamp(1.32rem, 1.15rem + 0.6vw, 1.55rem);
+  font-size: clamp(1.38rem, 1.15rem + 0.7vw, 1.7rem);
   font-weight: 400;
-  line-height: 1.55;
-  letter-spacing: -0.011em;
+  line-height: 1.45;
+  letter-spacing: -0.015em;
   color: var(--fg);
   text-wrap: pretty;
 }
@@ -567,6 +674,7 @@ html[data-theme='light'] .theme-icon-moon {
   margin-top: 0.75rem;
 }
 
+/* Writing index (FlowForge index rhythm, no row hairlines) */
 .post-list {
   list-style: none;
   margin: 0 auto;
@@ -575,49 +683,85 @@ html[data-theme='light'] .theme-icon-moon {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.35rem;
+  gap: var(--space-2);
 }
 
 .post-list-item {
-  display: grid;
-  grid-template-columns: 6.5rem minmax(0, 1fr);
-  gap: 0.85rem 1.1rem;
-  align-items: start;
+  position: relative;
+  margin-inline: calc(-1 * var(--row-bleed));
+  padding: var(--space-4) var(--row-bleed);
+  border-radius: var(--row-radius);
+  transition: background-color var(--dur-fast) ease;
 }
 
-.post-list-item time {
-  font-size: 0.82rem;
+.post-list-item:hover,
+.post-list-item:focus-within {
+  background: var(--row-hover);
+}
+
+.post-list-meta,
+.post-list-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.45rem;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
   color: var(--muted);
-  letter-spacing: 0.01em;
-  padding-top: 0.2rem;
 }
 
-.post-list-body {
-  min-width: 0;
+.post-list-tags {
+  margin-top: var(--space-2);
+}
+
+.post-list-heading {
+  margin: var(--space-2) 0 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
 }
 
 .post-list-title {
-  display: inline;
-  font-family: var(--sans);
-  font-size: 1.3rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.3;
   color: var(--fg);
   text-decoration: none;
 }
 
-.post-list-title:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.12em;
+/* Whole card is the link target */
+.post-list-title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.post-list-item:hover .post-list-title {
+  color: var(--accent);
+}
+
+.post-list-title:focus-visible {
+  outline: none;
+}
+
+.post-list-item:has(.post-list-title:focus-visible) {
+  outline: 2px solid var(--accent);
 }
 
 .post-list-summary {
-  margin: 0.4rem 0 0;
+  margin: var(--space-2) 0 0;
   color: var(--muted);
-  font-size: 1.02rem;
-  line-height: 1.5;
-  font-family: var(--sans);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.page-eyebrow {
+  margin: 0 0 var(--space-2);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 .prose {
@@ -820,106 +964,64 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 /*
- * Desktop home (Lee): shell is a 2-col grid.
- * Left = chrome + copy (+ contact icons). Right = mood art only.
+ * Desktop home: two columns. Mood plate on the LEFT (~40%), text on the
+ * RIGHT (~60%). The mood column is sticky and viewport-tall; no JS sizing.
  */
 @media (min-width: 1024px) {
   .shell-home {
-    display: grid;
-    /* ~1500px Lee home-layout width */
-    width: min(100%, 93.75rem);
+    width: min(100%, var(--home-max));
     margin-inline: auto;
-    /* Breathing text column + mood + Lee middle gap */
-    grid-template-columns: minmax(0, 42rem) minmax(22rem, 1fr);
-    column-gap: clamp(3rem, 5.5vw, 6rem);
-    align-items: start;
-    /* Vertical pad lives on .home-left (equal block), not shell */
     padding-bottom: 0;
   }
 
-  .shell-home > main {
-    display: contents;
-  }
-
   .shell-home .home-split {
-    display: contents;
-    width: auto;
-    margin: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    column-gap: var(--home-gap);
+    align-items: start;
   }
 
-  /*
-   * Left stack complements tall mood plate. JS sets min-height to the
-   * mood/viewport band and equal padding-block when stack is shorter.
-   */
-  .shell-home .home-left {
+  .shell-home .home-mood {
+    display: block;
     grid-column: 1;
     grid-row: 1;
-    max-width: 42rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  /*
-   * Image-only right column. Aside is a zero-height grid anchor (no row
-   * inflation). Inner plate is fixed + viewport-tall; sync sets left/width.
-   */
-  .shell-home .home-mood {
-    display: block; /* override base mobile hide */
-    grid-column: 2;
-    grid-row: 1;
     align-self: stretch;
-    width: 100%;
-    height: 0;
-    overflow: visible;
-    margin: 0;
-    padding: 0;
-    pointer-events: none;
+    min-width: 0;
   }
 
-  .shell-home .home-mood-inner {
-    position: fixed;
+  .shell-home .home-mood-sticky {
+    position: sticky;
     top: 0;
     height: 100svh;
-    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: auto;
-  }
-
-  .shell-home .home-mood .hero-shell {
-    width: min(100%, 32rem);
-    max-width: min(100%, 32rem);
-    margin-inline: auto;
-  }
-
-  .shell-home .home-mood .hero-shell-stage {
-    /* Width-led 9:16; ~full viewport height budget */
-    aspect-ratio: 9 / 16;
-    width: min(100%, calc((100svh - 2rem) * 9 / 16));
-    height: auto;
-    margin-inline: auto;
-  }
-}
-
-/* Compact desktop: Lee-like wider mood plate + keep middle gap */
-@media (min-width: 1024px) and (max-width: 1399px) {
-  .shell-home {
-    grid-template-columns: minmax(0, 36rem) minmax(21rem, 1fr);
-    column-gap: clamp(2.25rem, 4vw, 4rem);
-  }
-
-  .shell-home .home-left {
-    max-width: 36rem;
+    padding-block: var(--page-pad-block);
   }
 
   .shell-home .home-mood .hero-shell {
     width: 100%;
-    max-width: none;
+    display: flex;
+    justify-content: center;
   }
 
   .shell-home .home-mood .hero-shell-stage {
-    width: min(100%, calc((100svh - 1.5rem) * 9 / 16));
+    width: min(100%, calc((100svh - 2 * var(--page-pad-block)) * 9 / 16));
+    height: auto;
+  }
+
+  /* Intro uses the whole text column on desktop */
+  .shell-home .home-section-bio,
+  .shell-home .voice-bio {
+    max-width: none;
+  }
+
+  .shell-home .home-text {
+    grid-column: 2;
+    grid-row: 1;
+    max-width: none;
+    min-height: 100svh;
+    justify-content: center;
   }
 }
 
@@ -929,15 +1031,11 @@ html[data-theme='light'] .theme-icon-moon {
     display: none !important;
   }
 
-  .home-left {
+  .home-text {
     max-width: var(--measure);
     margin-inline: auto;
   }
 
-  .post-list-item {
-    grid-template-columns: 1fr;
-    gap: 0.25rem;
-  }
 }
 
 /* Unlisted /mood index — all homepage stills */
@@ -946,9 +1044,11 @@ html[data-theme='light'] .theme-icon-moon {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
-  gap: 1.25rem 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: var(--space-5) var(--space-4);
   width: 100%;
+  max-width: var(--measure);
+  margin-inline: auto;
 }
 
 .mood-index-card {
@@ -995,8 +1095,804 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--fg);
 }
 
+/* ---------------------------------------------------------------
+ * Post page (style adapted from FlowForge's long-form blog):
+ * breadcrumb, deck, mono meta line, callouts, FAQ, sticky "On this page"
+ * rail with reading progress. Article stays on the reading column; the
+ * rail sits in the right gutter on wide screens.
+ * ------------------------------------------------------------- */
+.post-layout {
+  width: 100%;
+}
+
+.post {
+  max-width: var(--measure);
+  width: 100%;
+  margin-inline: auto;
+}
+
+.post-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.post-crumbs a {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.post-crumbs a:hover {
+  text-decoration: underline;
+}
+
+.post-crumbs-current {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  opacity: 0.75;
+}
+
+.post-header h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 1.4rem + 1.8vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.post-deck {
+  margin: var(--space-4) 0 0;
+  font-size: 1.18rem;
+  line-height: 1.55;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.post-meta,
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.45rem;
+  margin: var(--space-5) 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.post-tags {
+  margin-top: var(--space-2);
+}
+
+.post-draft {
+  color: #e0b25c;
+}
+
+.post-cover {
+  margin: var(--space-6) 0 0;
+}
+
+.post-cover img {
+  display: block;
+  width: 100%;
+  border-radius: var(--row-radius);
+  border: 1px solid var(--frame-border);
+}
+
+.post-body {
+  margin-top: var(--space-7);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+.post-body :is(h2, h3) {
+  scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+}
+
+.post-body h2 {
+  margin-top: var(--space-7);
+}
+
+/* Callouts: <Callout tone="note|warning|answer"> in MDX */
+.callout {
+  margin: 0 0 1.25rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--row-radius);
+  border: 1px solid var(--frame-border);
+  background: var(--frame-bg);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.callout-label {
+  margin: 0 0 var(--space-1) !important;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.callout-body > :last-child {
+  margin-bottom: 0;
+}
+
+.callout-body {
+  color: var(--muted);
+}
+
+.callout-warning {
+  border-color: rgba(224, 178, 92, 0.35);
+  background: rgba(224, 178, 92, 0.06);
+}
+
+.callout-warning .callout-label {
+  color: #e0b25c;
+}
+
+.callout-answer {
+  border-color: color-mix(in srgb, var(--fg) 22%, transparent);
+}
+
+/* FAQ */
+.post-faq {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+.post-faq h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+}
+
+.post-faq dl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: var(--space-5) 0 0;
+}
+
+.post-faq dt {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.post-faq dd {
+  margin: var(--space-1) 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* Rail: hidden on small screens */
+.post-rail {
+  display: none;
+}
+
+.post-rail-label {
+  margin: 0 0 var(--space-3);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.post-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid var(--border);
+}
+
+.post-toc a {
+  display: block;
+  margin-left: -1px;
+  padding: 0.2rem 0 0.2rem var(--space-3);
+  border-left: 2px solid transparent;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--muted);
+  text-decoration: none;
+  transition:
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease;
+}
+
+.post-toc .toc-depth-3 a {
+  padding-left: calc(var(--space-3) + var(--space-3));
+  font-size: 0.8rem;
+}
+
+.post-toc a:hover {
+  color: var(--fg);
+}
+
+.post-toc a[aria-current] {
+  color: var(--fg);
+  border-left-color: var(--fg);
+}
+
+.post-rail-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.post-progress {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.post-progress svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.post-progress circle {
+  fill: none;
+  stroke-width: 2;
+}
+
+.post-progress-track {
+  stroke: var(--border);
+}
+
+.post-progress-bar {
+  stroke: var(--fg);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 150ms ease-out;
+}
+
+.post-progress-pct {
+  position: relative;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.post-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 1.9rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease;
+}
+
+.post-pill:hover,
+.post-pill:focus-visible {
+  color: var(--fg);
+  border-color: var(--frame-border);
+  background: var(--row-hover);
+}
+
+.post-page .contact-icons {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+@media (min-width: 1024px) {
+  .post-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure)) minmax(0, 1fr);
+    column-gap: var(--home-gap);
+  }
+
+  .post {
+    grid-column: 2;
+  }
+
+  .post-rail {
+    display: block;
+    grid-column: 3;
+    max-width: 14rem;
+  }
+
+  .post-rail-sticky {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-6));
+  }
+}
+
+/* ---------------------------------------------------------------
+ * Inner pages frame (inspired by FlowForge long-form):
+ * full-width top bar whose row shares one padded frame with the content;
+ * content is left-aligned in that frame, not floating mid-viewport.
+ * ------------------------------------------------------------- */
+.chrome-bar {
+  /* Scrolls away with the page (not sticky); spacing instead of a rule */
+  position: static;
+  padding-inline: var(--page-pad);
+  padding-top: var(--space-3);
+}
+
+.chrome-bar .chrome {
+  position: static;
+  max-width: var(--post-group);
+  margin: 0 auto;
+  padding-inline: 0;
+  background: none;
+  backdrop-filter: none;
+}
+
+.shell-inner {
+  padding-top: clamp(var(--space-6), 5vw, var(--space-8));
+}
+
+.shell-inner > main {
+  /* Centered group: even side margins that grow on wide screens */
+  max-width: var(--post-group);
+  margin-inline: auto;
+}
+
+/* Align page blocks to the frame's left edge (same x as the wordmark) */
+.shell-inner :is(.page-intro, .post-list, .back, .empty, .mood-index-grid),
+.shell-inner .blog-page .contact-icons,
+.shell-inner .prose {
+  margin-inline: 0;
+}
+
+.shell-inner .page-intro,
+.shell-inner .post-list,
+.shell-inner .blog-page .contact-icons {
+  max-width: var(--article-max);
+}
+
+/* Post: article + rail in one frame */
+.shell-inner .post {
+  max-width: var(--article-max);
+  margin-inline: 0;
+}
+
+.shell-inner .post .prose {
+  max-width: none;
+  font-size: 1.2rem;
+  line-height: 1.75;
+}
+
+.post-header h1 {
+  font-size: clamp(1.85rem, 1.35rem + 1.5vw, 2.4rem);
+  line-height: 1.18;
+  letter-spacing: -0.028em;
+}
+
+.post-deck {
+  margin-top: var(--space-3);
+  font-size: clamp(1.08rem, 1rem + 0.35vw, 1.22rem);
+  max-width: 38rem;
+}
+
+.post-meta {
+  margin-top: var(--space-5);
+  font-size: 0.7rem;
+}
+
+/* Tags as quiet chips */
+.post-crumbs {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.post-tags {
+  list-style: none;
+  padding: 0;
+  margin-top: var(--space-3);
+  gap: var(--space-2);
+}
+
+.post-tag {
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  background: var(--row-hover);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.post-body {
+  margin-top: var(--space-7);
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Cleaner long-form: no hairlines; fills and spacing instead */
+.post-cover img {
+  border: 0;
+}
+
+.post-faq {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.shell-inner .post .prose pre {
+  border: 0;
+}
+
+.callout {
+  border: 0;
+  border-left: 2px solid color-mix(in srgb, var(--fg) 28%, transparent);
+  border-radius: 0 var(--row-radius) var(--row-radius) 0;
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+
+.callout-warning {
+  border-left-color: rgba(224, 178, 92, 0.6);
+  background: rgba(224, 178, 92, 0.06);
+}
+
+.shell-inner .blog-page .contact-icons {
+  border-top: 0;
+  padding-top: var(--space-4);
+}
+
+.post-toc ul {
+  border-left: 0;
+}
+
+.post-toc a {
+  margin-left: 0;
+}
+
+/* Utility rail: own column, quiet, divided from the article */
+.post-rail-label {
+  font-size: 0.6rem;
+}
+
+.post-toc a[aria-current] {
+  color: var(--fg);
+  font-weight: 600;
+  border-left-color: var(--accent);
+}
+
+.post-rail-tools {
+  gap: var(--space-2);
+  margin-top: var(--space-7);
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* No headings: tools lead the rail, no stray divider */
+.post-rail-tools:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.post-tool {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  max-width: 2.25rem;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  background: var(--row-hover);
+  padding: 0;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    max-width var(--dur) var(--ease-out),
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease;
+}
+
+.post-tool svg {
+  flex: 0 0 2.25rem;
+  width: 2.25rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.post-tool-label {
+  padding-right: var(--space-3);
+  opacity: 0;
+  transition: opacity var(--dur-fast) ease;
+}
+
+.post-tool:hover,
+.post-tool:focus-visible,
+.post-tool.is-open {
+  max-width: 12rem;
+  color: var(--fg);
+  background: color-mix(in srgb, var(--fg) 9%, transparent);
+}
+
+.post-tool:hover .post-tool-label,
+.post-tool:focus-visible .post-tool-label,
+.post-tool.is-open .post-tool-label {
+  opacity: 1;
+}
+
+.post-tool:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Mobile/tablet: rail collapses into a quiet tools row after the article */
+@media (max-width: 1023px) {
+  .post-rail {
+    display: block;
+    margin-top: var(--space-7);
+  }
+
+  .post-toc {
+    display: none;
+  }
+
+  .post-rail-tools {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shell-inner .post-layout {
+    display: grid;
+    grid-template-columns: minmax(0, var(--article-max)) var(--rail-w);
+    column-gap: var(--rail-gap);
+    align-items: start;
+  }
+
+  .shell-inner .post {
+    grid-column: 1;
+  }
+
+  .shell-inner .post-rail {
+    grid-column: 2;
+    max-width: none;
+    align-self: stretch;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .post-rail-sticky {
+    /* Rail may stick; the nav does not */
+    top: var(--space-7);
+    padding-top: 0.35rem;
+  }
+}
+
+/* ---------------------------------------------------------------
+ * Mood overlay: tiny chips, hidden until hover / focus / tap.
+ * ------------------------------------------------------------- */
+.mood-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-3);
+  pointer-events: none;
+}
+
+.mood-overlay-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  opacity: 0;
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+.mood-overlay-top {
+  transform: translateY(-4px);
+}
+
+.mood-overlay-bottom {
+  transform: translateY(4px);
+  transition-delay: 40ms;
+}
+
+.hero-shell-stage:hover .mood-overlay-row,
+.hero-shell-stage:focus-within .mood-overlay-row,
+.hero-shell[data-revealed='true'] .mood-overlay-row {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* Touch screens: faintly visible by default, tap the plate for full. */
+@media (hover: none) {
+  .mood-overlay-row {
+    opacity: 0.55;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+.mood-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.18rem 0.5rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(20, 19, 17, 0.38);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.mood-chip-label {
+  opacity: 0.7;
+}
+
+.mood-chip-count {
+  font-variant-numeric: tabular-nums;
+}
+
+.mood-chip-link,
+.mood-chip-next {
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+
+.mood-chip-link:hover,
+.mood-chip-next:hover,
+.mood-chip-link:focus-visible,
+.mood-chip-next:focus-visible {
+  color: #fff;
+  background: rgba(20, 19, 17, 0.6);
+}
+
+.mood-chip-link:focus-visible,
+.mood-chip-next:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 1px;
+}
+
+.mood-chip-link span,
+.mood-chip-next span {
+  display: inline-block;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.mood-chip-link:hover span,
+.mood-chip-next:hover span {
+  transform: translateX(2px);
+}
+
+/* /mood index: highlight on hover */
+.mood-index-frame {
+  transition:
+    transform var(--dur) var(--ease-out),
+    border-color var(--dur) ease;
+}
+
+.mood-index-link:hover .mood-index-frame {
+  transform: translateY(-2px);
+  border-color: var(--border);
+}
+
+/* ---------------------------------------------------------------
+ * Motion: page transitions + entrance reveals
+ * ------------------------------------------------------------- */
+
+/* Cross-document view transitions (Chrome/Edge/Safari 18+). No JS. */
+@view-transition {
+  navigation: auto;
+}
+
+/* Nav + wordmark stay put; only page content crossfades */
+.chrome {
+  view-transition-name: site-chrome;
+}
+
+::view-transition-old(root) {
+  animation: vt-out var(--dur-fast) ease both;
+}
+
+::view-transition-new(root) {
+  animation: vt-in var(--dur) var(--ease-out) both;
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Staggered entrance; set --i on the element for its order */
+.reveal {
+  animation: reveal-in var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * var(--stagger));
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .mood-still-scene.is-fade .mood-still {
-    animation: none !important;
+  @view-transition {
+    navigation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+  }
+
+  .mood-still-scene.is-leaving {
+    display: none;
   }
 }

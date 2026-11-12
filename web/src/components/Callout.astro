@@ -1,0 +1,11 @@
+---
+/** MDX: <Callout>…</Callout> or <Callout tone="warning">…</Callout> */
+type Props = { tone?: 'note' | 'warning' | 'answer' }
+const { tone = 'note' } = Astro.props
+const label = tone === 'warning' ? 'Warning' : tone === 'answer' ? 'Short answer' : 'Note'
+---
+
+<aside class:list={['callout', `callout-${tone}`]}>
+  <p class="callout-label">{label}</p>
+  <div class="callout-body"><slot /></div>
+</aside>
