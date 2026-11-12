@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import MoodStill from './moods/MoodStill'
-import MoodStub from './moods/MoodStub'
 import { adoptCurrentMood, advanceMood, cyclePosition, peekNextMood } from './moods/cycle'
+import { DESKTOP_MQ } from './moods/media'
 import type { MoodSlot } from './moods/types'
 
 type Props = {
@@ -12,16 +12,6 @@ type Props = {
 
 /** Crossfade length; mirrored by --mood-xfade in global.css. */
 const XFADE_MS = 420
-
-/** Same breakpoint as `.home-mood` in global.css: the plate is hidden below it. */
-const DESKTOP_MQ = '(min-width: 1024px)'
-
-declare global {
-  interface Window {
-    /** First mood picked (and preloaded) by the inline head script in index.astro. */
-    __heroMoodFirst?: string
-  }
-}
 
 function useDesktop(): boolean {
   const [desktop, setDesktop] = useState(() => window.matchMedia(DESKTOP_MQ).matches)
@@ -40,28 +30,27 @@ function readMoodParam(): string | null {
   return new URLSearchParams(window.location.search).get('mood')
 }
 
+const byId = (moods: MoodSlot[], id: string | null | undefined) =>
+  id ? moods.find((m) => m.id === id) : undefined
+
 function initialSlot(moods: MoodSlot[], forced?: string | null): MoodSlot | null {
   if (!moods.length) return null
-  if (forced) {
-    const hit = moods.find((m) => m.id === forced)
-    if (hit) return hit
-  }
+  const hit = byId(moods, forced)
+  if (hit) return hit
   // The head script already advanced the bag for this load: adopt its pick.
   const early = window.__heroMoodFirst
   window.__heroMoodFirst = undefined
   if (early) {
-    const id = adoptCurrentMood(moods)
-    const hit = moods.find((m) => m.id === (id ?? early)) ?? moods.find((m) => m.id === early)
-    if (hit) return hit
+    const adopted = byId(moods, adoptCurrentMood(moods) ?? early)
+    if (adopted) return adopted
   }
-  const id = advanceMood(moods)
-  return moods.find((m) => m.id === id) ?? moods[0] ?? null
+  return byId(moods, advanceMood(moods)) ?? moods[0]
 }
 
 const prefetched = new Set<string>()
 
 function prefetch(src?: string) {
-  if (!src || prefetched.has(src) || typeof Image === 'undefined') return
+  if (!src || prefetched.has(src)) return
   prefetched.add(src)
   const img = new Image()
   img.decoding = 'async'
@@ -71,22 +60,21 @@ function prefetch(src?: string) {
 
 /** Run once the page (incl. the first mood image) has loaded, then idle. */
 function afterLoad(fn: () => void): () => void {
-  let idle: number | undefined
-  let cancelled = false
+  let cancelIdle: (() => void) | undefined
   const run = () => {
-    if (cancelled) return
-    const ric = window.requestIdleCallback
-    idle = ric ? ric(fn, { timeout: 2000 }) : window.setTimeout(fn, 200)
+    if (window.requestIdleCallback) {
+      const id = window.requestIdleCallback(fn, { timeout: 2000 })
+      cancelIdle = () => window.cancelIdleCallback(id)
+    } else {
+      const id = window.setTimeout(fn, 200)
+      cancelIdle = () => window.clearTimeout(id)
+    }
   }
   if (document.readyState === 'complete') run()
   else window.addEventListener('load', run, { once: true })
   return () => {
-    cancelled = true
     window.removeEventListener('load', run)
-    if (idle !== undefined) {
-      if (window.cancelIdleCallback) window.cancelIdleCallback(idle)
-      window.clearTimeout(idle)
-    }
+    cancelIdle?.()
   }
 }
 
@@ -121,15 +109,13 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
   useEffect(() => {
     if (!desktop || !slot) return
     return afterLoad(() => {
-      const id = peekNextMood(moods)
-      const target = moods.find((m) => m.id === id)
+      const target = byId(moods, peekNextMood(moods))
       if (target && target.id !== slot.id) prefetch(target.src)
     })
   }, [desktop, moods, slot])
 
   const next = useCallback(() => {
-    const id = advanceMood(moods)
-    const target = moods.find((m) => m.id === id)
+    const target = byId(moods, advanceMood(moods))
     if (!target || target.id === slot?.id) return
     window.clearTimeout(timer.current)
     setLeaving(slot)
@@ -143,7 +129,12 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
   if (!desktop) return <div className="hero-shell" data-mood-id="none" aria-hidden="true" />
 
   const renderSlot = (s: MoodSlot, key: string, className: string) =>
-    s.src ? <MoodStill key={key} src={s.src} className={className} /> : <MoodStub key={key} id={s.id} />
+    s.src ? (
+      <MoodStill key={key} src={s.src} className={className} />
+    ) : (
+      // Placeholder for a mood with no image yet.
+      <div key={key} className="hero-shell-empty" aria-hidden="true" />
+    )
 
   return (
     <div
