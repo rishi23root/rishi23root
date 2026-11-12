@@ -38,18 +38,18 @@ const personJsonLd = {
       <div class="home-copy">
         <h1 class="visually-hidden">{site.github.name}</h1>
 
-        <section class="section home-section home-section-bio reveal" style="--i: 0">
+        <section class="home-section home-section-bio reveal" style="--i: 0">
           <p class="voice-bio">{voiceBio}</p>
         </section>
 
-        <section class="section home-section reveal" style="--i: 1">
+        <section class="home-section reveal" style="--i: 1">
           <h2>Writing</h2>
           {
             posts.length ? (
-              <ul class="home-writing-list">
+              <ul class="home-list home-writing-list">
                 {posts.map((post) => (
-                  <li>
-                    <a href={postPath(post.data.slug)}>{post.data.title}</a>
+                  <li class="hover-row">
+                    <a class="row-link" href={postPath(post.data.slug)}>{post.data.title}</a>
                     <time datetime={post.data.date.toISOString()}>{isoDay(post.data.date)}</time>
                   </li>
                 ))}
@@ -60,13 +60,13 @@ const personJsonLd = {
           }
         </section>
 
-        <section class="section home-section reveal" style="--i: 2">
+        <section class="home-section reveal" style="--i: 2">
           <h2>Work</h2>
-          <ul class="home-stack-list">
+          <ul class="home-list home-stack-list">
             {
               projects.map((project) => (
-                <li>
-                  <a href={project.url}>{project.title}</a>
+                <li class="hover-row">
+                  <a class="row-link" href={project.url}>{project.title}</a>
                   {project.blurb ? <span class="blurb">{project.blurb}</span> : null}
                 </li>
               ))
@@ -76,11 +76,11 @@ const personJsonLd = {
 
         {
           capabilities.length ? (
-            <section class="section home-section reveal" style="--i: 3">
+            <section class="home-section reveal" style="--i: 3">
               <h2>Capabilities</h2>
-              <ul class="home-stack-list">
+              <ul class="home-list home-stack-list">
                 {capabilities.map((item) => (
-                  <li>
+                  <li class="hover-row">
                     <span class="capability-heading">{item.heading}</span>
                     <span class="blurb">{item.body}</span>
                   </li>

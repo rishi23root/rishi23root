@@ -21,32 +21,43 @@
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* Charcoal black + beige white — both themes */
+
+/* ---------------------------------------------------------------
+ * Tokens
+ * ------------------------------------------------------------- */
+
+/* Charcoal black + beige white */
 :root,
 html[data-theme='dark'] {
   --bg: #1c1b19;
   --fg: #f2ebe0;
   --muted: rgba(242, 235, 224, 0.68);
   --border: rgba(242, 235, 224, 0.16);
-  --chrome: #1c1b19;
   --frame-bg: #262421;
   --frame-border: rgba(242, 235, 224, 0.14);
-  --frame-radius: 18px;
   --accent: #e6dccb;
   --row-hover: rgba(242, 235, 224, 0.05);
   color-scheme: dark;
 }
 
-/*
- * Layout + motion tokens (shared by every page and both themes).
- * Use these instead of ad-hoc rem values so spacing stays consistent.
- */
+html[data-theme='light'] {
+  --bg: #f2ebe0;
+  --fg: #1c1b19;
+  --muted: rgba(28, 27, 25, 0.64);
+  --border: rgba(28, 27, 25, 0.14);
+  --frame-bg: #e8dfd0;
+  --frame-border: rgba(28, 27, 25, 0.12);
+  --accent: #2a2825;
+  --row-hover: rgba(28, 27, 25, 0.05);
+  color-scheme: light;
+}
+
+/* Layout + motion tokens, shared by every page and both themes */
 :root {
   --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
-  --serif: var(--sans);
   --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --warn: #e0b25c;
 
-  /* Spacing scale */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -57,24 +68,26 @@ html[data-theme='dark'] {
   --space-8: 4rem;
 
   /* Page frame */
-  --measure: 38rem; /* reading column on inner pages */
+  --measure: 38rem; /* narrow text column (home on mobile, /mood) */
   --page-pad: clamp(1.5rem, 3.6vw, 3.5rem); /* left/right gutter, all pages */
-  --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7)); /* top/bottom */
-  --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem); /* between sections */
-  --row-pad: 0.85rem; /* hairline list rows */
-  --row-pad-tight: 0.6rem; /* home content rows */
+  --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7));
+  --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem);
+  --home-max: 93.75rem;
+  --home-gap: clamp(var(--space-6), 4.5vw, 5rem); /* mood plate <-> text */
+
+  /* Inner pages: article + rail form one centered group; the nav row matches it */
+  --article-max: 42rem;
+  --rail-w: 13rem;
+  --rail-gap: clamp(var(--space-7), 5vw, 5rem);
+  --post-group: calc(var(--article-max) + var(--rail-gap) + var(--rail-w));
+
+  /* Hover rows (home lists, writing index) */
+  --row-pad-tight: 0.6rem;
   --row-bleed: 0.75rem; /* hover wash extends past the text column */
   --row-radius: 10px;
-  --home-max: 93.75rem;
-  --frame-max: 72rem; /* inner pages: nav row + content frame */
-  --article-max: 42rem; /* post header/body column inside the frame */
-  --rail-w: 13rem; /* post utility rail */
-  --rail-gap: clamp(var(--space-7), 5vw, 5rem); /* article <-> rail */
-  /* Article + rail as one centered group; nav row matches it */
-  --post-group: calc(var(--article-max) + var(--rail-gap) + var(--rail-w));
-  --home-gap: clamp(var(--space-6), 4.5vw, 5rem); /* mood <-> text */
+  --frame-radius: 18px;
 
-  /* Nav (same height + spacing on every page) */
+  /* Nav */
   --nav-height: 3.25rem;
   --nav-gap: var(--space-3);
   --nav-font: 0.9rem;
@@ -85,29 +98,16 @@ html[data-theme='dark'] {
   --dur: 280ms;
   --dur-slow: 520ms;
   --stagger: 60ms;
-  --mood-xfade: 420ms;
+  --mood-xfade: 420ms; /* mirrored by XFADE_MS in HeroMoodShell.tsx */
 
-  /*
-   * Experiment: inset shadow on the mood plate. Revert with
-   * --mood-inset-shadow: none (or drop the .mood-inset class).
-   */
+  /* Inset shadow on the mood plate; set to none to drop it */
   --mood-inset-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18),
     inset 0 2px 18px rgba(0, 0, 0, 0.35), inset 0 -24px 48px -24px rgba(0, 0, 0, 0.45);
 }
 
-html[data-theme='light'] {
-  --bg: #f2ebe0;
-  --fg: #1c1b19;
-  --muted: rgba(28, 27, 25, 0.64);
-  --border: rgba(28, 27, 25, 0.14);
-  --chrome: #f2ebe0;
-  --frame-bg: #e8dfd0;
-  --frame-border: rgba(28, 27, 25, 0.12);
-  --accent: #2a2825;
-  --row-hover: rgba(28, 27, 25, 0.05);
-  color-scheme: light;
-}
-
+/* ---------------------------------------------------------------
+ * Base
+ * ------------------------------------------------------------- */
 *,
 *::before,
 *::after {
@@ -138,34 +138,71 @@ a:hover {
   color: var(--accent);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* ---------------------------------------------------------------
+ * Page shells
+ * ------------------------------------------------------------- */
 .shell {
-  /* Full bleed; every page shares the same gutters */
   width: 100%;
   margin-inline: auto;
   padding-inline: var(--page-pad);
   padding-bottom: var(--space-8);
 }
 
+/* Inner pages: the nav sits in its own bar above the shell and scrolls away */
+.chrome-bar {
+  padding-inline: var(--page-pad);
+  padding-top: var(--space-3);
+}
+
+.chrome-bar .chrome {
+  max-width: var(--post-group);
+  margin-inline: auto;
+}
+
+.shell-inner {
+  padding-top: clamp(var(--space-6), 5vw, var(--space-8));
+}
+
+.shell-inner > main {
+  max-width: var(--post-group);
+  margin-inline: auto;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+}
+
+.blog-page {
+  gap: 1.75rem;
+  padding-block: 0.25rem 2.5rem;
+}
+
+/* ---------------------------------------------------------------
+ * Chrome: wordmark, nav, theme toggle
+ * ------------------------------------------------------------- */
 .chrome {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--nav-gap);
-  /* Writing/other pages: same measure as prose. Home overrides in .shell-home */
-  max-width: var(--measure);
   width: 100%;
   min-height: var(--nav-height);
-  margin-inline: auto;
-  margin-bottom: var(--section-gap);
-  padding: 0;
-  /* Sticky only off-home; landing chrome scrolls with .home-text */
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: color-mix(in srgb, var(--chrome) 92%, transparent);
-  backdrop-filter: blur(8px);
+  /* Nav stays put during view transitions; only page content crossfades */
+  view-transition-name: site-chrome;
 }
-
 
 .chrome-start {
   display: flex;
@@ -175,7 +212,6 @@ a:hover {
 }
 
 .wordmark {
-  font-family: var(--sans);
   font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -200,7 +236,7 @@ a:hover {
   transition: color var(--dur-fast) ease;
 }
 
-/* Quiet active marker under the current page */
+/* Quiet underline under the current page */
 .nav a::after {
   content: '';
   position: absolute;
@@ -227,15 +263,15 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   width: 2rem;
   height: 2rem;
+  padding: 0;
   border: 0;
+  border-radius: 6px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  padding: 0;
-  border-radius: 6px;
-  flex-shrink: 0;
 }
 
 .theme-toggle:hover {
@@ -259,49 +295,65 @@ a:hover {
   height: 100%;
 }
 
-/* Dark mode: show sun (switch to light). Light mode: show moon. */
+/* Dark mode shows the sun (switch to light); light mode shows the moon */
 html[data-theme='dark'] .theme-icon-sun,
-html:not([data-theme]) .theme-icon-sun {
-  display: block;
-}
-
 html[data-theme='light'] .theme-icon-moon {
   display: block;
 }
 
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--section-gap);
+/* ---------------------------------------------------------------
+ * Hover rows: soft wash instead of hairlines. Put .hover-row on the
+ * row and .row-link on its link; the link then covers the whole row.
+ * ------------------------------------------------------------- */
+.hover-row {
+  position: relative;
+  border-radius: var(--row-radius);
+  transition: background-color var(--dur-fast) ease;
 }
 
-/* Lee-like home: text column + tall mood panel (desktop) */
-.home-split {
-  display: flex;
-  flex-direction: column;
-  gap: var(--section-gap);
-  width: 100%;
+.hover-row:hover,
+.hover-row:focus-within {
+  background: var(--row-hover);
 }
 
-/* Text column: chrome + prose (chrome never spans the mood column) */
+.hover-row:has(.row-link:focus-visible) {
+  outline: 2px solid var(--accent);
+}
+
+.row-link {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.row-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.row-link:focus-visible {
+  outline: none;
+}
+
+.hover-row:hover .row-link {
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------
+ * Home: text column + tall mood plate (desktop)
+ * ------------------------------------------------------------- */
 .home-text {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   min-width: 0;
   width: 100%;
   padding-block: var(--page-pad-block);
 }
 
+/* Home nav lives in the text column and scrolls with it */
 .home-text .chrome {
-  max-width: none;
-  margin-inline: 0;
-  /* Scroll away with left column — not sticky/fixed */
-  position: static;
-  top: auto;
-  z-index: auto;
-  background: transparent;
-  backdrop-filter: none;
+  margin-bottom: var(--section-gap);
 }
 
 .home-copy {
@@ -312,11 +364,13 @@ html[data-theme='light'] .theme-icon-moon {
   width: 100%;
 }
 
-.home-copy .home-section {
-  gap: 0;
+.home-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
-.home-copy .home-section h2 {
+.home-section h2 {
   margin: 0 0 var(--space-3);
   font-size: 0.78rem;
   font-weight: 600;
@@ -325,17 +379,19 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--muted);
 }
 
-.home-copy .home-section-bio {
-  max-width: 40rem;
+.voice-bio {
+  margin: 0;
+  max-width: 34ch;
+  width: 100%;
+  font-size: clamp(1.38rem, 1.15rem + 0.7vw, 1.7rem);
+  line-height: 1.45;
+  letter-spacing: -0.015em;
+  text-wrap: pretty;
 }
 
-/*
- * Home content lists (Writing / Work / Capabilities): no per-row hairlines.
- * Rows are spaced cards with a soft hover wash; the bleed keeps text aligned
- * with the section label while the hover background extends past it.
- */
-.home-writing-list,
-.home-stack-list {
+/* Writing / Work / Capabilities lists; the bleed keeps text aligned with
+   the section label while the hover wash extends past it */
+.home-list {
   list-style: none;
   margin: 0 calc(-1 * var(--row-bleed));
   padding: 0;
@@ -344,62 +400,23 @@ html[data-theme='light'] .theme-icon-moon {
   gap: var(--space-1);
 }
 
-.home-writing-list li,
-.home-stack-list li {
-  position: relative;
+.home-list li {
   padding: var(--row-pad-tight) var(--row-bleed);
-  border-radius: var(--row-radius);
   line-height: 1.45;
-  transition: background-color var(--dur-fast) ease;
 }
 
-.home-writing-list li:hover,
-.home-stack-list li:hover,
-.home-writing-list li:focus-within,
-.home-stack-list li:focus-within {
-  background: var(--row-hover);
+.home-list a {
+  font-weight: 500;
+  min-width: 0;
 }
 
-/* Writing: title left / date right */
+/* Writing: title left, date right */
 .home-writing-list li {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2) var(--space-6);
   font-size: 1.12rem;
-}
-
-.home-writing-list a,
-.home-stack-list a {
-  color: var(--fg);
-  text-decoration: none;
-  font-weight: 500;
-  min-width: 0;
-}
-
-/* Whole row is the click target for linked rows */
-.home-writing-list a::after,
-.home-stack-list a::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-}
-
-.home-writing-list li:hover a,
-.home-stack-list li:hover a {
-  color: var(--accent);
-}
-
-.home-writing-list a:focus-visible,
-.home-stack-list a:focus-visible {
-  outline: none;
-}
-
-.home-writing-list li:has(a:focus-visible),
-.home-stack-list li:has(a:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: 0;
 }
 
 .home-writing-list time {
@@ -409,7 +426,7 @@ html[data-theme='light'] .theme-icon-moon {
   font-variant-numeric: tabular-nums;
 }
 
-/* Work / capabilities: title, then a muted one-line blurb underneath */
+/* Work / capabilities: title, then a muted blurb underneath */
 .home-stack-list li {
   display: flex;
   flex-direction: column;
@@ -419,30 +436,95 @@ html[data-theme='light'] .theme-icon-moon {
 
 .home-stack-list .blurb {
   color: var(--muted);
-  font-weight: 400;
   font-size: 0.95rem;
 }
 
+.capability-heading {
+  font-weight: 600;
+}
+
 .home-copy .contact-icons {
-  margin-top: 0;
   padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
 }
 
 .home-mood {
-  display: none; /* text-only below 1024px */
+  display: none; /* text only below 1024px */
   min-width: 0;
 }
 
+@media (max-width: 1023px) {
+  .home-text {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+}
+
+/* Desktop: mood plate on the left (~40%), text on the right (~60%).
+   The mood column is sticky and viewport-tall; no JS sizing. */
+@media (min-width: 1024px) {
+  .shell-home {
+    width: min(100%, var(--home-max));
+    padding-bottom: 0;
+  }
+
+  .home-split {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    column-gap: var(--home-gap);
+    align-items: start;
+  }
+
+  .home-mood {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: stretch;
+  }
+
+  .home-mood-sticky {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: var(--page-pad-block);
+  }
+
+  .home-mood .hero-shell {
+    display: flex;
+    justify-content: center;
+  }
+
+  .home-mood .hero-shell-stage {
+    width: min(100%, calc((100svh - 2 * var(--page-pad-block)) * 9 / 16));
+  }
+
+  .home-text {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 100svh;
+    justify-content: center;
+  }
+
+  /* Intro uses the whole text column */
+  .voice-bio {
+    max-width: none;
+  }
+}
+
+/* ---------------------------------------------------------------
+ * Mood plate (HeroMoodShell)
+ * ------------------------------------------------------------- */
 .hero-shell {
   width: 100%;
-  max-width: none;
-  margin-inline: auto;
 }
 
 .hero-shell-stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16; /* portrait mood box */
+  aspect-ratio: 9 / 16;
   border-radius: var(--frame-radius);
   border: 1px solid var(--frame-border);
   background: var(--frame-bg);
@@ -450,12 +532,15 @@ html[data-theme='light'] .theme-icon-moon {
   isolation: isolate;
 }
 
-.hero-shell-art {
+.hero-shell-art,
+.hero-shell-empty,
+.mood-scene,
+.mood-layer {
   position: absolute;
   inset: 0;
 }
 
-/* Inset-shadow experiment (see --mood-inset-shadow). Sits above the art. */
+/* Inset shadow above the art (see --mood-inset-shadow) */
 .mood-inset::after {
   content: '';
   position: absolute;
@@ -467,44 +552,27 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .hero-shell-empty {
-  position: absolute;
-  inset: 0;
   background:
-    radial-gradient(
-      80% 70% at 50% 40%,
-      color-mix(in srgb, var(--fg) 6%, transparent),
-      transparent 70%
-    ),
-    linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--fg) 4%, transparent),
-      transparent 55%
-    );
-}
-
-/* Mood stills — static plates only (cyclist is landscape still, no layer anim) */
-.mood-scene {
-  position: absolute;
-  inset: 0;
+    radial-gradient(80% 70% at 50% 40%, color-mix(in srgb, var(--fg) 6%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--fg) 4%, transparent), transparent 55%);
 }
 
 .mood-layer {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
   user-select: none;
 }
 
-.mood-layer picture,
-.mood-layer img {
+.mood-layer :is(picture, img),
+.mood-index-frame :is(picture, img) {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.mood-layer img {
+.mood-layer img,
+.mood-index-frame img {
   object-fit: cover;
 }
 
@@ -541,96 +609,128 @@ html[data-theme='light'] .theme-icon-moon {
   }
 }
 
-.voice-bio {
-  margin: 0;
-  max-width: 34ch;
-  width: 100%;
-  font-family: var(--sans);
-  font-size: clamp(1.38rem, 1.15rem + 0.7vw, 1.7rem);
-  font-weight: 400;
-  line-height: 1.45;
-  letter-spacing: -0.015em;
-  color: var(--fg);
-  text-wrap: pretty;
-}
-
-.section {
+/* Overlay chips: hidden until hover / focus / tap */
+.mood-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
-  max-width: var(--measure);
-  width: 100%;
-  margin-inline: auto;
+  justify-content: space-between;
+  padding: var(--space-3);
+  pointer-events: none;
 }
 
-.home-copy .section {
-  margin-inline: 0;
-  max-width: none;
-}
-
-.section h2 {
-  margin: 0;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-family: var(--sans);
-}
-
-.quiet-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.mood-overlay-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  font-size: 1.1rem;
-  line-height: 1.5;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  opacity: 0;
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
 }
 
-.quiet-list a {
-  color: var(--fg);
+.mood-overlay-top {
+  transform: translateY(-4px);
+}
+
+.mood-overlay-bottom {
+  transform: translateY(4px);
+  transition-delay: 40ms;
+}
+
+.hero-shell-stage:hover .mood-overlay-row,
+.hero-shell-stage:focus-within .mood-overlay-row,
+.hero-shell[data-revealed='true'] .mood-overlay-row {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* Touch screens: faintly visible by default, tap the plate for full */
+@media (hover: none) {
+  .mood-overlay-row {
+    opacity: 0.55;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+.mood-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.18rem 0.5rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
   text-decoration: none;
-  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(20, 19, 17, 0.38);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
-.quiet-list a:hover {
-  color: var(--accent);
-  text-decoration: underline;
+.mood-chip-label {
+  opacity: 0.7;
 }
 
-.quiet-list .meta,
-.quiet-list time {
-  color: var(--muted);
-  font-weight: 400;
-  font-size: 0.9em;
+.mood-chip-count {
+  font-variant-numeric: tabular-nums;
 }
 
-.quiet-list .meta {
-  display: inline;
-  margin-left: 0.35rem;
+.mood-chip-link,
+.mood-chip-next {
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) ease,
+    color var(--dur-fast) ease;
 }
 
-.quiet-list .blurb {
-  color: var(--muted);
-  font-weight: 400;
+.mood-chip-link:is(:hover, :focus-visible),
+.mood-chip-next:is(:hover, :focus-visible) {
+  color: #fff;
+  background: rgba(20, 19, 17, 0.6);
 }
 
-.capability-heading {
-  font-weight: 600;
-  color: var(--fg);
+.mood-chip-link:focus-visible,
+.mood-chip-next:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 1px;
 }
 
-/* Compact Lee contact strip — icons only at bottom of text column */
+.mood-chip-link span,
+.mood-chip-next span {
+  display: inline-block;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.mood-chip-link:hover span,
+.mood-chip-next:hover span {
+  transform: translateX(2px);
+}
+
+/* ---------------------------------------------------------------
+ * Contact icons (home column + bottom of inner pages)
+ * ------------------------------------------------------------- */
 .contact-icons {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.85rem 1.05rem;
-  margin-top: 0.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
+}
+
+.blog-page .contact-icons {
+  width: 100%;
+  max-width: var(--article-max);
+  margin-top: 0.75rem;
+  padding-top: var(--space-4);
 }
 
 .contact-icon {
@@ -660,26 +760,64 @@ html[data-theme='light'] .theme-icon-moon {
   display: block;
 }
 
-.blog-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
-  padding-block: 0.25rem 2.5rem;
+/* ---------------------------------------------------------------
+ * Inner page intro, back link, empty state
+ * ------------------------------------------------------------- */
+.page-intro {
+  max-width: var(--article-max);
+  width: 100%;
 }
 
-.blog-page .contact-icons {
+.page-eyebrow {
+  margin: 0 0 var(--space-2);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.page-intro h1 {
+  margin: 0 0 0.55rem;
+  font-size: clamp(1.65rem, 3vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.page-intro .lede {
+  margin: 0;
+  color: var(--muted);
+  max-width: 34rem;
+}
+
+.back {
+  display: inline-block;
   max-width: var(--measure);
   width: 100%;
-  margin-inline: auto;
-  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-decoration: none;
 }
 
-/* Writing index (FlowForge index rhythm, no row hairlines) */
+.back:hover {
+  color: var(--fg);
+}
+
+.empty {
+  margin: 0;
+  max-width: var(--measure);
+  width: 100%;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------
+ * Writing index
+ * ------------------------------------------------------------- */
 .post-list {
   list-style: none;
-  margin: 0 auto;
+  margin: 0;
   padding: 0;
-  max-width: var(--measure);
+  max-width: var(--article-max);
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -687,20 +825,15 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .post-list-item {
-  position: relative;
   margin-inline: calc(-1 * var(--row-bleed));
   padding: var(--space-4) var(--row-bleed);
-  border-radius: var(--row-radius);
-  transition: background-color var(--dur-fast) ease;
 }
 
-.post-list-item:hover,
-.post-list-item:focus-within {
-  background: var(--row-hover);
-}
-
+/* Mono meta lines (index cards + post header) */
 .post-list-meta,
-.post-list-tags {
+.post-list-tags,
+.post-meta,
+.post-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.15rem 0.45rem;
@@ -723,31 +856,6 @@ html[data-theme='light'] .theme-icon-moon {
   line-height: 1.3;
 }
 
-.post-list-title {
-  color: var(--fg);
-  text-decoration: none;
-}
-
-/* Whole card is the link target */
-.post-list-title::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-}
-
-.post-list-item:hover .post-list-title {
-  color: var(--accent);
-}
-
-.post-list-title:focus-visible {
-  outline: none;
-}
-
-.post-list-item:has(.post-list-title:focus-visible) {
-  outline: 2px solid var(--accent);
-}
-
 .post-list-summary {
   margin: var(--space-2) 0 0;
   color: var(--muted);
@@ -755,59 +863,112 @@ html[data-theme='light'] .theme-icon-moon {
   line-height: 1.55;
 }
 
-.page-eyebrow {
-  margin: 0 0 var(--space-2);
+.post-draft {
+  color: var(--warn);
+}
+
+/* ---------------------------------------------------------------
+ * Post page: article + utility rail
+ * ------------------------------------------------------------- */
+.post {
+  max-width: var(--article-max);
+  width: 100%;
+}
+
+.post-crumbs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
   font-family: var(--mono);
   font-size: 0.68rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--muted);
 }
 
-.prose {
-  max-width: var(--measure);
-  margin-inline: auto;
-  width: 100%;
-  font-family: var(--sans);
-  font-size: 1.28rem;
-  line-height: 1.72;
-  font-weight: 400;
+.post-crumbs a {
+  color: var(--fg);
+  text-decoration: none;
 }
 
-.prose-header {
-  margin-bottom: 1.75rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border);
+.post-crumbs a:hover {
+  text-decoration: underline;
 }
 
-.prose h1 {
-  margin: 0 0 0.5rem;
-  font-family: var(--sans);
-  font-size: clamp(1.75rem, 3.2vw, 2.2rem);
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
+.post-crumbs-current {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.75;
 }
 
-.prose .post-meta {
+.post-header h1 {
   margin: 0;
-  font-family: var(--sans);
-  font-size: 0.92rem;
-  font-weight: 400;
-  color: var(--muted);
+  font-size: clamp(1.85rem, 1.35rem + 1.5vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  line-height: 1.18;
+  text-wrap: balance;
 }
 
-.prose-deck {
-  margin: 0.85rem 0 0;
-  font-family: var(--sans);
-  font-weight: 400;
-  color: var(--muted);
-  font-size: 1.1rem;
+.post-deck {
+  margin: var(--space-3) 0 0;
+  max-width: 38rem;
+  font-size: clamp(1.08rem, 1rem + 0.35vw, 1.22rem);
   line-height: 1.55;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.post-meta {
+  margin-top: var(--space-5);
+}
+
+.post-tags {
+  list-style: none;
+  padding: 0;
+  margin-top: var(--space-3);
+  gap: var(--space-2);
+  font-size: 0.72rem;
+}
+
+.post-tag {
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  background: var(--row-hover);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+}
+
+.post-cover {
+  margin: var(--space-6) 0 0;
+}
+
+.post-cover img {
+  display: block;
+  width: 100%;
+  border-radius: var(--row-radius);
+}
+
+.post-body {
+  margin-top: var(--space-7);
+}
+
+.post-body :is(h2, h3),
+.post-faq h2 {
+  scroll-margin-top: calc(var(--nav-height) + var(--space-5));
+}
+
+/* Long-form body (MDX). Spacing and type instead of rules. */
+.prose {
+  width: 100%;
+  font-size: 1.2rem;
+  line-height: 1.75;
 }
 
 .prose :is(h2, h3, h4) {
-  font-family: var(--sans);
   font-weight: 600;
   letter-spacing: -0.015em;
   line-height: 1.3;
@@ -815,6 +976,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .prose h2 {
+  margin-top: var(--space-7);
   font-size: 1.35rem;
 }
 
@@ -864,7 +1026,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .prose :is(code, kbd) {
-  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-family: var(--mono);
   font-size: 0.9em;
   padding: 0.12em 0.35em;
   border-radius: 4px;
@@ -877,7 +1039,6 @@ html[data-theme='light'] .theme-icon-moon {
   overflow-x: auto;
   border-radius: 10px;
   background: var(--frame-bg);
-  border: 1px solid var(--frame-border);
   font-size: 0.9rem;
   line-height: 1.5;
 }
@@ -910,345 +1071,44 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--muted);
 }
 
-.page-intro {
-  max-width: var(--measure);
-  margin-inline: auto;
-  width: 100%;
-}
-
-.page-intro h1 {
-  margin: 0 0 0.55rem;
-  font-family: var(--sans);
-  font-size: clamp(1.65rem, 3vw, 2rem);
-  font-weight: 600;
-  letter-spacing: -0.025em;
-}
-
-.page-intro .lede {
-  margin: 0;
-  color: var(--muted);
-  max-width: 34rem;
-}
-
-.back {
-  display: inline-block;
-  max-width: var(--measure);
-  width: 100%;
-  margin-inline: auto;
-  margin-bottom: 0;
-  font-size: 0.9rem;
-  color: var(--muted);
-  text-decoration: none;
-}
-
-.back:hover {
-  color: var(--fg);
-}
-
-.empty {
-  color: var(--muted);
-  margin: 0 auto;
-  max-width: var(--measure);
-  width: 100%;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
-
-/*
- * Desktop home: two columns. Mood plate on the LEFT (~40%), text on the
- * RIGHT (~60%). The mood column is sticky and viewport-tall; no JS sizing.
- */
-@media (min-width: 1024px) {
-  .shell-home {
-    width: min(100%, var(--home-max));
-    margin-inline: auto;
-    padding-bottom: 0;
-  }
-
-  .shell-home .home-split {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    column-gap: var(--home-gap);
-    align-items: start;
-  }
-
-  .shell-home .home-mood {
-    display: block;
-    grid-column: 1;
-    grid-row: 1;
-    align-self: stretch;
-    min-width: 0;
-  }
-
-  .shell-home .home-mood-sticky {
-    position: sticky;
-    top: 0;
-    height: 100svh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-block: var(--page-pad-block);
-  }
-
-  .shell-home .home-mood .hero-shell {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  .shell-home .home-mood .hero-shell-stage {
-    width: min(100%, calc((100svh - 2 * var(--page-pad-block)) * 9 / 16));
-    height: auto;
-  }
-
-  /* Intro uses the whole text column on desktop */
-  .shell-home .home-section-bio,
-  .shell-home .voice-bio {
-    max-width: none;
-  }
-
-  .shell-home .home-text {
-    grid-column: 2;
-    grid-row: 1;
-    max-width: none;
-    min-height: 100svh;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 1023px) {
-  .home-mood,
-  .home-mood-inner {
-    display: none !important;
-  }
-
-  .home-text {
-    max-width: var(--measure);
-    margin-inline: auto;
-  }
-
-}
-
-/* Unlisted /mood index — all homepage stills */
-.mood-index-grid {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
-  gap: var(--space-5) var(--space-4);
-  width: 100%;
-  max-width: var(--measure);
-  margin-inline: auto;
-}
-
-.mood-index-card {
-  margin: 0;
-}
-
-.mood-index-link {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  text-decoration: none;
-  color: inherit;
-}
-
-.mood-index-frame {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 9 / 16;
-  border-radius: var(--frame-radius);
-  border: 1px solid var(--frame-border);
-  background: var(--frame-bg);
-  overflow: hidden;
-}
-
-.mood-index-frame picture,
-.mood-index-frame img {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.mood-index-frame img {
-  object-fit: cover;
-}
-
-.mood-index-id {
-  font-family: var(--sans);
-  font-size: 0.82rem;
-  color: var(--muted);
-  letter-spacing: 0.02em;
-}
-
-.mood-index-link:hover .mood-index-id {
-  color: var(--fg);
-}
-
-/* ---------------------------------------------------------------
- * Post page (style adapted from FlowForge's long-form blog):
- * breadcrumb, deck, mono meta line, callouts, FAQ, sticky "On this page"
- * rail with reading progress. Article stays on the reading column; the
- * rail sits in the right gutter on wide screens.
- * ------------------------------------------------------------- */
-.post-layout {
-  width: 100%;
-}
-
-.post {
-  max-width: var(--measure);
-  width: 100%;
-  margin-inline: auto;
-}
-
-.post-crumbs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.post-crumbs a {
-  color: var(--fg);
-  text-decoration: none;
-}
-
-.post-crumbs a:hover {
-  text-decoration: underline;
-}
-
-.post-crumbs-current {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
-  opacity: 0.75;
-}
-
-.post-header h1 {
-  margin: 0;
-  font-size: clamp(1.9rem, 1.4rem + 1.8vw, 2.6rem);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  text-wrap: balance;
-}
-
-.post-deck {
-  margin: var(--space-4) 0 0;
-  font-size: 1.18rem;
-  line-height: 1.55;
-  color: var(--muted);
-  text-wrap: pretty;
-}
-
-.post-meta,
-.post-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.15rem 0.45rem;
-  margin: var(--space-5) 0 0;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-
-.post-tags {
-  margin-top: var(--space-2);
-}
-
-.post-draft {
-  color: #e0b25c;
-}
-
-.post-cover {
-  margin: var(--space-6) 0 0;
-}
-
-.post-cover img {
-  display: block;
-  width: 100%;
-  border-radius: var(--row-radius);
-  border: 1px solid var(--frame-border);
-}
-
-.post-body {
-  margin-top: var(--space-7);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--border);
-}
-
-.post-body :is(h2, h3) {
-  scroll-margin-top: calc(var(--nav-height) + var(--space-5));
-}
-
-.post-body h2 {
-  margin-top: var(--space-7);
-}
-
-/* Callouts: <Callout tone="note|warning|answer"> in MDX */
+/* <Callout tone="note|warning|answer">: faint fill + quiet left accent */
 .callout {
   margin: 0 0 1.25rem;
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--row-radius);
-  border: 1px solid var(--frame-border);
-  background: var(--frame-bg);
+  border-left: 2px solid color-mix(in srgb, var(--fg) 28%, transparent);
+  border-radius: 0 var(--row-radius) var(--row-radius) 0;
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
   font-size: 1.05rem;
   line-height: 1.6;
 }
 
-.callout-label {
-  margin: 0 0 var(--space-1) !important;
+.callout .callout-label {
+  margin: 0 0 var(--space-1);
   font-family: var(--mono);
   font-size: 0.66rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--fg);
-}
-
-.callout-body > :last-child {
-  margin-bottom: 0;
 }
 
 .callout-body {
   color: var(--muted);
 }
 
+.callout-body > :last-child {
+  margin-bottom: 0;
+}
+
 .callout-warning {
-  border-color: rgba(224, 178, 92, 0.35);
+  border-left-color: rgba(224, 178, 92, 0.6);
   background: rgba(224, 178, 92, 0.06);
 }
 
 .callout-warning .callout-label {
-  color: #e0b25c;
+  color: var(--warn);
 }
 
-.callout-answer {
-  border-color: color-mix(in srgb, var(--fg) 22%, transparent);
-}
-
-/* FAQ */
 .post-faq {
   margin-top: var(--space-8);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--border);
 }
 
 .post-faq h2 {
@@ -1256,7 +1116,6 @@ html[data-theme='light'] .theme-icon-moon {
   font-size: 1.35rem;
   font-weight: 600;
   letter-spacing: -0.015em;
-  scroll-margin-top: calc(var(--nav-height) + var(--space-5));
 }
 
 .post-faq dl {
@@ -1278,15 +1137,11 @@ html[data-theme='light'] .theme-icon-moon {
   line-height: 1.6;
 }
 
-/* Rail: hidden on small screens */
-.post-rail {
-  display: none;
-}
-
+/* Rail: "On this page" + tools (progress, share, all writing, home) */
 .post-rail-label {
   margin: 0 0 var(--space-3);
   font-family: var(--mono);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--muted);
@@ -1296,12 +1151,10 @@ html[data-theme='light'] .theme-icon-moon {
   list-style: none;
   margin: 0;
   padding: 0;
-  border-left: 1px solid var(--border);
 }
 
 .post-toc a {
   display: block;
-  margin-left: -1px;
   padding: 0.2rem 0 0.2rem var(--space-3);
   border-left: 2px solid transparent;
   font-size: 0.85rem;
@@ -1314,7 +1167,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .post-toc .toc-depth-3 a {
-  padding-left: calc(var(--space-3) + var(--space-3));
+  padding-left: calc(2 * var(--space-3));
   font-size: 0.8rem;
 }
 
@@ -1324,7 +1177,8 @@ html[data-theme='light'] .theme-icon-moon {
 
 .post-toc a[aria-current] {
   color: var(--fg);
-  border-left-color: var(--fg);
+  font-weight: 600;
+  border-left-color: var(--accent);
 }
 
 .post-rail-tools {
@@ -1332,9 +1186,12 @@ html[data-theme='light'] .theme-icon-moon {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-2);
-  margin-top: var(--space-6);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border);
+  margin-top: var(--space-7);
+}
+
+/* No headings: the tools lead the rail */
+.post-rail-tools:first-child {
+  margin-top: 0;
 }
 
 .post-progress {
@@ -1379,235 +1236,17 @@ html[data-theme='light'] .theme-icon-moon {
   font-variant-numeric: tabular-nums;
 }
 
-.post-pill {
-  display: inline-flex;
-  align-items: center;
-  height: 1.9rem;
-  padding: 0 var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: transparent;
-  font: inherit;
-  font-size: 0.78rem;
-  color: var(--muted);
-  text-decoration: none;
-  cursor: pointer;
-  transition:
-    color var(--dur-fast) ease,
-    border-color var(--dur-fast) ease,
-    background-color var(--dur-fast) ease;
-}
-
-.post-pill:hover,
-.post-pill:focus-visible {
-  color: var(--fg);
-  border-color: var(--frame-border);
-  background: var(--row-hover);
-}
-
-.post-page .contact-icons {
-  max-width: var(--measure);
-  margin-inline: auto;
-}
-
-@media (min-width: 1024px) {
-  .post-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, var(--measure)) minmax(0, 1fr);
-    column-gap: var(--home-gap);
-  }
-
-  .post {
-    grid-column: 2;
-  }
-
-  .post-rail {
-    display: block;
-    grid-column: 3;
-    max-width: 14rem;
-  }
-
-  .post-rail-sticky {
-    position: sticky;
-    top: calc(var(--nav-height) + var(--space-6));
-  }
-}
-
-/* ---------------------------------------------------------------
- * Inner pages frame (inspired by FlowForge long-form):
- * full-width top bar whose row shares one padded frame with the content;
- * content is left-aligned in that frame, not floating mid-viewport.
- * ------------------------------------------------------------- */
-.chrome-bar {
-  /* Scrolls away with the page (not sticky); spacing instead of a rule */
-  position: static;
-  padding-inline: var(--page-pad);
-  padding-top: var(--space-3);
-}
-
-.chrome-bar .chrome {
-  position: static;
-  max-width: var(--post-group);
-  margin: 0 auto;
-  padding-inline: 0;
-  background: none;
-  backdrop-filter: none;
-}
-
-.shell-inner {
-  padding-top: clamp(var(--space-6), 5vw, var(--space-8));
-}
-
-.shell-inner > main {
-  /* Centered group: even side margins that grow on wide screens */
-  max-width: var(--post-group);
-  margin-inline: auto;
-}
-
-/* Align page blocks to the frame's left edge (same x as the wordmark) */
-.shell-inner :is(.page-intro, .post-list, .back, .empty, .mood-index-grid),
-.shell-inner .blog-page .contact-icons,
-.shell-inner .prose {
-  margin-inline: 0;
-}
-
-.shell-inner .page-intro,
-.shell-inner .post-list,
-.shell-inner .blog-page .contact-icons {
-  max-width: var(--article-max);
-}
-
-/* Post: article + rail in one frame */
-.shell-inner .post {
-  max-width: var(--article-max);
-  margin-inline: 0;
-}
-
-.shell-inner .post .prose {
-  max-width: none;
-  font-size: 1.2rem;
-  line-height: 1.75;
-}
-
-.post-header h1 {
-  font-size: clamp(1.85rem, 1.35rem + 1.5vw, 2.4rem);
-  line-height: 1.18;
-  letter-spacing: -0.028em;
-}
-
-.post-deck {
-  margin-top: var(--space-3);
-  font-size: clamp(1.08rem, 1rem + 0.35vw, 1.22rem);
-  max-width: 38rem;
-}
-
-.post-meta {
-  margin-top: var(--space-5);
-  font-size: 0.7rem;
-}
-
-/* Tags as quiet chips */
-.post-crumbs {
-  flex-wrap: nowrap;
-  white-space: nowrap;
-}
-
-.post-tags {
-  list-style: none;
-  padding: 0;
-  margin-top: var(--space-3);
-  gap: var(--space-2);
-}
-
-.post-tag {
-  padding: 0.12rem 0.55rem;
-  border-radius: 999px;
-  background: var(--row-hover);
-  font-size: 0.66rem;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-}
-
-.post-body {
-  margin-top: var(--space-7);
-  padding-top: 0;
-  border-top: 0;
-}
-
-/* Cleaner long-form: no hairlines; fills and spacing instead */
-.post-cover img {
-  border: 0;
-}
-
-.post-faq {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.shell-inner .post .prose pre {
-  border: 0;
-}
-
-.callout {
-  border: 0;
-  border-left: 2px solid color-mix(in srgb, var(--fg) 28%, transparent);
-  border-radius: 0 var(--row-radius) var(--row-radius) 0;
-  background: color-mix(in srgb, var(--fg) 4%, transparent);
-}
-
-.callout-warning {
-  border-left-color: rgba(224, 178, 92, 0.6);
-  background: rgba(224, 178, 92, 0.06);
-}
-
-.shell-inner .blog-page .contact-icons {
-  border-top: 0;
-  padding-top: var(--space-4);
-}
-
-.post-toc ul {
-  border-left: 0;
-}
-
-.post-toc a {
-  margin-left: 0;
-}
-
-/* Utility rail: own column, quiet, divided from the article */
-.post-rail-label {
-  font-size: 0.6rem;
-}
-
-.post-toc a[aria-current] {
-  color: var(--fg);
-  font-weight: 600;
-  border-left-color: var(--accent);
-}
-
-.post-rail-tools {
-  gap: var(--space-2);
-  margin-top: var(--space-7);
-  padding-top: 0;
-  border-top: 0;
-}
-
-/* No headings: tools lead the rail, no stray divider */
-.post-rail-tools:first-child {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
-}
-
+/* Icon square that slides open to show its label on hover/focus */
 .post-tool {
   display: inline-flex;
   align-items: center;
   height: 2.25rem;
   max-width: 2.25rem;
   overflow: hidden;
+  padding: 0;
   border: 0;
   border-radius: 8px;
   background: var(--row-hover);
-  padding: 0;
   font: inherit;
   font-size: 0.78rem;
   color: var(--muted);
@@ -1617,7 +1256,6 @@ html[data-theme='light'] .theme-icon-moon {
   transition:
     max-width var(--dur) var(--ease-out),
     color var(--dur-fast) ease,
-    border-color var(--dur-fast) ease,
     background-color var(--dur-fast) ease;
 }
 
@@ -1638,17 +1276,13 @@ html[data-theme='light'] .theme-icon-moon {
   transition: opacity var(--dur-fast) ease;
 }
 
-.post-tool:hover,
-.post-tool:focus-visible,
-.post-tool.is-open {
+.post-tool:is(:hover, :focus-visible, .is-open) {
   max-width: 12rem;
   color: var(--fg);
   background: color-mix(in srgb, var(--fg) 9%, transparent);
 }
 
-.post-tool:hover .post-tool-label,
-.post-tool:focus-visible .post-tool-label,
-.post-tool.is-open .post-tool-label {
+.post-tool:is(:hover, :focus-visible, .is-open) .post-tool-label {
   opacity: 1;
 }
 
@@ -1657,10 +1291,9 @@ html[data-theme='light'] .theme-icon-moon {
   outline-offset: 2px;
 }
 
-/* Mobile/tablet: rail collapses into a quiet tools row after the article */
+/* Mobile/tablet: no TOC; the tools sit in a row under the article */
 @media (max-width: 1023px) {
   .post-rail {
-    display: block;
     margin-top: var(--space-7);
   }
 
@@ -1672,151 +1305,58 @@ html[data-theme='light'] .theme-icon-moon {
     flex-direction: row;
     align-items: center;
     margin-top: 0;
-    padding-top: 0;
-    border-top: 0;
   }
 }
 
+/* Desktop: article + rail columns; the rail sticks, the nav does not */
 @media (min-width: 1024px) {
-  .shell-inner .post-layout {
+  .post-layout {
     display: grid;
     grid-template-columns: minmax(0, var(--article-max)) var(--rail-w);
     column-gap: var(--rail-gap);
     align-items: start;
   }
 
-  .shell-inner .post {
-    grid-column: 1;
-  }
-
-  .shell-inner .post-rail {
-    grid-column: 2;
-    max-width: none;
+  .post-rail {
     align-self: stretch;
-    padding-left: 0;
-    border-left: 0;
   }
 
   .post-rail-sticky {
-    /* Rail may stick; the nav does not */
+    position: sticky;
     top: var(--space-7);
     padding-top: 0.35rem;
   }
 }
 
 /* ---------------------------------------------------------------
- * Mood overlay: tiny chips, hidden until hover / focus / tap.
+ * /mood: grid of every homepage still
  * ------------------------------------------------------------- */
-.mood-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+.mood-index-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: var(--space-5) var(--space-4);
+  width: 100%;
+  max-width: var(--measure);
+}
+
+.mood-index-link {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: var(--space-3);
-  pointer-events: none;
-}
-
-.mood-overlay-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  opacity: 0;
-  transition:
-    opacity var(--dur) var(--ease-out),
-    transform var(--dur) var(--ease-out);
-}
-
-.mood-overlay-top {
-  transform: translateY(-4px);
-}
-
-.mood-overlay-bottom {
-  transform: translateY(4px);
-  transition-delay: 40ms;
-}
-
-.hero-shell-stage:hover .mood-overlay-row,
-.hero-shell-stage:focus-within .mood-overlay-row,
-.hero-shell[data-revealed='true'] .mood-overlay-row {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-}
-
-/* Touch screens: faintly visible by default, tap the plate for full. */
-@media (hover: none) {
-  .mood-overlay-row {
-    opacity: 0.55;
-    transform: none;
-    pointer-events: auto;
-  }
-}
-
-.mood-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35em;
-  padding: 0.18rem 0.5rem;
-  border: 0;
-  border-radius: 999px;
-  font: inherit;
-  font-size: 0.68rem;
-  line-height: 1.4;
-  letter-spacing: 0.04em;
-  text-transform: lowercase;
+  gap: 0.55rem;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.92);
-  background: rgba(20, 19, 17, 0.38);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
-.mood-chip-label {
-  opacity: 0.7;
-}
-
-.mood-chip-count {
-  font-variant-numeric: tabular-nums;
-}
-
-.mood-chip-link,
-.mood-chip-next {
-  cursor: pointer;
-  transition:
-    background var(--dur-fast) ease,
-    color var(--dur-fast) ease;
-}
-
-.mood-chip-link:hover,
-.mood-chip-next:hover,
-.mood-chip-link:focus-visible,
-.mood-chip-next:focus-visible {
-  color: #fff;
-  background: rgba(20, 19, 17, 0.6);
-}
-
-.mood-chip-link:focus-visible,
-.mood-chip-next:focus-visible {
-  outline: 1px solid rgba(255, 255, 255, 0.7);
-  outline-offset: 1px;
-}
-
-.mood-chip-link span,
-.mood-chip-next span {
-  display: inline-block;
-  transition: transform var(--dur-fast) var(--ease-out);
-}
-
-.mood-chip-link:hover span,
-.mood-chip-next:hover span {
-  transform: translateX(2px);
-}
-
-/* /mood index: highlight on hover */
 .mood-index-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border-radius: var(--frame-radius);
+  border: 1px solid var(--frame-border);
+  background: var(--frame-bg);
+  overflow: hidden;
   transition:
     transform var(--dur) var(--ease-out),
     border-color var(--dur) ease;
@@ -1827,6 +1367,16 @@ html[data-theme='light'] .theme-icon-moon {
   border-color: var(--border);
 }
 
+.mood-index-id {
+  font-size: 0.82rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.mood-index-link:hover .mood-index-id {
+  color: var(--fg);
+}
+
 /* ---------------------------------------------------------------
  * Motion: page transitions + entrance reveals
  * ------------------------------------------------------------- */
@@ -1834,11 +1384,6 @@ html[data-theme='light'] .theme-icon-moon {
 /* Cross-document view transitions (Chrome/Edge/Safari 18+). No JS. */
 @view-transition {
   navigation: auto;
-}
-
-/* Nav + wordmark stay put; only page content crossfades */
-.chrome {
-  view-transition-name: site-chrome;
 }
 
 ::view-transition-old(root) {

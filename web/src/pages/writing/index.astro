@@ -22,7 +22,7 @@ const posts = await getPublishedPosts()
       posts.length ? (
         <ul class="post-list reveal" style="--i: 1">
           {posts.map((post) => (
-            <li class="post-list-item">
+            <li class="post-list-item hover-row">
               <MetaLine
                 class="post-list-meta"
                 items={[
@@ -32,7 +32,7 @@ const posts = await getPublishedPosts()
                 ]}
               />
               <h2 class="post-list-heading">
-                <a class="post-list-title" href={postPath(post.data.slug)}>{post.data.title}</a>
+                <a class="row-link" href={postPath(post.data.slug)}>{post.data.title}</a>
               </h2>
               <p class="post-list-summary">{post.data.summary}</p>
               {post.data.tags.length ? (
