@@ -2,6 +2,7 @@
 import '../styles/global.css'
 import SiteChrome from '../components/SiteChrome.astro'
 import { absoluteUrl, site } from '../lib/site'
+import { DESKTOP_MQ } from '../components/moods/media'
 
 type Props = {
   title?: string
@@ -86,6 +87,27 @@ const isHome = path === '/'
       } catch (e) {}
     </script>
     <slot name="head" />
+    {
+      isHome ? (
+        <script is:inline define:vars={{ desktopMq: DESKTOP_MQ }}>
+          ;(function () {
+            try {
+              if (
+                window.matchMedia(desktopMq).matches &&
+                !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              ) {
+                document.documentElement.classList.add('mood-await')
+              }
+            } catch (e) {}
+            window.addEventListener('pagereveal', function (e) {
+              if (e.viewTransition) {
+                window.__homePageVt = e.viewTransition.finished
+              }
+            })
+          })()
+        </script>
+      ) : null
+    }
   </head>
   <body>
     {

@@ -3,6 +3,7 @@ import MoodStill from './moods/MoodStill'
 import { adoptCurrentMood, advanceMood, cyclePosition, peekNextMood } from './moods/cycle'
 import { DESKTOP_MQ } from './moods/media'
 import type { MoodSlot } from './moods/types'
+import { settleMoodLayout } from '../lib/settleMood'
 
 type Props = {
   moods: MoodSlot[]
@@ -94,8 +95,21 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
   const [pos, setPos] = useState(() => cyclePosition())
   const [revealed, setRevealed] = useState(false)
   const timer = useRef<number | undefined>(undefined)
+  const plateReady = useRef(false)
 
   useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  // If the first still never loads, don't leave the page stuck centered.
+  useEffect(() => {
+    const fallback = window.setTimeout(() => settleMoodLayout(), 2500)
+    return () => window.clearTimeout(fallback)
+  }, [])
+
+  const onPlateReady = useCallback(() => {
+    if (plateReady.current) return
+    plateReady.current = true
+    settleMoodLayout()
+  }, [])
 
   useEffect(() => {
     if (desktop && !slot) {
@@ -114,6 +128,10 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
     })
   }, [desktop, moods, slot])
 
+  useEffect(() => {
+    if (slot && !slot.src) onPlateReady()
+  }, [slot, onPlateReady])
+
   const next = useCallback(() => {
     const target = byId(moods, advanceMood(moods))
     if (!target || target.id === slot?.id) return
@@ -128,9 +146,14 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
 
   if (!desktop) return <div className="hero-shell" data-mood-id="none" aria-hidden="true" />
 
-  const renderSlot = (s: MoodSlot, key: string, className: string) =>
+  const renderSlot = (s: MoodSlot, key: string, className: string, reportReady = false) =>
     s.src ? (
-      <MoodStill key={key} src={s.src} className={className} />
+      <MoodStill
+        key={key}
+        src={s.src}
+        className={className}
+        onReady={reportReady ? onPlateReady : undefined}
+      />
     ) : (
       // Placeholder for a mood with no image yet.
       <div key={key} className="hero-shell-empty" aria-hidden="true" />
@@ -153,7 +176,7 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
         <div className="hero-shell-art" role="img" aria-label={label}>
           {leaving ? renderSlot(leaving, `out-${leaving.id}`, 'is-leaving') : null}
           {slot ? (
-            renderSlot(slot, `in-${slot.id}`, leaving ? 'is-entering' : '')
+            renderSlot(slot, `in-${slot.id}`, leaving ? 'is-entering' : '', !leaving)
           ) : (
             <div className="hero-shell-empty" aria-hidden="true" />
           )}
