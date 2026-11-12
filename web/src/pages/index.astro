@@ -4,6 +4,7 @@ import ContactIcons from '../components/ContactIcons.astro'
 import SiteChrome from '../components/SiteChrome.astro'
 import HeroMoodShell from '../components/HeroMoodShell'
 import { firstMoodPreloadScript } from '../components/moods/preload'
+import { DESKTOP_MQ } from '../components/moods/media'
 import { githubAvatarUrl, site, socialLinks } from '../lib/site'
 import { getPublishedPosts, isoDay, postPath } from '../lib/posts'
 
@@ -36,6 +37,26 @@ const personJsonLd = {
     /* Start the first mood download from <head>, before React hydrates
        HeroMoodShell (desktop only; see moods/preload.ts). */
     moods.length ? <script is:inline slot="head" set:html={firstMoodPreloadScript(moods)} /> : null
+  }
+  {
+    /* Hold the centered "await" layout until the first mood is ready
+       (lib/settleMood.ts). Only with a plate to wait for: with no moods
+       nothing would ever settle the page. */
+    moods.length ? (
+      <script is:inline slot="head" define:vars={{ desktopMq: DESKTOP_MQ }}>
+        try {
+          if (
+            window.matchMedia(desktopMq).matches &&
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ) {
+            document.documentElement.classList.add('mood-await')
+          }
+        } catch (e) {}
+        window.addEventListener('pagereveal', function (e) {
+          if (e.viewTransition) window.__homePageVt = e.viewTransition.finished
+        })
+      </script>
+    ) : null
   }
   <div class="page home-split">
     {/* Text column (≈60% on wide screens). Mood plate sits to its left. */}

@@ -99,7 +99,7 @@ html[data-theme='light'] {
   --dur-slow: 520ms;
   --stagger: 60ms;
   --mood-xfade: 420ms; /* mirrored by XFADE_MS in HeroMoodShell.tsx */
-  --mood-settle: 780ms; /* home plate sliding out from behind the text */
+  --mood-settle: 780ms; /* home plate slide; mirrored by SETTLE_MS in settleMood.ts */
 
   /* Inset shadow on the mood plate; set to none to drop it */
   --mood-inset-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18),
@@ -1497,16 +1497,18 @@ html.vt-mood-settle::view-transition-new(root) {
   animation: none;
 }
 
-html.vt-mood-settle::view-transition-group(home-mood) {
-  z-index: 1;
+html.vt-mood-settle::view-transition-group(home-mood),
+html.vt-mood-settle::view-transition-group(home-text) {
   animation-duration: var(--mood-settle);
   animation-timing-function: var(--ease-out);
 }
 
+html.vt-mood-settle::view-transition-group(home-mood) {
+  z-index: 1;
+}
+
 html.vt-mood-settle::view-transition-group(home-text) {
   z-index: 2;
-  animation-duration: var(--mood-settle);
-  animation-timing-function: var(--ease-out);
 }
 
 /* The plate is the same size before and after: no crossfade, just motion. */

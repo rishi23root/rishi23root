@@ -1,13 +1,15 @@
 /** Settles the homepage from the centered "await" layout into the split. */
 
+/** Mirrored by --mood-settle in global.css. */
 const SETTLE_MS = 780
 
 let started = false
 
 function pageVtFinished(): Promise<void> {
-  const pending = (window as Window & { __homePageVt?: Promise<unknown> }).__homePageVt
-  if (pending) return Promise.resolve(pending).then(() => undefined, () => undefined)
-  return Promise.resolve()
+  return Promise.resolve(window.__homePageVt).then(
+    () => undefined,
+    () => undefined,
+  )
 }
 
 function flip(text: HTMLElement, plate: HTMLElement) {
@@ -16,25 +18,19 @@ function flip(text: HTMLElement, plate: HTMLElement) {
 
   document.documentElement.classList.remove('mood-await')
 
-  const lastText = text.getBoundingClientRect()
-  const lastPlate = plate.getBoundingClientRect()
   const ease = getComputedStyle(document.documentElement).getPropertyValue('--ease-out').trim() ||
     'cubic-bezier(0.22, 1, 0.36, 1)'
 
-  text.animate(
-    [
-      { transform: `translateX(${firstText.left - lastText.left}px)` },
-      { transform: 'none' },
-    ],
-    { duration: SETTLE_MS, easing: ease, fill: 'none' },
-  )
-  plate.animate(
-    [
-      { transform: `translateX(${firstPlate.left - lastPlate.left}px)` },
-      { transform: 'none' },
-    ],
-    { duration: SETTLE_MS, easing: ease, fill: 'none' },
-  )
+  const slide = (el: HTMLElement, first: DOMRect) =>
+    el.animate(
+      [
+        { transform: `translateX(${first.left - el.getBoundingClientRect().left}px)` },
+        { transform: 'none' },
+      ],
+      { duration: SETTLE_MS, easing: ease, fill: 'none' },
+    )
+  slide(text, firstText)
+  slide(plate, firstPlate)
 }
 
 async function run() {
@@ -75,12 +71,7 @@ async function run() {
 
 /** Call when the first mood image is ready (or if it fails). Safe to call often. */
 export function settleMoodLayout() {
-  if (started) return
-  if (typeof document === 'undefined') return
-  if (!document.documentElement.classList.contains('mood-await')) {
-    started = true
-    return
-  }
+  if (started || typeof document === 'undefined') return
   started = true
   void run()
 }
