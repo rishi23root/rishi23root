@@ -8,7 +8,6 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
 
 <BaseLayout title="Moods" description="Homepage mood stills used on rishi23root.in." path="/mood">
   <div class="page mood-index">
-    <a class="back" href="/">← Home</a>
     <section class="page-intro reveal" style="--i: 0">
       <h1>Moods</h1>
       <p class="lede">
@@ -34,7 +33,7 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
             return (
               <li>
                 <a class="mood-index-link" href={`/?mood=${mood.id}`}>
-                  <div class="mood-index-frame">
+                  <div class="mood-index-frame mood-inset">
                     {fallback ? (
                       <picture>
                         <source srcset={mood.src} type="image/webp" />

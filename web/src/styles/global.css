@@ -68,7 +68,7 @@ html[data-theme='light'] {
   --space-8: 4rem;
 
   /* Page frame */
-  --measure: 38rem; /* narrow text column (home on mobile, /mood) */
+  --measure: 38rem; /* narrow text column (home on mobile) */
   --page-pad: clamp(1.5rem, 3.6vw, 3.5rem); /* left/right gutter, all pages */
   --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7));
   --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem);
@@ -840,7 +840,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 /* ---------------------------------------------------------------
- * Inner page intro, back link, empty state
+ * Inner page intro, empty state
  * ------------------------------------------------------------- */
 .page-intro {
   max-width: var(--article-max);
@@ -867,19 +867,6 @@ html[data-theme='light'] .theme-icon-moon {
   margin: 0;
   color: var(--muted);
   max-width: 34rem;
-}
-
-.back {
-  display: inline-block;
-  max-width: var(--measure);
-  width: 100%;
-  font-size: 0.9rem;
-  color: var(--muted);
-  text-decoration: none;
-}
-
-.back:hover {
-  color: var(--fg);
 }
 
 .empty {
@@ -1423,10 +1410,15 @@ html[data-theme='light'] .theme-icon-moon {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
-  gap: var(--space-5) var(--space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6) var(--space-5);
   width: 100%;
-  max-width: var(--measure);
+}
+
+@media (min-width: 1024px) {
+  .mood-index-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .mood-index-link {
