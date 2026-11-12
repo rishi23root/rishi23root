@@ -1,7 +1,7 @@
 import { defineCollection, z } from 'astro:content'
 import { glob } from 'astro/loaders'
 
-/** kebab-case slug; must also equal the file name (checked in lib/site.ts). */
+/** kebab-case slug; must also equal the file name (checked in lib/posts.ts). */
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 const faqItem = z.object({
