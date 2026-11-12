@@ -5,7 +5,8 @@ import type { MoodSlot } from './types'
  * Every mood is shown once before any repeats; a fresh shuffle starts when the
  * bag is empty, and never opens with the mood that was just shown.
  */
-const KEY = 'mood-cycle:v1'
+export const MOOD_CYCLE_KEY = 'mood-cycle:v1'
+const KEY = MOOD_CYCLE_KEY
 
 type CycleState = {
   order: string[]
@@ -60,6 +61,8 @@ function write(state: CycleState): void {
 }
 
 let memory: CycleState | null = null
+/** Next bag, drawn early by peekNextMood so the prefetch matches the advance. */
+let pendingOrder: string[] | null = null
 
 /** Advance the bag by one and persist it. Returns the mood id to show. */
 export function advanceMood(moods: MoodSlot[]): string | null {
@@ -70,13 +73,40 @@ export function advanceMood(moods: MoodSlot[]): string | null {
   if (!prev) {
     next = { order: freshOrder(ids), index: 0 }
   } else if (prev.index + 1 >= prev.order.length) {
-    next = { order: freshOrder(ids, prev.order[prev.index]), index: 0 }
+    const order =
+      pendingOrder && sameSet(pendingOrder, ids) ? pendingOrder : freshOrder(ids, prev.order[prev.index])
+    next = { order, index: 0 }
   } else {
     next = { order: prev.order, index: prev.index + 1 }
   }
+  pendingOrder = null
   memory = next
   write(next)
   return next.order[next.index] ?? null
+}
+
+/**
+ * Pick up the mood the inline head script (index.astro) already advanced to
+ * on this page load, without advancing again. Returns its id, or null.
+ */
+export function adoptCurrentMood(moods: MoodSlot[]): string | null {
+  const state = read(moods.map((m) => m.id))
+  if (!state) return null
+  memory = state
+  return state.order[state.index] ?? null
+}
+
+/** The mood the next advanceMood() will return, without advancing. */
+export function peekNextMood(moods: MoodSlot[]): string | null {
+  const ids = moods.map((m) => m.id)
+  if (ids.length < 2) return null
+  const cur = memory ?? read(ids)
+  if (!cur) return null
+  if (cur.index + 1 < cur.order.length) return cur.order[cur.index + 1] ?? null
+  if (!pendingOrder || !sameSet(pendingOrder, ids)) {
+    pendingOrder = freshOrder(ids, cur.order[cur.index])
+  }
+  return pendingOrder[0] ?? null
 }
 
 /** Position of the current mood in this pass (1-based) and pass size. */

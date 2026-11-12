@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import MoodStill from './moods/MoodStill'
 import MoodStub from './moods/MoodStub'
-import { advanceMood, cyclePosition } from './moods/cycle'
+import { adoptCurrentMood, advanceMood, cyclePosition, peekNextMood } from './moods/cycle'
 import type { MoodSlot } from './moods/types'
 
 type Props = {
@@ -12,6 +12,28 @@ type Props = {
 
 /** Crossfade length; mirrored by --mood-xfade in global.css. */
 const XFADE_MS = 420
+
+/** Same breakpoint as `.home-mood` in global.css: the plate is hidden below it. */
+const DESKTOP_MQ = '(min-width: 1024px)'
+
+declare global {
+  interface Window {
+    /** First mood picked (and preloaded) by the inline head script in index.astro. */
+    __heroMoodFirst?: string
+  }
+}
+
+function useDesktop(): boolean {
+  const [desktop, setDesktop] = useState(() => window.matchMedia(DESKTOP_MQ).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(DESKTOP_MQ)
+    const onChange = () => setDesktop(mq.matches)
+    onChange()
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return desktop
+}
 
 /** `?mood=<id>` (links from /mood) forces the first mood shown. */
 function readMoodParam(): string | null {
@@ -24,15 +46,48 @@ function initialSlot(moods: MoodSlot[], forced?: string | null): MoodSlot | null
     const hit = moods.find((m) => m.id === forced)
     if (hit) return hit
   }
+  // The head script already advanced the bag for this load: adopt its pick.
+  const early = window.__heroMoodFirst
+  window.__heroMoodFirst = undefined
+  if (early) {
+    const id = adoptCurrentMood(moods)
+    const hit = moods.find((m) => m.id === (id ?? early)) ?? moods.find((m) => m.id === early)
+    if (hit) return hit
+  }
   const id = advanceMood(moods)
   return moods.find((m) => m.id === id) ?? moods[0] ?? null
 }
 
-function preload(src?: string) {
-  if (!src || typeof Image === 'undefined') return
+const prefetched = new Set<string>()
+
+function prefetch(src?: string) {
+  if (!src || prefetched.has(src) || typeof Image === 'undefined') return
+  prefetched.add(src)
   const img = new Image()
   img.decoding = 'async'
+  img.fetchPriority = 'low'
   img.src = src
+}
+
+/** Run once the page (incl. the first mood image) has loaded, then idle. */
+function afterLoad(fn: () => void): () => void {
+  let idle: number | undefined
+  let cancelled = false
+  const run = () => {
+    if (cancelled) return
+    const ric = window.requestIdleCallback
+    idle = ric ? ric(fn, { timeout: 2000 }) : window.setTimeout(fn, 200)
+  }
+  if (document.readyState === 'complete') run()
+  else window.addEventListener('load', run, { once: true })
+  return () => {
+    cancelled = true
+    window.removeEventListener('load', run)
+    if (idle !== undefined) {
+      if (window.cancelIdleCallback) window.cancelIdleCallback(idle)
+      window.clearTimeout(idle)
+    }
+  }
 }
 
 /**
@@ -41,7 +96,12 @@ function preload(src?: string) {
  * overlay advances the same cycle in place with a crossfade.
  */
 export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) {
-  const [slot, setSlot] = useState<MoodSlot | null>(() => initialSlot(moods, readMoodParam()))
+  const desktop = useDesktop()
+  // Below 1024px the plate is display:none — pick nothing, mount no <img>.
+  // The first mood is chosen the first time the viewport is desktop-sized.
+  const [slot, setSlot] = useState<MoodSlot | null>(() =>
+    desktop ? initialSlot(moods, readMoodParam()) : null,
+  )
   const [leaving, setLeaving] = useState<MoodSlot | null>(null)
   const [pos, setPos] = useState(() => cyclePosition())
   const [revealed, setRevealed] = useState(false)
@@ -49,10 +109,23 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
 
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
-  // Warm the cache for whatever "next" is likely to show.
   useEffect(() => {
-    moods.forEach((m) => m.id !== slot?.id && preload(m.src))
-  }, [moods, slot])
+    if (desktop && !slot) {
+      setSlot(initialSlot(moods, readMoodParam()))
+      setPos(cyclePosition())
+    }
+  }, [desktop, slot, moods])
+
+  // Warm the cache for the one mood "next" will show — desktop only, and only
+  // once the current image has loaded so it never competes with it.
+  useEffect(() => {
+    if (!desktop || !slot) return
+    return afterLoad(() => {
+      const id = peekNextMood(moods)
+      const target = moods.find((m) => m.id === id)
+      if (target && target.id !== slot.id) prefetch(target.src)
+    })
+  }, [desktop, moods, slot])
 
   const next = useCallback(() => {
     const id = advanceMood(moods)
@@ -66,6 +139,8 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
   }, [moods, slot])
 
   const label = slot ? slot.alt || `${slot.id} mood illustration` : 'Mood illustration placeholder'
+
+  if (!desktop) return <div className="hero-shell" data-mood-id="none" aria-hidden="true" />
 
   const renderSlot = (s: MoodSlot, key: string, className: string) =>
     s.src ? <MoodStill key={key} src={s.src} className={className} /> : <MoodStub key={key} id={s.id} />

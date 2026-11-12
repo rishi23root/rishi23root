@@ -16,6 +16,8 @@ const projects = (site.projects ?? [])
 const capabilities = site.capabilities ?? []
 const moods = site.moods ?? []
 const voiceBio = site.voiceBio ?? site.fullDescription
+// Only what the inline head script needs to pick and preload the first mood.
+const heroMoods = moods.map((m) => ({ id: m.id, src: m.src }))
 
 const personJsonLd = {
   '@context': 'https://schema.org',
@@ -31,6 +33,65 @@ const personJsonLd = {
 ---
 
 <BaseLayout path="/" jsonLd={personJsonLd}>
+  {
+    /* Start the first mood download from <head>, before React hydrates
+       HeroMoodShell. Desktop only (the plate is display:none below 1024px).
+       Picks the mood exactly as HeroMoodShell would: ?mood=<id> wins, else
+       advance the shuffle bag — keep in sync with moods/cycle.ts. The pick is
+       handed over on window.__heroMoodFirst so React does not advance again. */
+    moods.length ? (
+      <script slot="head" define:vars={{ heroMoods, cycleKey: 'mood-cycle:v1' }}>
+        try {
+          if (window.matchMedia('(min-width: 1024px)').matches) {
+            var ids = heroMoods.map(function (m) { return m.id })
+            var forced = new URLSearchParams(window.location.search).get('mood')
+            var id = forced && ids.indexOf(forced) !== -1 ? forced : null
+            if (!id) {
+              var shuffle = function (avoid) {
+                var o = ids.slice()
+                for (var i = o.length - 1; i > 0; i--) {
+                  var j = Math.floor(Math.random() * (i + 1))
+                  var t = o[i]; o[i] = o[j]; o[j] = t
+                }
+                if (avoid && o.length > 1 && o[0] === avoid) {
+                  var k = 1 + Math.floor(Math.random() * (o.length - 1))
+                  var u = o[0]; o[0] = o[k]; o[k] = u
+                }
+                return o
+              }
+              var prev = null
+              try {
+                prev = JSON.parse(localStorage.getItem(cycleKey) || 'null')
+                if (
+                  !prev || !Array.isArray(prev.order) || typeof prev.index !== 'number' ||
+                  prev.order.length !== ids.length ||
+                  !ids.every(function (x) { return prev.order.indexOf(x) !== -1 })
+                ) prev = null
+              } catch (e) { prev = null }
+              var next
+              if (!prev) next = { order: shuffle(), index: 0 }
+              else if (prev.index + 1 >= prev.order.length) next = { order: shuffle(prev.order[prev.index]), index: 0 }
+              else next = { order: prev.order, index: prev.index + 1 }
+              try { localStorage.setItem(cycleKey, JSON.stringify(next)) } catch (e) {}
+              id = next.order[next.index]
+            }
+            window.__heroMoodFirst = id
+            var hit = heroMoods.filter(function (m) { return m.id === id })[0]
+            if (hit && hit.src) {
+              var link = document.createElement('link')
+              link.rel = 'preload'
+              link.as = 'image'
+              link.href = hit.src
+              if (/\.webp$/.test(hit.src)) link.type = 'image/webp'
+              link.setAttribute('fetchpriority', 'high')
+              link.setAttribute('data-hero-mood', id)
+              document.head.appendChild(link)
+            }
+          }
+        } catch (e) {}
+      </script>
+    ) : null
+  }
   <div class="page home-split">
     {/* Text column (≈60% on wide screens). Mood plate sits to its left. */}
     <div class="home-text">
