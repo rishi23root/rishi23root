@@ -1,0 +1,41 @@
+---
+title: How I write posts on rishi23root.in
+date: 2026-11-11
+slug: post-template
+summary: The template every post starts from — answer first, short sections, a quotable FAQ, and a pre-publish checklist.
+draft: true
+author: Rishabh
+tags: [meta, writing]
+primaryKeyword: blog writing checklist
+secondaryKeywords: [answer-first writing, technical blog template]
+faq:
+  - q: What goes in the first paragraph?
+    a: A one- or two-sentence answer to the question the title asks, so a reader (or an answer engine) gets the point without scrolling.
+  - q: When should a post have an FAQ?
+    a: When readers are likely to ask follow-up questions that have short, stand-alone answers. Skip it for short notes.
+---
+
+This is a draft template (it never ships). Every post opens by answering its own title in one or two sentences, then earns the rest of the page with specifics.
+
+<Callout tone="answer">Lead with the answer, keep sections short, show real code or numbers, and finish with what to do next.</Callout>
+
+## Structure
+
+Use `##` for sections and `###` for sub-steps. Never skip a level, and keep headings descriptive so the "On this page" rail reads like an outline.
+
+### Lists and code
+
+- Steps that happen in order go in a numbered list.
+- Commands and config go in fenced code blocks with a language.
+
+```ts
+const post = await getEntry('posts', 'post-template')
+```
+
+## Before you publish
+
+<Callout tone="warning">Never paste secrets, tokens, client names or private screenshots. Redact first.</Callout>
+
+1. Title answers a real question and is under 90 characters.
+2. Summary is one sentence under 220 characters.
+3. `slug` matches the file name; flip `draft` to `false`.
