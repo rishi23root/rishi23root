@@ -60,15 +60,15 @@ html[data-theme='light'] {
 
   /* Page frame */
   --measure: 38rem; /* narrow prose / empty-state width */
-  --page-pad: clamp(1.5rem, 3.6vw, 3.5rem); /* left/right gutter, all pages */
+  --page-pad: clamp(1.25rem, 2vw, 1.5rem); /* left/right gutter, all pages */
   --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7));
   --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem);
   --home-max: 93.75rem;
   --home-gap: clamp(var(--space-6), 4.5vw, 5rem); /* mood plate <-> text */
 
   /* Inner pages: article + rail form one centered group; the nav row matches it */
-  --article-max: 42rem;
-  --rail-w: 13rem;
+  --article-max: 51rem;
+  --rail-w: 15rem;
   --rail-gap: clamp(var(--space-7), 5vw, 5rem);
   --post-group: calc(var(--article-max) + var(--rail-gap) + var(--rail-w));
 
@@ -1050,10 +1050,13 @@ html[data-theme='light'] .theme-icon-moon {
 .post-crumbs a {
   color: var(--fg);
   text-decoration: none;
+  cursor: pointer;
 }
 
-.post-crumbs a:hover {
-  text-decoration: underline;
+.post-crumbs a:hover,
+.post-crumbs a:focus-visible {
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .post-crumbs-current {
@@ -1256,6 +1259,109 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--muted);
 }
 
+/* Tables: mono header labels, hairline rows, first column as the row name */
+.prose table {
+  width: 100%;
+  margin: var(--space-5) 0 var(--space-6);
+  border-collapse: collapse;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.prose th {
+  padding: 0 var(--space-4) var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.prose td {
+  padding: var(--space-3) var(--space-4) var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--muted);
+}
+
+.prose :is(th, td):last-child {
+  padding-right: 0;
+}
+
+.prose td:first-child {
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.prose td code {
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+.prose td:first-child code {
+  padding: 0;
+  background: transparent;
+  font-size: 0.78em;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* Narrow: each row becomes a block, the name on top, the other cells labelled below */
+@media (max-width: 640px) {
+  .prose thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .prose :is(table, tbody, tr, td) {
+    display: block;
+  }
+
+  .prose tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prose tr:first-child {
+    border-top: 1px solid var(--border);
+  }
+
+  .prose td {
+    padding: 0;
+    border: 0;
+  }
+
+  .prose td:first-child,
+  .prose td:nth-child(2):last-child {
+    grid-column: 1 / -1;
+  }
+
+  .prose td:not(:first-child)[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.15rem;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0.8;
+  }
+
+  .prose td code {
+    white-space: normal;
+  }
+}
+
 /* <Callout tone="note|warning|answer">: faint fill + quiet left accent */
 .callout {
   margin: 0 0 1.25rem;
@@ -1290,6 +1396,498 @@ html[data-theme='light'] .theme-icon-moon {
 
 .callout-warning .callout-label {
   color: var(--warn);
+}
+
+/* <RepoCard> / <PrCard> and GitHub link previews: one quiet card, mono eyebrow */
+.gh-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.35rem;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--row-radius);
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
+  color: var(--fg);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.gh-card p {
+  margin: 0;
+}
+
+.prose a.gh-card {
+  text-decoration: none;
+  color: var(--fg);
+}
+
+.gh-card-block {
+  margin: var(--space-5) 0;
+  transition:
+    border-color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease;
+}
+
+.gh-card-block:hover {
+  border-color: color-mix(in srgb, var(--fg) 28%, transparent);
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
+}
+
+.gh-card-block:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.gh-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.gh-card-eyebrow,
+.gh-card-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.gh-card-eyebrow span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gh-card-top svg {
+  flex: none;
+  width: 0.95rem;
+  height: 0.95rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gh-card-stat {
+  letter-spacing: 0.04em;
+}
+
+.gh-card-state {
+  flex: none;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  letter-spacing: 0.1em;
+}
+
+.gh-card-state.is-merged,
+.gh-card-state.is-open {
+  color: var(--fg);
+}
+
+.gh-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.gh-card-num {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.gh-card-desc {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.gh-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.9rem;
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.gh-card-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.gh-card-lang i {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--lang, var(--muted));
+}
+
+.gh-card-diff {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+
+.gh-card-add {
+  color: color-mix(in srgb, #6fbf73 75%, var(--fg));
+}
+
+.gh-card-del {
+  color: color-mix(in srgb, #d9776b 75%, var(--fg));
+}
+
+html[data-theme='light'] .gh-card-add {
+  color: #3d7a40;
+}
+
+html[data-theme='light'] .gh-card-del {
+  color: #a8473b;
+}
+
+.gh-card-foot {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.gh-pop {
+  position: fixed;
+  z-index: 60;
+  width: min(23rem, calc(100vw - 24px));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition:
+    opacity var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease-out),
+    visibility 0s linear var(--dur-fast);
+}
+
+.gh-pop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  transition:
+    opacity var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease-out);
+  cursor: pointer;
+}
+
+.gh-pop .gh-card {
+  padding: var(--space-3) var(--space-4);
+  background: var(--frame-bg);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.38);
+}
+
+html[data-theme='light'] .gh-pop .gh-card {
+  box-shadow: 0 14px 36px rgba(28, 27, 25, 0.14);
+}
+
+.gh-pop .gh-card-title {
+  font-size: 1rem;
+}
+
+.gh-pop .gh-card-desc {
+  -webkit-line-clamp: 3;
+  font-size: 0.9rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gh-pop {
+    transform: none;
+  }
+}
+
+/* Excalidraw hand-drawn fonts, self-hosted; boards export SVG without inlined fonts */
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-a88b72a24fb54c9f94e3b5fdaa7481c9.woff2') format('woff2');
+  unicode-range: U+20-7e,U+a0-a3,U+a5-a6,U+a8-ab,U+ad-b1,U+b4,U+b6-b8,U+ba-ff,U+131,U+152-153,U+2bc,U+2c6,U+2da,U+2dc,U+304,U+308,U+2013-2014,U+2018-201a,U+201c-201e,U+2020,U+2022,U+2024-2026,U+2030,U+2039-203a,U+20ac,U+2122,U+2212;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-be310b9bcd4f1a43f571c46df7809174.woff2') format('woff2');
+  unicode-range: U+100-130,U+132-137,U+139-149,U+14c-151,U+154-17e,U+192,U+1fc-1ff,U+218-21b,U+237,U+1e80-1e85,U+1ef2-1ef3,U+2113;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-b9dcf9d2e50a1eaf42fc664b50a3fd0d.woff2') format('woff2');
+  unicode-range: U+400-45f,U+490-491,U+2116;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-41b173a47b57366892116a575a43e2b6.woff2') format('woff2');
+  unicode-range: U+37e,U+384-38a,U+38c,U+38e-393,U+395-3a1,U+3a3-3a8,U+3aa-3cf,U+3d7;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-3f2c5db56cc93c5a6873b1361d730c16.woff2') format('woff2');
+  unicode-range: U+2c7,U+2d8-2d9,U+2db,U+2dd,U+302,U+306-307,U+30a-30c,U+326-328,U+212e,U+2211,U+fb01-fb02;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-349fac6ca4700ffec595a7150a0d1e1d.woff2') format('woff2');
+  unicode-range: U+462-463,U+472-475,U+4d8-4d9,U+4e2-4e3,U+4e6-4e9,U+4ee-4ef;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-623ccf21b21ef6b3a0d87738f77eb071.woff2') format('woff2');
+  unicode-range: U+300-301,U+303;
+}
+
+@font-face {
+  font-family: 'Virgil';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Virgil-Regular.woff2') format('woff2');
+}
+
+/* Excalidraw boards in Writing: scene rendered to SVG, full measure, no card chrome */
+.excal-board {
+  --excal-h: 500px;
+  margin: 1.5rem 0 1.75rem;
+  width: 100%;
+}
+
+.excal-board-frame {
+  position: relative;
+  width: 100%;
+  height: var(--excal-h);
+  max-height: min(70vh, 640px);
+}
+
+.excal-board-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  transition: opacity 360ms var(--ease-out);
+}
+
+.excal-board-placeholder [role='alert'] {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.excal-board.is-ready .excal-board-placeholder {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.excal-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  animation: excal-fade-in 520ms var(--ease-out) both;
+}
+
+.excal-viewport:active {
+  cursor: grabbing;
+}
+
+@keyframes excal-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.excal-stage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+  transition: transform 220ms var(--ease-out);
+  user-select: none;
+}
+
+.excal-viewport:active .excal-stage {
+  transition: none;
+}
+
+.excal-stage svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Scenes are drawn dark-on-light; invert like Excalidraw's own dark mode. */
+html[data-theme='dark'] .excal-stage svg {
+  filter: invert(93%) hue-rotate(180deg);
+}
+
+/* Control pill: hidden until the board is hovered or focused */
+.excal-pill {
+  --pill-bg: color-mix(in srgb, var(--fg) 12%, var(--bg));
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 4px;
+  border: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+  border-radius: 10px;
+  background: var(--pill-bg);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  color: var(--fg);
+  cursor: default;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+.excal-viewport:hover .excal-pill,
+.excal-viewport.is-pinned .excal-pill,
+.excal-viewport:has(:focus-visible) .excal-pill,
+.excal-modal .excal-pill {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .excal-pill {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+.excal-pill button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.78;
+  cursor: pointer;
+}
+
+.excal-pill button:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.excal-pill button:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--fg);
+  outline-offset: 1px;
+}
+
+.excal-pill svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.excal-pill-zoom {
+  min-width: 3.4em;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.excal-pill-sep {
+  width: 1px;
+  height: 16px;
+  margin: 0 3px;
+  background: color-mix(in srgb, var(--fg) 20%, transparent);
+}
+
+/* Expanded: the same SVG at ~70% of the viewport; backdrop click closes */
+.excal-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(6px);
+  animation: excal-backdrop-in var(--dur) var(--ease-out) both;
+}
+
+@keyframes excal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.excal-modal-board {
+  position: relative;
+  width: 70vw;
+  height: 70vh;
+  border-radius: 14px;
+  background: var(--bg);
+  box-shadow: 0 0 0 1px var(--border), 0 24px 64px rgba(0, 0, 0, 0.32);
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .excal-board {
+    --excal-h: 360px;
+  }
+
+  .excal-modal-board {
+    width: 92vw;
+  }
 }
 
 .post-faq {

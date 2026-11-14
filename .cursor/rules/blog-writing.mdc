@@ -9,9 +9,12 @@ alwaysApply: false
 Follow `web/BLOG_WRITING_GUIDE.md`. Short version:
 
 - Write as Rishabh (first person, plain, specific). No hype or filler.
-- Answer first: the first paragraph answers the title in 1-2 sentences.
+- Section order for Writing posts (as `##` headings, after the `title` H1): TL;DR → What problem I had → What I tried → What worked → What failed → Architecture → Code → Results → What I recommend. A short qualifier after a colon is fine; drop a section that has nothing real rather than pad it. Skeleton: `content/posts/draft-template.mdx`.
+- The TL;DR answers the title in 1-2 sentences.
 - `##`/`###` headings only (the H1 comes from `title`). Code fences need a language. Images need alt text.
 - Frontmatter: `title` ≤ 90 chars, one-sentence `summary` ≤ 220, kebab-case `slug` equal to the file name, `date` YYYY-MM-DD. Optional: `tags`, `updated`, `primaryKeyword`, `secondaryKeywords`, `seoTitle`, `cover`, `image`, `faq` (2-4 stand-alone Q&A).
 - `<Callout tone="answer|note|warning">` is available in MDX without an import. Use it sparingly.
+- `<ExcalidrawBoard src="/diagrams/<name>.json" />` embeds a read-only diagram rendered to SVG (no import). Scenes live in `web/public/diagrams/`; see the "Excalidraw boards" section in `AGENTS.md`.
+- `<RepoCard owner repo />` and `<PrCard owner repo number />` render GitHub cards from build-time API data (no import). Plain github.com repo/PR links get hover previews automatically.
 - Never publish secrets, client or employer data, other people's personal data, unbacked claims, uncredited copy, or unreviewed AI text.
-- New posts start from `content/posts/post-template.mdx` with `draft: true`. Flip it to `false` only after the checklist in the guide passes and `npm run build:web` is green.
+- New posts start from `content/posts/draft-template.mdx` with `draft: true`. Flip it to `false` only after the checklist in the guide passes and `npm run build:web` is green.

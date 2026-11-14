@@ -1,0 +1,15 @@
+---
+/** MDX: <RepoCard owner="rishi23root" repo="pyblink" /> — fetched at build time. */
+import { getRepo } from '../../lib/github'
+import { githubUrl, type GithubRef } from '../../lib/githubRefs'
+import GithubCardBody from './GithubCardBody.astro'
+
+type Props = { owner: string; repo: string }
+const { owner, repo } = Astro.props
+const ref: GithubRef = { kind: 'repo', owner, repo }
+const data = await getRepo(owner, repo)
+---
+
+<a class="gh-card gh-card-block" href={data?.url ?? githubUrl(ref)}>
+  <GithubCardBody data={data} fallback={ref} />
+</a>

@@ -2,18 +2,27 @@ import { getCollection, type CollectionEntry } from 'astro:content'
 
 export type Post = CollectionEntry<'posts'>
 
-/**
- * Published posts only. Drafts show up in `astro dev` so they can be
- * previewed, but never in a build (pages, RSS, sitemap, llms.txt).
- */
-function publishedPostsFilter(entry: Post): boolean {
-  return import.meta.env.DEV || entry.data.draft !== true
+const isPublished = (entry: Post) => entry.data.draft !== true
+
+async function postsNewestFirst(filter: (entry: Post) => boolean): Promise<Post[]> {
+  const posts = await getCollection('posts', filter)
+  return posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
 
-/** Published posts, newest first. */
-export async function getPublishedPosts(): Promise<Post[]> {
-  const posts = await getCollection('posts', publishedPostsFilter)
-  return posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+/**
+ * Published posts only, newest first, in dev and build alike. Every listing
+ * uses this: Writing index, home, command palette, RSS, llms.txt, redirects.
+ */
+export function getPublishedPosts(): Promise<Post[]> {
+  return postsNewestFirst(isPublished)
+}
+
+/**
+ * Posts that get a page. Drafts are included only in `astro dev`, so they can
+ * be previewed at their URL without showing up in any list.
+ */
+export function getRenderablePosts(): Promise<Post[]> {
+  return postsNewestFirst((entry) => import.meta.env.DEV || isPublished(entry))
 }
 
 export function postPath(slug: string): string {

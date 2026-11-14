@@ -38,6 +38,8 @@ jobs:
 
       - name: Build site
         working-directory: web
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run build
 
       - name: Upload Pages artifact

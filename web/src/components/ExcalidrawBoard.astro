@@ -1,0 +1,20 @@
+---
+/**
+ * MDX / post wrapper: hydrates the React island when scrolled into view.
+ * Prefer this over importing the .tsx from content/posts (awkward relative path).
+ * Passed into MDX via `components={{ ExcalidrawBoard }}` on the writing page,
+ * so posts can use `<ExcalidrawBoard src="/diagrams/….json" />` with no import.
+ */
+import Board from './ExcalidrawBoard.tsx'
+
+type Props = {
+  src: string
+  height?: number | string
+  class?: string
+  className?: string
+}
+
+const { src, height, class: className, className: classNameAlt } = Astro.props
+---
+
+<Board client:visible src={src} height={height} className={className ?? classNameAlt} />
