@@ -1292,6 +1292,146 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--warn);
 }
 
+/* Live Excalidraw boards in Writing: full measure, fixed height, no card chrome */
+.excal-board {
+  --excal-h: 500px;
+  margin: 1.5rem 0 1.75rem;
+  width: 100%;
+}
+
+.excal-board-frame {
+  position: relative;
+  width: 100%;
+  height: var(--excal-h);
+  max-height: min(70vh, 640px);
+  overflow: hidden;
+  background: transparent;
+}
+
+.excal-board-canvas,
+.excal-board-placeholder {
+  position: absolute;
+  inset: 0;
+}
+
+.excal-board-canvas .excalidraw,
+.excal-board-modal-canvas .excalidraw {
+  --color-surface-lowest: transparent;
+  height: 100% !important;
+}
+
+.excal-board-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
+}
+
+.excal-board-error {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.excal-board-expand {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 40;
+  margin: 0;
+  padding: 0.35rem 0.65rem;
+  border: 0;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.excal-board-frame .excal-board-canvas {
+  /* Keep Excalidraw’s layer UI from swallowing the Expand hit target. */
+  pointer-events: auto;
+}
+
+.excal-board-frame .excal-board-canvas .excalidraw .layer-ui__wrapper {
+  pointer-events: none;
+}
+
+.excal-board-frame .excal-board-canvas .excalidraw .layer-ui__wrapper .App-toolbar,
+.excal-board-frame .excal-board-canvas .excalidraw canvas {
+  pointer-events: auto;
+}
+
+.excal-board-expand:hover {
+  color: var(--fg);
+}
+
+.excal-board-expand:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.excal-board-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.excal-board-modal .excal-board-expand-close {
+  z-index: 90;
+}
+
+.excal-board-modal-canvas {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Quiet Excalidraw chrome in view/zen embeds */
+.excal-board .excalidraw .App-menu,
+.excal-board .excalidraw .layer-ui__wrapper__top-right,
+.excal-board .excalidraw .FixedSideContainer_side_top,
+.excal-board .excalidraw .HelpDialog__btn,
+.excal-board .excalidraw .main-menu-trigger,
+.excal-board .excalidraw .App-bottom-bar,
+.excal-board .excalidraw .footer-center,
+.excal-board .excalidraw .zoom-actions,
+.excal-board-modal .excalidraw .App-menu,
+.excal-board-modal .excalidraw .layer-ui__wrapper__top-right,
+.excal-board-modal .excalidraw .FixedSideContainer_side_top,
+.excal-board-modal .excalidraw .main-menu-trigger,
+.excal-board-modal .excalidraw .App-bottom-bar,
+.excal-board-modal .excalidraw .footer-center,
+.excal-board-modal .excalidraw .zoom-actions {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .excal-board {
+    --excal-h: 360px;
+  }
+
+  .excal-board-modal {
+    padding: var(--space-3);
+  }
+}
+
 .post-faq {
   margin-top: var(--space-8);
 }

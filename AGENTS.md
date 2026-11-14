@@ -33,6 +33,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Featured Work | `content/site.json` → `opensource.active` + `blurbs` | `owner/repo` strings |
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
 | Writing post | `content/posts/<slug>.mdx` | Frontmatter required; skip `draft: true` in public lists (see SEO cheat below) |
+| Excalidraw board in a post | Draw in [Excalidraw](https://excalidraw.com) → export `.excalidraw` / scene JSON → save as `web/public/diagrams/<name>.json` → embed `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX (no import; wired like Callout via the writing page). Optional `height` (default 500). Live view-mode island; not for home/mood/projects. |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
 | Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; mood-left / text-right; `HeroMoodShell` island; no on-site avatar |
 | Command palette (kbar) | `web/src/components/CommandPalette.astro` | Hidden UI; Cmd/Ctrl+K or `?`; boot is tiny, palette chunk lazy-loaded |

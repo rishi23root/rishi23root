@@ -3,6 +3,7 @@ import { render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Callout from '../../components/Callout.astro'
 import ContactIcons from '../../components/ContactIcons.astro'
+import ExcalidrawBoard from '../../components/ExcalidrawBoard.astro'
 import MetaLine from '../../components/MetaLine.astro'
 import { absoluteUrl, site } from '../../lib/site'
 import {
@@ -150,7 +151,7 @@ if (d.faq.length) {
         }
 
         <div class="prose post-body">
-          <Content components={{ Callout }} />
+          <Content components={{ Callout, ExcalidrawBoard }} />
         </div>
 
         {
