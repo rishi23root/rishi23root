@@ -39,8 +39,8 @@ const personJsonLd = {
     moods.length ? <script is:inline slot="head" set:html={firstMoodPreloadScript(moods)} /> : null
   }
   {
-    /* Hold mood-await (plate clipped) until the first still is ready
-       (lib/settleMood.ts expands it from the left). Skip when no moods. */
+    /* Hold mood-await (no mood column yet) until the first still is ready
+       (lib/settleMood.ts grows column + plate from the left). Skip when no moods. */
     moods.length ? (
       <script is:inline slot="head" define:vars={{ desktopMq: DESKTOP_MQ }}>
         try {
