@@ -35,7 +35,7 @@ export default function MoodStill({ src, className = '', onReady }: Props) {
   }, [src, ready])
 
   return (
-    <div className={`mood-scene mood-still-scene ${className}`.trim()}>
+    <div className={`mood-still-scene ${className}`.trim()}>
       <div className="mood-layer">
         <img
           ref={imgRef}

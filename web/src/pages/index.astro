@@ -65,7 +65,7 @@ const personJsonLd = {
       <div class="home-copy">
         <h1 class="visually-hidden">{site.github.name}</h1>
 
-        <section class="home-section home-section-bio reveal" style="--i: 0">
+        <section class="home-section reveal" style="--i: 0">
           <p class="voice-bio">{voiceBio}</p>
         </section>
 
@@ -130,7 +130,7 @@ const personJsonLd = {
             {/* Desktop-only island: client:media defers the React download
                 below 1024px. SSR-safe shell + __heroMoodFirst handoff avoid
                 flash / double shuffle-bag advance (see HeroMoodShell). */}
-            <HeroMoodShell client:media="(min-width: 1024px)" moods={moods} />
+            <HeroMoodShell client:media={DESKTOP_MQ} moods={moods} />
           </div>
         </aside>
       ) : null

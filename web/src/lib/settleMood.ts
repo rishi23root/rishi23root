@@ -7,8 +7,8 @@
  *
  * Text width is interpolated continuously (WAAPI `width` + `fill: 'both'`) so
  * the first paint after dropping `mood-await` still shows the post-group
- * measure — no hard snap / line-wrap pop. Copy is width:100% of `.home-text`,
- * so wraps ease with the column.
+ * measure — no hard snap. Bio / stack copy stay on `--home-col` in CSS so
+ * their lines don't re-wrap during the slide.
  */
 
 /** Fallback for --mood-settle / --ease-settle in global.css; keep in sync. */

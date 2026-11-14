@@ -1,6 +1,6 @@
 # Agent guide — profile README + static site
 
-Generate `README.md` from `readme.template.md` + `content/site.json` (via `config.ts`) + `toolbox.ts` via `index.ts`. Static landing/blog lives in `web/` and reads the same `content/`. Prefer small, on-demand edits; rebuild; push. Do not reinvent the layout.
+Generate `README.md` from `readme.template.md` + `content/site.json` (via `config.ts`) + `toolbox.ts` via `index.ts`. Static landing/writing site lives in `web/` and reads the same `content/`. Prefer small, on-demand edits; rebuild; push. Do not reinvent the layout.
 
 ## Architecture (skim)
 
@@ -34,7 +34,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
 | Blog post | `content/posts/<slug>.mdx` | Frontmatter required; skip `draft: true` in public lists (see SEO cheat below) |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
-| Landing / blog UI | `web/src/` | Lee soft-dark folio; right wordmark; `HeroMoodShell` island; no on-site avatar |
+| Landing / writing UI | `web/src/` | Lee soft-dark folio; left wordmark; mood-left / text-right; `HeroMoodShell` island; no on-site avatar |
 | Site-only content | `content/site.json` → `voiceBio`, `moods`, `projects`, `capabilities` | README loaders ignore these; README shape unchanged |
 | OG / Twitter / JSON-LD | `web/src/layouts/BaseLayout.astro` (+ page props) | Default OG image in `web/public`; posts use `og:type=article` |
 | RSS / llms.txt | `web/src/pages/rss.xml.ts`, `llms.txt.ts` | Built from content — no stale hand copy in `public/` |

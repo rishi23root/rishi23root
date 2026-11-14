@@ -545,16 +545,15 @@ html[data-theme='light'] .theme-icon-moon {
     justify-content: flex-start;
   }
 
-  /* Pre-finalize (cddf0b62) bio measure: base 34ch, desktop overridden to
-     the settled text track so settle does not re-wrap the lead. */
+  /* Bio + stack blurbs stay on the settled text track so lines don't
+     re-wrap when await → split. Base .voice-bio is 34ch (mobile). */
   .voice-bio,
   .home-stack-list li > * {
     max-width: var(--home-col);
   }
 
-  /* Before the mood still is ready: text+nav sit in the middle at the
-     Writing / post-group measure. settleMood.ts FLIP-animates .home-text
-     width into the split; bio stays on --home-col (no wrap pop). */
+  /* Before the mood still is ready: text+nav sit centered at the Writing
+     / post-group measure. settleMood.ts FLIP-animates .home-text width. */
   html.mood-await .home-split {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -563,7 +562,6 @@ html[data-theme='light'] .theme-icon-moon {
     grid-column: 1;
     grid-row: 1;
     width: min(100%, var(--post-group));
-    max-width: var(--post-group);
     margin-inline: auto;
     z-index: 2;
     position: relative;
@@ -646,7 +644,7 @@ html[data-theme='light'] .theme-icon-moon {
 
 .hero-shell-art,
 .hero-shell-empty,
-.mood-scene,
+.mood-still-scene,
 .mood-layer {
   position: absolute;
   inset: 0;
@@ -674,8 +672,8 @@ html[data-theme='light'] .theme-icon-moon {
   user-select: none;
 }
 
-.mood-layer :is(picture, img),
-.mood-index-frame :is(picture, img) {
+.mood-layer img,
+.mood-index-frame img {
   display: block;
   width: 100%;
   height: 100%;
