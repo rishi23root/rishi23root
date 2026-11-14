@@ -549,9 +549,9 @@ html[data-theme='light'] .theme-icon-moon {
     justify-content: flex-start;
   }
 
-  /* Stack headings/links keep the settled column width so settle does not
-     re-wrap rows. Voice bio stays at 34ch (narrower than both await and
-     settled tracks). Blurbs use their own tighter max. */
+  /* Wrapping copy uses the settled text-track width so settle does not
+     re-wrap. Blurbs keep their own tighter max. */
+  .voice-bio,
   .home-stack-list li > :not(.blurb) {
     max-width: var(--home-col);
   }
