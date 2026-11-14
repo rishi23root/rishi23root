@@ -34,6 +34,7 @@ export const GET: APIRoute = async () => {
     '## Key pages',
     '',
     `- Home: ${site.siteUrl}/`,
+    `- Projects: ${site.siteUrl}/projects/`,
     `- Writing: ${site.siteUrl}/writing/`,
     `- RSS: ${site.siteUrl}/rss.xml`,
     `- This file: ${site.siteUrl}/llms.txt`,

@@ -15,6 +15,11 @@ const wordmark = `@${site.github.name}`
     <nav class="nav" aria-label="Primary">
       <a href="/" aria-current={path === '/' ? 'page' : undefined}>Home</a>
       <a
+        href="/projects/"
+        aria-current={path.startsWith('/projects') ? 'page' : undefined}
+        >Projects</a
+      >
+      <a
         href="/writing/"
         aria-current={path.startsWith('/writing') ? 'page' : undefined}
         >Writing</a
