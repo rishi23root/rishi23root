@@ -183,6 +183,13 @@ a:hover {
   margin-inline: auto;
 }
 
+/* Writing index has no TOC rail — chrome + main share the article/prose measure
+   (same family as home voice-bio), not the wider post-group. */
+body:has(.blog-index) .chrome-bar .chrome,
+body:has(.blog-index) .shell-inner > main {
+  max-width: var(--article-max);
+}
+
 .page {
   display: flex;
   flex-direction: column;
@@ -400,7 +407,8 @@ html[data-theme='light'] .theme-icon-moon {
 
 .voice-bio {
   margin: 0;
-  max-width: 34ch;
+  /* Same prose family as Writing `--article-max` — between Lee 34ch and full home-col. */
+  max-width: min(var(--article-max), 100%);
   width: 100%;
   font-size: clamp(1.38rem, 1.15rem + 0.7vw, 1.7rem);
   line-height: 1.45;
@@ -429,9 +437,9 @@ html[data-theme='light'] .theme-icon-moon {
   min-width: 0;
 }
 
-/* Writing: title left, date right — cap width so short titles don't leave a gulf */
+/* Writing: title left, date right — same measure as voice-bio / article */
 .home-writing-list {
-  max-width: min(36rem, 100%);
+  max-width: min(var(--article-max), 100%);
 }
 
 .home-writing-list li {
@@ -549,9 +557,8 @@ html[data-theme='light'] .theme-icon-moon {
     justify-content: flex-start;
   }
 
-  /* Wrapping copy uses the settled text-track width so settle does not
-     re-wrap. Blurbs keep their own tighter max. */
-  .voice-bio,
+  /* Stack headings keep settled column width so settle does not re-wrap.
+     Voice bio stays on `--article-max` (narrower than await + settled tracks). */
   .home-stack-list li > :not(.blurb) {
     max-width: var(--home-col);
   }
@@ -952,13 +959,8 @@ html[data-theme='light'] .theme-icon-moon {
   gap: var(--space-1);
 }
 
-/* Listing page: intro, posts, and hover wash use the full nav width
-   (the post-group). Individual post pages keep the article measure. */
-.blog-index .page-intro,
-.blog-index .post-list,
-.blog-index .contact-icons {
-  max-width: none;
-}
+/* Writing index stays on `--article-max` (chrome capped via body:has above).
+   Post pages keep article + rail = `--post-group` for chrome. */
 
 .post-list-item {
   margin-inline: calc(-1 * var(--row-bleed));
