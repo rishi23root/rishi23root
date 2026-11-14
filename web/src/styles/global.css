@@ -1863,6 +1863,29 @@ html[data-theme='light'] .theme-icon-moon {
   transform: translateY(-2px);
 }
 
+/* Hold empty until decode, then ease in (no pop/snap). Soft settle ease. */
+.mood-index-img {
+  opacity: 0;
+  transform: scale(1.02);
+  will-change: opacity, transform;
+}
+
+.mood-index-img.is-loaded {
+  animation: mood-index-in 900ms var(--ease-settle) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+@keyframes mood-index-in {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .mood-index-id {
   font-size: 0.82rem;
   color: var(--muted);

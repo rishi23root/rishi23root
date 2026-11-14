@@ -11,6 +11,14 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
   path="/mood/"
   robots="noindex, nofollow"
 >
+  <noscript>
+    <style>
+      .mood-index-img {
+        opacity: 1;
+        transform: none;
+      }
+    </style>
+  </noscript>
   <div class="page">
     <section class="page-intro reveal" style="--i: 0">
       <h1>Moods</h1>
@@ -22,11 +30,12 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
     {
       moods.length ? (
         <ul class="mood-index-grid reveal" style="--i: 1">
-          {moods.map((mood) => (
-            <li>
+          {moods.map((mood, i) => (
+            <li style={`--i: ${i}`}>
               <a class="mood-index-link" href={`/?mood=${mood.id}`}>
                 <div class="mood-index-frame mood-inset">
                   <img
+                    class="mood-index-img"
                     src={mood.src}
                     alt={mood.alt || mood.id}
                     loading="lazy"
@@ -45,4 +54,21 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
       )
     }
   </div>
+  {/* Soft fade once each still decodes — same ease family as home mood settle. */}
+  <script is:inline>
+    ;(function () {
+      document.querySelectorAll('.mood-index-img').forEach(function (img) {
+        var show = function () {
+          img.classList.add('is-loaded')
+        }
+        if (img.complete && img.naturalWidth > 0) {
+          show()
+          return
+        }
+        img.addEventListener('load', show, { once: true })
+        img.addEventListener('error', show, { once: true })
+        if (img.complete) show()
+      })
+    })()
+  </script>
 </BaseLayout>
