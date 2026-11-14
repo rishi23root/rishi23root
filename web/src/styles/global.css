@@ -1790,6 +1790,13 @@ html[data-theme='light'] .theme-icon-moon {
   border-radius: 8px;
 }
 
+/* Phone only: keep ↑ Back to top, hide the % ring. Tablet+ keeps the ring. */
+@media (max-width: 40rem) {
+  .post-progress-ring {
+    display: none;
+  }
+}
+
 .post-rail-ctas {
   display: flex;
   flex-direction: column;
