@@ -1324,7 +1324,7 @@ html[data-theme='light'] .theme-icon-moon {
   line-height: 1.6;
 }
 
-/* Rail: "On this page" + tools (progress, share, all writing, home) */
+/* Rail: "On this page" + back-to-top */
 .post-rail-label {
   margin: 0 0 var(--space-3);
   font-family: var(--mono);
@@ -1720,132 +1720,34 @@ html[data-theme='light'] .theme-icon-moon {
   );
 }
 
-.post-progress {
+.post-back-top {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
   max-width: 100%;
   height: 2.25rem;
   padding: 0;
   border: 0;
   background: none;
-  color: var(--fg);
-  cursor: pointer;
   font: inherit;
-}
-
-.post-progress-ring {
-  position: relative;
-  flex: 0 0 2.25rem;
-  width: 2.25rem;
-  height: 2.25rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.post-progress-ring svg {
-  position: absolute;
-  inset: 0;
-  transform: rotate(-90deg);
-}
-
-.post-progress circle {
-  fill: none;
-  stroke-width: 2;
-}
-
-.post-progress-track {
-  stroke: var(--border);
-}
-
-.post-progress-bar {
-  stroke: var(--accent);
-  stroke-linecap: round;
-  transition: stroke-dashoffset 150ms ease-out;
-}
-
-.post-progress-pct {
-  position: relative;
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.post-progress-label {
   font-size: 0.78rem;
   line-height: 1.2;
   color: var(--muted);
   white-space: nowrap;
-}
-
-.post-progress:hover .post-progress-label,
-.post-progress:focus-visible .post-progress-label {
-  color: var(--fg);
-}
-
-.post-progress:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 8px;
-}
-
-/* Icon square that slides open to show its label on hover/focus */
-.post-tool {
-  display: inline-flex;
-  align-items: center;
-  height: 2.25rem;
-  max-width: 2.25rem;
-  overflow: hidden;
-  padding: 0;
-  border: 0;
-  border-radius: 8px;
-  background: var(--row-hover);
-  font: inherit;
-  font-size: 0.78rem;
-  color: var(--muted);
-  text-decoration: none;
-  white-space: nowrap;
   cursor: pointer;
-  transition:
-    max-width var(--dur) var(--ease-out),
-    color var(--dur-fast) ease,
-    background-color var(--dur-fast) ease;
 }
 
-.post-tool svg {
-  flex: 0 0 2.25rem;
-  width: 2.25rem;
-  height: 1rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.post-tool-label {
-  padding-right: var(--space-3);
-  opacity: 0;
-  transition: opacity var(--dur-fast) ease;
-}
-
-.post-tool:is(:hover, :focus-visible, .is-open) {
-  max-width: 12rem;
+.post-back-top:hover,
+.post-back-top:focus-visible {
   color: var(--fg);
-  background: color-mix(in srgb, var(--fg) 9%, transparent);
 }
 
-.post-tool:is(:hover, :focus-visible, .is-open) .post-tool-label {
-  opacity: 1;
-}
-
-.post-tool:focus-visible {
+.post-back-top:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  border-radius: 8px;
 }
 
-/* Mobile/tablet: no TOC; the tools sit in a row under the article */
+/* Mobile/tablet: no TOC; back-to-top sits on the right under the article */
 @media (max-width: 1023px) {
   .post-rail {
     margin-top: var(--space-7);
@@ -1859,6 +1761,8 @@ html[data-theme='light'] .theme-icon-moon {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
+    justify-content: flex-end;
+    width: 100%;
     margin-top: 0;
   }
 
