@@ -83,8 +83,8 @@ const icon = {
   reset: (
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2.05-4.95" /><path d="M5 4.5V8h3.5" /></svg>
   ),
-  open: (
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5h6v6M19 5l-8 8" /><path d="M17 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h4" /></svg>
+  expand: (
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg>
   ),
   close: (
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
@@ -98,15 +98,35 @@ type ViewerProps = {
   onOpen?: () => void
   onClose?: () => void
   closeRef?: Ref<HTMLButtonElement>
+  /** Keep the pill pinned (e.g. while this board's modal is open). */
+  hold?: boolean
 }
 
+const UNPIN_DELAY = 1200
+
 /** Pan/zoom viewport over the SVG, with a hover/focus-revealed control pill. */
-function SvgViewer({ svg, size, label, onOpen, onClose, closeRef }: ViewerProps) {
+function SvgViewer({ svg, size, label, onOpen, onClose, closeRef, hold = false }: ViewerProps) {
   const frameRef = useRef<HTMLDivElement>(null)
   const [frame, setFrame] = useState<Size>({ w: 0, h: 0 })
   const [zoom, setZoom] = useState<number | null>(null)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const drag = useRef<{ id: number; x: number; y: number; px: number; py: number } | null>(null)
+  const [pinned, setPinned] = useState(false)
+  const hovering = useRef(false)
+  const unpinTimer = useRef<number | undefined>(undefined)
+
+  const cancelUnpin = () => window.clearTimeout(unpinTimer.current)
+  const scheduleUnpin = () => {
+    cancelUnpin()
+    unpinTimer.current = window.setTimeout(() => setPinned(false), UNPIN_DELAY)
+  }
+
+  useEffect(() => {
+    if (hold) cancelUnpin()
+    else if (pinned && !hovering.current) scheduleUnpin()
+  }, [hold])
+
+  useEffect(() => cancelUnpin, [])
 
   useLayoutEffect(() => {
     const el = frameRef.current
@@ -151,16 +171,32 @@ function SvgViewer({ svg, size, label, onOpen, onClose, closeRef }: ViewerProps)
   return (
     <div
       ref={frameRef}
-      className="excal-viewport"
+      className={pinned ? 'excal-viewport is-pinned' : 'excal-viewport'}
       role="group"
       aria-label={label}
+      onPointerEnter={() => {
+        hovering.current = true
+        cancelUnpin()
+      }}
+      onPointerLeave={() => {
+        hovering.current = false
+        if (pinned && !hold) scheduleUnpin()
+      }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
       <div className="excal-stage" style={stage} role="img" aria-label={label} dangerouslySetInnerHTML={{ __html: svg }} />
-      <div className="excal-pill" role="toolbar" aria-label="Diagram controls">
+      <div
+        className="excal-pill"
+        role="toolbar"
+        aria-label="Diagram controls"
+        onClickCapture={() => {
+          cancelUnpin()
+          setPinned(true)
+        }}
+      >
         <button type="button" aria-label="Zoom out" onClick={() => setScale(scale / ZOOM_STEP)}>
           {icon.zoomOut}
         </button>
@@ -176,8 +212,8 @@ function SvgViewer({ svg, size, label, onOpen, onClose, closeRef }: ViewerProps)
         </button>
         <span className="excal-pill-sep" aria-hidden="true" />
         {onOpen ? (
-          <button type="button" aria-label="Open larger" onClick={onOpen}>
-            {icon.open}
+          <button type="button" aria-label="Expand" onClick={onOpen}>
+            {icon.expand}
           </button>
         ) : null}
         {onClose ? (
@@ -251,7 +287,7 @@ export default function ExcalidrawBoard({ src, height = 500, className }: Props)
         <div className="excal-board-placeholder" aria-hidden={Boolean(svg)}>
           {error ? <span role="alert">{error}</span> : <span>Whiteboard</span>}
         </div>
-        {svg ? <SvgViewer svg={svg} size={size} label={label} onOpen={open} /> : null}
+        {svg ? <SvgViewer svg={svg} size={size} label={label} onOpen={open} hold={expanded} /> : null}
       </div>
       {expanded && svg
         ? createPortal(

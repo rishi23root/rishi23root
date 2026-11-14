@@ -1466,7 +1466,8 @@ html[data-theme='dark'] .excal-stage svg {
 }
 
 .excal-viewport:hover .excal-pill,
-.excal-viewport:focus-within .excal-pill,
+.excal-viewport.is-pinned .excal-pill,
+.excal-viewport:has(:focus-visible) .excal-pill,
 .excal-modal .excal-pill {
   opacity: 1;
   transform: none;

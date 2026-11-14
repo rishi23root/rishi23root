@@ -70,7 +70,7 @@ Keep the order. A short qualifier after a colon is fine (`## What failed: export
 
 ## Excalidraw boards
 
-Writing posts can embed Excalidraw diagrams. A board renders the scene to a static SVG in the browser (`exportToSvg`), fits it to the frame and fades it in. There's no editor canvas. A control pill (zoom out, %, zoom in, reset, open larger) appears on hover or keyboard focus, and drag pans. "Open larger" shows the same SVG in a modal at ~70% of the viewport that closes on backdrop click, Escape or Close. Dark mode is a CSS `invert(93%) hue-rotate(180deg)` filter on the SVG, so theme switches are instant.
+Writing posts can embed Excalidraw diagrams. A board renders the scene to a static SVG in the browser (`exportToSvg`), fits it to the frame and fades it in. There's no editor canvas. A control pill (zoom out, %, zoom in, reset, expand) appears on hover or keyboard focus and stays pinned after any control is used, until the pointer has been off the board for ~1.2 s (or the modal closes). Drag pans. Expand shows the same SVG in a modal at ~70% of the viewport that closes on backdrop click, Escape or Close. Dark mode is a CSS `invert(93%) hue-rotate(180deg)` filter on the SVG, so theme switches are instant.
 
 How it fits together:
 
@@ -86,7 +86,7 @@ Adding a board:
 2. Main menu → "Save to…" to download the `.excalidraw` file.
 3. Save it as `web/public/diagrams/<name>.json` (kebab-case name).
 4. Embed it in the post: `<ExcalidrawBoard src="/diagrams/<name>.json" />`. Optional `height={360}` (number = px).
-5. `npm run dev:web` → check both themes, the hover pill and "Open larger" → `npm run build:web`.
+5. `npm run dev:web` → check both themes, the hover pill and Expand → `npm run build:web`.
 
 Examples: `content/posts/post-template.mdx` (two boards, `board-pipeline.json` and `example-stack.json`) and `content/posts/on-shared-content.mdx`.
 

@@ -136,9 +136,9 @@ So I draw every scene in light mode with dark strokes, and dark mode turns them 
 
 ## Controls that stay out of the way
 
-The drawing is the point, so the controls hide until you want them. Hover a board, or tab into it, and a small pill shows up in the corner: zoom out, the current zoom, zoom in, reset, and open larger. On touch screens it simply stays visible. Dragging the drawing pans it. The scroll wheel is left alone, because a diagram that hijacks scrolling halfway down an article is a trap.
+The drawing is the point, so the controls hide until you want them. Hover a board, or tab into it, and a small pill shows up in the corner: zoom out, the current zoom, zoom in, reset, and expand. Once you've used it, it stays put until your pointer has been off the board for a moment, so it doesn't vanish mid-zoom. On touch screens it simply stays visible. Dragging the drawing pans it. The scroll wheel is left alone, because a diagram that hijacks scrolling halfway down an article is a trap.
 
-"Open larger" puts the same SVG in a centred panel at about 70% of the screen, over a blurred copy of the page. Click anywhere outside the panel, press Escape, or hit the close button to go back. Focus moves to the close button on the way in and returns to where you were on the way out.
+Expand puts the same SVG in a centred panel at about 70% of the screen, over a blurred copy of the page. Click anywhere outside the panel, press Escape, or hit the close button to go back. Focus moves to the close button on the way in and returns to where you were on the way out.
 
 ## What failed: a live canvas
 
@@ -154,7 +154,7 @@ This is the full workflow I follow:
 2. Download the scene from the main menu with "Save to…". You get a `.excalidraw` file, which is already JSON.
 3. Rename it to `<name>.json` and move it into `web/public/diagrams/`.
 4. Add `<ExcalidrawBoard src="/diagrams/<name>.json" />` where it belongs in the post.
-5. Run `npm run dev:web`, then check the board in both themes and try the zoom controls and "Open larger".
+5. Run `npm run dev:web`, then check the board in both themes and try the zoom controls and Expand.
 6. Run `npm run build:web` before pushing.
 
 Keep pasted screenshots out of scenes when you can. They're stored inside the JSON as data URLs, and a single one can make the file several times bigger than the drawing itself.
