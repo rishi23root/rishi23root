@@ -23,17 +23,19 @@ const posts = await getPublishedPosts()
         <ul class="post-list reveal" style="--i: 1">
           {posts.map((post) => (
             <li class="post-list-item hover-row">
-              <MetaLine
-                class="post-list-meta"
-                items={[
-                  { text: formatPostDate(post.data.date), datetime: post.data.date.toISOString() },
-                  { text: `${readingTimeMinutes(post)} min read` },
-                  post.data.draft && { text: 'Draft', class: 'post-draft' },
-                ]}
-              />
-              <h2 class="post-list-heading">
-                <a class="row-link" href={postPath(post.data.slug)}>{post.data.title}</a>
-              </h2>
+              <div class="post-list-top">
+                <h2 class="post-list-heading">
+                  <a class="row-link" href={postPath(post.data.slug)}>{post.data.title}</a>
+                </h2>
+                <MetaLine
+                  class="post-list-meta"
+                  items={[
+                    { text: formatPostDate(post.data.date), datetime: post.data.date.toISOString() },
+                    { text: `${readingTimeMinutes(post)} min read` },
+                    post.data.draft && { text: 'Draft', class: 'post-draft' },
+                  ]}
+                />
+              </div>
               <p class="post-list-summary">{post.data.summary}</p>
               {post.data.tags.length ? (
                 <p class="post-list-tags">{post.data.tags.join(' · ')}</p>
