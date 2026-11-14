@@ -1,0 +1,38 @@
+---
+/**
+ * Hidden command palette (kbar). No nav button — open with Cmd/Ctrl+K or ?.
+ * Boot script is tiny; the UI chunk loads only on first open.
+ */
+import { site } from '../lib/site'
+import { getPublishedPosts, postPath } from '../lib/posts'
+import type { CommandAction } from './command-palette/types'
+
+const posts = await getPublishedPosts()
+const projects = (site.projects ?? [])
+  .slice()
+  .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+
+const actions: CommandAction[] = [
+  { id: 'home', name: 'Home', section: 'Navigate', href: '/' },
+  { id: 'projects', name: 'Projects', section: 'Navigate', href: '/projects/' },
+  { id: 'writing', name: 'Writing', section: 'Navigate', href: '/writing/' },
+  { id: 'theme', name: 'Toggle theme', section: 'Actions', perform: 'theme' },
+  ...projects.map((p) => ({
+    id: `project-${p.title}`,
+    name: p.title,
+    section: 'Projects',
+    href: p.url,
+  })),
+  ...posts.map((p) => ({
+    id: `post-${p.data.slug}`,
+    name: p.data.title,
+    section: 'Writing',
+    href: postPath(p.data.slug),
+  })),
+]
+---
+
+<script type="application/json" id="site-kbar-actions" set:html={JSON.stringify(actions)} />
+<script>
+  import './command-palette/boot.ts'
+</script>

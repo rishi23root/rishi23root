@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+import CommandPalette from '../components/CommandPalette.astro'
 import SiteChrome from '../components/SiteChrome.astro'
 import { absoluteUrl, site } from '../lib/site'
 
@@ -106,6 +107,7 @@ const isHome = path === '/'
         <slot />
       </main>
     </div>
+    <CommandPalette />
     <script is:inline>
       ;(function () {
         var toggle = document.getElementById('themeToggle')
