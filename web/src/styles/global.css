@@ -1378,10 +1378,58 @@ html[data-theme='light'] .theme-icon-moon {
   }
 }
 
+.post-toc {
+  position: relative;
+}
+
+/* Quiet track + traveling mark, 1:1 with the TOC box. JS fills the path. */
+.toc-rail-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.toc-rail-track,
+.toc-rail-mark {
+  fill: none;
+  stroke-width: var(--toc-line);
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+}
+
+.toc-rail-track {
+  stroke: var(--toc-spine);
+}
+
+.toc-rail-mark {
+  stroke: var(--toc-mark);
+}
+
+/* JS-drawn rail: hide the CSS strokes and in-place marks so they
+   don't double-paint. The 1px transparent H2 border stays for layout. */
+.post-toc.is-rail-svg > ul > li.toc-depth-2 > a {
+  border-left-color: transparent;
+}
+
+.post-toc.is-rail-svg .toc-sub::before,
+.post-toc.is-rail-svg .toc-sub > ul::before,
+.post-toc.is-rail-svg .toc-sub::after,
+.post-toc.is-rail-svg .toc-sub > ul > li:last-child::after,
+.post-toc.is-rail-svg .toc-sub > ul::after,
+.post-toc.is-rail-svg > ul > li.toc-depth-2 > a::before,
+.post-toc.is-rail-svg .toc-depth-3 a::before {
+  content: none;
+}
+
 .post-toc ul {
   list-style: none;
   margin: 0;
   padding: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .post-toc a {
