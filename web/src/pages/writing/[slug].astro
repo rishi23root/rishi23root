@@ -529,26 +529,40 @@ if (d.faq.length) {
             var sH = sBot - sTop
             if (sH < 0.75) continue
 
-            // One cubic per side: spine → indent and indent → spine.
-            // Vertical tangents at both ends so the track stays continuous;
-            // a single swoop replaces the old two-corner ╰╮ / ╭╯ pair.
-            var riseFull = Math.max(curveH + curveR, xi - xs)
-            var minFull = 2 * riseFull
+            // The 8023011 CSS rail is a ╰╮ pair (two 8px quarters in a
+            // ~15px-tall, 15px-wide box after a short ~5px ╰ drop). At
+            // 1px that rasterizes as one tight hook — the thin-* curve.
+            // Drawing those two quarters in SVG reads as "2 curved"; a
+            // single cubic with the same endpoints keeps the thin shape.
+            var minFull = 2 * (curveH + curveR)
             var scale = Math.min(1, sH / Math.max(minFull, 1))
-            var rise = riseFull * scale
-            if (sH < 2) rise = sH / 2
-            // Short handles keep the mid a diagonal, not a flat S shelf.
-            var handle = rise * 0.32
+            var r = curveR * scale
+            var ch = curveH * scale
+            if (sH < 2) {
+              r = 0
+              ch = sH / 2
+            }
+            var drop = Math.max(0, ch - r)
+            var hookRise = Math.max(0, ch + r - line - drop)
+            // 0.55 keeps the ends vertical longer, like the thin hook,
+            // without a mid shelf that would read as two corners.
+            var handle = hookRise * 0.55
             var h3s = [].slice.call(sub.querySelectorAll(':scope > ul > li.toc-depth-3 > a'))
             var openStart = pen.len
             if (sTop > pen.y + 0.5) {
               pen.line(xs, sTop)
             }
-            var indentTop = sTop + rise
-            var indentBot = sBot - rise
+            var yOpen0 = sTop + drop
+            var indentTop = yOpen0 + hookRise
+            var indentBot = sBot - drop - hookRise
             if (indentBot < indentTop) indentBot = indentTop
             // First H3 owns the opening curve.
-            pen.cubic(xs, sTop + handle, xi, indentTop - handle, xi, indentTop)
+            if (yOpen0 > pen.y + 0.25) pen.line(xs, yOpen0)
+            if (hookRise > 0.25) {
+              pen.cubic(xs, yOpen0 + handle, xi, indentTop - handle, xi, indentTop)
+            } else if (indentTop > pen.y + 0.25) {
+              pen.line(xi, indentTop)
+            }
 
             // Map each H3 to a slice of the indent, clamped to the
             // visible window so a mid-close still has a shrinking path.
@@ -574,9 +588,11 @@ if (d.faq.length) {
             }
             // Closing curve is a quiet return to the next H2 spine, like
             // the old ╭: the mark travels it when leaving the last H3.
-            if (sBot > indentBot + 0.25) {
-              pen.cubic(xi, indentBot + handle, xs, sBot - handle, xs, sBot)
+            var yClose1 = sBot - drop
+            if (hookRise > 0.25 && yClose1 > indentBot + 0.25) {
+              pen.cubic(xi, indentBot + handle, xs, yClose1 - handle, xs, yClose1)
             }
+            if (sBot > pen.y + 0.25) pen.line(xs, sBot)
           }
 
           track.setAttribute('d', pen.d)
