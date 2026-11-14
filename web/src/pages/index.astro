@@ -67,6 +67,8 @@ const personJsonLd = {
 
         <section class="home-section reveal" style="--i: 0">
           <p class="voice-bio">{voiceBio}</p>
+          {/* Variant B: quiet strip under the voice bio (shown when data-socials=bio). */}
+          <ContactIcons variant="bio" />
         </section>
 
         <section class="home-section reveal" style="--i: 1">
@@ -116,10 +118,6 @@ const personJsonLd = {
             </section>
           ) : null
         }
-
-        <div class="reveal" style="--i: 4">
-          <ContactIcons />
-        </div>
       </div>
     </div>
 

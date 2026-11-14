@@ -2,6 +2,7 @@
 import '../styles/global.css'
 import CommandPalette from '../components/CommandPalette.astro'
 import SiteChrome from '../components/SiteChrome.astro'
+import SocialsPlacementPreview from '../components/SocialsPlacementPreview.astro'
 import { absoluteUrl, site } from '../lib/site'
 
 type Props = {
@@ -90,6 +91,32 @@ const isHome = path === '/'
           document.documentElement.setAttribute('data-theme', 'light')
       } catch (e) {}
     </script>
+    <script is:inline>
+      // TEMPORARY A/B: socials in chrome (nav) vs under home bio.
+      // ?socials=nav|bio wins; else sessionStorage; default nav.
+      ;(function () {
+        var KEY = 'socials-placement'
+        var params
+        try {
+          params = new URLSearchParams(location.search)
+        } catch (e) {
+          params = new URLSearchParams()
+        }
+        var q = params.get('socials')
+        var stored = null
+        try {
+          stored = sessionStorage.getItem(KEY)
+        } catch (e) {}
+        var placement =
+          q === 'nav' || q === 'bio' ? q : stored === 'nav' || stored === 'bio' ? stored : 'nav'
+        document.documentElement.setAttribute('data-socials', placement)
+        if (q === 'nav' || q === 'bio') {
+          try {
+            sessionStorage.setItem(KEY, q)
+          } catch (e) {}
+        }
+      })()
+    </script>
     <slot name="head" />
   </head>
   <body>
@@ -108,6 +135,8 @@ const isHome = path === '/'
       </main>
     </div>
     <CommandPalette />
+    {/* TEMPORARY — remove with SocialsPlacementPreview once placement is picked. */}
+    <SocialsPlacementPreview />
     <script is:inline>
       ;(function () {
         var toggle = document.getElementById('themeToggle')
