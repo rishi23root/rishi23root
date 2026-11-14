@@ -2,7 +2,7 @@
 title: "How this site is built: one content folder, a README and a website"
 date: 2026-11-14
 slug: how-this-site-works
-summary: My GitHub profile README and this site are built from one content folder; this is how the writing pipeline, SVG diagrams, moods, command palette, themes and SEO fit together.
+summary: My GitHub profile README and this site are built from one content folder; this is how the writing, diagrams, mood images, projects, RSS and SEO fit together.
 draft: false
 author: Rishabh
 tags: [meta, astro, excalidraw]
@@ -79,13 +79,13 @@ Dark mode is one CSS filter on the SVG, the same invert-and-rotate Excalidraw us
 
 ### Small things that make it feel like mine
 
-**Moods.** On desktop, the home page shows one of seven still images next to the text, with a small "next mood" button and a link to see them all. The order is a shuffle bag kept in `localStorage`: every mood shows once before any repeats, and a new round never opens with the image you just saw. The first pick happens in an inline script in `<head>`, which preloads that image before React has even downloaded. The island only hydrates at 1024px and up, so phones never load it. All of them live on `/mood`.
+**Mood images.** On desktop, the home page shows one still image next to the text, and it changes every visit. It's the most personal part of the site and the one with the most moving parts, so it gets its own section under Architecture.
 
 **Command palette.** Press <kbd>⌘K</kbd>, <kbd>Ctrl</kbd>+<kbd>K</kbd> or <kbd>?</kbd> anywhere for a palette of pages, projects and posts, plus "Toggle theme". There's no button for it. A 1.1 KB listener ships on every page; the palette itself is 3.7 KB of plain TypeScript, fetched on first open. Two-key chords (<kbd>G</kbd> then <kbd>W</kbd> for Writing) work without loading it at all.
 
 **Themes.** Pages ship dark. A tiny inline script in `<head>` applies a saved light choice before the first paint, so there's no flash of the wrong theme. The toggle writes to `localStorage`, and everything that has colour, including the diagrams, follows the `data-theme` attribute on `<html>`.
 
-**SEO and machine-readable copies.** Every page gets a canonical URL, Open Graph and Twitter tags, and a social image. Posts add `BlogPosting`, `BreadcrumbList` and, when there's an FAQ, `FAQPage` structured data. RSS, the sitemap and `llms.txt` are generated from the same posts and `site.json` at build time, so there's no hand-kept copy in `public/` to go stale. `robots.txt` allows search and AI crawlers. Old `/blog/<slug>` links redirect to `/writing/<slug>`.
+**Feeds and search.** RSS, the sitemap, structured data and `llms.txt` are all generated from the same posts and `site.json`, so there's nothing hand-kept to go stale. The details are under Architecture.
 
 ## What failed
 
@@ -96,6 +96,8 @@ Dark mode is one CSS filter on the SVG, the same invert-and-rotate Excalidraw us
 **Letting the export inline its fonts.** By default `exportToSvg` embeds the hand-drawn font inside the SVG. That means a 1.8 MB font-subsetting script, a worker that failed and fell back to the main thread, and a font fetched from a CDN. Turning that off and hosting the two fonts myself (about 140 KB, split by character range so a page fetches only what it uses) removed all of it.
 
 **Trusting the first error message.** After a dependency change, the dev server threw `jsxDEV is not a function` and the boards stayed blank. It looked like a broken component. It was a stale Vite pre-bundle cache. `rm -rf web/node_modules/.vite` and a restart fixed it. When a dev-only error makes no sense, clear the cache before reading the stack trace.
+
+**Two lists for the same six repos.** The Projects page reads `projects` from `site.json`. The README's Featured Work and the `llms.txt` summary read `opensource.active` and `opensource.blurbs`. Those are the same six repositories, typed twice, and one blurb has already drifted. That's exactly the problem this whole setup exists to prevent, sitting in the middle of it. Merging them into one list is on my short list.
 
 <Callout>A headless test browser can also lie to you: Chrome in headless mode reports `hover: none`, so styles meant for touch screens apply and hover-only UI looks permanently visible. Force a mouse pointer before trusting a hover test.</Callout>
 
@@ -110,6 +112,47 @@ In words: `content/` holds the data. The README build reads the bio and post tit
 | `index.ts` + `posts.ts` | `site.json`, post frontmatter, GitHub API | `README.md` |
 | Astro (`web/`) | `site.json`, full posts, `web/public/diagrams/` | pages, RSS, sitemap, `llms.txt` |
 | `ExcalidrawBoard` island | one scene JSON | an inline SVG, in the browser |
+
+### Mood images
+
+The catalogue is a list in `site.json`. Each entry has an `id`, a short activity `label`, the image path and alt text:
+
+```json
+{ "id": "shore", "label": "sitting", "src": "/mood/shore.webp", "alt": "Figure sitting on a beach shore under open sky" }
+```
+
+There are seven right now: cycling, wandering, roaming, exploring, tennis, sitting and sketching. Each is a portrait WebP between 15 and 170 KB in `web/public/mood/`. Adding one is an image and four lines of JSON.
+
+On the home page they sit in a plate beside the text, and the caption has two controls: "next" and a link to every mood. Three decisions keep that cheap:
+
+1. **Desktop only.** The plate is hidden below 1024px, and the React island that runs it hydrates with `client:media="(min-width: 1024px)"`. A phone gets the text and never downloads React or a single mood image.
+2. **A shuffle bag, not random.** The order lives in `localStorage`. Every mood shows once before any repeats, a new round never opens with the image you just saw, and if I add or remove a mood the bag notices and starts over. Each full page load advances it by one, and "next" advances the same bag with a 420 ms crossfade.
+3. **Pick before React.** The island would normally choose the mood after it hydrates, which means the image request starts late. Instead, an inline script in `<head>` runs the same shuffle-bag code, picks the mood, and adds a high-priority `<link rel="preload">` for that one image. React then adopts that pick instead of advancing again. Once the page has loaded and gone idle, the island quietly prefetches the next mood at low priority, so "next" is instant.
+
+`/mood` shows the whole catalogue as a grid with each activity label, and every still links to `/?mood=<id>`, which forces that mood on the home page. The page is `noindex` and left out of the sitemap; it's a gallery, not something to rank.
+
+### Projects and Featured Work
+
+The Projects page is a plain list from `site.json`: a title, a one-line blurb, a link, and an `order` field to sort by. It's static HTML with no client code, and the command palette lists the same projects. Two of the six are upstream projects I contribute to; the rest are mine.
+
+The README's Featured Work is built from repository names (`owner/repo`) instead. The build asks the GitHub API for each one, so the star counts are live on every rebuild, and uses my blurb if I wrote one or the repo's own description if I didn't. The same names and blurbs feed the "Featured work" line in `llms.txt`.
+
+### RSS
+
+`/rss.xml` is a short endpoint. It takes the published posts, newest first, and maps each to a title, the post's `summary` as the description, the publish date and its link. Because it calls the same `getPublishedPosts()` as the Writing page, a draft can't appear in the feed by accident. Every page advertises it with `<link rel="alternate" type="application/rss+xml">`, so feed readers find it from any URL.
+
+### SEO and answer engines
+
+Classic SEO and answer-engine optimisation (AEO: being quotable by assistants and AI search) turn out to want the same thing here: one clear answer, stated once, in a place a machine can find.
+
+- **Canonical URLs.** Every page sets an absolute canonical with a trailing slash, matching how the site is built, so there's one address per page.
+- **Social cards.** Open Graph and Twitter tags on every page, with the large-image card. A post uses its `image`, then its `cover`, then the site default, always as an absolute URL. Posts set `og:type` to `article` and add the publish time.
+- **Structured data.** The home page describes me as a `Person`, with my social profiles as `sameAs`. Each post adds `BlogPosting` (headline, dates, keywords, image, author), a `BreadcrumbList` (Home, Writing, post), and `FAQPage` when the frontmatter has an FAQ. The FAQ is also rendered on the page, so the markup never claims something a reader can't see.
+- **Sitemap and robots.** `@astrojs/sitemap` generates the sitemap at build time and skips `/mood` and the `/blog` redirects. `robots.txt` allows everything, names the main AI crawlers explicitly, and points to the sitemap.
+- **`llms.txt`.** A plain-text summary for assistants, generated by an endpoint rather than kept in `public/`: who I am, my stack and links, featured work, key pages, and every published post with its date and one-sentence summary. It ends with a short note asking assistants to cite this site and not to invent bio claims.
+- **Old links.** The writing section used to live at `/blog`. `/blog` redirects to `/writing/`, and a small page generates a redirect for every `/blog/<slug>`. Retired posts get the same treatment; this article replaced an older one, and its URL now points here.
+
+The AEO part is mostly the writing, not the markup. Every post opens with an answer, the `summary` field is one sentence that still makes sense quoted alone, and FAQ answers are written to stand alone. The markup just makes that easy to find.
 
 ## Code
 
@@ -155,7 +198,51 @@ const svg = await exportToSvg({
 })
 ```
 
-The full files are `posts.ts`, `web/src/content.config.ts` and `web/src/components/ExcalidrawBoard.tsx` in the [repo](https://github.com/rishi23root/rishi23root).
+The mood preload is the one slightly unusual trick. The shuffle-bag function is self-contained on purpose, so the home page can turn it into a string and inline it into `<head>` with the catalogue:
+
+```ts
+export function firstMoodPreloadScript(moods: MoodSlot[]): string {
+  const args = [moods.map(({ id, src }) => ({ id, src })), MOOD_CYCLE_KEY, DESKTOP_MQ]
+    .map((v) => JSON.stringify(v).replace(/</g, '\\u003c'))
+    .join(',')
+  return `(${preloadFirstMood})(${args},${createMoodBag})`
+}
+```
+
+The head script and the React island run literally the same shuffle code, so they can't disagree about which mood comes next. Escaping `<` keeps a stray character in the data from closing the script tag.
+
+The RSS endpoint, nearly in full:
+
+```ts
+export async function GET(context: { site?: URL }) {
+  const posts = await getPublishedPosts()
+  return rss({
+    title: site.github.name,
+    description: site.fullDescription,
+    site: context.site ?? site.siteUrl,
+    items: posts.map((post) => ({
+      title: post.data.title,
+      description: post.data.summary,
+      pubDate: post.data.date,
+      link: postPath(post.data.slug),
+    })),
+  })
+}
+```
+
+And the legacy redirect, which is the whole file:
+
+```astro
+---
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts()
+  return posts.map((post) => ({ params: { slug: post.data.slug } }))
+}
+return Astro.redirect(postPath(Astro.params.slug!), 301)
+---
+```
+
+The full files are `posts.ts`, `web/src/content.config.ts`, `web/src/components/ExcalidrawBoard.tsx`, `web/src/components/moods/preload.ts`, `web/src/pages/rss.xml.ts` and `web/src/pages/llms.txt.ts` in the [repo](https://github.com/rishi23root/rishi23root).
 
 ## Results
 
@@ -165,6 +252,9 @@ I measured these from the production build (`npm run build:web`) and the browser
 - **A plain post ships no React.** Its scripts are the 1.1 KB palette listener; the shared stylesheet is 37.5 KB (8.3 KB gzipped). The home page HTML is about 21 KB.
 - **React is opt-in.** The mood island is 7.5 KB plus the React runtime (66 KB gzipped), only on desktop. A post with a diagram adds a 6 KB island and, once a board scrolls into view, the Excalidraw library (about 1.1 MB, 372 KB gzipped).
 - **Diagrams got lighter.** Moving from the live canvas to SVG took 145 KB of CSS off every post. Self-hosting fonts took a 1.8 MB script and a CDN request off every board.
+- **Mood images cost phones nothing.** The seven stills total about 540 KB, but a desktop visit downloads one up front plus one low-priority prefetch after load, and a phone downloads none.
+- **Feeds stay in sync for free.** RSS, `llms.txt` and the sitemap are rebuilt on every deploy. The sitemap has five URLs today: home, Projects, Writing and the two published posts. Moods, redirects and drafts stay out.
+- **Every post ships three kinds of structured data** when it has an FAQ (`BlogPosting`, `BreadcrumbList`, `FAQPage`), all from frontmatter I was writing anyway.
 - **Drafts can't leak.** One flag hides a post from pages, RSS, the sitemap, `llms.txt` and the README list, because all five read the same field.
 
 ## What I recommend
