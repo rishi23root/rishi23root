@@ -330,7 +330,7 @@ if (d.faq.length) {
           this.y = 0
         }
         PathPen.prototype.move = function (x, y) {
-          this.d += (this.d ? '' : '') + 'M' + fmt(x) + ' ' + fmt(y)
+          this.d += 'M' + fmt(x) + ' ' + fmt(y)
           this.x = x
           this.y = y
         }
@@ -392,6 +392,14 @@ if (d.faq.length) {
           mark.setAttribute('stroke-dashoffset', String(-fmt(start)))
         }
 
+        function snapDash() {
+          fromS.x = targetFrom
+          fromS.v = 0
+          toS.x = targetTo
+          toS.v = 0
+          applyDash()
+        }
+
         function settled(s, target) {
           return Math.abs(s.x - target) < 0.2 && Math.abs(s.v) < 2
         }
@@ -408,11 +416,7 @@ if (d.faq.length) {
           var dt = lastT ? (now - lastT) / 1000 : 1 / 60
           lastT = now
           if (motion.matches) {
-            fromS.x = targetFrom
-            fromS.v = 0
-            toS.x = targetTo
-            toS.v = 0
-            applyDash()
+            snapDash()
             running = false
             return
           }
@@ -421,11 +425,7 @@ if (d.faq.length) {
           applyDash()
           var done = settled(fromS, targetFrom) && settled(toS, targetTo)
           if (done && now >= layoutUntil) {
-            fromS.x = targetFrom
-            toS.x = targetTo
-            fromS.v = 0
-            toS.v = 0
-            applyDash()
+            snapDash()
             running = false
             return
           }
@@ -449,29 +449,16 @@ if (d.faq.length) {
               }
             }
           }
-          if (!range) {
+          if (range) {
+            targetFrom = range.start
+            targetTo = range.end
+          } else {
             var mid = (fromS.x + toS.x) / 2
             targetFrom = mid
             targetTo = mid
-            if (instant || motion.matches || totalLen === 0) {
-              fromS.x = targetFrom
-              toS.x = targetTo
-              fromS.v = 0
-              toS.v = 0
-              applyDash()
-              return
-            }
-            startLoop()
-            return
           }
-          targetFrom = range.start
-          targetTo = range.end
-          if (instant || motion.matches) {
-            fromS.x = targetFrom
-            toS.x = targetTo
-            fromS.v = 0
-            toS.v = 0
-            applyDash()
+          if (instant || motion.matches || (!range && totalLen === 0)) {
+            snapDash()
             return
           }
           startLoop()

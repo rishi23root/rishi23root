@@ -7,7 +7,7 @@ import type { MoodSlot } from './types'
  */
 export const MOOD_CYCLE_KEY = 'mood-cycle:v1'
 
-export type CycleState = {
+type CycleState = {
   order: string[]
   /** Index of the mood currently shown in `order`. */
   index: number
@@ -118,8 +118,3 @@ export function peekNextMood(moods: MoodSlot[]): string | null {
   return pendingOrder[0] ?? null
 }
 
-/** Position of the current mood in this pass (1-based) and pass size. */
-export function cyclePosition(): { n: number; total: number } | null {
-  if (!memory) return null
-  return { n: memory.index + 1, total: memory.order.length }
-}

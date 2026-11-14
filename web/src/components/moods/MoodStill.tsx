@@ -49,7 +49,7 @@ export default function MoodStill({ src, className = '', onReady }: Props) {
 
   return (
     <div className={`mood-scene mood-still-scene ${className}`.trim()}>
-      <div className="mood-layer mood-still">
+      <div className="mood-layer">
         {fallback ? (
           <picture>
             <source srcSet={src} type="image/webp" />

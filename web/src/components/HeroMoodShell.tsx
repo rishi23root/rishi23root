@@ -191,49 +191,49 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
 
       <div className="mood-caption-slot">
         <div className="mood-caption">
-        <span className="mood-caption-name" aria-live="polite">
-          {slot ? displayName(slot.id) : ' '}
-        </span>
-        <div className="mood-caption-actions">
-          <a
-            className="mood-caption-all"
-            href={allMoodsHref}
-            aria-label="See all moods"
-          >
-            All
-          </a>
-          <span className="mood-caption-sep" aria-hidden="true">
-            ·
+          <span className="mood-caption-name" aria-live="polite">
+            {slot ? displayName(slot.id) : ' '}
           </span>
-          <button
-            type="button"
-            className="mood-caption-next"
-            aria-label="Next mood"
-            onClick={(e) => {
-              next()
-              // A pointer click focuses the button; blur so the focus
-              // style doesn't stick after the cursor leaves.
-              if (e.detail > 0) e.currentTarget.blur()
-            }}
-          >
-            Next
-            <svg
-              className="mood-caption-next-arrow"
-              viewBox="0 0 14 12"
-              aria-hidden="true"
-              focusable="false"
+          <div className="mood-caption-actions">
+            <a
+              className="mood-caption-all"
+              href={allMoodsHref}
+              aria-label="See all moods"
             >
-              <path
-                d="M1.5 6h9.5M8 2.75 12.25 6 8 9.25"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.15"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
+              All
+            </a>
+            <span className="mood-caption-sep" aria-hidden="true">
+              ·
+            </span>
+            <button
+              type="button"
+              className="mood-caption-next"
+              aria-label="Next mood"
+              onClick={(e) => {
+                next()
+                // A pointer click focuses the button; blur so the focus
+                // style doesn't stick after the cursor leaves.
+                if (e.detail > 0) e.currentTarget.blur()
+              }}
+            >
+              Next
+              <svg
+                className="mood-caption-next-arrow"
+                viewBox="0 0 14 12"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  d="M1.5 6h9.5M8 2.75 12.25 6 8 9.25"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.15"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
