@@ -215,6 +215,20 @@ if (d.faq.length) {
             >
               ↑ Back to top
             </button>
+            <div class="post-rail-ctas">
+              <button type="button" class="post-tool" id="postShare" aria-label="Share this post">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" /></svg>
+                <span class="post-tool-label" id="postShareLabel">Share</span>
+              </button>
+              <a class="post-tool" href="/writing/" aria-label="All writing">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10" /></svg>
+                <span class="post-tool-label">All writing</span>
+              </a>
+              <a class="post-tool" href="/" aria-label="Home">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7" /><path d="M5 10v10h14V10" /></svg>
+                <span class="post-tool-label">Home</span>
+              </a>
+            </div>
           </div>
         </div>
       </aside>
@@ -774,6 +788,29 @@ if (d.faq.length) {
         })
       })
 
+      var share = document.getElementById('postShare')
+      if (share) {
+        share.addEventListener('click', function () {
+          var data = { title: document.title, url: location.href }
+          if (navigator.share) {
+            navigator.share(data).catch(function () {})
+            return
+          }
+          navigator.clipboard &&
+            navigator.clipboard.writeText(location.href).then(
+              function () {
+                var lbl = document.getElementById('postShareLabel')
+                share.classList.add('is-open')
+                if (lbl) lbl.textContent = 'Link copied'
+                setTimeout(function () {
+                  share.classList.remove('is-open')
+                  if (lbl) lbl.textContent = 'Share'
+                }, 1800)
+              },
+              function () {},
+            )
+        })
+      }
     })()
   </script>
 </BaseLayout>
