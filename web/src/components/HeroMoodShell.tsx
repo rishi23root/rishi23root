@@ -173,7 +173,7 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
     >
       <div
         className="hero-shell-stage mood-inset"
-        // Tap anywhere on the plate (touch) slightly brightens the caption.
+        // Tap the plate on touch to fully reveal the caption.
         onClick={(e) => {
           if ((e.target as HTMLElement).closest('a,button')) return
           setRevealed((v) => !v)
@@ -189,13 +189,18 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
         </div>
       </div>
 
-      <div className="mood-caption">
+      <div className="mood-caption-slot">
+        <div className="mood-caption">
         <span className="mood-caption-name" aria-live="polite">
           {slot ? displayName(slot.id) : ' '}
         </span>
         <div className="mood-caption-actions">
-          <a className="mood-caption-all" href={allMoodsHref}>
-            All moods
+          <a
+            className="mood-caption-all"
+            href={allMoodsHref}
+            aria-label="See all moods"
+          >
+            All
           </a>
           <span className="mood-caption-sep" aria-hidden="true">
             ·
@@ -228,6 +233,7 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
               />
             </svg>
           </button>
+        </div>
         </div>
       </div>
     </div>

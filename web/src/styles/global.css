@@ -524,6 +524,8 @@ html[data-theme='light'] .theme-icon-moon {
 
   .home-mood .hero-shell-stage {
     width: 100%;
+    position: relative;
+    z-index: 1;
   }
 
   .home-text {
@@ -565,8 +567,12 @@ html[data-theme='light'] .theme-icon-moon {
     pointer-events: none;
   }
 
-  html.mood-await .mood-caption {
+  html.mood-await .mood-caption,
+  html.mood-await .hero-shell:is(:hover, :focus-within) .mood-caption,
+  html.mood-await .hero-shell[data-revealed='true'] .mood-caption {
     opacity: 0;
+    transform: translateY(calc(-100% - var(--mood-caption-gap)));
+    transition: none;
   }
 
   /* Entrances already played (or were skipped) under the await layout;
@@ -598,8 +604,12 @@ html[data-theme='light'] .theme-icon-moon {
     will-change: transform;
   }
 
-  html.mood-settling .mood-caption {
+  html.mood-settling .mood-caption,
+  html.mood-settling .hero-shell:is(:hover, :focus-within) .mood-caption,
+  html.mood-settling .hero-shell[data-revealed='true'] .mood-caption {
     opacity: 0;
+    transform: translateY(calc(-100% - var(--mood-caption-gap)));
+    transition: none;
   }
 }
 
@@ -695,20 +705,42 @@ html[data-theme='light'] .theme-icon-moon {
   }
 }
 
-/* Caption: always-visible row directly below the plate, not overlaid. */
+/* Caption: reserved row below the plate. Hidden at rest; slides out
+   from behind the plate (clipped so it never paints over the image).
+   Source Sans 3 is subset to 400–600, so lightness comes from opacity,
+   not font-weight 300. */
+.mood-caption-slot {
+  flex: 0 0 var(--mood-caption-space);
+  height: var(--mood-caption-space);
+  min-height: var(--mood-caption-space);
+  overflow: hidden;
+}
+
 .mood-caption {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
   width: 100%;
+  height: var(--mood-caption-row);
   margin-top: var(--mood-caption-gap);
-  min-height: var(--mood-caption-row);
   pointer-events: none;
   font-size: 0.68rem;
+  font-weight: 400;
   line-height: 1.3;
   letter-spacing: 0.03em;
-  color: var(--muted);
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+  opacity: 0;
+  transform: translateY(calc(-100% - var(--mood-caption-gap)));
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+.hero-shell:is(:hover, :focus-within) .mood-caption,
+.hero-shell[data-revealed='true'] .mood-caption {
+  opacity: 1;
+  transform: none;
 }
 
 .mood-caption-name {
@@ -734,7 +766,7 @@ html[data-theme='light'] .theme-icon-moon {
   background: transparent;
   font: inherit;
   letter-spacing: inherit;
-  color: var(--muted);
+  color: inherit;
   text-decoration: none;
   cursor: pointer;
   transition: color var(--dur-fast) var(--ease-out);
@@ -745,7 +777,7 @@ html[data-theme='light'] .theme-icon-moon {
   align-items: center;
   gap: 0.22em;
   /* Slightly stronger than the name, still quiet. */
-  color: color-mix(in srgb, var(--fg) 38%, var(--muted));
+  color: color-mix(in srgb, var(--fg) 74%, transparent);
   /* Invisible extra hit area; negative margin keeps the visual right edge. */
   padding: 0.28rem 0.35rem;
   margin: -0.28rem -0.35rem;
@@ -762,8 +794,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .mood-caption-sep {
-  color: var(--muted);
-  opacity: 0.55;
+  opacity: 0.7;
   pointer-events: none;
   user-select: none;
 }
@@ -785,7 +816,29 @@ html[data-theme='light'] .theme-icon-moon {
   outline-offset: 2px;
 }
 
+/* Touch: no hover, so keep the caption in place at a quieter opacity.
+   Tap the plate (data-revealed) or focus a control to bring it to full. */
+@media (hover: none) {
+  .mood-caption {
+    opacity: 0.7;
+    transform: none;
+  }
+
+  .hero-shell:focus-within .mood-caption,
+  .hero-shell[data-revealed='true'] .mood-caption {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .mood-caption,
+  .hero-shell:is(:hover, :focus-within) .mood-caption,
+  .hero-shell[data-revealed='true'] .mood-caption {
+    transform: none;
+    transition: opacity var(--dur) var(--ease-out);
+  }
+
   .mood-caption-next-arrow,
   .mood-caption-next:is(:hover, :focus-visible) .mood-caption-next-arrow {
     transition: none;
