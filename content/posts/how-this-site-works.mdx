@@ -109,9 +109,9 @@ In words: `content/` holds the data. The README build reads the bio and post tit
 
 | Piece | Reads | Writes |
 | --- | --- | --- |
-| `index.ts` + `posts.ts` | `site.json`, post frontmatter, GitHub API | `README.md` |
-| Astro (`web/`) | `site.json`, full posts, `web/public/diagrams/` | pages, RSS, sitemap, `llms.txt` |
-| `ExcalidrawBoard` island | one scene JSON | an inline SVG, in the browser |
+| README build<br />`index.ts`, `posts.ts` | `site.json`, post frontmatter, GitHub API | `README.md` |
+| Astro site<br />`web/` | `site.json`, full posts, board scenes | pages, RSS, sitemap, `llms.txt` |
+| Board island<br />`ExcalidrawBoard` | one scene JSON | inline SVG, in the browser |
 
 ### What's in `site.json`
 
