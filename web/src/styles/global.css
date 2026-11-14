@@ -544,16 +544,10 @@ html[data-theme='light'] .theme-icon-moon {
     justify-content: flex-start;
   }
 
-  /* Bio, home writing list, and stack headings share the settled text track
-     so settle does not re-wrap relative to Work / Capabilities. */
-  .voice-bio,
-  .home-writing-list,
-  .home-stack-list li > :not(.blurb) {
-    max-width: var(--home-col);
-  }
-
   /* Before the mood still is ready: text+nav sit in the middle at the
-     same width as Writing, with the plate stacked behind them. */
+     Writing / post-group measure; copy fills that track. settleMood.ts
+     FLIP-animates .home-text width into the split — children stay at 100%
+     so lines ease with the column (no premature --home-col lock). */
   html.mood-await .home-split {
     grid-template-columns: minmax(0, 1fr);
   }

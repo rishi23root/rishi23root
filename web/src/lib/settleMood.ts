@@ -7,10 +7,10 @@
  * so it lands correctly at any desktop width.
  *
  * Text: its left edge slides with translateX while its box width eases from
- * the Writing width to the column width on the same curve, so both edges
- * glide together. The copy inside is already set at the column's width
- * (--home-col in global.css), so no line re-wraps; only the nav and row
- * edges tighten around it.
+ * the Writing / post-group measure down to the settled text track on the
+ * same curve, so both edges glide together. Copy inside is width:100% of
+ * that column, so lines ease with the animated width (await looks like a
+ * full readable measure; settled matches the mood+text split).
  */
 
 /** Fallback for --mood-settle in global.css; keep the two in sync. */
