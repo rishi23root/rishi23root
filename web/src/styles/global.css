@@ -1224,6 +1224,15 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--muted);
 }
 
+.post-toc {
+  --toc-spine: color-mix(in srgb, var(--fg) 20%, transparent);
+  --toc-line: 2px;
+  /* Tall enough for a short straight drop before the bend, so the
+     ╰ stays on the same 2px centerline as the H2 spine. */
+  --toc-curve-h: calc(0.28rem + 0.54rem);
+  --toc-curve-r: 8px;
+}
+
 .post-toc ul {
   list-style: none;
   margin: 0;
@@ -1231,6 +1240,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .post-toc a {
+  position: relative;
   display: block;
   padding: 0.28rem 0 0.28rem var(--space-3);
   border-left: 2px solid transparent;
@@ -1243,17 +1253,121 @@ html[data-theme='light'] .theme-icon-moon {
     border-color var(--dur-fast) ease;
 }
 
-/* H3s sit in from the shared H2 spine. The group indent shifts the
-   whole row (and any current bar) inward so a subheading does not
-   draw a competing bar on the H2 line. */
+/* One quiet spine: each H2 carries a segment. No full-height track,
+   so the line can curve into an open sub-list instead of running
+   past it as a second bar. */
+.post-toc > ul > li.toc-depth-2 > a {
+  border-left-color: var(--toc-spine);
+}
+
+/* H3s sit in from the H2 spine. */
 .post-toc .toc-sub,
 .post-toc > ul > li.toc-depth-3 {
-  padding-left: var(--space-3);
+  position: relative;
+  padding-left: var(--space-4);
+}
+
+.post-toc .toc-sub {
+  z-index: 0;
 }
 
 .post-toc .toc-depth-3 a {
-  padding-left: var(--space-4);
+  /* No left border: the indent track is the ::after on .toc-sub.
+     A ::before overlay, inset by --toc-line, sits on that same 2px. */
+  border-left-width: 0;
+  padding-left: var(--space-3);
   font-size: 0.8rem;
+}
+
+.post-toc .toc-depth-3 a::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--toc-line));
+  top: 0;
+  bottom: 0;
+  width: var(--toc-line);
+  background: transparent;
+  pointer-events: none;
+}
+
+/* Opening ╰: spine drops, then turns right. Width stops at the
+   indent-side ╮ so the two 8px arcs meet on a horizontal tangent. */
+.post-toc .toc-sub::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--space-4) - var(--toc-curve-r));
+  height: var(--toc-curve-h);
+  box-sizing: border-box;
+  border-left: var(--toc-line) solid var(--toc-spine);
+  border-bottom: var(--toc-line) solid var(--toc-spine);
+  border-bottom-left-radius: var(--toc-curve-r);
+  pointer-events: none;
+}
+
+/* Opening ╮: the indent-side turn, same 8px / 2px, sitting on the
+   ╰ arm and handing a downward tangent to the indent track. */
+.post-toc .toc-sub > ul::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--toc-curve-r));
+  top: calc(var(--toc-curve-h) - var(--toc-line));
+  width: var(--toc-curve-r);
+  height: var(--toc-curve-r);
+  box-sizing: border-box;
+  border-top: var(--toc-line) solid var(--toc-spine);
+  border-right: var(--toc-line) solid var(--toc-spine);
+  border-top-right-radius: var(--toc-curve-r);
+  pointer-events: none;
+}
+
+/* Diverted indent track, from the ╮ down to the ╯. */
+.post-toc .toc-sub::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: calc(var(--space-4) - var(--toc-line));
+  top: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
+  bottom: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
+  width: var(--toc-line);
+  background: var(--toc-spine);
+  pointer-events: none;
+}
+
+/* Closing ╯: indent-side turn back toward the spine, mirror of the ╮. */
+.post-toc .toc-sub > ul > li:last-child {
+  position: relative;
+}
+
+.post-toc .toc-sub > ul > li:last-child::after {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--toc-curve-r));
+  bottom: calc(var(--toc-curve-h) - var(--toc-line));
+  width: var(--toc-curve-r);
+  height: var(--toc-curve-r);
+  box-sizing: border-box;
+  border-right: var(--toc-line) solid var(--toc-spine);
+  border-bottom: var(--toc-line) solid var(--toc-spine);
+  border-bottom-right-radius: var(--toc-curve-r);
+  pointer-events: none;
+}
+
+/* Closing ╭: returns to the main spine and meets the next H2 flush.
+   Width stops at the ╯ so the arcs join on a horizontal tangent. */
+.post-toc .toc-sub > ul::after {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--space-4));
+  bottom: 0;
+  width: calc(var(--space-4) - var(--toc-curve-r));
+  height: var(--toc-curve-h);
+  box-sizing: border-box;
+  border-left: var(--toc-line) solid var(--toc-spine);
+  border-top: var(--toc-line) solid var(--toc-spine);
+  border-top-left-radius: var(--toc-curve-r);
+  pointer-events: none;
 }
 
 .post-toc a:hover {
@@ -1266,37 +1380,74 @@ html[data-theme='light'] .theme-icon-moon {
 .post-toc.is-collapsible .toc-sub {
   display: grid;
   grid-template-rows: 0fr;
+  overflow: hidden;
   opacity: 0;
   transform: translateY(-0.25rem);
   visibility: hidden;
   transition:
     grid-template-rows var(--dur) var(--ease-out),
-    opacity var(--dur-fast) ease,
+    opacity var(--dur) var(--ease-out),
     transform var(--dur) var(--ease-out),
     visibility 0s linear var(--dur);
 }
 
 .post-toc.is-collapsible .toc-sub.is-open {
   grid-template-rows: 1fr;
+  overflow: hidden;
   opacity: 1;
   transform: none;
   visibility: visible;
   transition:
     grid-template-rows var(--dur) var(--ease-out),
-    opacity var(--dur) ease 60ms,
+    opacity var(--dur) var(--ease-out),
     transform var(--dur) var(--ease-out),
     visibility 0s;
 }
 
 .post-toc .toc-sub > ul {
+  /* min-height 0 lets the 0fr grid row shrink. Overflow is clipped by
+     .toc-sub so an H3's 2px active overlay can sit in the indent, on
+     the track, without being cut off. */
   min-height: 0;
-  overflow: hidden;
+  position: relative;
 }
 
 .post-toc a[aria-current] {
+  z-index: 1;
   color: var(--fg);
   font-weight: 600;
-  border-left-color: var(--accent);
+}
+
+/* H2 active mark: same 2px border-left as the quiet spine, just --fg. */
+.post-toc > ul > li.toc-depth-2 > a[aria-current] {
+  border-left-color: var(--fg);
+}
+
+/* H3 active mark: paint the ::before that already sits on the indent track. */
+.post-toc .toc-depth-3 a[aria-current]::before {
+  background: var(--fg);
+}
+
+/* First H3 mark starts below the ╮; last H3 mark stops above the ╯
+   so a square overlay doesn't cut across those curves. */
+.post-toc .toc-sub > ul > li:first-child > a::before {
+  top: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
+}
+
+.post-toc .toc-sub > ul > li:last-child > a::before {
+  bottom: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
+}
+
+/* First H3 current: the opening ╰╮ is that item's segment. */
+.post-toc .toc-sub:has(> ul > li:first-child > a[aria-current])::before,
+.post-toc .toc-sub:has(> ul > li:first-child > a[aria-current]) > ul::before {
+  border-color: var(--fg);
+}
+
+/* Last H3 current: the closing ╯ is that item's segment; the ╭
+   return to the next H2 spine stays quiet. */
+.post-toc .toc-sub:has(> ul > li:last-child > a[aria-current]) > ul > li:last-child::after {
+  border-color: var(--fg);
 }
 
 .post-rail-tools {
@@ -1334,20 +1485,30 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .post-progress {
-  position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 2.25rem;
+  gap: var(--space-2);
+  max-width: 100%;
   height: 2.25rem;
   padding: 0;
   border: 0;
   background: none;
   color: var(--fg);
   cursor: pointer;
+  font: inherit;
 }
 
-.post-progress svg {
+.post-progress-ring {
+  position: relative;
+  flex: 0 0 2.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.post-progress-ring svg {
   position: absolute;
   inset: 0;
   transform: rotate(-90deg);
@@ -1363,7 +1524,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .post-progress-bar {
-  stroke: var(--fg);
+  stroke: var(--accent);
   stroke-linecap: round;
   transition: stroke-dashoffset 150ms ease-out;
 }
@@ -1373,6 +1534,24 @@ html[data-theme='light'] .theme-icon-moon {
   font-family: var(--mono);
   font-size: 0.6rem;
   font-variant-numeric: tabular-nums;
+}
+
+.post-progress-label {
+  font-size: 0.78rem;
+  line-height: 1.2;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.post-progress:hover .post-progress-label,
+.post-progress:focus-visible .post-progress-label {
+  color: var(--fg);
+}
+
+.post-progress:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
 }
 
 /* Icon square that slides open to show its label on hover/focus */
@@ -1442,6 +1621,7 @@ html[data-theme='light'] .theme-icon-moon {
 
   .post-rail-tools {
     flex-direction: row;
+    flex-wrap: nowrap;
     align-items: center;
     margin-top: 0;
   }
