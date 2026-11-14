@@ -501,8 +501,7 @@ html[data-theme='light'] .theme-icon-moon {
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     column-gap: var(--home-gap);
     align-items: start;
-    /* Width of the settled text column (the 3fr track), from the split's
-       own width so it holds in the centered "await" layout too. */
+    /* Width of the settled text column (the 3fr track), from the split. */
     container-type: inline-size;
     --home-col: calc((100cqi - var(--home-gap)) * 3 / 5);
   }
@@ -552,27 +551,16 @@ html[data-theme='light'] .theme-icon-moon {
     max-width: var(--home-col);
   }
 
-  /* Before the mood still is ready: text+nav sit centered at the Writing
-     / post-group measure. settleMood.ts FLIP-animates .home-text width. */
-  html.mood-await .home-split {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  html.mood-await .home-text {
-    grid-column: 1;
-    grid-row: 1;
-    width: min(100%, var(--post-group));
-    margin-inline: auto;
-    z-index: 2;
-    position: relative;
-    background: var(--bg);
-  }
-
+  /* Before the mood still is ready: keep the settled split (mood left /
+     text right + gap). The plate is clipped away; settleMood.ts expands
+     it from the left only — never from behind the text. */
   html.mood-await .home-mood {
-    grid-column: 1;
-    grid-row: 1;
-    z-index: 1;
     pointer-events: none;
+  }
+
+  html.mood-await .home-mood .hero-shell-stage {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
   }
 
   html.mood-await .mood-caption,
@@ -592,28 +580,14 @@ html[data-theme='light'] .theme-icon-moon {
     transform: none;
   }
 
-  /* During the slide (lib/settleMood.ts) the same text block and plate
-     move with transforms; the opaque text keeps covering the plate until
-     it slides out from under the text's left edge. Width is WAAPI-driven
-     (may briefly exceed the settled track — allow overflow, no max cap). */
-  html.mood-settling .home-text {
-    position: relative;
-    z-index: 2;
-    background: var(--bg);
-    max-width: none;
-    margin-inline: 0;
-    overflow: visible;
-    will-change: transform, width;
-  }
-
+  /* During the left-expand (lib/settleMood.ts): text stays put; plate
+     reveals left → right inside its column (gap to text preserved). */
   html.mood-settling .home-mood {
-    position: relative;
-    z-index: 1;
     pointer-events: none;
   }
 
   html.mood-settling .home-mood .hero-shell-stage {
-    will-change: transform;
+    will-change: clip-path, opacity;
   }
 
   html.mood-settling .mood-caption,

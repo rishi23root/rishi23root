@@ -113,7 +113,7 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood/' }: Props)
 
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
-  // If the first still never loads, don't leave the page stuck centered.
+  // If the first still never loads, don't leave the plate clipped forever.
   useEffect(() => {
     const fallback = window.setTimeout(() => settleMoodLayout(), 2500)
     return () => window.clearTimeout(fallback)
