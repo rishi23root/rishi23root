@@ -13,9 +13,10 @@ const projects = (site.projects ?? [])
   .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
 
 const actions: CommandAction[] = [
-  { id: 'home', name: 'Home', section: 'Navigate', href: '/' },
-  { id: 'projects', name: 'Projects', section: 'Navigate', href: '/projects/' },
-  { id: 'writing', name: 'Writing', section: 'Navigate', href: '/writing/' },
+  { id: 'home', name: 'Home', section: 'Navigate', href: '/', shortcut: ['G', 'H'] },
+  { id: 'projects', name: 'Projects', section: 'Navigate', href: '/projects/', shortcut: ['G', 'P'] },
+  { id: 'writing', name: 'Writing', section: 'Navigate', href: '/writing/', shortcut: ['G', 'W'] },
+  { id: 'mood', name: 'Moods', section: 'Navigate', href: '/mood/', shortcut: ['G', 'M'] },
   { id: 'theme', name: 'Toggle theme', section: 'Actions', perform: 'theme' },
   ...projects.map((p) => ({
     id: `project-${p.title}`,
