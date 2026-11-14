@@ -571,21 +571,28 @@ if (d.faq.length) {
               slots[0].top = indentTop
               slots[slots.length - 1].bot = indentBot
             }
+            var lastRangeAt = -1
             for (var j = 0; j < slots.length; j++) {
               var slotStart = j === 0 ? openStart : pen.len
               if (slots[j].bot > pen.y + 0.25) pen.line(xi, slots[j].bot)
               addRange(slots[j].link, slotStart, pen.len)
+              lastRangeAt = ranges.length - 1
             }
             if (!slots.length && indentBot > pen.y + 0.25) {
               pen.line(xi, indentBot)
             }
             // Closing curve is a quiet return to the next H2 spine, like
-            // the old ╭: the mark travels it when leaving the last H3.
+            // the old ╭. The last H3's mark also covers this hook so it
+            // has a full-height active stroke (the indent alone is only
+            // a sliver — the hook lives in the last item's box).
             var yClose1 = sBot - drop
             if (hookRise > 0.25 && yClose1 > indentBot + 0.25) {
               pen.cubic(xi, indentBot + handle, xs, yClose1 - handle, xs, yClose1)
             }
             if (sBot > pen.y + 0.25) pen.line(xs, sBot)
+            if (lastRangeAt >= 0) {
+              ranges[lastRangeAt].end = Math.max(ranges[lastRangeAt].end, pen.len)
+            }
           }
 
           track.setAttribute('d', pen.d)
