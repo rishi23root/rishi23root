@@ -3,19 +3,17 @@
  *
  * One measured FLIP slide, no view transition: the same text block (one nav,
  * one copy) and the same plate move from where they were to where the split
- * puts them. Nothing is hardcoded: both ends are read from the live layout,
- * so it lands correctly at any desktop width.
+ * puts them. Both ends are read from the live layout.
  *
- * Text: its left edge slides with translateX while its box width eases from
- * the Writing / post-group measure down to the settled text track on the
- * same curve, so both edges glide together. Copy inside is width:100% of
- * that column, so lines ease with the animated width (await looks like a
- * full readable measure; settled matches the mood+text split).
+ * Text width is interpolated continuously (WAAPI `width` + `fill: 'both'`) so
+ * the first paint after dropping `mood-await` still shows the post-group
+ * measure — no hard snap / line-wrap pop. Copy is width:100% of `.home-text`,
+ * so wraps ease with the column.
  */
 
 /** Fallback for --mood-settle / --ease-settle in global.css; keep in sync. */
-const SETTLE_MS = 1400
-const SETTLE_EASE = 'cubic-bezier(0.33, 0, 0.12, 1)'
+const SETTLE_MS = 1600
+const SETTLE_EASE = 'cubic-bezier(0.33, 0, 0.1, 1)'
 
 let started = false
 
@@ -28,7 +26,7 @@ function pageVtFinished(): Promise<void> {
 
 function motion(): { duration: number; easing: string } {
   const css = getComputedStyle(document.documentElement)
-  // The CSS minifier may rewrite 900ms as .9s, so honour the unit.
+  // The CSS minifier may rewrite 1600ms as 1.6s, so honour the unit.
   const raw = css.getPropertyValue('--mood-settle').trim()
   const ms = parseFloat(raw) * (/\ds$/.test(raw) ? 1000 : 1)
   return {
@@ -45,10 +43,20 @@ function slide(text: HTMLElement, plate: HTMLElement): Promise<unknown> {
   html.classList.add('mood-settling', 'mood-settled')
   html.classList.remove('mood-await')
 
-  // Final layout (forced synchronously, before the next paint).
+  // Final layout (sync, before paint).
   const lastText = text.getBoundingClientRect()
   const lastPlate = plate.getBoundingClientRect()
-  const timing = { ...motion(), fill: 'none' as const }
+
+  // Hold await width as an inline style through the first paint so content
+  // cannot snap to the settled track before WAAPI's from-keyframe applies.
+  text.style.boxSizing = 'border-box'
+  text.style.width = `${firstText.width}px`
+  text.style.maxWidth = 'none'
+
+  const { duration, easing } = motion()
+  // `both` = apply from-keyframe immediately (no flash) and hold the end
+  // until we cancel in finally.
+  const timing = { duration, easing, fill: 'both' as const }
 
   const scale = lastPlate.width ? firstPlate.width / lastPlate.width : 1
   const plateAnim = plate.animate(
@@ -75,9 +83,24 @@ function slide(text: HTMLElement, plate: HTMLElement): Promise<unknown> {
     timing,
   )
 
+  // WAAPI now owns width; drop the inline pin on the next frame.
+  requestAnimationFrame(() => {
+    text.style.width = ''
+    text.style.maxWidth = ''
+    text.style.boxSizing = ''
+  })
+
   return Promise.all([plateAnim.finished, textAnim.finished])
     .catch(() => undefined)
-    .finally(() => html.classList.remove('mood-settling'))
+    .finally(() => {
+      html.classList.remove('mood-settling')
+      text.style.width = ''
+      text.style.maxWidth = ''
+      text.style.boxSizing = ''
+      // Drop fill:both so normal grid width takes over cleanly.
+      textAnim.cancel()
+      plateAnim.cancel()
+    })
 }
 
 async function run() {
