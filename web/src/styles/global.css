@@ -1284,10 +1284,47 @@ html[data-theme='light'] .theme-icon-moon {
      crisp at both 1x and 2x. */
   --toc-line: 1px;
   --toc-mark: color-mix(in srgb, var(--fg) 62%, transparent);
+  /* Mark motion: 460ms spring. The cubic-bezier is the fallback;
+     browsers that understand linear() get a damped spring (~9.5% overshoot).
+     Color/opacity use --ease-out so they don't overshoot. */
+  --toc-mark-dur: 460ms;
+  --toc-mark-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
   /* Tall enough for a short straight drop before the bend, so the
      ╰ stays on the same 2px centerline as the H2 spine. */
   --toc-curve-h: calc(0.28rem + 0.54rem);
   --toc-curve-r: 8px;
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+  .post-toc {
+    --toc-mark-ease: linear(
+      0,
+      0.0522 4.2%,
+      0.1791 8.3%,
+      0.3429 12.5%,
+      0.5151 16.7%,
+      0.6759 20.8%,
+      0.8135 25.0%,
+      0.9225 29.2%,
+      1.0019 33.3%,
+      1.0540 37.5%,
+      1.0831 41.7%,
+      1.0942 45.8%,
+      1.0923 50.0%,
+      1.0821 54.2%,
+      1.0673 58.3%,
+      1.0510 62.5%,
+      1.0352 66.7%,
+      1.0214 70.8%,
+      1.0102 75.0%,
+      1.0019 79.2%,
+      0.9962 83.3%,
+      0.9928 87.5%,
+      0.9912 91.7%,
+      0.9911 95.8%,
+      1
+    );
+  }
 }
 
 .post-toc ul {
@@ -1306,8 +1343,8 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--muted);
   text-decoration: none;
   transition:
-    color var(--dur-fast) ease,
-    border-color var(--dur-fast) ease;
+    color var(--toc-mark-dur) var(--ease-out),
+    border-color var(--toc-mark-dur) var(--ease-out);
 }
 
 /* One quiet spine: each H2 carries a segment. No full-height track,
@@ -1315,6 +1352,23 @@ html[data-theme='light'] .theme-icon-moon {
    past it as a second bar. */
 .post-toc > ul > li.toc-depth-2 > a {
   border-left-color: var(--toc-spine);
+}
+
+/* H2 active mark is an overlay on the quiet spine so it can scale
+   and settle without moving the text or the ╰ join below. Origin
+   is the top so overshoot grows up, not into the opening curve. */
+.post-toc > ul > li.toc-depth-2 > a::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--toc-line));
+  top: 0;
+  bottom: 0;
+  width: var(--toc-line);
+  background: var(--toc-mark);
+  opacity: 0;
+  transform: scaleY(0.88) translateY(2px);
+  transform-origin: top center;
+  pointer-events: none;
 }
 
 /* H3s sit in from the H2 spine. */
@@ -1343,7 +1397,10 @@ html[data-theme='light'] .theme-icon-moon {
   top: 0;
   bottom: 0;
   width: var(--toc-line);
-  background: transparent;
+  background: var(--toc-mark);
+  opacity: 0;
+  transform: scaleY(0.88) translateY(2px);
+  transform-origin: center center;
   pointer-events: none;
 }
 
@@ -1427,6 +1484,23 @@ html[data-theme='light'] .theme-icon-moon {
   pointer-events: none;
 }
 
+/* Color crossfades on a smooth ease so they don't overshoot;
+   scale/translate on the H2/H3 mark uses the spring. Bends are
+   color-only — transforming them would open gaps in the joins. */
+.post-toc > ul > li.toc-depth-2 > a::before,
+.post-toc .toc-depth-3 a::before {
+  transition:
+    opacity var(--toc-mark-dur) var(--ease-out),
+    background-color var(--toc-mark-dur) var(--ease-out),
+    transform var(--toc-mark-dur) var(--toc-mark-ease);
+}
+
+.post-toc .toc-sub::before,
+.post-toc .toc-sub > ul::before,
+.post-toc .toc-sub > ul > li:last-child::after {
+  transition: border-color var(--toc-mark-dur) var(--ease-out);
+}
+
 .post-toc a:hover {
   color: var(--fg);
 }
@@ -1475,24 +1549,25 @@ html[data-theme='light'] .theme-icon-moon {
   font-weight: 600;
 }
 
-/* H2 active mark: same stroke as the quiet spine, a softened --fg. */
-.post-toc > ul > li.toc-depth-2 > a[aria-current] {
-  border-left-color: var(--toc-mark);
-}
-
-/* H3 active mark: paint the ::before that already sits on the indent track. */
+/* H2/H3 active mark: fade in and spring-settle onto the track.
+   The quiet spine/indent stays put; only the overlay moves. */
+.post-toc > ul > li.toc-depth-2 > a[aria-current]::before,
 .post-toc .toc-depth-3 a[aria-current]::before {
-  background: var(--toc-mark);
+  opacity: 1;
+  transform: scaleY(1) translateY(0);
 }
 
 /* First H3 mark starts below the ╮; last H3 mark stops above the ╯
-   so a square overlay doesn't cut across those curves. */
+   so a square overlay doesn't cut across those curves. Origins are
+   set so spring overshoot grows away from the nearest bend. */
 .post-toc .toc-sub > ul > li:first-child > a::before {
   top: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
+  transform-origin: top center;
 }
 
 .post-toc .toc-sub > ul > li:last-child > a::before {
   bottom: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
+  transform-origin: bottom center;
 }
 
 /* First H3 current: the opening ╰╮ is that item's segment. */
@@ -1825,5 +1900,14 @@ html[data-theme='light'] .theme-icon-moon {
   .post-toc.is-collapsible .toc-sub,
   .post-toc.is-collapsible .toc-sub.is-open {
     transition: none;
+  }
+
+  .post-toc > ul > li.toc-depth-2 > a::before,
+  .post-toc .toc-depth-3 a::before,
+  .post-toc .toc-sub::before,
+  .post-toc .toc-sub > ul::before,
+  .post-toc .toc-sub > ul > li:last-child::after {
+    transition: none;
+    transform: none;
   }
 }
