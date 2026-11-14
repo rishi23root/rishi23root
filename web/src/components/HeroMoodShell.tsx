@@ -14,8 +14,13 @@ type Props = {
 /** Crossfade length; mirrored by --mood-xfade in global.css. */
 const XFADE_MS = 420
 
+/**
+ * SSR-safe desktop gate. `client:media` still SSRs this island; start false so
+ * markup matches, then flip on the client. The head preload already advanced
+ * the bag into `window.__heroMoodFirst`, so first paint adopts that pick.
+ */
 function useDesktop(): boolean {
-  const [desktop, setDesktop] = useState(() => window.matchMedia(DESKTOP_MQ).matches)
+  const [desktop, setDesktop] = useState(false)
   useEffect(() => {
     const mq = window.matchMedia(DESKTOP_MQ)
     const onChange = () => setDesktop(mq.matches)
@@ -89,11 +94,12 @@ function afterLoad(fn: () => void): () => void {
 }
 
 /**
- * Portrait mood plate. Mounted client:only so each full page load advances the
- * shuffle-bag cycle (no repeats until every mood has been seen). "next" in the
- * caption (below the plate) advances the same cycle in place with a crossfade.
+ * Portrait mood plate. Hydrated via `client:media` (≥1024px) so mobile never
+ * downloads React; each full desktop load advances the shuffle-bag cycle (no
+ * repeats until every mood has been seen). "next" in the caption (below the
+ * plate) advances the same cycle in place with a crossfade.
  */
-export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) {
+export default function HeroMoodShell({ moods, allMoodsHref = '/mood/' }: Props) {
   const desktop = useDesktop()
   // Below 1024px the plate is display:none — pick nothing, mount no <img>.
   // The first mood is chosen the first time the viewport is desktop-sized.

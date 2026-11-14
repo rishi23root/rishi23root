@@ -1,6 +1,6 @@
 export type MoodSlot = {
   id: string
-  /** WebP still in web/public; a .jpg sibling is used as the fallback. */
+  /** WebP still in web/public/mood. */
   src?: string
   alt?: string
 }

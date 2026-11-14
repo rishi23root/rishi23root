@@ -17,7 +17,7 @@ export async function getPublishedPosts(): Promise<Post[]> {
 }
 
 export function postPath(slug: string): string {
-  return `/writing/${slug}`
+  return `/writing/${slug}/`
 }
 
 /** YYYY-MM-DD */

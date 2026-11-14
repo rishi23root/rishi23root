@@ -2,9 +2,18 @@ import siteJson from '../../../content/site.json'
 
 export const site = siteJson
 
-/** Absolute URL on the canonical site (canonical links, OG, JSON-LD). */
+/**
+ * Absolute URL on the canonical site (canonical links, OG, JSON-LD).
+ * Directory-style paths keep a trailing slash to match `trailingSlash: 'always'`;
+ * file paths (rss.xml, images, fonts) do not.
+ */
 export function absoluteUrl(path: string): string {
-  return new URL(path, site.siteUrl).toString()
+  const url = new URL(path, `${site.siteUrl}/`)
+  const isFile = /\.[a-z0-9]+$/i.test(url.pathname.split('/').pop() ?? '')
+  if (!isFile && !url.pathname.endsWith('/')) {
+    url.pathname = `${url.pathname}/`
+  }
+  return url.toString()
 }
 
 /** GitHub profile photo by URL only — never commit a binary avatar. */

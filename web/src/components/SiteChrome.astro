@@ -15,7 +15,7 @@ const wordmark = `@${site.github.name}`
     <nav class="nav" aria-label="Primary">
       <a href="/" aria-current={path === '/' ? 'page' : undefined}>Home</a>
       <a
-        href="/writing"
+        href="/writing/"
         aria-current={path.startsWith('/writing') ? 'page' : undefined}
         >Writing</a
       >
@@ -25,7 +25,7 @@ const wordmark = `@${site.github.name}`
       class="theme-toggle"
       id="themeToggle"
       aria-label="Switch to light mode"
-      title="Theme"
+      title="Switch to light mode"
     >
       <span class="theme-icon theme-icon-sun" aria-hidden="true">
         <svg viewBox="0 0 24 24" focusable="false">
@@ -44,5 +44,16 @@ const wordmark = `@${site.github.name}`
         </svg>
       </span>
     </button>
+    {/* Align label with any theme the head script already applied. */}
+    <script is:inline>
+      ;(function () {
+        var toggle = document.getElementById('themeToggle')
+        if (!toggle) return
+        var light = document.documentElement.getAttribute('data-theme') === 'light'
+        var label = light ? 'Switch to dark mode' : 'Switch to light mode'
+        toggle.setAttribute('aria-label', label)
+        toggle.setAttribute('title', label)
+      })()
+    </script>
   </div>
 </header>

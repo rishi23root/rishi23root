@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { jpgFallback } from './media'
 
 type Props = {
   src: string
@@ -9,7 +8,7 @@ type Props = {
   onReady?: () => void
 }
 
-/** Static mood plate — WebP primary, optional JPG sibling fallback. */
+/** Static mood plate — WebP only (universal support for target browsers). */
 export default function MoodStill({ src, className = '', onReady }: Props) {
   const imgRef = useRef<HTMLImageElement>(null)
   const fired = useRef(false)
@@ -35,29 +34,19 @@ export default function MoodStill({ src, className = '', onReady }: Props) {
     }
   }, [src, ready])
 
-  const fallback = jpgFallback(src)
-  const img = (
-    <img
-      ref={imgRef}
-      src={fallback ?? src}
-      alt=""
-      decoding="async"
-      fetchPriority="high"
-      draggable={false}
-    />
-  )
-
   return (
     <div className={`mood-scene mood-still-scene ${className}`.trim()}>
       <div className="mood-layer">
-        {fallback ? (
-          <picture>
-            <source srcSet={src} type="image/webp" />
-            {img}
-          </picture>
-        ) : (
-          img
-        )}
+        <img
+          ref={imgRef}
+          src={src}
+          alt=""
+          width={720}
+          height={1280}
+          decoding="async"
+          fetchPriority="high"
+          draggable={false}
+        />
       </div>
     </div>
   )

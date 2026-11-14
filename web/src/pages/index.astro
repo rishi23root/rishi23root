@@ -107,7 +107,7 @@ const personJsonLd = {
               <h2>Capabilities</h2>
               <ul class="home-list home-stack-list">
                 {capabilities.map((item) => (
-                  <li class="hover-row" tabindex="0">
+                  <li class="hover-row">
                     <span class="capability-heading">{item.heading}</span>
                     <span class="blurb">{item.body}</span>
                   </li>
@@ -127,7 +127,10 @@ const personJsonLd = {
       moods.length ? (
         <aside class="home-mood reveal" style="--i: 0" aria-label="Mood illustration">
           <div class="home-mood-sticky">
-            <HeroMoodShell client:only="react" moods={moods} />
+            {/* Desktop-only island: client:media defers the React download
+                below 1024px. SSR-safe shell + __heroMoodFirst handoff avoid
+                flash / double shuffle-bag advance (see HeroMoodShell). */}
+            <HeroMoodShell client:media="(min-width: 1024px)" moods={moods} />
           </div>
         </aside>
       ) : null
