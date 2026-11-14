@@ -95,6 +95,7 @@ Don't:
 - Use boards on home, mood or projects pages, or load the island outside Writing posts.
 - Put the only copy of essential information in a board. No-JS readers and RSS only get a placeholder, so the text must stand on its own.
 - Paste large screenshots into scenes; they're stored inline in the JSON as data URLs.
+- Add a static `import '@excalidraw/excalidraw/index.css'` (or any static import of the package) to the component. The package exports that CSS only under `development`/`production` conditions, which Astro SSR doesn't always pass ("Cannot find module"). The island loads the library and `dist/prod/index.css` (by relative path) with dynamic imports on the client only; keep it that way.
 
 ## SEO / frontmatter cheat (canonical site)
 

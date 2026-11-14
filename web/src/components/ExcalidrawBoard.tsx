@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import type { ExcalidrawImperativeAPI, ExcalidrawInitialDataState } from '@excalidraw/excalidraw/types'
-import '@excalidraw/excalidraw/index.css'
 
 type Theme = 'light' | 'dark'
 
@@ -55,7 +54,13 @@ export default function ExcalidrawBoard({ src, height = 500, className }: Props)
     let cancelled = false
     ;(async () => {
       try {
-        const mod = await import('@excalidraw/excalidraw')
+        // Client-only, so SSR never resolves the package. The CSS is imported by file
+        // path: the package exports `index.css` only under dev/prod conditions, which
+        // some resolvers don't pass, and its fonts load relative to this file.
+        const [mod] = await Promise.all([
+          import('@excalidraw/excalidraw'),
+          import('../../node_modules/@excalidraw/excalidraw/dist/prod/index.css'),
+        ])
         if (!cancelled) setExcalidraw(() => mod.Excalidraw)
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load whiteboard')
