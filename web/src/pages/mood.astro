@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import PageIntro from '../components/PageIntro.astro'
 import { site } from '../lib/site'
 
 const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
@@ -7,35 +8,41 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
 
 <BaseLayout
   title="Moods"
-  description="Moods that appear on the home page. Click one to open the site with it."
+  description="Moods that appear on the home page, one at a time."
   path="/mood/"
   robots="noindex, nofollow"
 >
-  <div class="page">
-    <section class="page-intro reveal" style="--i: 0">
-      <h1>Moods</h1>
-      <p class="lede">
-        These moods appear on the home page, one at a time. Click one to open it there.
-      </p>
-    </section>
+  <noscript>
+    <style>
+      .mood-index-img {
+        opacity: 1;
+        transform: none;
+      }
+    </style>
+  </noscript>
+  <div class="page page-listing">
+    <PageIntro eyebrow="Moods" title="Stills from the home plate">
+      These moods appear on the home page, one&nbsp;at&nbsp;a&nbsp;time.
+    </PageIntro>
 
     {
       moods.length ? (
         <ul class="mood-index-grid reveal" style="--i: 1">
-          {moods.map((mood) => (
-            <li>
+          {moods.map((mood, i) => (
+            <li style={`--i: ${i}`}>
               <a class="mood-index-link" href={`/?mood=${mood.id}`}>
                 <div class="mood-index-frame mood-inset">
                   <img
+                    class="mood-index-img"
                     src={mood.src}
-                    alt={mood.alt || mood.id}
+                    alt={mood.alt || mood.label || mood.id}
                     loading="lazy"
                     decoding="async"
                     width="720"
                     height="1280"
                   />
                 </div>
-                <span class="mood-index-id">{mood.id}</span>
+                <span class="mood-index-id">{mood.label || mood.id}</span>
               </a>
             </li>
           ))}
@@ -45,4 +52,21 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
       )
     }
   </div>
+  {/* Soft fade once each still decodes — same ease family as home mood settle. */}
+  <script is:inline>
+    ;(function () {
+      document.querySelectorAll('.mood-index-img').forEach(function (img) {
+        var show = function () {
+          img.classList.add('is-loaded')
+        }
+        if (img.complete && img.naturalWidth > 0) {
+          show()
+          return
+        }
+        img.addEventListener('load', show, { once: true })
+        img.addEventListener('error', show, { once: true })
+        if (img.complete) show()
+      })
+    })()
+  </script>
 </BaseLayout>

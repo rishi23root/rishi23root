@@ -43,33 +43,45 @@
   "moods": [
     {
       "id": "cyclist",
+      "label": "cycling",
       "src": "/mood/cyclist.webp",
       "alt": "Cyclist in green hills under drifting clouds"
     },
     {
       "id": "park",
+      "label": "wandering",
       "src": "/mood/park.webp",
       "alt": "Aerial park lawn with people and long shadows"
     },
     {
       "id": "building",
+      "label": "roaming",
       "src": "/mood/building.webp",
       "alt": "Terracotta building facade with a walker and dog"
     },
     {
       "id": "warehouse",
+      "label": "exploring",
       "src": "/mood/warehouse.webp",
       "alt": "Dusty warehouse interior with shafts of light"
     },
     {
-      "id": "seaside",
-      "src": "/mood/seaside.webp",
-      "alt": "Coastal path along cliffs above the sea"
+      "id": "tennis",
+      "label": "tennis",
+      "src": "/mood/tennis.webp",
+      "alt": "Top-down tennis court with two players and long blue shadows"
     },
     {
-      "id": "ghat",
-      "src": "/mood/ghat.webp",
-      "alt": "Stone temple ghat with marigold garlands, a boat, and a radiant sun"
+      "id": "shore",
+      "label": "sitting",
+      "src": "/mood/shore.webp",
+      "alt": "Figure sitting on a beach shore under open sky"
+    },
+    {
+      "id": "sketch",
+      "label": "sketching",
+      "src": "/mood/sketch.webp",
+      "alt": "Charcoal portrait sketch of a face"
     }
   ],
   "projects": [

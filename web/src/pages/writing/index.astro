@@ -2,21 +2,17 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ContactIcons from '../../components/ContactIcons.astro'
 import MetaLine from '../../components/MetaLine.astro'
+import PageIntro from '../../components/PageIntro.astro'
 import { formatPostDate, getPublishedPosts, postPath, readingTimeMinutes } from '../../lib/posts'
 
 const posts = await getPublishedPosts()
 ---
 
-<BaseLayout title="Writing" description="Notes on SaaS, automation, and security." path="/writing/">
-  <div class="page blog-page blog-index">
-    <section class="page-intro reveal" style="--i: 0">
-      <p class="page-eyebrow">Writing</p>
-      <h1>Notes from building</h1>
-      <p class="lede">
-        Short, answer-first notes on SaaS, automation and security. Same posts
-        tree as the profile README.
-      </p>
-    </section>
+<BaseLayout title="Writing" description="Short notes on SaaS, automation, and security — written as I ship." path="/writing/">
+  <div class="page blog-page page-listing">
+    <PageIntro eyebrow="Writing" title="Notes from building">
+      Short notes on SaaS, automation, and security — written as I ship.
+    </PageIntro>
 
     {
       posts.length ? (

@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import ContactIcons from '../../components/ContactIcons.astro'
+import PageIntro from '../../components/PageIntro.astro'
+import { site } from '../../lib/site'
+
+const projects = (site.projects ?? [])
+  .slice()
+  .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+---
+
+<BaseLayout
+  title="Projects"
+  description="Selected work — open source, automation, and product surfaces."
+  path="/projects/"
+>
+  <div class="page blog-page page-listing">
+    <PageIntro eyebrow="Projects" title="Selected work">
+      Open source, automation, and product surfaces I've shipped.
+    </PageIntro>
+
+    {
+      projects.length ? (
+        <ul class="post-list reveal" style="--i: 1">
+          {projects.map((project) => (
+            <li class="post-list-item hover-row">
+              <div class="post-list-top">
+                <h2 class="post-list-heading">
+                  <a class="row-link" href={project.url} rel="noopener noreferrer">
+                    {project.title}
+                  </a>
+                </h2>
+              </div>
+              {project.blurb ? <p class="post-list-summary">{project.blurb}</p> : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No projects yet.</p>
+      )
+    }
+
+    <ContactIcons />
+  </div>
+</BaseLayout>

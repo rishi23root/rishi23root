@@ -1,0 +1,22 @@
+---
+/**
+ * Single heading pattern for listing surfaces (Writing, Projects, Moods, …).
+ * Eyebrow + h1; optional lede fills the page-listing shell.
+ */
+type Props = {
+  eyebrow: string
+  title: string
+  /** Reveal stagger index; defaults to 0. */
+  i?: number
+  class?: string
+}
+
+const { eyebrow, title, i = 0, class: className } = Astro.props
+const hasLede = Astro.slots.has('default')
+---
+
+<section class:list={['page-intro', 'reveal', className]} style={`--i: ${i}`}>
+  <p class="page-eyebrow">{eyebrow}</p>
+  <h1>{title}</h1>
+  {hasLede ? <p class="lede"><slot /></p> : null}
+</section>

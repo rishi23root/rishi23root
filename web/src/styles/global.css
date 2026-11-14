@@ -59,7 +59,7 @@ html[data-theme='light'] {
   --space-8: 4rem;
 
   /* Page frame */
-  --measure: 38rem; /* narrow text column (home on mobile) */
+  --measure: 38rem; /* narrow prose / empty-state width */
   --page-pad: clamp(1.5rem, 3.6vw, 3.5rem); /* left/right gutter, all pages */
   --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7));
   --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem);
@@ -148,36 +148,37 @@ a:hover {
 
 /* ---------------------------------------------------------------
  * Page shells
+ *
+ * One measure story for Home (<1024), Writing list, Writing post
+ * (TOC hidden), Projects, Mood:
+ *   gutter  = --page-pad on .shell / .chrome-bar
+ *   content = --post-group centered on chrome + main
+ * Home ≥1024 uses mood split + --home-max (not this measure).
+ * Post ≥1024 + TOC: chrome/main stay --post-group; article + rail.
+ * Post ≥1024, no TOC: chrome/main shrink to --article-max.
  * ------------------------------------------------------------- */
 .shell {
   width: 100%;
   margin-inline: auto;
   padding-inline: var(--page-pad);
-  /* Same bottom padding as the homepage text column, on every page. */
   padding-bottom: var(--page-pad-block);
 }
 
-/* Home's text column already has --page-pad-block, so don't stack another. */
+/* Home text column already pads with --page-pad-block. */
 .shell-home {
   padding-bottom: 0;
 }
 
-/* Inner pages (writing, posts, later project pages): nav shares the
-   homepage's top padding, then the same gap under the nav as home. */
 .chrome-bar {
   padding-inline: var(--page-pad);
   padding-top: var(--page-pad-block);
-}
-
-.chrome-bar .chrome {
-  max-width: var(--post-group);
-  margin-inline: auto;
 }
 
 .shell-inner {
   padding-top: var(--section-gap);
 }
 
+.chrome-bar .chrome,
 .shell-inner > main {
   max-width: var(--post-group);
   margin-inline: auto;
@@ -480,9 +481,10 @@ html[data-theme='light'] .theme-icon-moon {
   min-width: 0;
 }
 
+/* Below the mood split: same --post-group main as inner pages. */
 @media (max-width: 1023px) {
-  .home-text {
-    max-width: var(--measure);
+  .shell-home > main {
+    max-width: var(--post-group);
     margin-inline: auto;
   }
 }
@@ -895,10 +897,9 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 /* ---------------------------------------------------------------
- * Inner page intro, empty state
+ * PageIntro (listing pages only) + empty state
  * ------------------------------------------------------------- */
 .page-intro {
-  max-width: var(--article-max);
   width: 100%;
 }
 
@@ -921,7 +922,6 @@ html[data-theme='light'] .theme-icon-moon {
 .page-intro .lede {
   margin: 0;
   color: var(--muted);
-  max-width: 34rem;
 }
 
 .empty {
@@ -932,7 +932,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 /* ---------------------------------------------------------------
- * Writing index
+ * Listing pages (Writing / Projects / Mood) + post-list rows
  * ------------------------------------------------------------- */
 .post-list {
   list-style: none;
@@ -945,11 +945,9 @@ html[data-theme='light'] .theme-icon-moon {
   gap: var(--space-1);
 }
 
-/* Listing page: intro, posts, and hover wash use the full nav width
-   (the post-group). Individual post pages keep the article measure. */
-.blog-index .page-intro,
-.blog-index .post-list,
-.blog-index .contact-icons {
+/* Listings fill the shell; post pages keep --article-max on lists/contact. */
+.page-listing .post-list,
+.page-listing .contact-icons {
   max-width: none;
 }
 
@@ -1324,7 +1322,7 @@ html[data-theme='light'] .theme-icon-moon {
   line-height: 1.6;
 }
 
-/* Rail: "On this page" + tools (progress, share, all writing, home) */
+/* Rail: "On this page" + progress/back-to-top + CTA icons (share / writing / home) */
 .post-rail-label {
   margin: 0 0 var(--space-3);
   font-family: var(--mono);
@@ -1686,21 +1684,20 @@ html[data-theme='light'] .theme-icon-moon {
   border-color: var(--toc-mark);
 }
 
+/* Default: horizontal bar (mobile + desktop without a TOC rail).
+   Desktop + TOC re-stacks into a vertical column below. */
 .post-rail-tools {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  margin-top: var(--space-7);
-}
-
-/* No headings: the tools lead the rail */
-.post-rail-tools:first-child {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
   margin-top: 0;
 }
 
-/* 1px rule between TOC and tools: solid on the left, fade to the right.
-   Only when a TOC precedes the tools (skipped if tools are first-child). */
+/* 1px rule between TOC and tools (desktop rail only; hidden on mobile). */
 .post-toc + .post-rail-tools {
   position: relative;
 }
@@ -1790,6 +1787,14 @@ html[data-theme='light'] .theme-icon-moon {
   border-radius: 8px;
 }
 
+.post-rail-ctas {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 /* Icon square that slides open to show its label on hover/focus */
 .post-tool {
   display: inline-flex;
@@ -1845,8 +1850,14 @@ html[data-theme='light'] .theme-icon-moon {
   outline-offset: 2px;
 }
 
-/* Mobile/tablet: no TOC; the tools sit in a row under the article */
+/* Mobile/tablet: hide TOC, fill shell (no reserved rail gutter), hide
+   progress ring. Chrome/main stay --post-group (same as listings). */
 @media (max-width: 1023px) {
+  .post,
+  .blog-page:not(.page-listing) .contact-icons {
+    max-width: none;
+  }
+
   .post-rail {
     margin-top: var(--space-7);
   }
@@ -1855,11 +1866,8 @@ html[data-theme='light'] .theme-icon-moon {
     display: none;
   }
 
-  .post-rail-tools {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    margin-top: 0;
+  .post-progress-ring {
+    display: none;
   }
 
   .post-toc + .post-rail-tools::before {
@@ -1884,6 +1892,44 @@ html[data-theme='light'] .theme-icon-moon {
     position: sticky;
     top: var(--space-7);
     padding-top: 0.35rem;
+  }
+
+  /* TOC present: stack tools under the rail */
+  .post-layout:has(.post-toc) .post-rail-tools {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: var(--space-2);
+    width: auto;
+    margin-top: var(--space-7);
+  }
+
+  .post-layout:has(.post-toc) .post-rail-tools:first-child {
+    margin-top: 0;
+  }
+
+  .post-layout:has(.post-toc) .post-rail-ctas {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* No headings → no TOC: single column, shell matches the article */
+  .post-layout:not(:has(.post-toc)) {
+    grid-template-columns: minmax(0, var(--article-max));
+  }
+
+  body:has(.post-layout):not(:has(.post-toc)) .chrome-bar .chrome,
+  body:has(.post-layout):not(:has(.post-toc)) .shell-inner > main {
+    max-width: var(--article-max);
+  }
+
+  .post-layout:not(:has(.post-toc)) .post-rail {
+    margin-top: var(--space-7);
+  }
+
+  .post-layout:not(:has(.post-toc)) .post-rail-sticky {
+    position: static;
+    padding-top: 0;
   }
 }
 
@@ -1927,6 +1973,29 @@ html[data-theme='light'] .theme-icon-moon {
   transform: translateY(-2px);
 }
 
+/* Hold empty until decode, then ease in (no pop/snap). Soft settle ease. */
+.mood-index-img {
+  opacity: 0;
+  transform: scale(1.02);
+  will-change: opacity, transform;
+}
+
+.mood-index-img.is-loaded {
+  animation: mood-index-in 900ms var(--ease-settle) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+
+@keyframes mood-index-in {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .mood-index-id {
   font-size: 0.82rem;
   color: var(--muted);
@@ -1935,6 +2004,149 @@ html[data-theme='light'] .theme-icon-moon {
 
 .mood-index-link:hover .mood-index-id {
   color: var(--fg);
+}
+
+/* ---------------------------------------------------------------
+ * Command palette (kbar) — opened via Cmd/Ctrl+K; no visible chrome
+ * ------------------------------------------------------------- */
+.kbar {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: min(18vh, 7rem) var(--page-pad) var(--space-6);
+}
+
+.kbar[hidden] {
+  display: none;
+}
+
+.kbar-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.kbar-dialog {
+  position: relative;
+  width: min(100%, 32rem);
+  max-height: min(70vh, 28rem);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--fg) 4%, transparent),
+    0 24px 48px -24px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.kbar-input {
+  width: 100%;
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 1.05rem;
+  outline: none;
+}
+
+.kbar-input::placeholder {
+  color: var(--muted);
+}
+
+.kbar-list {
+  overflow: auto;
+  padding: var(--space-2);
+  flex: 1;
+}
+
+.kbar-section {
+  margin: var(--space-2) var(--space-2) var(--space-1);
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kbar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kbar-item.is-active,
+.kbar-item:hover {
+  background: var(--row-hover);
+}
+
+.kbar-item-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kbar-keys {
+  display: inline-flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.kbar-keys kbd,
+.kbar-hint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+.kbar-empty {
+  margin: var(--space-4);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.kbar-hint {
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+html.kbar-open {
+  overflow: hidden;
 }
 
 /* ---------------------------------------------------------------

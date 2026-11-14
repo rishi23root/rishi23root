@@ -1,5 +1,7 @@
 export type MoodSlot = {
   id: string
+  /** Activity title shown on /mood (ids stay stable for assets/URL params). */
+  label?: string
   /** WebP still in web/public/mood. */
   src?: string
   alt?: string
