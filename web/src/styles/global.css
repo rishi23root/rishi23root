@@ -1790,8 +1790,9 @@ html[data-theme='light'] .theme-icon-moon {
   border-radius: 8px;
 }
 
-/* Phone only: keep ↑ Back to top, hide the % ring. Tablet+ keeps the ring. */
-@media (max-width: 40rem) {
+/* Phone only: keep ↑ Back to top, hide the % ring. Tablet+ keeps the ring.
+   48rem (~768px) — 40rem left the ring visible on some phone widths. */
+@media (max-width: 48rem) {
   .post-progress-ring {
     display: none;
   }
