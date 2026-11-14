@@ -1,14 +1,19 @@
 /**
- * Settles the homepage mood by growing the left column + plate together.
+ * Settles the homepage from the centered "await" layout into the split.
  *
- * Await: no mood track (text uses the full split). Settle: soft left→right
- * expand of grid track + gap; the plate fills that growing column — space and
- * image open as one. Never reserved empty mood space, never from behind text.
+ * Mood emerges from behind the text (measured FLIP). Text eases to the
+ * right track first; the plate follows a beat later at slightly lower
+ * opacity so a clear gap opens — no flush edge, no vertical offset.
+ * Soft ease, continuous width (`fill: 'both'`), no snap / bounce.
  */
 
 /** Fallback for --mood-settle / --ease-settle in global.css; keep in sync. */
 const SETTLE_MS = 1600
 const SETTLE_EASE = 'cubic-bezier(0.33, 0, 0.1, 1)'
+/** Let text clear first so the plate isn't flush against it mid-slide. */
+const PLATE_DELAY_MS = 120
+/** Travel opacity — plate is quieter while emerging, full at rest. */
+const PLATE_TRAVEL_OPACITY = 0.72
 
 let started = false
 
@@ -30,62 +35,83 @@ function motion(): { duration: number; easing: string } {
   }
 }
 
-function expandLayout(
-  split: HTMLElement,
-  mood: HTMLElement,
-  plate: HTMLElement,
-): Promise<unknown> {
+function slide(text: HTMLElement, plate: HTMLElement): Promise<unknown> {
   const html = document.documentElement
+  const firstText = text.getBoundingClientRect()
+  const firstPlate = plate.getBoundingClientRect()
 
-  // Jump to settled grid to read final track sizes, then pin collapsed
-  // before paint so WAAPI's from-keyframe owns the first frame.
   html.classList.add('mood-settling', 'mood-settled')
   html.classList.remove('mood-await')
 
-  const moodW = mood.getBoundingClientRect().width
-  const gapPx = parseFloat(getComputedStyle(split).columnGap) || 0
+  // Final layout (sync, before paint).
+  const lastText = text.getBoundingClientRect()
+  const lastPlate = plate.getBoundingClientRect()
 
-  split.style.gridTemplateColumns = '0px minmax(0, 1fr)'
-  split.style.columnGap = '0px'
-  mood.style.overflow = 'hidden'
-  mood.style.minWidth = '0'
+  // Hold await width as an inline style through the first paint so content
+  // cannot snap to the settled track before WAAPI's from-keyframe applies.
+  text.style.boxSizing = 'border-box'
+  text.style.width = `${firstText.width}px`
+  text.style.maxWidth = 'none'
 
   const { duration, easing } = motion()
-  const timing = { duration, easing, fill: 'both' as const }
+  // `both` = apply from-keyframe immediately (no flash) and hold the end
+  // until we cancel in finally.
+  const textTiming = { duration, easing, fill: 'both' as const }
+  const plateTiming = {
+    duration,
+    easing,
+    fill: 'both' as const,
+    delay: PLATE_DELAY_MS,
+  }
 
-  // Column + gap grow left→right; plate is width:100% of the track so it
-  // expands with the space (overflow clips until the track is wide enough).
-  const splitAnim = split.animate(
-    [
-      {
-        gridTemplateColumns: '0px minmax(0, 1fr)',
-        columnGap: '0px',
-      },
-      {
-        gridTemplateColumns: `${moodW}px minmax(0, 1fr)`,
-        columnGap: `${gapPx}px`,
-      },
-    ],
-    timing,
-  )
+  // Vertical: measured tops only — no extra lower offset.
+  const dx = firstPlate.left - lastPlate.left
+  const dy = firstPlate.top - lastPlate.top
+  const scale = lastPlate.width ? firstPlate.width / lastPlate.width : 1
 
   const plateAnim = plate.animate(
     [
-      { opacity: 0.78 },
-      { opacity: 1 },
+      {
+        transformOrigin: '0 0',
+        transform: `translate(${dx}px, ${dy}px) scale(${scale})`,
+        opacity: PLATE_TRAVEL_OPACITY,
+      },
+      {
+        transformOrigin: '0 0',
+        transform: 'none',
+        opacity: 1,
+      },
     ],
-    timing,
+    plateTiming,
   )
 
-  return Promise.all([splitAnim.finished, plateAnim.finished])
+  const textAnim = text.animate(
+    [
+      {
+        transform: `translate(${firstText.left - lastText.left}px, ${firstText.top - lastText.top}px)`,
+        width: `${firstText.width}px`,
+      },
+      { transform: 'none', width: `${lastText.width}px` },
+    ],
+    textTiming,
+  )
+
+  // WAAPI now owns width; drop the inline pin on the next frame.
+  requestAnimationFrame(() => {
+    text.style.width = ''
+    text.style.maxWidth = ''
+    text.style.boxSizing = ''
+  })
+
+  return Promise.all([plateAnim.finished, textAnim.finished])
     .catch(() => undefined)
     .finally(() => {
       html.classList.remove('mood-settling')
-      split.style.gridTemplateColumns = ''
-      split.style.columnGap = ''
-      mood.style.overflow = ''
-      mood.style.minWidth = ''
-      splitAnim.cancel()
+      text.style.width = ''
+      text.style.maxWidth = ''
+      text.style.boxSizing = ''
+      // Drop fill:both so normal grid width takes over cleanly.
+      textAnim.cancel()
       plateAnim.cancel()
     })
 }
@@ -95,23 +121,22 @@ async function run() {
   if (!html.classList.contains('mood-await')) return
 
   await pageVtFinished()
-  // Brief beat on the text-only layout (no empty mood hole).
-  await new Promise((r) => window.setTimeout(r, 200))
+  // A short beat so the centered, writing-like layout is actually seen.
+  await new Promise((r) => window.setTimeout(r, 240))
 
   if (!html.classList.contains('mood-await')) return
 
-  const split = document.querySelector<HTMLElement>('.home-split')
-  const mood = document.querySelector<HTMLElement>('.home-mood')
+  const text = document.querySelector<HTMLElement>('.home-text')
   const plate = document.querySelector<HTMLElement>('.home-mood .hero-shell-stage')
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  if (reduced || !split || !mood || !plate || typeof split.animate !== 'function') {
+  if (reduced || !text || !plate || typeof text.animate !== 'function') {
     html.classList.add('mood-settled')
     html.classList.remove('mood-await')
     return
   }
 
-  await expandLayout(split, mood, plate)
+  await slide(text, plate)
 }
 
 /** Call when the first mood image is ready (or if it fails). Safe to call often. */

@@ -551,17 +551,27 @@ html[data-theme='light'] .theme-icon-moon {
     max-width: var(--home-col);
   }
 
-  /* Before the mood still is ready: no reserved mood column — text uses
-     the full split. settleMood.ts grows track + gap + plate together
-     from the left (space and image as one). */
+  /* Before the mood still is ready: text+nav sit centered at the Writing
+     / post-group measure. Mood stacks behind; settleMood.ts FLIPs both
+     into the split (plate emerges from behind text). */
   html.mood-await .home-split {
-    grid-template-columns: 0fr minmax(0, 1fr);
-    column-gap: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html.mood-await .home-text {
+    grid-column: 1;
+    grid-row: 1;
+    width: min(100%, var(--post-group));
+    margin-inline: auto;
+    z-index: 2;
+    position: relative;
+    background: var(--bg);
   }
 
   html.mood-await .home-mood {
-    overflow: hidden;
-    min-width: 0;
+    grid-column: 1;
+    grid-row: 1;
+    z-index: 1;
     pointer-events: none;
   }
 
@@ -582,20 +592,27 @@ html[data-theme='light'] .theme-icon-moon {
     transform: none;
   }
 
-  /* During layout expand (lib/settleMood.ts): column + plate grow as one;
-     overflow clips the plate to the growing track (gap opens with it). */
-  html.mood-settling .home-split {
-    will-change: grid-template-columns, column-gap;
+  /* During the slide (lib/settleMood.ts): opaque text covers the plate
+     until it eases out from under the text's left edge into the gap.
+     Width is WAAPI-driven (may briefly exceed the settled track). */
+  html.mood-settling .home-text {
+    position: relative;
+    z-index: 2;
+    background: var(--bg);
+    max-width: none;
+    margin-inline: 0;
+    overflow: visible;
+    will-change: transform, width;
   }
 
   html.mood-settling .home-mood {
-    overflow: hidden;
-    min-width: 0;
+    position: relative;
+    z-index: 1;
     pointer-events: none;
   }
 
   html.mood-settling .home-mood .hero-shell-stage {
-    will-change: opacity;
+    will-change: transform, opacity;
   }
 
   html.mood-settling .mood-caption,
