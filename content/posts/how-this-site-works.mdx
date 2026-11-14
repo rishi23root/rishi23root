@@ -113,6 +113,72 @@ In words: `content/` holds the data. The README build reads the bio and post tit
 | Astro (`web/`) | `site.json`, full posts, `web/public/diagrams/` | pages, RSS, sitemap, `llms.txt` |
 | `ExcalidrawBoard` island | one scene JSON | an inline SVG, in the browser |
 
+### What's in `site.json`
+
+This is the whole data side of the site, trimmed to one item per list. The comments say what reads each block:
+
+```jsonc
+{
+  // Base for every absolute URL: canonical, OG, RSS, sitemap
+  "siteUrl": "https://rishi23root.in",
+  // README username, nav wordmark, title suffix, RSS title
+  "github": { "name": "rishi23root" },
+
+  // README whoami; site meta description, RSS, llms.txt, JSON-LD
+  "shortBio": "software engineer · AI · SaaS · automation",
+  "fullDescription": "I build useful things at the intersection of…",
+  // Site only: the first-person intro on the home page
+  "voiceBio": "I'm Rishabh, a software engineer…\n\nI write about…",
+  // README `$ echo $STACK` and mottos row; llms.txt
+  "stackLine": "TypeScript · Python · Node.js · React · React Native",
+  "mottos": ["timshel", "fac quod debes"],
+
+  // README contact links; site footer icons, sameAs, llms.txt
+  "contact": {
+    "email": "hi@rishi23root.in",
+    "socials": {
+      "github": "https://github.com/rishi23root",
+      "x": "https://x.com/rishi23root"
+    }
+  },
+
+  // README Featured Work (live stars); llms.txt featured line
+  "opensource": {
+    "active": ["rishi23root/pyblink"],
+    "blurbs": {
+      "rishi23root/pyblink": "Blink-counter automation to ease eye strain"
+    }
+  },
+  // README: how many recently starred repos to list
+  "recentLikedCount": 8,
+
+  // Site only: home mood plate, /mood gallery, head preload
+  "moods": [
+    {
+      "id": "cyclist",
+      "label": "cycling",
+      "src": "/mood/cyclist.webp",
+      "alt": "Cyclist in green hills under drifting clouds"
+    }
+  ],
+  // Site only: /projects and the command palette, by `order`
+  "projects": [
+    {
+      "title": "pyblink",
+      "blurb": "Blink-counter automation to ease eye strain",
+      "url": "https://github.com/rishi23root/pyblink",
+      "order": 4
+    }
+  ],
+  // Site only: the short "what I do" list on the home page
+  "capabilities": [
+    { "heading": "Automation & systems", "body": "Python tooling, browser…" }
+  ]
+}
+```
+
+The real file is plain JSON with no comments. The README build only knows the first half. It reads through `config.ts`, which re-exports the keys it needs and ignores `voiceBio`, `moods`, `projects` and `capabilities`, so adding something for the site can't change the README's shape. The site imports the file directly through `site.ts`. You can also spot the duplication from What failed here: `opensource` and `projects` describe the same repositories.
+
 ### Mood images
 
 The catalogue is a list in `site.json`. Each entry has an `id`, a short activity `label`, the image path and alt text:
