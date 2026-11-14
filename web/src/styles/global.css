@@ -60,14 +60,14 @@ html[data-theme='light'] {
 
   /* Page frame */
   --measure: 38rem; /* narrow prose / empty-state width */
-  --page-pad: clamp(1.5rem, 3.6vw, 3.5rem); /* left/right gutter, all pages */
+  --page-pad: clamp(1.5rem, 2.5vw, 2.25rem); /* left/right gutter, all pages */
   --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7));
   --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem);
   --home-max: 93.75rem;
   --home-gap: clamp(var(--space-6), 4.5vw, 5rem); /* mood plate <-> text */
 
   /* Inner pages: article + rail form one centered group; the nav row matches it */
-  --article-max: 42rem;
+  --article-max: 46rem;
   --rail-w: 13rem;
   --rail-gap: clamp(var(--space-7), 5vw, 5rem);
   --post-group: calc(var(--article-max) + var(--rail-gap) + var(--rail-w));
