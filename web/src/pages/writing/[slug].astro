@@ -306,12 +306,13 @@ if (d.faq.length) {
           tmp.remove()
           return px
         }
-        function durMs() {
-          var raw = getComputedStyle(toc).getPropertyValue('--dur').trim()
+        function cssTime(prop, fallback) {
+          var raw = getComputedStyle(toc).getPropertyValue(prop).trim()
           var n = parseFloat(raw)
-          if (/ms$/i.test(raw)) return n || 280
-          if (/s$/i.test(raw)) return (n || 0.28) * 1000
-          return n || 280
+          if (!raw || !isFinite(n)) return fallback
+          if (/ms$/i.test(raw)) return n
+          if (/s$/i.test(raw)) return n * 1000
+          return n
         }
         function snap(v, line, dpr) {
           if (Math.round(line * dpr) % 2 === 1) {
@@ -594,8 +595,17 @@ if (d.faq.length) {
           setTargets(false)
         }
 
-        onRailOpen = function () {
-          layoutUntil = performance.now() + (motion.matches ? 0 : durMs() + 48)
+        onRailOpen = function (kind) {
+          var wait = 0
+          if (!motion.matches) {
+            var openMs = cssTime('--toc-sub-dur-open', 520)
+            var closeMs = cssTime('--toc-sub-dur-close', 620)
+            if (kind && kind.closing) wait = closeMs
+            else if (kind && kind.switching) wait = Math.max(openMs, closeMs)
+            else wait = openMs
+            wait += 48
+          }
+          layoutUntil = performance.now() + wait
           rebuild()
           startLoop()
         }
@@ -626,15 +636,51 @@ if (d.faq.length) {
 
       var openSub = null
       var onRailOpen = function () {}
-      function setOpen(sub) {
+      var closeTimer = 0
+      function applyOpen(sub, kind) {
         if (sub === openSub) return
+        var prev = openSub
         openSub = sub
         subs.forEach(function (s) {
           var on = s === sub
           s.classList.toggle('is-open', on)
           s.inert = !on
         })
-        onRailOpen()
+        if (!kind) {
+          kind = { closing: !sub && !!prev, switching: !!(sub && prev) }
+        }
+        onRailOpen(kind)
+      }
+      function setOpen(sub) {
+        if (sub === openSub) {
+          if (closeTimer) {
+            window.clearTimeout(closeTimer)
+            closeTimer = 0
+          }
+          return
+        }
+        // A close is already scheduled and we still want no sub:
+        // don't restart the delay on every scroll tick.
+        if (!sub && closeTimer) return
+        if (closeTimer) {
+          window.clearTimeout(closeTimer)
+          closeTimer = 0
+        }
+        // Delay collapse only when leaving a sub for no sub, so a
+        // quick scroll-through doesn't flicker. Switching sections
+        // or opening starts immediately; reduced motion snaps.
+        if (!sub && openSub && !(motion && motion.matches)) {
+          var delay = 120
+          var raw = toc && getComputedStyle(toc).getPropertyValue('--toc-sub-delay-close').trim()
+          var n = parseFloat(raw)
+          if (raw && isFinite(n)) delay = /s$/i.test(raw) && !/ms$/i.test(raw) ? n * 1000 : n
+          closeTimer = window.setTimeout(function () {
+            closeTimer = 0
+            applyOpen(null, { closing: true, switching: false })
+          }, delay)
+          return
+        }
+        applyOpen(sub)
       }
       // Collapse only once JS can reopen them; without JS every H3 stays listed.
       if (toc && subs.length) {

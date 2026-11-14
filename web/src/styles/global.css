@@ -1344,6 +1344,14 @@ html[data-theme='light'] .theme-icon-moon {
      ╰ stays on the same 1px centerline as the H2 spine. */
   --toc-curve-h: calc(0.28rem + 0.54rem);
   --toc-curve-r: 8px;
+  /* Sub-list open/close. Close is a touch slower and uses a
+     smoother ease so the list doesn't vanish in the first beat
+     (the old 280ms ease-out felt like it hid too quickly). */
+  --toc-sub-dur-open: 520ms;
+  --toc-sub-dur-close: 620ms;
+  --toc-sub-delay-close: 120ms;
+  --toc-sub-ease-open: var(--ease-out);
+  --toc-sub-ease-close: cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
@@ -1594,9 +1602,11 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--fg);
 }
 
-/* Subheadings show only under the section being read. Grid 0fr -> 1fr animates
-   to the list's real height; visibility flips after the close so collapsed
-   links leave the tab order and accessibility tree. */
+/* Subheadings show only under the section being read. Grid 0fr -> 1fr
+   animates to the list's real height; visibility flips after the close
+   so collapsed links leave the tab order and accessibility tree.
+   Close is slightly slower than open. A short JS delay (see [slug].astro)
+   holds the open list so a quick scroll-through doesn't flicker. */
 .post-toc.is-collapsible .toc-sub {
   display: grid;
   grid-template-rows: 0fr;
@@ -1605,10 +1615,10 @@ html[data-theme='light'] .theme-icon-moon {
   transform: translateY(-0.25rem);
   visibility: hidden;
   transition:
-    grid-template-rows var(--dur) var(--ease-out),
-    opacity var(--dur) var(--ease-out),
-    transform var(--dur) var(--ease-out),
-    visibility 0s linear var(--dur);
+    grid-template-rows var(--toc-sub-dur-close) var(--toc-sub-ease-close),
+    opacity var(--toc-sub-dur-close) var(--toc-sub-ease-close),
+    transform var(--toc-sub-dur-close) var(--toc-sub-ease-close),
+    visibility 0s linear var(--toc-sub-dur-close);
 }
 
 .post-toc.is-collapsible .toc-sub.is-open {
@@ -1618,9 +1628,9 @@ html[data-theme='light'] .theme-icon-moon {
   transform: none;
   visibility: visible;
   transition:
-    grid-template-rows var(--dur) var(--ease-out),
-    opacity var(--dur) var(--ease-out),
-    transform var(--dur) var(--ease-out),
+    grid-template-rows var(--toc-sub-dur-open) var(--toc-sub-ease-open),
+    opacity var(--toc-sub-dur-open) var(--toc-sub-ease-open),
+    transform var(--toc-sub-dur-open) var(--toc-sub-ease-open),
     visibility 0s;
 }
 
@@ -1988,7 +1998,7 @@ html[data-theme='light'] .theme-icon-moon {
 
   .post-toc.is-collapsible .toc-sub,
   .post-toc.is-collapsible .toc-sub.is-open {
-    transition: none;
+    transition: none !important;
   }
 
   .post-toc > ul > li.toc-depth-2 > a::before,
