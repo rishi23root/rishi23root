@@ -33,7 +33,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | --- | --- | --- |
 | Bio / description / `$STACK` line | `content/site.json` → `shortBio`, `fullDescription`, `stackLine` | Keep whoami inside the ```bash fence |
 | Mottos | `content/site.json` → `mottos` | Rendered as 「samp」 |
-| Socials / email / site URL | `content/site.json` → `contact`, `siteUrl` | Bottom text links (not icons) |
+| Socials / email / site URL | `content/site.json` → `contact`, `siteUrl` | README: bottom text links (incl. Website). Site icons: `web/src/lib/site.ts` `socialLinks` (no website self-link); temporary A/B via `?socials=nav` / `?socials=bio` + `SocialsPlacementPreview` |
 | Featured Work | `content/site.json` → `opensource.active` + `blurbs` | `owner/repo` strings |
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
 | Writing post | `content/posts/<slug>.mdx` | Frontmatter required. Lists, RSS, `llms.txt` and the palette use `getPublishedPosts()` (never drafts, dev included); only `writing/[slug].astro` uses `getRenderablePosts()`, so a `draft: true` post is previewable at its URL in dev and nowhere else |

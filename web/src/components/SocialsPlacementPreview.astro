@@ -1,0 +1,89 @@
+---
+/**
+ * TEMPORARY review control — remove once A/B (nav vs bio socials) is decided.
+ * Visible when `?preview=socials` is set, or after a placement was chosen this
+ * session (`sessionStorage` key `socials-preview`). Query `?socials=nav|bio`
+ * still works without showing the control.
+ */
+---
+
+<div
+  class="socials-preview"
+  id="socialsPreview"
+  hidden
+  role="group"
+  aria-label="Temporary socials placement preview"
+>
+  <span class="socials-preview-label">Socials</span>
+  <button type="button" data-socials-set="nav" aria-pressed="false">nav</button>
+  <span class="socials-preview-sep" aria-hidden="true">|</span>
+  <button type="button" data-socials-set="bio" aria-pressed="false">bio</button>
+</div>
+
+<script is:inline>
+  ;(function () {
+    var KEY = 'socials-placement'
+    var PREVIEW_KEY = 'socials-preview'
+    var root = document.documentElement
+    var box = document.getElementById('socialsPreview')
+    if (!box) return
+
+    function current() {
+      return root.getAttribute('data-socials') === 'bio' ? 'bio' : 'nav'
+    }
+
+    function showPreview() {
+      box.hidden = false
+      try {
+        sessionStorage.setItem(PREVIEW_KEY, '1')
+      } catch (e) {}
+    }
+
+    function syncPressed() {
+      var value = current()
+      box.querySelectorAll('[data-socials-set]').forEach(function (btn) {
+        var on = btn.getAttribute('data-socials-set') === value
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false')
+      })
+    }
+
+    function setPlacement(value) {
+      if (value !== 'nav' && value !== 'bio') return
+      root.setAttribute('data-socials', value)
+      try {
+        sessionStorage.setItem(KEY, value)
+      } catch (e) {}
+      try {
+        var url = new URL(location.href)
+        url.searchParams.set('socials', value)
+        history.replaceState(null, '', url)
+      } catch (e) {}
+      syncPressed()
+    }
+
+    var params
+    try {
+      params = new URLSearchParams(location.search)
+    } catch (e) {
+      params = new URLSearchParams()
+    }
+    var qSocials = params.get('socials')
+    var wantPreview =
+      params.get('preview') === 'socials' || qSocials === 'nav' || qSocials === 'bio'
+    var storedPreview = false
+    try {
+      storedPreview = sessionStorage.getItem(PREVIEW_KEY) === '1'
+    } catch (e) {}
+    if (wantPreview || storedPreview) showPreview()
+    syncPressed()
+
+    box.addEventListener('click', function (e) {
+      var t = e.target
+      if (!t || !t.getAttribute) return
+      var next = t.getAttribute('data-socials-set')
+      if (!next) return
+      showPreview()
+      setPlacement(next)
+    })
+  })()
+</script>

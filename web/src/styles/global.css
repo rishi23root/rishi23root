@@ -213,6 +213,8 @@ a:hover {
   align-items: center;
   gap: var(--space-4);
   min-width: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .wordmark {
@@ -471,9 +473,9 @@ html[data-theme='light'] .theme-icon-moon {
   font-weight: 600;
 }
 
-.home-copy .contact-icons {
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border);
+/* Bio variant: quiet strip under the voice paragraph (not a page footer). */
+.home-section .contact-icons--bio {
+  margin-top: var(--space-4);
 }
 
 .home-mood {
@@ -853,7 +855,8 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 /* ---------------------------------------------------------------
- * Contact icons (home column + bottom of inner pages)
+ * Contact icons (chrome cluster A / home bio strip B)
+ * TEMPORARY: html[data-socials=nav|bio] toggles which row is visible.
  * ------------------------------------------------------------- */
 .contact-icons {
   display: flex;
@@ -862,11 +865,31 @@ html[data-theme='light'] .theme-icon-moon {
   gap: 0.85rem 1.05rem;
 }
 
-.blog-page .contact-icons {
-  width: 100%;
-  max-width: var(--article-max);
-  margin-top: 0.75rem;
-  padding-top: var(--space-4);
+/* Variant A: compact cluster beside the theme toggle */
+.contact-icons--nav {
+  flex-shrink: 0;
+  gap: 0.05rem;
+}
+
+.contact-icons--nav .contact-icon {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 6px;
+}
+
+.contact-icons--nav .contact-icon svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+/* A/B visibility — default before the head script is nav */
+html:not([data-socials='bio']) .contact-icons--bio,
+html[data-socials='nav'] .contact-icons--bio {
+  display: none;
+}
+
+html[data-socials='bio'] .contact-icons--nav {
+  display: none;
 }
 
 .contact-icon {
@@ -878,6 +901,10 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--muted);
   text-decoration: none;
   border-radius: 8px;
+}
+
+html[data-theme='light'] .contact-icon {
+  color: rgba(28, 27, 25, 0.72);
 }
 
 .contact-icon:hover,
@@ -894,6 +921,81 @@ html[data-theme='light'] .theme-icon-moon {
   width: 1.2rem;
   height: 1.2rem;
   display: block;
+}
+
+/* TEMPORARY review switcher — remove with SocialsPlacementPreview.astro */
+.socials-preview {
+  position: fixed;
+  right: var(--page-pad);
+  bottom: var(--page-pad);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.socials-preview[hidden] {
+  display: none;
+}
+
+.socials-preview-label {
+  margin-right: 0.15rem;
+}
+
+.socials-preview-sep {
+  opacity: 0.45;
+}
+
+.socials-preview button {
+  margin: 0;
+  padding: 0.1rem 0.2rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.socials-preview button[aria-pressed='true'] {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.socials-preview button:hover,
+.socials-preview button:focus-visible {
+  color: var(--fg);
+}
+
+.socials-preview button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Crowded chrome: keep icons as a tight cluster under nav links */
+@media (max-width: 40rem) {
+  .chrome-end {
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .contact-icons--nav {
+    order: 3;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .theme-toggle {
+    order: 2;
+  }
 }
 
 /* ---------------------------------------------------------------
@@ -945,9 +1047,8 @@ html[data-theme='light'] .theme-icon-moon {
   gap: var(--space-1);
 }
 
-/* Listings fill the shell; post pages keep --article-max on lists/contact. */
-.page-listing .post-list,
-.page-listing .contact-icons {
+/* Listings fill the shell. */
+.page-listing .post-list {
   max-width: none;
 }
 
@@ -2451,8 +2552,7 @@ html[data-theme='dark'] .excal-stage svg {
 /* Mobile/tablet: hide TOC, fill shell (no reserved rail gutter), hide
    progress ring. Chrome/main stay --post-group (same as listings). */
 @media (max-width: 1023px) {
-  .post,
-  .blog-page:not(.page-listing) .contact-icons {
+  .post {
     max-width: none;
   }
 

@@ -1,12 +1,17 @@
 ---
 import { socialLinks, type SocialId } from '../lib/site'
 
+type Props = {
+  /** `nav` = chrome cluster; `bio` = under home voice bio. */
+  variant?: 'nav' | 'bio'
+}
+
+const { variant = 'bio' } = Astro.props
+
 /** 24×24 filled icon paths, one per contact link. */
 const iconPaths: Record<SocialId, string> = {
   email:
     'M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z',
-  website:
-    'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z',
   x: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.727-8.849L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z',
   linkedin:
     'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.5 18H6v-8h2.5v8zM7.25 9.25A1.75 1.75 0 1 1 7.25 5.75a1.75 1.75 0 0 1 0 3.5zM18 18h-2.5v-4.2c0-1.55-.55-2.05-1.4-2.05-.9 0-1.35.65-1.55 1.25-.05.2-.05.45-.05.7V18H10v-8h2.4v1.1c.45-.75 1.2-1.35 2.55-1.35 1.85 0 3.05 1.2 3.05 3.8V18z',
@@ -16,7 +21,7 @@ const iconPaths: Record<SocialId, string> = {
 }
 ---
 
-<nav class="contact-icons" aria-label="Contact">
+<nav class={`contact-icons contact-icons--${variant}`} aria-label="Contact">
   {
     socialLinks.map((item) => (
       <a
