@@ -1052,10 +1052,6 @@ html[data-theme='light'] .theme-icon-moon {
   text-decoration: none;
 }
 
-.post-crumbs a:hover {
-  text-decoration: underline;
-}
-
 .post-crumbs-current {
   min-width: 0;
   max-width: 100%;
