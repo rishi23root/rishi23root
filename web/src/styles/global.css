@@ -1623,7 +1623,6 @@ html[data-theme='light'] .theme-icon-moon {
 
 .post-toc.is-collapsible .toc-sub.is-open {
   grid-template-rows: 1fr;
-  overflow: hidden;
   opacity: 1;
   transform: none;
   visibility: visible;

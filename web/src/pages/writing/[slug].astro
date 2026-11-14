@@ -270,6 +270,19 @@ if (d.faq.length) {
         return a.closest('[data-toc-sub]') || (a.parentElement && a.parentElement.querySelector(':scope > [data-toc-sub]'))
       }
 
+      // Parse a CSS time custom property as milliseconds. Open/close
+      // durations and the close delay live on .post-toc so JS and CSS
+      // share one source; the numeric fallbacks are only if a var is missing.
+      function cssTime(el, prop, fallback) {
+        if (!el) return fallback
+        var raw = getComputedStyle(el).getPropertyValue(prop).trim()
+        var n = parseFloat(raw)
+        if (!raw || !isFinite(n)) return fallback
+        if (/ms$/i.test(raw)) return n
+        if (/s$/i.test(raw)) return n * 1000
+        return n
+      }
+
       // Traveling rail mark: one SVG path for the quiet track, a second
       // stroke on the same path whose dash start/length spring between
       // the active item's range so the highlight slides around the bends.
@@ -305,14 +318,6 @@ if (d.faq.length) {
           var px = tmp.getBoundingClientRect().width
           tmp.remove()
           return px
-        }
-        function cssTime(prop, fallback) {
-          var raw = getComputedStyle(toc).getPropertyValue(prop).trim()
-          var n = parseFloat(raw)
-          if (!raw || !isFinite(n)) return fallback
-          if (/ms$/i.test(raw)) return n
-          if (/s$/i.test(raw)) return n * 1000
-          return n
         }
         function snap(v, line, dpr) {
           if (Math.round(line * dpr) % 2 === 1) {
@@ -598,8 +603,8 @@ if (d.faq.length) {
         onRailOpen = function (kind) {
           var wait = 0
           if (!motion.matches) {
-            var openMs = cssTime('--toc-sub-dur-open', 520)
-            var closeMs = cssTime('--toc-sub-dur-close', 620)
+            var openMs = cssTime(toc, '--toc-sub-dur-open', 520)
+            var closeMs = cssTime(toc, '--toc-sub-dur-close', 620)
             if (kind && kind.closing) wait = closeMs
             else if (kind && kind.switching) wait = Math.max(openMs, closeMs)
             else wait = openMs
@@ -637,7 +642,7 @@ if (d.faq.length) {
       var openSub = null
       var onRailOpen = function () {}
       var closeTimer = 0
-      function applyOpen(sub, kind) {
+      function applyOpen(sub) {
         if (sub === openSub) return
         var prev = openSub
         openSub = sub
@@ -646,38 +651,31 @@ if (d.faq.length) {
           s.classList.toggle('is-open', on)
           s.inert = !on
         })
-        if (!kind) {
-          kind = { closing: !sub && !!prev, switching: !!(sub && prev) }
+        onRailOpen({ closing: !sub && !!prev, switching: !!(sub && prev) })
+      }
+      function clearCloseTimer() {
+        if (closeTimer) {
+          window.clearTimeout(closeTimer)
+          closeTimer = 0
         }
-        onRailOpen(kind)
       }
       function setOpen(sub) {
         if (sub === openSub) {
-          if (closeTimer) {
-            window.clearTimeout(closeTimer)
-            closeTimer = 0
-          }
+          clearCloseTimer()
           return
         }
         // A close is already scheduled and we still want no sub:
         // don't restart the delay on every scroll tick.
         if (!sub && closeTimer) return
-        if (closeTimer) {
-          window.clearTimeout(closeTimer)
-          closeTimer = 0
-        }
+        clearCloseTimer()
         // Delay collapse only when leaving a sub for no sub, so a
         // quick scroll-through doesn't flicker. Switching sections
         // or opening starts immediately; reduced motion snaps.
         if (!sub && openSub && !(motion && motion.matches)) {
-          var delay = 120
-          var raw = toc && getComputedStyle(toc).getPropertyValue('--toc-sub-delay-close').trim()
-          var n = parseFloat(raw)
-          if (raw && isFinite(n)) delay = /s$/i.test(raw) && !/ms$/i.test(raw) ? n * 1000 : n
           closeTimer = window.setTimeout(function () {
             closeTimer = 0
-            applyOpen(null, { closing: true, switching: false })
-          }, delay)
+            applyOpen(null)
+          }, cssTime(toc, '--toc-sub-delay-close', 120))
           return
         }
         applyOpen(sub)
