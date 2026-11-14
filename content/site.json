@@ -70,6 +70,18 @@
       "label": "tennis",
       "src": "/mood/tennis.webp",
       "alt": "Top-down tennis court with two players and long blue shadows"
+    },
+    {
+      "id": "shore",
+      "label": "sitting",
+      "src": "/mood/shore.webp",
+      "alt": "Figure sitting on a beach shore under open sky"
+    },
+    {
+      "id": "sketch",
+      "label": "sketching",
+      "src": "/mood/sketch.webp",
+      "alt": "Charcoal portrait sketch of a face"
     }
   ],
   "projects": [
