@@ -1747,8 +1747,14 @@ html[data-theme='light'] .theme-icon-moon {
   border-radius: 8px;
 }
 
-/* Mobile/tablet: no TOC; back-to-top sits on the right under the article */
+/* Mobile/tablet: no TOC; back-to-top sits on the right under the article.
+   Drop the reserved rail from the shell so the page isn't half-empty. */
 @media (max-width: 1023px) {
+  body:has(.post-layout) .chrome-bar .chrome,
+  body:has(.post-layout) .shell-inner > main {
+    max-width: var(--article-max);
+  }
+
   .post-rail {
     margin-top: var(--space-7);
   }
@@ -1788,6 +1794,32 @@ html[data-theme='light'] .theme-icon-moon {
     position: sticky;
     top: var(--space-7);
     padding-top: 0.35rem;
+  }
+
+  /* No headings → no TOC: single column, shell matches the article */
+  .post-layout:not(:has(.post-toc)) {
+    grid-template-columns: minmax(0, var(--article-max));
+  }
+
+  body:has(.post-layout):not(:has(.post-toc)) .chrome-bar .chrome,
+  body:has(.post-layout):not(:has(.post-toc)) .shell-inner > main {
+    max-width: var(--article-max);
+  }
+
+  .post-layout:not(:has(.post-toc)) .post-rail {
+    margin-top: var(--space-7);
+  }
+
+  .post-layout:not(:has(.post-toc)) .post-rail-sticky {
+    position: static;
+    padding-top: 0;
+  }
+
+  .post-layout:not(:has(.post-toc)) .post-rail-tools {
+    flex-direction: row;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 0;
   }
 }
 
