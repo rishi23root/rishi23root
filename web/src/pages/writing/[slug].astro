@@ -3,12 +3,13 @@ import { render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Callout from '../../components/Callout.astro'
 import ContactIcons from '../../components/ContactIcons.astro'
+import ExcalidrawBoard from '../../components/ExcalidrawBoard.astro'
 import MetaLine from '../../components/MetaLine.astro'
 import { absoluteUrl, site } from '../../lib/site'
 import {
   assertSlugMatchesFile,
   formatPostDate,
-  getPublishedPosts,
+  getRenderablePosts,
   postKeywords,
   postPath,
   readingTimeMinutes,
@@ -17,7 +18,7 @@ import {
 import { publicImageSize } from '../../lib/imageSize'
 
 export async function getStaticPaths() {
-  const posts = await getPublishedPosts()
+  const posts = await getRenderablePosts()
   posts.forEach(assertSlugMatchesFile)
   return posts.map((post) => ({ params: { slug: post.data.slug }, props: { post } }))
 }
@@ -150,7 +151,7 @@ if (d.faq.length) {
         }
 
         <div class="prose post-body">
-          <Content components={{ Callout }} />
+          <Content components={{ Callout, ExcalidrawBoard }} />
         </div>
 
         {

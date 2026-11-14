@@ -3,10 +3,16 @@ title: One content tree, two surfaces
 date: 2026-11-05
 slug: on-shared-content
 summary: Why the profile README and this site both read from content/ — less drift, same voice.
-draft: false
+draft: true
 tags: [meta, content]
 ---
 
 Profile READMEs rot when the website tells a different story. Here, `content/site.json` and `content/posts/` feed both surfaces at build time.
 
 The README lists the latest posts. The site renders the full pages. Edit once; rebuild; both stay aligned.
+
+## One tree, two readers
+
+<ExcalidrawBoard src="/diagrams/example-stack.json" />
+
+Same source files; two build pipelines. The board above is an Excalidraw scene rendered to SVG — draw elsewhere, commit the JSON under `web/public/diagrams/`, embed here.

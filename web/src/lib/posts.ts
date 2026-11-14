@@ -2,18 +2,24 @@ import { getCollection, type CollectionEntry } from 'astro:content'
 
 export type Post = CollectionEntry<'posts'>
 
+const byDateDesc = (a: Post, b: Post) => b.data.date.valueOf() - a.data.date.valueOf()
+
 /**
- * Published posts only. Drafts show up in `astro dev` so they can be
- * previewed, but never in a build (pages, RSS, sitemap, llms.txt).
+ * Published posts only, newest first, in dev and build alike. Every listing
+ * uses this: Writing index, home, command palette, RSS, llms.txt, redirects.
  */
-function publishedPostsFilter(entry: Post): boolean {
-  return import.meta.env.DEV || entry.data.draft !== true
+export async function getPublishedPosts(): Promise<Post[]> {
+  const posts = await getCollection('posts', (entry) => entry.data.draft !== true)
+  return posts.sort(byDateDesc)
 }
 
-/** Published posts, newest first. */
-export async function getPublishedPosts(): Promise<Post[]> {
-  const posts = await getCollection('posts', publishedPostsFilter)
-  return posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+/**
+ * Posts that get a page. Drafts are included only in `astro dev`, so they can
+ * be previewed at their URL without showing up in any list.
+ */
+export async function getRenderablePosts(): Promise<Post[]> {
+  const posts = await getCollection('posts', (entry) => import.meta.env.DEV || entry.data.draft !== true)
+  return posts.sort(byDateDesc)
 }
 
 export function postPath(slug: string): string {
