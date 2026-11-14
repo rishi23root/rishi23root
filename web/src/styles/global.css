@@ -90,12 +90,12 @@ html[data-theme='light'] {
   --dur-slow: 520ms;
   --stagger: 60ms;
   --mood-xfade: 420ms; /* mirrored by XFADE_MS in HeroMoodShell.tsx */
-  --mood-settle: 900ms; /* home settle slide; mirrored by SETTLE_MS in settleMood.ts */
+  --mood-settle: 1400ms; /* home settle slide; mirrored by SETTLE_MS in settleMood.ts */
   /* Caption row below the homepage plate: gap + reserved line height. */
   --mood-caption-gap: 0.45rem;
   --mood-caption-row: 1.15rem;
   --mood-caption-space: calc(var(--mood-caption-gap) + var(--mood-caption-row));
-  --ease-settle: cubic-bezier(0.45, 0, 0.15, 1); /* soft start, long glide in */
+  --ease-settle: cubic-bezier(0.33, 0, 0.12, 1); /* softer start, longer glide; no overshoot */
 
   /* Inset shadow on the mood plate; set to none to drop it */
   --mood-inset-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18),

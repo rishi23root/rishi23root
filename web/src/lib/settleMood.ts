@@ -13,9 +13,9 @@
  * full readable measure; settled matches the mood+text split).
  */
 
-/** Fallback for --mood-settle in global.css; keep the two in sync. */
-const SETTLE_MS = 900
-const SETTLE_EASE = 'cubic-bezier(0.45, 0, 0.15, 1)'
+/** Fallback for --mood-settle / --ease-settle in global.css; keep in sync. */
+const SETTLE_MS = 1400
+const SETTLE_EASE = 'cubic-bezier(0.33, 0, 0.12, 1)'
 
 let started = false
 
