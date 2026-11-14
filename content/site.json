@@ -43,26 +43,31 @@
   "moods": [
     {
       "id": "cyclist",
+      "label": "cycling",
       "src": "/mood/cyclist.webp",
       "alt": "Cyclist in green hills under drifting clouds"
     },
     {
       "id": "park",
+      "label": "wandering",
       "src": "/mood/park.webp",
       "alt": "Aerial park lawn with people and long shadows"
     },
     {
       "id": "building",
+      "label": "roaming",
       "src": "/mood/building.webp",
       "alt": "Terracotta building facade with a walker and dog"
     },
     {
       "id": "warehouse",
+      "label": "exploring",
       "src": "/mood/warehouse.webp",
       "alt": "Dusty warehouse interior with shafts of light"
     },
     {
       "id": "tennis",
+      "label": "tennis",
       "src": "/mood/tennis.webp",
       "alt": "Top-down tennis court with two players and long blue shadows"
     }

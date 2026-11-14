@@ -35,14 +35,14 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
                   <img
                     class="mood-index-img"
                     src={mood.src}
-                    alt={mood.alt || mood.id}
+                    alt={mood.alt || mood.label || mood.id}
                     loading="lazy"
                     decoding="async"
                     width="720"
                     height="1280"
                   />
                 </div>
-                <span class="mood-index-id">{mood.id}</span>
+                <span class="mood-index-id">{mood.label || mood.id}</span>
               </a>
             </li>
           ))}
