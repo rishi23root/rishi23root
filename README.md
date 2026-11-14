@@ -25,7 +25,7 @@ $ stats
 
 ### Writing
 
-- **[One content tree, two surfaces](https://rishi23root.in/writing/on-shared-content)** — 2026-11-05
+- **[How this site is built: one content folder, a README and a website](https://rishi23root.in/writing/how-this-site-works)** — 2026-11-14
 - **[Hello world](https://rishi23root.in/writing/hello-world)** — 2026-11-01
 
 ### Recently liked

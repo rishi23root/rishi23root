@@ -27,6 +27,7 @@ export default defineConfig({
   // Index redirect; per-slug redirects live in pages/blog/[slug].astro
   redirects: {
     '/blog': '/writing/',
+    '/writing/on-shared-content': '/writing/how-this-site-works/',
   },
   markdown: {
     rehypePlugins: [rehypePublicImageSize],

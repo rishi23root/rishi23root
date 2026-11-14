@@ -66,7 +66,7 @@ Writing posts follow this section order (frontmatter `title` is the H1; the rest
 9. Results
 10. What I recommend
 
-Keep the order. A short qualifier after a colon is fine (`## What failed: exporting PNGs`); drop a section that has nothing real rather than pad it. Details per section are in `web/BLOG_WRITING_GUIDE.md` §2. `content/posts/post-template.mdx` is a real post (the Excalidraw boards writeup), not a template, despite its slug.
+Keep the order. A short qualifier after a colon is fine (`## What failed: exporting PNGs`); drop a section that has nothing real rather than pad it. Details per section are in `web/BLOG_WRITING_GUIDE.md` §2. `content/posts/how-this-site-works.mdx` is the reference published post in this structure. `post-template.mdx` (Excalidraw boards writeup) and `on-shared-content.mdx` are drafts it superseded; `/writing/on-shared-content` redirects to it (`web/astro.config.mjs`).
 
 ## Excalidraw boards
 
@@ -88,7 +88,7 @@ Adding a board:
 4. Embed it in the post: `<ExcalidrawBoard src="/diagrams/<name>.json" />`. Optional `height={360}` (number = px).
 5. `npm run dev:web` → check both themes, the hover pill and Expand → `npm run build:web`.
 
-Examples: `content/posts/post-template.mdx` (two boards, `board-pipeline.json` and `example-stack.json`) and `content/posts/on-shared-content.mdx`.
+Examples: `content/posts/how-this-site-works.mdx` (`board-pipeline.json`, `site-architecture.json`); `draft-template.mdx` uses `example-stack.json`.
 
 Don't:
 
