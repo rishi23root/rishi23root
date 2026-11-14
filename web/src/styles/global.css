@@ -183,13 +183,6 @@ a:hover {
   margin-inline: auto;
 }
 
-/* Writing index has no TOC rail — chrome + main share the article/prose measure
-   (same family as home voice-bio), not the wider post-group. */
-body:has(.blog-index) .chrome-bar .chrome,
-body:has(.blog-index) .shell-inner > main {
-  max-width: var(--article-max);
-}
-
 .page {
   display: flex;
   flex-direction: column;
@@ -959,8 +952,13 @@ html[data-theme='light'] .theme-icon-moon {
   gap: var(--space-1);
 }
 
-/* Writing index stays on `--article-max` (chrome capped via body:has above).
-   Post pages keep article + rail = `--post-group` for chrome. */
+/* Listing page: intro, posts, and hover wash use the full nav width
+   (the post-group). Individual post pages keep the article measure. */
+.blog-index .page-intro,
+.blog-index .post-list,
+.blog-index .contact-icons {
+  max-width: none;
+}
 
 .post-list-item {
   margin-inline: calc(-1 * var(--row-bleed));
