@@ -11,7 +11,7 @@
       "width": 220,
       "height": 90,
       "angle": 0,
-      "strokeColor": "#e6dccb",
+      "strokeColor": "#1c1b19",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -20,15 +20,26 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "seed": 1,
       "version": 1,
       "versionNonce": 1,
       "isDeleted": false,
       "boundElements": [
-        { "id": "label-content", "type": "text" },
-        { "id": "arrow-readme", "type": "arrow" },
-        { "id": "arrow-site", "type": "arrow" }
+        {
+          "id": "label-content",
+          "type": "text"
+        },
+        {
+          "id": "arrow-readme",
+          "type": "arrow"
+        },
+        {
+          "id": "arrow-site",
+          "type": "arrow"
+        }
       ],
       "updated": 1,
       "link": null,
@@ -42,7 +53,7 @@
       "width": 160,
       "height": 30,
       "angle": 0,
-      "strokeColor": "#e6dccb",
+      "strokeColor": "#1c1b19",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -78,7 +89,7 @@
       "width": 180,
       "height": 80,
       "angle": 0,
-      "strokeColor": "#e6dccb",
+      "strokeColor": "#1c1b19",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -87,14 +98,22 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "seed": 3,
       "version": 1,
       "versionNonce": 3,
       "isDeleted": false,
       "boundElements": [
-        { "id": "label-readme", "type": "text" },
-        { "id": "arrow-readme", "type": "arrow" }
+        {
+          "id": "label-readme",
+          "type": "text"
+        },
+        {
+          "id": "arrow-readme",
+          "type": "arrow"
+        }
       ],
       "updated": 1,
       "link": null,
@@ -108,7 +127,7 @@
       "width": 140,
       "height": 30,
       "angle": 0,
-      "strokeColor": "#e6dccb",
+      "strokeColor": "#1c1b19",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -144,7 +163,7 @@
       "width": 200,
       "height": 80,
       "angle": 0,
-      "strokeColor": "#e6dccb",
+      "strokeColor": "#1c1b19",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -153,14 +172,22 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 3 },
+      "roundness": {
+        "type": 3
+      },
       "seed": 5,
       "version": 1,
       "versionNonce": 5,
       "isDeleted": false,
       "boundElements": [
-        { "id": "label-site", "type": "text" },
-        { "id": "arrow-site", "type": "arrow" }
+        {
+          "id": "label-site",
+          "type": "text"
+        },
+        {
+          "id": "arrow-site",
+          "type": "arrow"
+        }
       ],
       "updated": 1,
       "link": null,
@@ -174,7 +201,7 @@
       "width": 150,
       "height": 30,
       "angle": 0,
-      "strokeColor": "#e6dccb",
+      "strokeColor": "#1c1b19",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -210,7 +237,7 @@
       "width": 50,
       "height": 110,
       "angle": 0,
-      "strokeColor": "#e6dccb",
+      "strokeColor": "#1c1b19",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -219,7 +246,9 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "seed": 7,
       "version": 1,
       "versionNonce": 7,
@@ -229,8 +258,14 @@
       "link": null,
       "locked": false,
       "points": [
-        [0, 0],
-        [-50, 110]
+        [
+          0,
+          0
+        ],
+        [
+          -50,
+          110
+        ]
       ],
       "lastCommittedPoint": null,
       "startBinding": {
@@ -254,7 +289,7 @@
       "width": 80,
       "height": 110,
       "angle": 0,
-      "strokeColor": "#e6dccb",
+      "strokeColor": "#1c1b19",
       "backgroundColor": "transparent",
       "fillStyle": "solid",
       "strokeWidth": 2,
@@ -263,7 +298,9 @@
       "opacity": 100,
       "groupIds": [],
       "frameId": null,
-      "roundness": { "type": 2 },
+      "roundness": {
+        "type": 2
+      },
       "seed": 8,
       "version": 1,
       "versionNonce": 8,
@@ -273,8 +310,14 @@
       "link": null,
       "locked": false,
       "points": [
-        [0, 0],
-        [80, 110]
+        [
+          0,
+          0
+        ],
+        [
+          80,
+          110
+        ]
       ],
       "lastCommittedPoint": null,
       "startBinding": {

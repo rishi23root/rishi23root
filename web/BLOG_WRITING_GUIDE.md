@@ -2,7 +2,7 @@
 
 These are the rules and guardrails for posts on Rishabh's personal site (handle **rishi23root**). They're adapted from the FlowForge blog setup (JSON blog schema, AEO checklist, long-form post layout) and rewritten for a personal blog written in MDX.
 
-Posts live in `content/posts/<slug>.mdx`. The same files feed the site (`/writing/<slug>`), RSS, `llms.txt`, the sitemap and the "Writing" section of the GitHub profile README. Start from `content/posts/post-template.mdx`, which is a draft and never ships.
+Posts live in `content/posts/<slug>.mdx`. The same files feed the site (`/writing/<slug>`), RSS, `llms.txt`, the sitemap and the "Writing" section of the GitHub profile README. Start from `content/posts/draft-template.mdx`, which is a draft and never ships.
 
 ## 1. Voice
 
@@ -20,6 +20,7 @@ Posts live in `content/posts/<slug>.mdx`. The same files feed the site (`/writin
 4. **Lists:** numbered for steps that happen in order, bullets for unordered points.
 5. **Code:** fenced, with a language (` ```ts `). Keep snippets small enough to read; link out to the full code.
 6. **Images:** meaningful `alt` text. Keep them in `web/public/writing/<slug>/`.
+   **Diagrams:** `<ExcalidrawBoard src="/diagrams/<name>.json" />` for live, read-only Excalidraw scenes stored in `web/public/diagrams/` (see `AGENTS.md` → Excalidraw boards). The text around a board must still make sense without it.
 7. **End:** what to do next, or what you'd do differently. No "thanks for reading" sign-off.
 
 ## 3. Frontmatter (validated at build)

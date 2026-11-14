@@ -18,6 +18,8 @@ Generate `README.md` from `readme.template.md` + `content/site.json` (via `confi
 | `web/src/pages/llms.txt.ts` | Generated `llms.txt` from `site.json` + posts (do not hand-edit a public copy) |
 | `web/public/og-default.png` | Default Open Graph / Twitter card image |
 | `web/public/favicon.svg` | Site favicon |
+| `web/src/components/ExcalidrawBoard.{astro,tsx}` | Live, read-only Excalidraw board for Writing posts (see **Excalidraw boards**) |
+| `web/public/diagrams/*.json` | Excalidraw scene files the boards load |
 | `.github/workflows/build.yml` | README: on-demand `push` to `master` + `workflow_dispatch` |
 | `.github/workflows/pages.yml` | Site: build `web/` → GitHub Pages (`rishi23root.in`) |
 
@@ -33,7 +35,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Featured Work | `content/site.json` → `opensource.active` + `blurbs` | `owner/repo` strings |
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
 | Writing post | `content/posts/<slug>.mdx` | Frontmatter required; skip `draft: true` in public lists (see SEO cheat below) |
-| Excalidraw board in a post | Draw in [Excalidraw](https://excalidraw.com) → export `.excalidraw` / scene JSON → save as `web/public/diagrams/<name>.json` → embed `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX (no import; wired like Callout via the writing page). Optional `height` (default 500). Live view-mode island; not for home/mood/projects. |
+| Excalidraw board in a post | `web/public/diagrams/<name>.json` + `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX | No import needed; see **Excalidraw boards** below |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
 | Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; mood-left / text-right; `HeroMoodShell` island; no on-site avatar |
 | Command palette (kbar) | `web/src/components/CommandPalette.astro` | Hidden UI; Cmd/Ctrl+K or `?`; boot is tiny, palette chunk lazy-loaded |
@@ -48,7 +50,36 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 
 ## Writing rules
 
-Before writing or editing a post, read `web/BLOG_WRITING_GUIDE.md` (voice, answer-first structure, frontmatter rules, FAQ, callouts, guardrails, pre-publish checklist). There's a short Cursor rule for it in `.cursor/rules/blog-writing.mdc`. Start new posts from `content/posts/post-template.mdx` (a draft that never ships).
+Before writing or editing a post, read `web/BLOG_WRITING_GUIDE.md` (voice, answer-first structure, frontmatter rules, FAQ, callouts, guardrails, pre-publish checklist). There's a short Cursor rule for it in `.cursor/rules/blog-writing.mdc`. Start new posts from `content/posts/draft-template.mdx` (a draft that never ships). `content/posts/post-template.mdx` is a real post (the Excalidraw boards writeup), not a template, despite its slug.
+
+## Excalidraw boards
+
+Writing posts can embed live Excalidraw diagrams. A board is a read-only Excalidraw canvas (view mode + zen mode): readers can pan, zoom and open a full-screen Expand overlay, but can't edit. It follows the site's dark/light toggle and frames the drawing on load (`scrollToContent({ fitToContent: true })`).
+
+How it fits together:
+
+- **Scenes:** `web/public/diagrams/<name>.json`, served at `/diagrams/<name>.json`. A scene is a full Excalidraw document (`type`, `version`, `elements`, `appState`, `files`). A `.excalidraw` download is already this format; just rename it.
+- **Component:** `web/src/components/ExcalidrawBoard.astro` wraps `ExcalidrawBoard.tsx` with `client:visible`. The React island fetches the JSON and dynamically imports `@excalidraw/excalidraw` after mounting, so the library only downloads when a board scrolls into view, and only on posts that use one.
+- **MDX wiring:** `web/src/pages/writing/[slug].astro` passes `components={{ Callout, ExcalidrawBoard }}` to `<Content />`, so posts use the tag with no import. Posts don't write `client:visible` themselves.
+- **Styles:** `.excal-board*` rules in `web/src/styles/global.css`. Full article width, 500px tall (360px on mobile), transparent background, no card frame.
+
+Adding a board:
+
+1. Draw at excalidraw.com in the **light** theme with **dark** strokes. Excalidraw's dark mode inverts canvas colours, so light strokes go faint on the dark site.
+2. Main menu → "Save to…" to download the `.excalidraw` file.
+3. Save it as `web/public/diagrams/<name>.json` (kebab-case name).
+4. Embed it in the post: `<ExcalidrawBoard src="/diagrams/<name>.json" />`. Optional `height={360}` (number = px).
+5. `npm run dev:web` → check both themes and Expand → `npm run build:web`.
+
+Examples: `content/posts/post-template.mdx` (two boards, `board-pipeline.json` and `example-stack.json`) and `content/posts/on-shared-content.mdx`.
+
+Don't:
+
+- Add object storage, remote scene URLs, `ref:` indirection or diff/patch formats. Scenes are static files in the repo.
+- Add in-browser editing, saving or a CMS for diagrams. Edits happen in Excalidraw and land by commit.
+- Use boards on home, mood or projects pages, or load the island outside Writing posts.
+- Put the only copy of essential information in a board. No-JS readers and RSS only get a placeholder, so the text must stand on its own.
+- Paste large screenshots into scenes; they're stored inline in the JSON as data URLs.
 
 ## SEO / frontmatter cheat (canonical site)
 
