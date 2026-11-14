@@ -67,8 +67,8 @@ html[data-theme='light'] {
   --home-gap: clamp(var(--space-6), 4.5vw, 5rem); /* mood plate <-> text */
 
   /* Inner pages: article + rail form one centered group; the nav row matches it */
-  --article-max: 46rem;
-  --rail-w: 13rem;
+  --article-max: 51rem;
+  --rail-w: 15rem;
   --rail-gap: clamp(var(--space-7), 5vw, 5rem);
   --post-group: calc(var(--article-max) + var(--rail-gap) + var(--rail-w));
 
