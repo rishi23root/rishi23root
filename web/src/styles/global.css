@@ -1050,6 +1050,13 @@ html[data-theme='light'] .theme-icon-moon {
 .post-crumbs a {
   color: var(--fg);
   text-decoration: none;
+  cursor: pointer;
+}
+
+.post-crumbs a:hover,
+.post-crumbs a:focus-visible {
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .post-crumbs-current {
