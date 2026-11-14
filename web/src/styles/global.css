@@ -148,36 +148,37 @@ a:hover {
 
 /* ---------------------------------------------------------------
  * Page shells
+ *
+ * One measure story for Home (<1024), Writing list, Writing post
+ * (TOC hidden), Projects, Mood:
+ *   gutter  = --page-pad on .shell / .chrome-bar
+ *   content = --post-group centered on chrome + main
+ * Home ≥1024 uses mood split + --home-max (not this measure).
+ * Post ≥1024 + TOC: chrome/main stay --post-group; article + rail.
+ * Post ≥1024, no TOC: chrome/main shrink to --article-max.
  * ------------------------------------------------------------- */
 .shell {
   width: 100%;
   margin-inline: auto;
   padding-inline: var(--page-pad);
-  /* Same bottom padding as the homepage text column, on every page. */
   padding-bottom: var(--page-pad-block);
 }
 
-/* Home's text column already has --page-pad-block, so don't stack another. */
+/* Home text column already pads with --page-pad-block. */
 .shell-home {
   padding-bottom: 0;
 }
 
-/* Inner pages (writing, posts, later project pages): nav shares the
-   homepage's top padding, then the same gap under the nav as home. */
 .chrome-bar {
   padding-inline: var(--page-pad);
   padding-top: var(--page-pad-block);
-}
-
-.chrome-bar .chrome {
-  max-width: var(--post-group);
-  margin-inline: auto;
 }
 
 .shell-inner {
   padding-top: var(--section-gap);
 }
 
+.chrome-bar .chrome,
 .shell-inner > main {
   max-width: var(--post-group);
   margin-inline: auto;
@@ -480,8 +481,7 @@ html[data-theme='light'] .theme-icon-moon {
   min-width: 0;
 }
 
-/* Below the mood split: Home shares Writing’s shell width (--post-group)
-   and --page-pad only — no extra centered --measure column. */
+/* Below the mood split: same --post-group main as inner pages. */
 @media (max-width: 1023px) {
   .shell-home > main {
     max-width: var(--post-group);
@@ -897,10 +897,9 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 /* ---------------------------------------------------------------
- * Inner page intro, empty state
+ * PageIntro (listing pages only) + empty state
  * ------------------------------------------------------------- */
 .page-intro {
-  max-width: var(--article-max);
   width: 100%;
 }
 
@@ -933,7 +932,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 /* ---------------------------------------------------------------
- * Writing index
+ * Listing pages (Writing / Projects / Mood) + post-list rows
  * ------------------------------------------------------------- */
 .post-list {
   list-style: none;
@@ -946,11 +945,9 @@ html[data-theme='light'] .theme-icon-moon {
   gap: var(--space-1);
 }
 
-/* Listing page: intro, posts, and hover wash use the full nav width
-   (the post-group). Individual post pages keep the article measure. */
-.blog-index .page-intro,
-.blog-index .post-list,
-.blog-index .contact-icons {
+/* Listings fill the shell; post pages keep --article-max on lists/contact. */
+.page-listing .post-list,
+.page-listing .contact-icons {
   max-width: none;
 }
 
@@ -1687,21 +1684,20 @@ html[data-theme='light'] .theme-icon-moon {
   border-color: var(--toc-mark);
 }
 
+/* Default: horizontal bar (mobile + desktop without a TOC rail).
+   Desktop + TOC re-stacks into a vertical column below. */
 .post-rail-tools {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  margin-top: var(--space-7);
-}
-
-/* No headings: the tools lead the rail */
-.post-rail-tools:first-child {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
   margin-top: 0;
 }
 
-/* 1px rule between TOC and tools: solid on the left, fade to the right.
-   Only when a TOC precedes the tools (skipped if tools are first-child). */
+/* 1px rule between TOC and tools (desktop rail only; hidden on mobile). */
 .post-toc + .post-rail-tools {
   position: relative;
 }
@@ -1793,8 +1789,9 @@ html[data-theme='light'] .theme-icon-moon {
 
 .post-rail-ctas {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: var(--space-2);
 }
 
@@ -1853,18 +1850,11 @@ html[data-theme='light'] .theme-icon-moon {
   outline-offset: 2px;
 }
 
-/* Mobile/tablet: no TOC; progress/back-to-top left, CTAs right.
-   Keep the same shell measure as Writing index (--post-group + --page-pad).
-   Do not shrink chrome/main to --article-max here — that centered a narrower
-   column and added extra side gutters vs the listing.
-   Also drop .post's article-max so content uses the full shell (no reserved
-   rail gutter while the sidebar is hidden).
-   Hide the % ring through the site mobile breakpoint (1023px); rem-based
-   max-width: 48rem still left the ring visible on some viewports. Keep
-   ↑ Back to top + rail CTAs. */
+/* Mobile/tablet: hide TOC, fill shell (no reserved rail gutter), hide
+   progress ring. Chrome/main stay --post-group (same as listings). */
 @media (max-width: 1023px) {
   .post,
-  .blog-page:not(.blog-index) .contact-icons {
+  .blog-page:not(.page-listing) .contact-icons {
     max-width: none;
   }
 
@@ -1876,25 +1866,8 @@ html[data-theme='light'] .theme-icon-moon {
     display: none;
   }
 
-  .post-rail-tools {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    width: 100%;
-    margin-top: 0;
-  }
-
-  /* More specific than base `.post-progress-ring { display: inline-flex }` */
-  .post-rail-tools .post-progress .post-progress-ring {
-    display: none !important;
-  }
-
-  .post-rail-ctas {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
+  .post-progress-ring {
+    display: none;
   }
 
   .post-toc + .post-rail-tools::before {
@@ -1921,6 +1894,25 @@ html[data-theme='light'] .theme-icon-moon {
     padding-top: 0.35rem;
   }
 
+  /* TOC present: stack tools under the rail */
+  .post-layout:has(.post-toc) .post-rail-tools {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: var(--space-2);
+    width: auto;
+    margin-top: var(--space-7);
+  }
+
+  .post-layout:has(.post-toc) .post-rail-tools:first-child {
+    margin-top: 0;
+  }
+
+  .post-layout:has(.post-toc) .post-rail-ctas {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   /* No headings → no TOC: single column, shell matches the article */
   .post-layout:not(:has(.post-toc)) {
     grid-template-columns: minmax(0, var(--article-max));
@@ -1938,20 +1930,6 @@ html[data-theme='light'] .theme-icon-moon {
   .post-layout:not(:has(.post-toc)) .post-rail-sticky {
     position: static;
     padding-top: 0;
-  }
-
-  .post-layout:not(:has(.post-toc)) .post-rail-tools {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-3);
-    width: 100%;
-    margin-top: 0;
-  }
-
-  .post-layout:not(:has(.post-toc)) .post-rail-ctas {
-    flex-direction: row;
-    align-items: center;
   }
 }
 

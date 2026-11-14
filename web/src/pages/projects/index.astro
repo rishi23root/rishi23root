@@ -14,14 +14,14 @@ const projects = (site.projects ?? [])
   description="Selected work — open source, automation, and product surfaces."
   path="/projects/"
 >
-  <div class="page blog-page blog-index">
+  <div class="page blog-page page-listing">
     <PageIntro eyebrow="Projects" title="Selected work">
       Open source, automation, and product surfaces I've shipped.
     </PageIntro>
 
     {
       projects.length ? (
-        <ul class="post-list project-list reveal" style="--i: 1">
+        <ul class="post-list reveal" style="--i: 1">
           {projects.map((project) => (
             <li class="post-list-item hover-row">
               <div class="post-list-top">
