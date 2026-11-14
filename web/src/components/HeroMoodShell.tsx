@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import MoodStill from './moods/MoodStill'
-import { adoptCurrentMood, advanceMood, cyclePosition, peekNextMood } from './moods/cycle'
+import { adoptCurrentMood, advanceMood, peekNextMood } from './moods/cycle'
 import { DESKTOP_MQ } from './moods/media'
 import type { MoodSlot } from './moods/types'
 import { settleMoodLayout } from '../lib/settleMood'
 
 type Props = {
   moods: MoodSlot[]
-  /** Link for the "all moods" chip. */
+  /** Link for the all-moods circle. */
   allMoodsHref?: string
 }
 
@@ -33,6 +33,15 @@ function readMoodParam(): string | null {
 
 const byId = (moods: MoodSlot[], id: string | null | undefined) =>
   id ? moods.find((m) => m.id === id) : undefined
+
+/** Display-only title case. Does not change the underlying mood id. */
+function displayName(id: string): string {
+  return id
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
 
 function initialSlot(moods: MoodSlot[], forced?: string | null): MoodSlot | null {
   if (!moods.length) return null
@@ -82,7 +91,7 @@ function afterLoad(fn: () => void): () => void {
 /**
  * Portrait mood plate. Mounted client:only so each full page load advances the
  * shuffle-bag cycle (no repeats until every mood has been seen). "next" in the
- * overlay advances the same cycle in place with a crossfade.
+ * caption (below the plate) advances the same cycle in place with a crossfade.
  */
 export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) {
   const desktop = useDesktop()
@@ -92,7 +101,6 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
     desktop ? initialSlot(moods, readMoodParam()) : null,
   )
   const [leaving, setLeaving] = useState<MoodSlot | null>(null)
-  const [pos, setPos] = useState(() => cyclePosition())
   const [revealed, setRevealed] = useState(false)
   const timer = useRef<number | undefined>(undefined)
   const plateReady = useRef(false)
@@ -114,7 +122,6 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
   useEffect(() => {
     if (desktop && !slot) {
       setSlot(initialSlot(moods, readMoodParam()))
-      setPos(cyclePosition())
     }
   }, [desktop, slot, moods])
 
@@ -138,7 +145,6 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
     window.clearTimeout(timer.current)
     setLeaving(slot)
     setSlot(target)
-    setPos(cyclePosition())
     timer.current = window.setTimeout(() => setLeaving(null), XFADE_MS)
   }, [moods, slot])
 
@@ -167,7 +173,7 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
     >
       <div
         className="hero-shell-stage mood-inset"
-        // Tap anywhere on the plate (touch) toggles the overlay.
+        // Tap the plate on touch to fully reveal the caption.
         onClick={(e) => {
           if ((e.target as HTMLElement).closest('a,button')) return
           setRevealed((v) => !v)
@@ -181,47 +187,54 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood' }: Props) 
             <div className="hero-shell-empty" aria-hidden="true" />
           )}
         </div>
+      </div>
 
-        {slot ? (
-          <div className="mood-overlay">
-            <div className="mood-overlay-row mood-overlay-top">
-              <span className="mood-chip">
-                <span className="mood-chip-label">mood</span>
-                {pos ? (
-                  <span className="mood-chip-count">
-                    {String(pos.n).padStart(2, '0')}/{String(pos.total).padStart(2, '0')}
-                  </span>
-                ) : null}
-              </span>
-              <a
-                className="mood-chip mood-chip-link"
-                href={allMoodsHref}
-                aria-label="See all moods"
-                tabIndex={-1}
+      <div className="mood-caption-slot">
+        <div className="mood-caption">
+          <span className="mood-caption-name" aria-live="polite">
+            {slot ? displayName(slot.id) : ' '}
+          </span>
+          <div className="mood-caption-actions">
+            <a
+              className="mood-caption-all"
+              href={allMoodsHref}
+              aria-label="See all moods"
+            >
+              All
+            </a>
+            <span className="mood-caption-sep" aria-hidden="true">
+              ·
+            </span>
+            <button
+              type="button"
+              className="mood-caption-next"
+              aria-label="Next mood"
+              onClick={(e) => {
+                next()
+                // A pointer click focuses the button; blur so the focus
+                // style doesn't stick after the cursor leaves.
+                if (e.detail > 0) e.currentTarget.blur()
+              }}
+            >
+              Next
+              <svg
+                className="mood-caption-next-arrow"
+                viewBox="0 0 14 12"
+                aria-hidden="true"
+                focusable="false"
               >
-                all <span aria-hidden="true">→</span>
-              </a>
-            </div>
-            <div className="mood-overlay-row mood-overlay-bottom">
-              <span className="mood-chip mood-chip-name" aria-live="polite">
-                {slot.id}
-              </span>
-              <button
-                type="button"
-                className="mood-chip mood-chip-next"
-                tabIndex={-1}
-                onClick={(e) => {
-                  next()
-                  // A pointer click focuses the button even with tabIndex={-1},
-                  // which would keep the chips up after the cursor leaves.
-                  if (e.detail > 0) e.currentTarget.blur()
-                }}
-              >
-                next <span aria-hidden="true">›</span>
-              </button>
-            </div>
+                <path
+                  d="M1.5 6h9.5M8 2.75 12.25 6 8 9.25"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.15"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
-        ) : null}
+        </div>
       </div>
     </div>
   )
