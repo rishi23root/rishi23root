@@ -1,27 +1,27 @@
 ---
-title: How the live Excalidraw boards on this site work
+title: How the Excalidraw boards on this site work
 date: 2026-11-14
 slug: post-template
-summary: Diagrams in my posts are Excalidraw scenes stored as JSON in the repo, loaded by a small React island only when you scroll to them, and shown read-only in the site's theme.
+summary: Diagrams in my posts are Excalidraw scenes stored as JSON in the repo, turned into SVG in the browser only when you scroll to them, and shown in the site's theme.
 draft: true
 author: Rishabh
 tags: [astro, excalidraw, meta]
 primaryKeyword: excalidraw in astro mdx
-secondaryKeywords: [astro react island, client:visible, excalidraw view mode]
+secondaryKeywords: [astro react island, client:visible, excalidraw exportToSvg]
 faq:
   - q: Can readers edit the diagrams?
-    a: No. Boards run in Excalidraw's view mode, so you can pan, zoom and expand them, but nothing you do is saved or sent anywhere.
+    a: No. A board is a static SVG drawn from the scene. You can zoom, pan and open it larger, but there's nothing to edit and nothing is saved or sent anywhere.
   - q: Does every page on the site load Excalidraw?
     a: No. Only posts that embed a board reference the island, and even there the Excalidraw library loads after the board scrolls near the screen.
   - q: What do readers without JavaScript see?
     a: A quiet "Whiteboard" placeholder at the board's height. The diagram needs JavaScript, so anything essential should also be said in the text around it.
 ---
 
-The diagrams in my posts are real Excalidraw scenes, not screenshots. Each one is a JSON file in this repo; a small React island loads it when you scroll near it and shows it read-only, in whichever theme the site is in.
+The diagrams in my posts are real Excalidraw scenes, not screenshots. Each one is a JSON file in this repo; a small React island turns it into an SVG when you scroll near it and shows it in whichever theme the site is in.
 
 <Callout tone="answer">Draw in Excalidraw, save the scene as JSON under `web/public/diagrams/`, and write `<ExcalidrawBoard src="/diagrams/name.json" />` in the post. Everything else happens on its own.</Callout>
 
-Here is the whole pipeline, drawn as one of these boards. Drag to pan, scroll or pinch to zoom, or hit Expand.
+Here is the whole pipeline, drawn as one of these boards. Hover it for zoom controls, drag to pan, or open it larger.
 
 <ExcalidrawBoard src="/diagrams/board-pipeline.json" />
 
@@ -93,62 +93,68 @@ const { src, height } = Astro.props
 <Board client:visible src={src} height={height} />
 ```
 
-There is a second, smaller delay inside the island. Its own chunk is about 3 KB, and it only pulls in the Excalidraw library with a dynamic `import()` once it has mounted. So a reader who never scrolls this far never downloads the drawing app at all, and pages without a board don't reference it.
+There is a second, smaller delay inside the island. Its own chunk is about 6 KB, and it only pulls in the Excalidraw library with a dynamic `import()` once it has mounted. So a reader who never scrolls this far never downloads the drawing app at all, and pages without a board don't reference it.
 
-While the library and the scene load, the board shows a "Whiteboard" placeholder at its final height. Nothing below it jumps when the drawing appears.
+While the library and the scene load, the board shows a faint "Whiteboard" label at its final height. When the drawing is ready, the label fades out and the SVG fades in. Nothing below it jumps.
 
-## Fitting the drawing to the frame
+## From scene to SVG
 
-Scenes are drawn on an infinite canvas, so the interesting part could be anywhere. Once Excalidraw hands back its API, I ask it to frame the content:
+I don't need an editor on the page, only the picture. Excalidraw ships the function it uses for its own "Export image" button, and that's the only thing the island calls:
 
 ```tsx
-const onApi = (api: ExcalidrawImperativeAPI) => {
-  requestAnimationFrame(() => {
-    api.scrollToContent(undefined, { fitToContent: true })
-  })
-}
+const { exportToSvg } = await import('@excalidraw/excalidraw')
+const svg = await exportToSvg({
+  elements: scene.elements,
+  appState: { ...scene.appState, exportBackground: false, viewBackgroundColor: 'transparent' },
+  files: scene.files,
+  exportPadding: 16,
+  skipInliningFonts: true,
+})
 ```
 
-The one-frame wait matters. Before it, the canvas may not have its real size yet, and the fit comes out wrong.
+What comes back is an ordinary `<svg>` element. The text stays text and every line stays sharp at any zoom. There's no canvas to size and no editor state to keep in sync.
 
-`fitToContent` zooms out when a drawing is too big for the frame, but it doesn't blow small drawings up past 100%. A three-box sketch stays the size I drew it.
+Fitting it is plain arithmetic. The SVG's `viewBox` gives its natural size, a `ResizeObserver` gives the frame's, and the scale is the smaller of the two ratios, capped at 1. Big drawings shrink to fit; a three-box sketch stays the size I drew it.
+
+`skipInliningFonts` matters more than it looks. By default the export embeds the hand-drawn font inside the SVG, which means downloading a 1.8 MB font-subsetting script and fetching the font from a CDN. I host Excalifont and Virgil myself instead, declare them with `@font-face`, and wait for them before the fade starts, so the text never swaps mid-animation.
 
 ## Following the site theme
 
-The theme toggle in the header sets `data-theme` on the `<html>` element. The board watches that attribute and passes the value straight to Excalidraw:
+The theme toggle in the header sets `data-theme` on the `<html>` element. The board doesn't watch it at all. One CSS rule does the work:
 
-```tsx
-useEffect(() => {
-  const root = document.documentElement
-  const sync = () => setTheme(root.dataset.theme === 'light' ? 'light' : 'dark')
-  sync()
-  const observer = new MutationObserver(sync)
-  observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] })
-  return () => observer.disconnect()
-}, [])
+```css
+html[data-theme='dark'] .excal-stage svg {
+  filter: invert(93%) hue-rotate(180deg);
+}
 ```
 
-Flip the toggle now and the boards above switch with the page.
+That's the same filter Excalidraw uses for its own dark mode. Inverting flips dark strokes to light, and the hue rotation puts colours back roughly where they were. Flip the toggle now; the boards switch in the same frame as the page, with nothing re-rendered.
 
-One detail decides whether this looks good: Excalidraw's dark mode inverts the canvas colours. So I draw every scene in light mode with dark strokes, and dark mode turns them light. The background is forced to transparent, so the board sits directly on the page colour instead of in a box.
+So I draw every scene in light mode with dark strokes, and dark mode turns them light. The background is transparent, so the board sits directly on the page colour instead of in a box.
 
 <Callout>If a diagram looks faint in dark mode, it was probably drawn with light strokes. Redraw it with dark ones in Excalidraw's light theme.</Callout>
 
-## Read-only, with an Expand button
+## Controls that stay out of the way
 
-Boards run with `viewModeEnabled`, which keeps panning and zooming but removes every drawing tool. `zenModeEnabled` hides most of the remaining interface, and a few CSS rules hide the rest, so all that's left is the drawing.
+The drawing is the point, so the controls hide until you want them. Hover a board, or tab into it, and a small pill shows up in the corner: zoom out, the current zoom, zoom in, reset, and open larger. On touch screens it simply stays visible. Dragging the drawing pans it. The scroll wheel is left alone, because a diagram that hijacks scrolling halfway down an article is a trap.
 
-The one control I add is Expand. It opens the same scene in a full-screen overlay for diagrams that need more room. Escape or Close brings you back. The overlay is rendered straight into `document.body`, so it covers the page cleanly no matter how the article around it is laid out.
+"Open larger" puts the same SVG in a centred panel at about 70% of the screen, over a blurred copy of the page. Click anywhere outside the panel, press Escape, or hit the close button to go back. Focus moves to the close button on the way in and returns to where you were on the way out.
+
+## What failed: a live canvas
+
+The first version embedded the actual Excalidraw app in view mode. It worked, but it never felt like part of the page. Every board flashed an empty white canvas before the drawing appeared. The editor's stylesheet, about 145 KB, ended up in the CSS shared by every post, whether it had a board or not. And I spent more CSS hiding the app's menus and toolbars than styling the board itself.
+
+Swapping it for an SVG removed all three problems at once. The drawing app still loads on posts with a board, because the export function lives inside it, but nothing of it stays on screen.
 
 ## Adding a new board
 
 This is the full workflow I follow:
 
-1. Draw the diagram at excalidraw.com in the light theme, with dark strokes.
+1. Draw the diagram at excalidraw.com in the light theme, with dark strokes and the default hand-drawn font.
 2. Download the scene from the main menu with "Save to…". You get a `.excalidraw` file, which is already JSON.
 3. Rename it to `<name>.json` and move it into `web/public/diagrams/`.
 4. Add `<ExcalidrawBoard src="/diagrams/<name>.json" />` where it belongs in the post.
-5. Run `npm run dev:web`, then check the board in both themes and try Expand.
+5. Run `npm run dev:web`, then check the board in both themes and try the zoom controls and "Open larger".
 6. Run `npm run build:web` before pushing.
 
 Keep pasted screenshots out of scenes when you can. They're stored inside the JSON as data URLs, and a single one can make the file several times bigger than the drawing itself.
@@ -163,6 +169,6 @@ Boards also stay inside Writing posts. The home page, projects and moods don't n
 
 ## What I'd change next
 
-The weak spot is anywhere without JavaScript. RSS readers and no-JS browsers only get the placeholder. A pre-rendered SVG fallback would fix that, and it's the next thing I'd add.
+The weak spot is that the SVG is still made in the browser. RSS readers and no-JS browsers only get the placeholder, and readers still download the drawing app just to run one export. Rendering the SVG at build time would fix both, and it's the next thing I'd add.
 
 Until then, the rule is simple: a board illustrates the text, it never replaces it. If the post doesn't make sense with the diagram missing, the words need more work.

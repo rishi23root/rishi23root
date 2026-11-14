@@ -1,213 +1,269 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type Ref,
+} from 'react'
 import { createPortal } from 'react-dom'
-import type { ExcalidrawImperativeAPI, ExcalidrawInitialDataState } from '@excalidraw/excalidraw/types'
-
-type Theme = 'light' | 'dark'
+import type { ExcalidrawInitialDataState } from '@excalidraw/excalidraw/types'
 
 type Props = {
   /** Public URL to an Excalidraw scene JSON (e.g. `/diagrams/foo.json`). */
   src: string
-  /** Board height; number → px. Default 500. */
+  /** Inline board height; number → px. Default 500. */
   height?: number | string
   className?: string
 }
 
-function readSiteTheme(): Theme {
-  if (typeof document === 'undefined') return 'dark'
-  return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'
+type SceneDoc = ExcalidrawInitialDataState & { type?: string; version?: number; source?: string }
+
+const MIN_ZOOM = 0.1
+const MAX_ZOOM = 4
+const ZOOM_STEP = 1.25
+
+/**
+ * Scene JSON → static SVG via Excalidraw's `exportToSvg`, rendered once per page
+ * view. The library is imported client-side only, so SSR never resolves it and
+ * no editor canvas or editor CSS ships. Dark mode is a CSS filter on the SVG.
+ */
+async function renderSceneSvg(src: string): Promise<string> {
+  const [{ exportToSvg }, res] = await Promise.all([import('@excalidraw/excalidraw'), fetch(src)])
+  if (!res.ok) throw new Error(`Could not load diagram (${res.status})`)
+  const scene = (await res.json()) as SceneDoc
+  const svg = await exportToSvg({
+    elements: (scene.elements ?? []) as Parameters<typeof exportToSvg>[0]['elements'],
+    appState: {
+      ...(scene.appState ?? {}),
+      exportBackground: false,
+      exportWithDarkMode: false,
+      viewBackgroundColor: 'transparent',
+    },
+    files: scene.files ?? null,
+    exportPadding: 16,
+    skipInliningFonts: true,
+  })
+  await loadSceneFonts(svg)
+  return svg.outerHTML
 }
 
-function useSiteTheme(): Theme {
-  const [theme, setTheme] = useState<Theme>(readSiteTheme)
-  useEffect(() => {
-    const root = document.documentElement
-    const sync = () => setTheme(readSiteTheme())
-    sync()
-    const mo = new MutationObserver(sync)
-    mo.observe(root, { attributes: true, attributeFilter: ['data-theme'] })
-    return () => mo.disconnect()
+/** Fonts declared in global.css (`/fonts/excalidraw/`). Others fall back to system fonts. */
+const HOSTED_FONTS = new Set(['Excalifont', 'Virgil'])
+
+/** Wait for the hosted fonts the scene uses so text doesn't swap after fade-in. */
+async function loadSceneFonts(svg: SVGSVGElement) {
+  const loads: Promise<unknown>[] = []
+  svg.querySelectorAll('text').forEach((node) => {
+    const family = node.getAttribute('font-family')?.split(',')[0]?.trim().replace(/["']/g, '')
+    if (family && HOSTED_FONTS.has(family)) loads.push(document.fonts.load(`20px "${family}"`, node.textContent || ' '))
+  })
+  await Promise.race([Promise.allSettled(loads), new Promise((r) => setTimeout(r, 2500))])
+}
+
+type Size = { w: number; h: number }
+
+function readSvgSize(svgMarkup: string): Size {
+  const vb = /viewBox="([\d.\-\s]+)"/.exec(svgMarkup)?.[1]?.trim().split(/\s+/).map(Number)
+  if (vb && vb.length === 4) return { w: vb[2], h: vb[3] }
+  const w = Number(/width="([\d.]+)"/.exec(svgMarkup)?.[1] ?? 0)
+  const h = Number(/height="([\d.]+)"/.exec(svgMarkup)?.[1] ?? 0)
+  return { w, h }
+}
+
+const icon = {
+  zoomOut: (
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M8.5 11h5M16 16l4 4" /></svg>
+  ),
+  zoomIn: (
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M8.5 11h5M11 8.5v5M16 16l4 4" /></svg>
+  ),
+  reset: (
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2.05-4.95" /><path d="M5 4.5V8h3.5" /></svg>
+  ),
+  open: (
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 5h6v6M19 5l-8 8" /><path d="M17 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h4" /></svg>
+  ),
+  close: (
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+  ),
+}
+
+type ViewerProps = {
+  svg: string
+  size: Size
+  label: string
+  onOpen?: () => void
+  onClose?: () => void
+  closeRef?: Ref<HTMLButtonElement>
+}
+
+/** Pan/zoom viewport over the SVG, with a hover/focus-revealed control pill. */
+function SvgViewer({ svg, size, label, onOpen, onClose, closeRef }: ViewerProps) {
+  const frameRef = useRef<HTMLDivElement>(null)
+  const [frame, setFrame] = useState<Size>({ w: 0, h: 0 })
+  const [zoom, setZoom] = useState<number | null>(null)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const drag = useRef<{ id: number; x: number; y: number; px: number; py: number } | null>(null)
+
+  useLayoutEffect(() => {
+    const el = frameRef.current
+    if (!el) return
+    const measure = () => setFrame({ w: el.clientWidth, h: el.clientHeight })
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
   }, [])
-  return theme
-}
 
-type SceneDoc = ExcalidrawInitialDataState & {
-  type?: string
-  version?: number
-  source?: string
+  const fit =
+    size.w && size.h && frame.w && frame.h ? Math.min(frame.w / size.w, frame.h / size.h, 1) : 1
+  const scale = zoom ?? fit
+
+  const setScale = (next: number) => setZoom(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next)))
+  const reset = () => {
+    setZoom(null)
+    setPan({ x: 0, y: 0 })
+  }
+
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 || (e.target as HTMLElement).closest('.excal-pill')) return
+    drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY, px: pan.x, py: pan.y }
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+  const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = drag.current
+    if (!d || d.id !== e.pointerId) return
+    setPan({ x: d.px + e.clientX - d.x, y: d.py + e.clientY - d.y })
+  }
+  const endDrag = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (drag.current?.id === e.pointerId) drag.current = null
+  }
+
+  const stage: CSSProperties = {
+    width: `${size.w}px`,
+    height: `${size.h}px`,
+    transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+  }
+
+  return (
+    <div
+      ref={frameRef}
+      className="excal-viewport"
+      role="group"
+      aria-label={label}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+    >
+      <div className="excal-stage" style={stage} role="img" aria-label={label} dangerouslySetInnerHTML={{ __html: svg }} />
+      <div className="excal-pill" role="toolbar" aria-label="Diagram controls">
+        <button type="button" aria-label="Zoom out" onClick={() => setScale(scale / ZOOM_STEP)}>
+          {icon.zoomOut}
+        </button>
+        <span className="excal-pill-zoom" aria-live="polite">
+          {Math.round(scale * 100)}%
+        </span>
+        <button type="button" aria-label="Zoom in" onClick={() => setScale(scale * ZOOM_STEP)}>
+          {icon.zoomIn}
+        </button>
+        <span className="excal-pill-sep" aria-hidden="true" />
+        <button type="button" aria-label="Reset view" onClick={reset}>
+          {icon.reset}
+        </button>
+        <span className="excal-pill-sep" aria-hidden="true" />
+        {onOpen ? (
+          <button type="button" aria-label="Open larger" onClick={onOpen}>
+            {icon.open}
+          </button>
+        ) : null}
+        {onClose ? (
+          <button type="button" aria-label="Close" onClick={onClose} ref={closeRef}>
+            {icon.close}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  )
 }
 
 /**
- * Live Excalidraw board for Writing posts: view + zen mode, theme-aware,
- * fits content on load. Hydrate with `client:visible` (via Astro wrapper).
+ * Excalidraw diagram for Writing posts. Hydrate with `client:visible` (via the
+ * Astro wrapper); renders the scene to SVG, fades it in, and opens a larger
+ * copy in a modal that closes on backdrop click, Escape, or Close.
  */
 export default function ExcalidrawBoard({ src, height = 500, className }: Props) {
-  const theme = useSiteTheme()
-  const apiRef = useRef<ExcalidrawImperativeAPI | null>(null)
-  const [Excalidraw, setExcalidraw] = useState<typeof import('@excalidraw/excalidraw').Excalidraw | null>(
-    null,
-  )
-  const [scene, setScene] = useState<SceneDoc | null>(null)
+  const [svg, setSvg] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
+  const openerRef = useRef<HTMLElement | null>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     let cancelled = false
-    ;(async () => {
-      try {
-        // Client-only, so SSR never resolves the package. The CSS is imported by file
-        // path: the package exports `index.css` only under dev/prod conditions, which
-        // some resolvers don't pass, and its fonts load relative to this file.
-        const [mod] = await Promise.all([
-          import('@excalidraw/excalidraw'),
-          import('../../node_modules/@excalidraw/excalidraw/dist/prod/index.css'),
-        ])
-        if (!cancelled) setExcalidraw(() => mod.Excalidraw)
-      } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load whiteboard')
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-    setScene(null)
+    setSvg(null)
     setError(null)
-    ;(async () => {
-      try {
-        const res = await fetch(src)
-        if (!res.ok) throw new Error(`Could not load diagram (${res.status})`)
-        const data = (await res.json()) as SceneDoc
-        if (!cancelled) setScene(data)
-      } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Could not load diagram')
-      }
-    })()
+    renderSceneSvg(src).then(
+      (markup) => !cancelled && setSvg(markup),
+      (e) => !cancelled && setError(e instanceof Error ? e.message : 'Could not load diagram'),
+    )
     return () => {
       cancelled = true
     }
   }, [src])
 
-  const fit = useCallback((api: ExcalidrawImperativeAPI) => {
-    // Defer one frame so the canvas has a real size.
-    requestAnimationFrame(() => {
-      api.scrollToContent(undefined, { fitToContent: true })
-    })
+  const open = useCallback(() => {
+    openerRef.current = document.activeElement as HTMLElement | null
+    setExpanded(true)
   }, [])
-
-  const onApi = useCallback(
-    (api: ExcalidrawImperativeAPI) => {
-      apiRef.current = api
-      fit(api)
-    },
-    [fit],
-  )
+  const close = useCallback(() => setExpanded(false), [])
 
   useEffect(() => {
     if (!expanded) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setExpanded(false)
+      if (e.key === 'Escape') close()
     }
     document.addEventListener('keydown', onKey)
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    closeRef.current?.focus()
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = prev
+      openerRef.current?.focus()
     }
-  }, [expanded])
+  }, [expanded, close])
 
-  useEffect(() => {
-    if (expanded && apiRef.current) fit(apiRef.current)
-  }, [expanded, fit])
-
+  const size = svg ? readSvgSize(svg) : { w: 0, h: 0 }
   const heightCss = typeof height === 'number' ? `${height}px` : height
-  const ready = Boolean(Excalidraw && scene && !error)
-  const style = { '--excal-h': heightCss } as CSSProperties
-  const Board = Excalidraw
-
-  const board =
-    ready && Board ? (
-      <Board
-        key={`${src}-${expanded ? 'full' : 'inline'}`}
-        excalidrawAPI={onApi}
-        initialData={{
-          elements: scene!.elements ?? [],
-          appState: {
-            ...(scene!.appState ?? {}),
-            viewBackgroundColor: 'transparent',
-          },
-          files: scene!.files ?? {},
-          scrollToContent: true,
-        }}
-        viewModeEnabled
-        zenModeEnabled
-        theme={theme}
-        UIOptions={{
-          canvasActions: {
-            changeViewBackgroundColor: false,
-            clearCanvas: false,
-            export: false,
-            loadScene: false,
-            saveToActiveFile: false,
-            toggleTheme: false,
-            saveAsImage: false,
-          },
-        }}
-      />
-    ) : null
+  const label = `Diagram: ${src.split('/').pop()?.replace(/\.json$/, '').replace(/[-_]/g, ' ') ?? 'whiteboard'}`
 
   return (
     <figure
-      className={['excal-board', className, expanded ? 'is-expanded' : ''].filter(Boolean).join(' ')}
-      style={style}
+      className={['excal-board', svg ? 'is-ready' : '', className].filter(Boolean).join(' ')}
+      style={{ '--excal-h': heightCss } as CSSProperties}
       data-excal-src={src}
     >
-      <div className="excal-board-frame" role="group" aria-label="Whiteboard">
-        {!ready && !error ? (
-          <div className="excal-board-placeholder" aria-busy="true">
-            <span>Whiteboard</span>
-          </div>
-        ) : null}
-        {error ? (
-          <div className="excal-board-placeholder excal-board-error" role="alert">
-            {error}
-          </div>
-        ) : null}
-        {ready && !expanded ? <div className="excal-board-canvas">{board}</div> : null}
-        {ready && !expanded ? (
-          <button
-            type="button"
-            className="excal-board-expand"
-            aria-label="Expand whiteboard"
-            aria-expanded={false}
-            onPointerDown={(e) => {
-              e.stopPropagation()
-              setExpanded(true)
-            }}
-          >
-            Expand
-          </button>
-        ) : null}
+      <div className="excal-board-frame">
+        <div className="excal-board-placeholder" aria-hidden={Boolean(svg)}>
+          {error ? <span role="alert">{error}</span> : <span>Whiteboard</span>}
+        </div>
+        {svg ? <SvgViewer svg={svg} size={size} label={label} onOpen={open} /> : null}
       </div>
-      {expanded && typeof document !== 'undefined'
+      {expanded && svg
         ? createPortal(
-            <div className="excal-board-modal" role="dialog" aria-modal="true" aria-label="Expanded whiteboard">
-              <button
-                type="button"
-                className="excal-board-expand excal-board-expand-close"
-                aria-label="Close expanded whiteboard"
-                aria-expanded={true}
-                onPointerDown={(e) => {
-                  e.stopPropagation()
-                  setExpanded(false)
-                }}
-              >
-                Close
-              </button>
-              <div className="excal-board-modal-canvas">{board}</div>
+            <div
+              className="excal-modal"
+              onPointerDown={(e) => {
+                if (e.target === e.currentTarget) close()
+              }}
+            >
+              <div className="excal-modal-board" role="dialog" aria-modal="true" aria-label={label}>
+                <SvgViewer svg={svg} size={size} label={label} onClose={close} closeRef={closeRef} />
+              </div>
             </div>,
             document.body,
           )

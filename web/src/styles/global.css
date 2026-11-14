@@ -1296,7 +1296,63 @@ html[data-theme='light'] .theme-icon-moon {
   color: var(--warn);
 }
 
-/* Live Excalidraw boards in Writing: full measure, fixed height, no card chrome */
+/* Excalidraw hand-drawn fonts, self-hosted; boards export SVG without inlined fonts */
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-a88b72a24fb54c9f94e3b5fdaa7481c9.woff2') format('woff2');
+  unicode-range: U+20-7e,U+a0-a3,U+a5-a6,U+a8-ab,U+ad-b1,U+b4,U+b6-b8,U+ba-ff,U+131,U+152-153,U+2bc,U+2c6,U+2da,U+2dc,U+304,U+308,U+2013-2014,U+2018-201a,U+201c-201e,U+2020,U+2022,U+2024-2026,U+2030,U+2039-203a,U+20ac,U+2122,U+2212;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-be310b9bcd4f1a43f571c46df7809174.woff2') format('woff2');
+  unicode-range: U+100-130,U+132-137,U+139-149,U+14c-151,U+154-17e,U+192,U+1fc-1ff,U+218-21b,U+237,U+1e80-1e85,U+1ef2-1ef3,U+2113;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-b9dcf9d2e50a1eaf42fc664b50a3fd0d.woff2') format('woff2');
+  unicode-range: U+400-45f,U+490-491,U+2116;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-41b173a47b57366892116a575a43e2b6.woff2') format('woff2');
+  unicode-range: U+37e,U+384-38a,U+38c,U+38e-393,U+395-3a1,U+3a3-3a8,U+3aa-3cf,U+3d7;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-3f2c5db56cc93c5a6873b1361d730c16.woff2') format('woff2');
+  unicode-range: U+2c7,U+2d8-2d9,U+2db,U+2dd,U+302,U+306-307,U+30a-30c,U+326-328,U+212e,U+2211,U+fb01-fb02;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-349fac6ca4700ffec595a7150a0d1e1d.woff2') format('woff2');
+  unicode-range: U+462-463,U+472-475,U+4d8-4d9,U+4e2-4e3,U+4e6-4e9,U+4ee-4ef;
+}
+
+@font-face {
+  font-family: 'Excalifont';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Excalifont-Regular-623ccf21b21ef6b3a0d87738f77eb071.woff2') format('woff2');
+  unicode-range: U+300-301,U+303;
+}
+
+@font-face {
+  font-family: 'Virgil';
+  font-display: swap;
+  src: url('/fonts/excalidraw/Virgil-Regular.woff2') format('woff2');
+}
+
+/* Excalidraw boards in Writing: scene rendered to SVG, full measure, no card chrome */
 .excal-board {
   --excal-h: 500px;
   margin: 1.5rem 0 1.75rem;
@@ -1308,122 +1364,200 @@ html[data-theme='light'] .theme-icon-moon {
   width: 100%;
   height: var(--excal-h);
   max-height: min(70vh, 640px);
-  overflow: hidden;
-  background: transparent;
 }
 
-.excal-board-canvas,
 .excal-board-placeholder {
   position: absolute;
   inset: 0;
-}
-
-.excal-board-canvas .excalidraw,
-.excal-board-modal-canvas .excalidraw {
-  --color-surface-lowest: transparent;
-  height: 100% !important;
-}
-
-.excal-board-placeholder {
   display: grid;
   place-items: center;
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  background: color-mix(in srgb, var(--fg) 3%, transparent);
+  opacity: 0.55;
+  transition: opacity 360ms var(--ease-out);
 }
 
-.excal-board-error {
-  text-transform: none;
-  letter-spacing: 0;
+.excal-board-placeholder [role='alert'] {
   font-family: var(--sans);
   font-size: 0.95rem;
-  padding: var(--space-4);
-  text-align: center;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
-.excal-board-expand {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  z-index: 40;
-  margin: 0;
-  padding: 0.35rem 0.65rem;
-  border: 0;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.excal-board-frame .excal-board-canvas {
-  /* Keep Excalidraw’s layer UI from swallowing the Expand hit target. */
-  pointer-events: auto;
-}
-
-.excal-board-frame .excal-board-canvas .excalidraw .layer-ui__wrapper {
+.excal-board.is-ready .excal-board-placeholder {
+  opacity: 0;
   pointer-events: none;
 }
 
-.excal-board-frame .excal-board-canvas .excalidraw .layer-ui__wrapper .App-toolbar,
-.excal-board-frame .excal-board-canvas .excalidraw canvas {
+.excal-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  animation: excal-fade-in 520ms var(--ease-out) both;
+}
+
+.excal-viewport:active {
+  cursor: grabbing;
+}
+
+@keyframes excal-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.excal-stage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+  transition: transform 220ms var(--ease-out);
+  user-select: none;
+}
+
+.excal-viewport:active .excal-stage {
+  transition: none;
+}
+
+.excal-stage svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Scenes are drawn dark-on-light; invert like Excalidraw's own dark mode. */
+html[data-theme='dark'] .excal-stage svg {
+  filter: invert(93%) hue-rotate(180deg);
+}
+
+/* Control pill: hidden until the board is hovered or focused */
+.excal-pill {
+  --pill-bg: color-mix(in srgb, var(--fg) 12%, var(--bg));
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 4px;
+  border: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+  border-radius: 10px;
+  background: var(--pill-bg);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  color: var(--fg);
+  cursor: default;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+.excal-viewport:hover .excal-pill,
+.excal-viewport:focus-within .excal-pill,
+.excal-modal .excal-pill {
+  opacity: 1;
+  transform: none;
   pointer-events: auto;
 }
 
-.excal-board-expand:hover {
-  color: var(--fg);
+@media (hover: none) {
+  .excal-pill {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
 }
 
-.excal-board-expand:focus-visible {
+.excal-pill button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.78;
+  cursor: pointer;
+}
+
+.excal-pill button:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.excal-pill button:focus-visible {
+  opacity: 1;
   outline: 2px solid var(--fg);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
-.excal-board-modal {
+.excal-pill svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.excal-pill-zoom {
+  min-width: 3.4em;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.excal-pill-sep {
+  width: 1px;
+  height: 16px;
+  margin: 0 3px;
+  background: color-mix(in srgb, var(--fg) 20%, transparent);
+}
+
+/* Expanded: the same SVG at ~70% of the viewport; backdrop click closes */
+.excal-modal {
   position: fixed;
   inset: 0;
   z-index: 80;
-  padding: var(--space-5);
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(6px);
+  animation: excal-backdrop-in var(--dur) var(--ease-out) both;
 }
 
-.excal-board-modal .excal-board-expand-close {
-  z-index: 90;
+@keyframes excal-backdrop-in {
+  from {
+    opacity: 0;
+  }
 }
 
-.excal-board-modal-canvas {
+.excal-modal-board {
   position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
+  width: 70vw;
+  height: 70vh;
+  border-radius: 14px;
+  background: var(--bg);
+  box-shadow: 0 0 0 1px var(--border), 0 24px 64px rgba(0, 0, 0, 0.32);
   overflow: hidden;
-}
-
-/* Quiet Excalidraw chrome in view/zen embeds */
-.excal-board .excalidraw .App-menu,
-.excal-board .excalidraw .layer-ui__wrapper__top-right,
-.excal-board .excalidraw .FixedSideContainer_side_top,
-.excal-board .excalidraw .HelpDialog__btn,
-.excal-board .excalidraw .main-menu-trigger,
-.excal-board .excalidraw .App-bottom-bar,
-.excal-board .excalidraw .footer-center,
-.excal-board .excalidraw .zoom-actions,
-.excal-board-modal .excalidraw .App-menu,
-.excal-board-modal .excalidraw .layer-ui__wrapper__top-right,
-.excal-board-modal .excalidraw .FixedSideContainer_side_top,
-.excal-board-modal .excalidraw .main-menu-trigger,
-.excal-board-modal .excalidraw .App-bottom-bar,
-.excal-board-modal .excalidraw .footer-center,
-.excal-board-modal .excalidraw .zoom-actions {
-  display: none !important;
 }
 
 @media (max-width: 640px) {
@@ -1431,8 +1565,8 @@ html[data-theme='light'] .theme-icon-moon {
     --excal-h: 360px;
   }
 
-  .excal-board-modal {
-    padding: var(--space-3);
+  .excal-modal-board {
+    width: 92vw;
   }
 }
 

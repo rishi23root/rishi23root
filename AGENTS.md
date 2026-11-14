@@ -18,8 +18,9 @@ Generate `README.md` from `readme.template.md` + `content/site.json` (via `confi
 | `web/src/pages/llms.txt.ts` | Generated `llms.txt` from `site.json` + posts (do not hand-edit a public copy) |
 | `web/public/og-default.png` | Default Open Graph / Twitter card image |
 | `web/public/favicon.svg` | Site favicon |
-| `web/src/components/ExcalidrawBoard.{astro,tsx}` | Live, read-only Excalidraw board for Writing posts (see **Excalidraw boards**) |
+| `web/src/components/ExcalidrawBoard.{astro,tsx}` | Read-only Excalidraw diagram (scene → SVG) for Writing posts (see **Excalidraw boards**) |
 | `web/public/diagrams/*.json` | Excalidraw scene files the boards load |
+| `web/public/fonts/excalidraw/` | Self-hosted Excalifont + Virgil for board text |
 | `.github/workflows/build.yml` | README: on-demand `push` to `master` + `workflow_dispatch` |
 | `.github/workflows/pages.yml` | Site: build `web/` → GitHub Pages (`rishi23root.in`) |
 
@@ -69,22 +70,23 @@ Keep the order. A short qualifier after a colon is fine (`## What failed: export
 
 ## Excalidraw boards
 
-Writing posts can embed live Excalidraw diagrams. A board is a read-only Excalidraw canvas (view mode + zen mode): readers can pan, zoom and open a full-screen Expand overlay, but can't edit. It follows the site's dark/light toggle and frames the drawing on load (`scrollToContent({ fitToContent: true })`).
+Writing posts can embed Excalidraw diagrams. A board renders the scene to a static SVG in the browser (`exportToSvg`), fits it to the frame and fades it in. There's no editor canvas. A control pill (zoom out, %, zoom in, reset, open larger) appears on hover or keyboard focus, and drag pans. "Open larger" shows the same SVG in a modal at ~70% of the viewport that closes on backdrop click, Escape or Close. Dark mode is a CSS `invert(93%) hue-rotate(180deg)` filter on the SVG, so theme switches are instant.
 
 How it fits together:
 
 - **Scenes:** `web/public/diagrams/<name>.json`, served at `/diagrams/<name>.json`. A scene is a full Excalidraw document (`type`, `version`, `elements`, `appState`, `files`). A `.excalidraw` download is already this format; just rename it.
 - **Component:** `web/src/components/ExcalidrawBoard.astro` wraps `ExcalidrawBoard.tsx` with `client:visible`. The React island fetches the JSON and dynamically imports `@excalidraw/excalidraw` after mounting, so the library only downloads when a board scrolls into view, and only on posts that use one.
 - **MDX wiring:** `web/src/pages/writing/[slug].astro` passes `components={{ Callout, ExcalidrawBoard }}` to `<Content />`, so posts use the tag with no import. Posts don't write `client:visible` themselves.
-- **Styles:** `.excal-board*` rules in `web/src/styles/global.css`. Full article width, 500px tall (360px on mobile), transparent background, no card frame.
+- **Styles:** `.excal-board*`, `.excal-viewport`, `.excal-pill`, `.excal-modal*` in `web/src/styles/global.css`. Full article width, 500px tall (360px on mobile), transparent background, no card frame.
+- **Fonts:** the SVG is exported with `skipInliningFonts: true`; text uses the `@font-face` rules for Excalifont and Virgil in `global.css` (files in `web/public/fonts/excalidraw/`). The island waits for those fonts before fading in. Other Excalidraw fonts fall back to system fonts.
 
 Adding a board:
 
-1. Draw at excalidraw.com in the **light** theme with **dark** strokes. Excalidraw's dark mode inverts canvas colours, so light strokes go faint on the dark site.
+1. Draw at excalidraw.com in the **light** theme with **dark** strokes and the hand-drawn font (Excalifont, the default). Dark mode inverts colours, so light strokes go faint on the dark site.
 2. Main menu → "Save to…" to download the `.excalidraw` file.
 3. Save it as `web/public/diagrams/<name>.json` (kebab-case name).
 4. Embed it in the post: `<ExcalidrawBoard src="/diagrams/<name>.json" />`. Optional `height={360}` (number = px).
-5. `npm run dev:web` → check both themes and Expand → `npm run build:web`.
+5. `npm run dev:web` → check both themes, the hover pill and "Open larger" → `npm run build:web`.
 
 Examples: `content/posts/post-template.mdx` (two boards, `board-pipeline.json` and `example-stack.json`) and `content/posts/on-shared-content.mdx`.
 
@@ -95,7 +97,8 @@ Don't:
 - Use boards on home, mood or projects pages, or load the island outside Writing posts.
 - Put the only copy of essential information in a board. No-JS readers and RSS only get a placeholder, so the text must stand on its own.
 - Paste large screenshots into scenes; they're stored inline in the JSON as data URLs.
-- Add a static `import '@excalidraw/excalidraw/index.css'` (or any static import of the package) to the component. The package exports that CSS only under `development`/`production` conditions, which Astro SSR doesn't always pass ("Cannot find module"). The island loads the library and `dist/prod/index.css` (by relative path) with dynamic imports on the client only; keep it that way.
+- Statically import `@excalidraw/excalidraw` (or its `index.css`) in the component. The island only needs `exportToSvg`, loaded with a client-side dynamic `import()`, so SSR never resolves the package and no editor CSS ships. Keep it that way.
+- Drop `skipInliningFonts: true`. Inlining pulls a ~1.8 MB font-subsetting chunk and fetches fonts from esm.sh; the self-hosted `@font-face` rules cover it.
 
 ## SEO / frontmatter cheat (canonical site)
 

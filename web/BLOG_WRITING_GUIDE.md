@@ -39,7 +39,7 @@ Use the names as the `##` headings, in this order. A short qualifier after a col
 4. **Lists:** numbered for steps that happen in order, bullets for unordered points.
 5. **Code:** fenced, with a language (` ```ts `). Keep snippets small enough to read; link out to the full code.
 6. **Images:** meaningful `alt` text. Keep them in `web/public/writing/<slug>/`.
-   **Diagrams:** `<ExcalidrawBoard src="/diagrams/<name>.json" />` for live, read-only Excalidraw scenes stored in `web/public/diagrams/` (see `AGENTS.md` → Excalidraw boards). The text around a board must still make sense without it.
+   **Diagrams:** `<ExcalidrawBoard src="/diagrams/<name>.json" />` for Excalidraw scenes (rendered to SVG, read-only) stored in `web/public/diagrams/` (see `AGENTS.md` → Excalidraw boards). The text around a board must still make sense without it.
 7. **End:** the "What I recommend" section is the ending. No "thanks for reading" sign-off.
 
 ## 4. Frontmatter (validated at build)
