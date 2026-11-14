@@ -59,7 +59,7 @@ html[data-theme='light'] {
   --space-8: 4rem;
 
   /* Page frame */
-  --measure: 38rem; /* narrow text column (home on mobile) */
+  --measure: 38rem; /* narrow prose / empty-state width */
   --page-pad: clamp(1.5rem, 3.6vw, 3.5rem); /* left/right gutter, all pages */
   --page-pad-block: clamp(var(--space-5), 4vw, var(--space-7));
   --section-gap: clamp(var(--space-5), 2.4vw, 2.25rem);
@@ -480,9 +480,11 @@ html[data-theme='light'] .theme-icon-moon {
   min-width: 0;
 }
 
+/* Below the mood split: Home shares Writing’s shell width (--post-group)
+   and --page-pad only — no extra centered --measure column. */
 @media (max-width: 1023px) {
-  .home-text {
-    max-width: var(--measure);
+  .shell-home > main {
+    max-width: var(--post-group);
     margin-inline: auto;
   }
 }
