@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ContactIcons from '../../components/ContactIcons.astro'
+import PageIntro from '../../components/PageIntro.astro'
 import { site } from '../../lib/site'
 
 const projects = (site.projects ?? [])
@@ -14,13 +15,9 @@ const projects = (site.projects ?? [])
   path="/projects/"
 >
   <div class="page blog-page blog-index">
-    <section class="page-intro reveal" style="--i: 0">
-      <p class="page-eyebrow">Projects</p>
-      <h1>Selected work</h1>
-      <p class="lede">
-        Open source, automation, and product surfaces I've shipped.
-      </p>
-    </section>
+    <PageIntro eyebrow="Projects" title="Selected work">
+      Open source, automation, and product surfaces I've shipped.
+    </PageIntro>
 
     {
       projects.length ? (

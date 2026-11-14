@@ -921,7 +921,6 @@ html[data-theme='light'] .theme-icon-moon {
 .page-intro .lede {
   margin: 0;
   color: var(--muted);
-  max-width: 34rem;
 }
 
 .empty {

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import PageIntro from '../components/PageIntro.astro'
 import { site } from '../lib/site'
 
 const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
@@ -20,13 +21,9 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
     </style>
   </noscript>
   <div class="page">
-    <section class="page-intro reveal" style="--i: 0">
-      <p class="page-eyebrow">Moods</p>
-      <h1>Stills from the home plate</h1>
-      <p class="lede">
-        These moods appear on the home page, one&nbsp;at&nbsp;a&nbsp;time.
-      </p>
-    </section>
+    <PageIntro eyebrow="Moods" title="Stills from the home plate">
+      These moods appear on the home page, one&nbsp;at&nbsp;a&nbsp;time.
+    </PageIntro>
 
     {
       moods.length ? (
