@@ -400,8 +400,6 @@ html[data-theme='light'] .theme-icon-moon {
 
 .voice-bio {
   margin: 0;
-  /* Same prose family as Writing `--article-max` — between Lee 34ch and full home-col. */
-  max-width: min(var(--article-max), 100%);
   width: 100%;
   font-size: clamp(1.38rem, 1.15rem + 0.7vw, 1.7rem);
   line-height: 1.45;
@@ -430,11 +428,7 @@ html[data-theme='light'] .theme-icon-moon {
   min-width: 0;
 }
 
-/* Writing: title left, date right — same measure as voice-bio / article */
-.home-writing-list {
-  max-width: min(var(--article-max), 100%);
-}
-
+/* Writing: title left, date right — full home text track (see --home-col) */
 .home-writing-list li {
   display: flex;
   align-items: baseline;
@@ -550,8 +544,10 @@ html[data-theme='light'] .theme-icon-moon {
     justify-content: flex-start;
   }
 
-  /* Stack headings keep settled column width so settle does not re-wrap.
-     Voice bio stays on `--article-max` (narrower than await + settled tracks). */
+  /* Bio, home writing list, and stack headings share the settled text track
+     so settle does not re-wrap relative to Work / Capabilities. */
+  .voice-bio,
+  .home-writing-list,
   .home-stack-list li > :not(.blurb) {
     max-width: var(--home-col);
   }
