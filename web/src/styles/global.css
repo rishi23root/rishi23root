@@ -1864,8 +1864,15 @@ html[data-theme='light'] .theme-icon-moon {
 /* Mobile/tablet: no TOC; progress/back-to-top left, CTAs right.
    Keep the same shell measure as Writing index (--post-group + --page-pad).
    Do not shrink chrome/main to --article-max here — that centered a narrower
-   column and added extra side gutters vs the listing. */
+   column and added extra side gutters vs the listing.
+   Also drop .post's article-max so content uses the full shell (no reserved
+   rail gutter while the sidebar is hidden). */
 @media (max-width: 1023px) {
+  .post,
+  .blog-page:not(.blog-index) .contact-icons {
+    max-width: none;
+  }
+
   .post-rail {
     margin-top: var(--space-7);
   }
