@@ -18,6 +18,10 @@ const projects = (site.projects ?? [])
 const capabilities = site.capabilities ?? []
 const moods = site.moods ?? []
 const voiceBio = site.voiceBio ?? site.fullDescription
+const voiceBioParagraphs = voiceBio
+  .split(/\n\n+/)
+  .map((para) => para.trim())
+  .filter(Boolean)
 
 const personJsonLd = {
   '@context': 'https://schema.org',
@@ -65,7 +69,11 @@ const personJsonLd = {
         <h1 class="visually-hidden">{site.github.name}</h1>
 
         <section class="home-section reveal" style="--i: 0">
-          <p class="voice-bio">{voiceBio}</p>
+          {
+            voiceBioParagraphs.map((para) => (
+              <p class="voice-bio">{para}</p>
+            ))
+          }
         </section>
 
         <section class="home-section reveal" style="--i: 1">

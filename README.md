@@ -1,7 +1,7 @@
 ```bash
 $ whoami
-rishi23root — freelancer · SaaS · security · automation
-I build SaaS products, automate the boring parts, and keep security in the loop.
+rishi23root — software engineer · SaaS · AI · infrastructure
+I build SaaS products, automation systems, AI applications, and developer tools. I’m especially interested in making complex systems simpler, cheaper, and more reliable.
 
 $ echo $STACK
 TypeScript · Python · Node.js · React · React Native
