@@ -70,6 +70,11 @@
       "id": "ghat",
       "src": "/mood/ghat.webp",
       "alt": "Stone temple ghat with marigold garlands, a boat, and a radiant sun"
+    },
+    {
+      "id": "tennis",
+      "src": "/mood/tennis.webp",
+      "alt": "Top-down tennis court with two players and long blue shadows"
     }
   ],
   "projects": [
