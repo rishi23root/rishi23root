@@ -6,10 +6,11 @@
  * Render it only when the post has GitHub links, so other posts ship no script.
  */
 import { getLinkPreviews } from '../../lib/github'
+import type { GithubRef } from '../../lib/githubRefs'
 import GithubCardBody from './GithubCardBody.astro'
 
-type Props = { source: string }
-const previews = Object.entries(await getLinkPreviews(Astro.props.source))
+type Props = { refs: GithubRef[] }
+const previews = Object.entries(await getLinkPreviews(Astro.props.refs))
 ---
 
 <div class="gh-previews" hidden>

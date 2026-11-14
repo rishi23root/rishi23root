@@ -15,13 +15,6 @@ type Props = {
 }
 
 const { src, height, class: className, className: classNameAlt } = Astro.props
-const cls = className ?? classNameAlt
 ---
 
-{
-  height != null ? (
-    <Board client:visible src={src} height={height} className={cls} />
-  ) : (
-    <Board client:visible src={src} className={cls} />
-  )
-}
+<Board client:visible src={src} height={height} className={className ?? classNameAlt} />

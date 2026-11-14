@@ -4,9 +4,7 @@
  * Failures resolve to null so a rate limit or offline build never breaks the site.
  */
 
-import { findGithubRefs, refKey, type GithubRef } from './githubRefs'
-
-export { findGithubRefs, parseGithubUrl, refKey, type GithubRef } from './githubRefs'
+import { githubUrl, refKey, type GithubRef } from './githubRefs'
 
 export type RepoData = {
   kind: 'repo'
@@ -19,7 +17,7 @@ export type RepoData = {
   languageColor: string | null
 }
 
-export type PrState = 'open' | 'draft' | 'merged' | 'closed'
+type PrState = 'open' | 'draft' | 'merged' | 'closed'
 
 export type PrData = {
   kind: 'pr'
@@ -71,14 +69,15 @@ const LANGUAGE_COLORS: Record<string, string> = {
 }
 
 export function getRepo(owner: string, repo: string): Promise<RepoData | null> {
-  return cached(`repo:${owner}/${repo}`.toLowerCase(), async () => {
+  const ref: GithubRef = { kind: 'repo', owner, repo }
+  return cached(ref, async () => {
     const r = await api<any>(`/repos/${owner}/${repo}`)
     if (!r) return null
     return {
       kind: 'repo',
       owner: r.owner?.login ?? owner,
       repo: r.name ?? repo,
-      url: r.html_url ?? `https://github.com/${owner}/${repo}`,
+      url: r.html_url ?? githubUrl(ref),
       description: r.description ?? null,
       stars: r.stargazers_count ?? 0,
       language: r.language ?? null,
@@ -88,7 +87,8 @@ export function getRepo(owner: string, repo: string): Promise<RepoData | null> {
 }
 
 export function getPr(owner: string, repo: string, number: number): Promise<PrData | null> {
-  return cached(`pr:${owner}/${repo}#${number}`.toLowerCase(), async () => {
+  const ref: GithubRef = { kind: 'pr', owner, repo, number }
+  return cached(ref, async () => {
     const p = await api<any>(`/repos/${owner}/${repo}/pulls/${number}`)
     if (!p) return null
     const state: PrState = p.merged_at ? 'merged' : p.state === 'closed' ? 'closed' : p.draft ? 'draft' : 'open'
@@ -97,7 +97,7 @@ export function getPr(owner: string, repo: string, number: number): Promise<PrDa
       owner,
       repo,
       number,
-      url: p.html_url ?? `https://github.com/${owner}/${repo}/pull/${number}`,
+      url: p.html_url ?? githubUrl(ref),
       title: p.title ?? `Pull request #${number}`,
       state,
       author: p.user?.login ?? '',
@@ -111,14 +111,10 @@ export function getPr(owner: string, repo: string, number: number): Promise<PrDa
   })
 }
 
-export function getRef(ref: GithubRef): Promise<RepoData | PrData | null> {
-  return ref.kind === 'pr' ? getPr(ref.owner, ref.repo, ref.number) : getRepo(ref.owner, ref.repo)
-}
-
-/** Preview data for every repo/PR link in a post, keyed by `refKey`. */
-export async function getLinkPreviews(source: string): Promise<Record<string, RepoData | PrData>> {
-  const refs = findGithubRefs(source)
-  const entries = await Promise.all(refs.map(async (ref) => [refKey(ref), await getRef(ref)] as const))
+/** Preview data for a post's repo/PR links, keyed by `refKey`; refs that fail to load are left out. */
+export async function getLinkPreviews(refs: GithubRef[]): Promise<Record<string, RepoData | PrData>> {
+  const load = (ref: GithubRef) => (ref.kind === 'pr' ? getPr(ref.owner, ref.repo, ref.number) : getRepo(ref.owner, ref.repo))
+  const entries = await Promise.all(refs.map(async (ref) => [refKey(ref), await load(ref)] as const))
   return Object.fromEntries(entries.filter((e): e is readonly [string, RepoData | PrData] => e[1] != null))
 }
 
@@ -131,7 +127,8 @@ export function formatShortDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
 }
 
-function cached<T>(key: string, load: () => Promise<T>): Promise<T> {
+function cached<T>(ref: GithubRef, load: () => Promise<T>): Promise<T> {
+  const key = refKey(ref)
   if (!cache.has(key)) cache.set(key, load())
   return cache.get(key) as Promise<T>
 }

@@ -408,10 +408,6 @@ html[data-theme='light'] .theme-icon-moon {
   text-wrap: pretty;
 }
 
-.voice-bio + .voice-bio {
-  margin-top: var(--space-3);
-}
-
 /* Writing / Work / Capabilities lists; the bleed keeps text aligned with
    the section label while the hover wash extends past it */
 .home-list {

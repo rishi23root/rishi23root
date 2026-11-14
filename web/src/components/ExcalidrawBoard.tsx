@@ -19,8 +19,6 @@ type Props = {
   className?: string
 }
 
-type SceneDoc = ExcalidrawInitialDataState & { type?: string; version?: number; source?: string }
-
 const MIN_ZOOM = 0.1
 const MAX_ZOOM = 4
 const ZOOM_STEP = 1.25
@@ -33,7 +31,7 @@ const ZOOM_STEP = 1.25
 async function renderSceneSvg(src: string): Promise<string> {
   const [{ exportToSvg }, res] = await Promise.all([import('@excalidraw/excalidraw'), fetch(src)])
   if (!res.ok) throw new Error(`Could not load diagram (${res.status})`)
-  const scene = (await res.json()) as SceneDoc
+  const scene = (await res.json()) as ExcalidrawInitialDataState
   const svg = await exportToSvg({
     elements: (scene.elements ?? []) as Parameters<typeof exportToSvg>[0]['elements'],
     appState: {
@@ -281,7 +279,6 @@ export default function ExcalidrawBoard({ src, height = 500, className }: Props)
     <figure
       className={['excal-board', svg ? 'is-ready' : '', className].filter(Boolean).join(' ')}
       style={{ '--excal-h': heightCss } as CSSProperties}
-      data-excal-src={src}
     >
       <div className="excal-board-frame">
         <div className="excal-board-placeholder" aria-hidden={Boolean(svg)}>

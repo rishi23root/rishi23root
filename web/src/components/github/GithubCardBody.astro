@@ -1,5 +1,6 @@
 ---
-import { formatCount, formatShortDate, type GithubRef, type PrData, type RepoData } from '../../lib/github'
+import { formatCount, formatShortDate, type PrData, type RepoData } from '../../lib/github'
+import type { GithubRef } from '../../lib/githubRefs'
 
 type Props = { data: RepoData | PrData | null; fallback: GithubRef }
 const { data, fallback } = Astro.props

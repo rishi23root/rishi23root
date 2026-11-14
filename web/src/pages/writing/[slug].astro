@@ -34,7 +34,7 @@ const path = postPath(d.slug)
 const canonical = absoluteUrl(path)
 const ogImage = d.image ?? d.cover ?? '/og-default.png'
 const coverSize = d.cover ? publicImageSize(d.cover) : undefined
-const hasGithubLinks = findGithubRefs(post.body ?? '').length > 0
+const githubRefs = findGithubRefs(post.body ?? '')
 // Rail outline: each H2 owns the H3s that follow it. H3s before the first H2
 // have no parent, so they stay top-level and always visible.
 type TocLink = { slug: string; text: string }
@@ -158,7 +158,7 @@ if (d.faq.length) {
         <div class="prose post-body">
           <Content components={{ Callout, ExcalidrawBoard, RepoCard, PrCard }} />
         </div>
-        {hasGithubLinks ? <GithubLinkPreviews source={post.body ?? ''} /> : null}
+        {githubRefs.length ? <GithubLinkPreviews refs={githubRefs} /> : null}
 
         {
           d.faq.length ? (

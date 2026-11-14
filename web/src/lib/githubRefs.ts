@@ -13,6 +13,11 @@ export function refKey(ref: GithubRef): string {
   return ref.kind === 'pr' ? `${ref.owner}/${ref.repo}#${ref.number}`.toLowerCase() : `${ref.owner}/${ref.repo}`.toLowerCase()
 }
 
+export function githubUrl(ref: GithubRef): string {
+  const base = `https://github.com/${ref.owner}/${ref.repo}`
+  return ref.kind === 'pr' ? `${base}/pull/${ref.number}` : base
+}
+
 /** Parse a github.com repo or pull request URL; anything else returns null. */
 export function parseGithubUrl(href: string): GithubRef | null {
   const m = /^https?:\/\/(?:www\.)?github\.com\/([\w.-]+)\/([\w.-]+?)(?:\.git)?(?:\/pull\/(\d+)(?:\/(?:files|commits))?)?\/?(?:[?#].*)?$/.exec(href)
