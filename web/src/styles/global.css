@@ -1225,8 +1225,12 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .post-toc {
-  --toc-spine: color-mix(in srgb, var(--fg) 20%, transparent);
-  --toc-line: 2px;
+  --toc-spine: color-mix(in srgb, var(--fg) 13%, transparent);
+  /* 1.5px border-width snaps to 1 CSS px in Chromium and looks
+     soft at 1x. 1px is clearly thinner than the old 2px and stays
+     crisp at both 1x and 2x. */
+  --toc-line: 1px;
+  --toc-mark: color-mix(in srgb, var(--fg) 62%, transparent);
   /* Tall enough for a short straight drop before the bend, so the
      ╰ stays on the same 2px centerline as the H2 spine. */
   --toc-curve-h: calc(0.28rem + 0.54rem);
@@ -1243,7 +1247,7 @@ html[data-theme='light'] .theme-icon-moon {
   position: relative;
   display: block;
   padding: 0.28rem 0 0.28rem var(--space-3);
-  border-left: 2px solid transparent;
+  border-left: var(--toc-line) solid transparent;
   font-size: 0.85rem;
   line-height: 1.35;
   color: var(--muted);
@@ -1273,7 +1277,7 @@ html[data-theme='light'] .theme-icon-moon {
 
 .post-toc .toc-depth-3 a {
   /* No left border: the indent track is the ::after on .toc-sub.
-     A ::before overlay, inset by --toc-line, sits on that same 2px. */
+     A ::before overlay, inset by --toc-line, sits on that same stroke. */
   border-left-width: 0;
   padding-left: var(--space-3);
   font-size: 0.8rem;
@@ -1406,7 +1410,7 @@ html[data-theme='light'] .theme-icon-moon {
 
 .post-toc .toc-sub > ul {
   /* min-height 0 lets the 0fr grid row shrink. Overflow is clipped by
-     .toc-sub so an H3's 2px active overlay can sit in the indent, on
+     .toc-sub so an H3's active overlay can sit in the indent, on
      the track, without being cut off. */
   min-height: 0;
   position: relative;
@@ -1418,14 +1422,14 @@ html[data-theme='light'] .theme-icon-moon {
   font-weight: 600;
 }
 
-/* H2 active mark: same 2px border-left as the quiet spine, just --fg. */
+/* H2 active mark: same stroke as the quiet spine, a softened --fg. */
 .post-toc > ul > li.toc-depth-2 > a[aria-current] {
-  border-left-color: var(--fg);
+  border-left-color: var(--toc-mark);
 }
 
 /* H3 active mark: paint the ::before that already sits on the indent track. */
 .post-toc .toc-depth-3 a[aria-current]::before {
-  background: var(--fg);
+  background: var(--toc-mark);
 }
 
 /* First H3 mark starts below the ╮; last H3 mark stops above the ╯
@@ -1441,13 +1445,13 @@ html[data-theme='light'] .theme-icon-moon {
 /* First H3 current: the opening ╰╮ is that item's segment. */
 .post-toc .toc-sub:has(> ul > li:first-child > a[aria-current])::before,
 .post-toc .toc-sub:has(> ul > li:first-child > a[aria-current]) > ul::before {
-  border-color: var(--fg);
+  border-color: var(--toc-mark);
 }
 
 /* Last H3 current: the closing ╯ is that item's segment; the ╭
    return to the next H2 spine stays quiet. */
 .post-toc .toc-sub:has(> ul > li:last-child > a[aria-current]) > ul > li:last-child::after {
-  border-color: var(--fg);
+  border-color: var(--toc-mark);
 }
 
 .post-rail-tools {
