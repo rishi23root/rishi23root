@@ -35,7 +35,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Socials / email / site URL | `content/site.json` → `contact`, `siteUrl` | Bottom text links (not icons) |
 | Featured Work | `content/site.json` → `opensource.active` + `blurbs` | `owner/repo` strings |
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
-| Writing post | `content/posts/<slug>.mdx` | Frontmatter required; skip `draft: true` in public lists (see SEO cheat below) |
+| Writing post | `content/posts/<slug>.mdx` | Frontmatter required. Lists, RSS, `llms.txt` and the palette use `getPublishedPosts()` (never drafts, dev included); only `writing/[slug].astro` uses `getRenderablePosts()`, so a `draft: true` post is previewable at its URL in dev and nowhere else |
 | Excalidraw board in a post | `web/public/diagrams/<name>.json` + `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX | No import needed; see **Excalidraw boards** below |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
 | Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; mood-left / text-right; `HeroMoodShell` island; no on-site avatar |

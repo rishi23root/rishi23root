@@ -9,7 +9,7 @@ import { absoluteUrl, site } from '../../lib/site'
 import {
   assertSlugMatchesFile,
   formatPostDate,
-  getPublishedPosts,
+  getRenderablePosts,
   postKeywords,
   postPath,
   readingTimeMinutes,
@@ -18,7 +18,7 @@ import {
 import { publicImageSize } from '../../lib/imageSize'
 
 export async function getStaticPaths() {
-  const posts = await getPublishedPosts()
+  const posts = await getRenderablePosts()
   posts.forEach(assertSlugMatchesFile)
   return posts.map((post) => ({ params: { slug: post.data.slug }, props: { post } }))
 }

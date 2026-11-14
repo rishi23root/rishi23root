@@ -25,7 +25,7 @@ $ stats
 
 ### Writing
 
-- **[How this site is built: one content folder, a README and a website](https://rishi23root.in/writing/how-this-site-works)** — 2026-11-14
+- **[How rishi23root.in is put together](https://rishi23root.in/writing/how-this-site-works)** — 2026-11-14
 - **[Hello world](https://rishi23root.in/writing/hello-world)** — 2026-11-01
 
 ### Recently liked
