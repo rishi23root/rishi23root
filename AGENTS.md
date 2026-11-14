@@ -21,6 +21,7 @@ Generate `README.md` from `readme.template.md` + `content/site.json` (via `confi
 | `web/src/components/ExcalidrawBoard.{astro,tsx}` | Read-only Excalidraw diagram (scene → SVG) for Writing posts (see **Excalidraw boards**) |
 | `web/public/diagrams/*.json` | Excalidraw scene files the boards load |
 | `web/public/fonts/excalidraw/` | Self-hosted Excalifont + Virgil for board text |
+| `web/src/components/github/` + `web/src/lib/github.ts` | `<RepoCard>` / `<PrCard>` and GitHub link hover previews in Writing posts, from build-time API data (see **GitHub cards and link previews**) |
 | `.github/workflows/build.yml` | README: on-demand `push` to `master` + `workflow_dispatch` |
 | `.github/workflows/pages.yml` | Site: build `web/` → GitHub Pages (`rishi23root.in`) |
 
@@ -37,6 +38,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
 | Writing post | `content/posts/<slug>.mdx` | Frontmatter required. Lists, RSS, `llms.txt` and the palette use `getPublishedPosts()` (never drafts, dev included); only `writing/[slug].astro` uses `getRenderablePosts()`, so a `draft: true` post is previewable at its URL in dev and nowhere else |
 | Excalidraw board in a post | `web/public/diagrams/<name>.json` + `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX | No import needed; see **Excalidraw boards** below |
+| GitHub card in a post | `<RepoCard owner="…" repo="…" />` or `<PrCard owner="…" repo="…" number={21} />` in the MDX | No import; plain github.com repo/PR links get hover previews automatically; see **GitHub cards and link previews** |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
 | Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; mood-left / text-right; `HeroMoodShell` island; no on-site avatar |
 | Command palette (kbar) | `web/src/components/CommandPalette.astro` | Hidden UI; Cmd/Ctrl+K or `?`; boot is tiny, palette chunk lazy-loaded |
@@ -76,7 +78,7 @@ How it fits together:
 
 - **Scenes:** `web/public/diagrams/<name>.json`, served at `/diagrams/<name>.json`. A scene is a full Excalidraw document (`type`, `version`, `elements`, `appState`, `files`). A `.excalidraw` download is already this format; just rename it.
 - **Component:** `web/src/components/ExcalidrawBoard.astro` wraps `ExcalidrawBoard.tsx` with `client:visible`. The React island fetches the JSON and dynamically imports `@excalidraw/excalidraw` after mounting, so the library only downloads when a board scrolls into view, and only on posts that use one.
-- **MDX wiring:** `web/src/pages/writing/[slug].astro` passes `components={{ Callout, ExcalidrawBoard }}` to `<Content />`, so posts use the tag with no import. Posts don't write `client:visible` themselves.
+- **MDX wiring:** `web/src/pages/writing/[slug].astro` passes `components={{ Callout, ExcalidrawBoard, RepoCard, PrCard }}` to `<Content />`, so posts use the tag with no import. Posts don't write `client:visible` themselves.
 - **Styles:** `.excal-board*`, `.excal-viewport`, `.excal-pill`, `.excal-modal*` in `web/src/styles/global.css`. Full article width, 500px tall (360px on mobile), transparent background, no card frame.
 - **Fonts:** the SVG is exported with `skipInliningFonts: true`; text uses the `@font-face` rules for Excalifont and Virgil in `global.css` (files in `web/public/fonts/excalidraw/`). The island waits for those fonts before fading in. Other Excalidraw fonts fall back to system fonts.
 
@@ -99,6 +101,26 @@ Don't:
 - Paste large screenshots into scenes; they're stored inline in the JSON as data URLs.
 - Statically import `@excalidraw/excalidraw` (or its `index.css`) in the component. The island only needs `exportToSvg`, loaded with a client-side dynamic `import()`, so SSR never resolves the package and no editor CSS ships. Keep it that way.
 - Drop `skipInliningFonts: true`. Inlining pulls a ~1.8 MB font-subsetting chunk and fetches fonts from esm.sh; the self-hosted `@font-face` rules cover it.
+
+## GitHub cards and link previews
+
+Writing posts can show a repository or pull request as a card, and plain github.com links get a small preview on hover. Both are filled in at build time; the browser never calls the GitHub API.
+
+```mdx
+<RepoCard owner="rishi23root" repo="rishi23root" />
+<PrCard owner="rishi23root" repo="rishi23root" number={21} />
+```
+
+- **Data:** `web/src/lib/github.ts` fetches `GET /repos/{owner}/{repo}` and `GET /repos/{owner}/{repo}/pulls/{n}` once per build each (promise cache shared by cards and previews), with `GITHUB_TOKEN` when it's set. The Pages workflow passes the built-in `secrets.GITHUB_TOKEN`; locally it works unauthenticated (60 requests/hour). Any failure (offline, rate limit, 404) logs one warning and the card falls back to a plain labelled link, so the build never fails on GitHub.
+- **Cards:** `web/src/components/github/RepoCard.astro` / `PrCard.astro`, sharing `GithubCardBody.astro`: mono eyebrow (Repository · owner / Pull request · owner/repo), stars (hidden at 0) or PR state, title, description or the first paragraph of the PR body, then language or `+adds −dels · files · commits · author · date`. The whole card is a link. No avatars (the site has no on-site avatar).
+- **Previews:** `[slug].astro` scans the post's MDX source (`findGithubRefs` in `web/src/lib/githubRefs.ts`, fenced code ignored) and renders `GithubLinkPreviews.astro` only when it finds repo or PR links. That component pre-renders one `<template>` per link with the same card body, plus a ~2.4 KB inline script: hover with a mouse (280 ms delay) or keyboard focus opens it under the link; leaving, blur or Escape closes it; it stays open while the pointer is on it. Touch devices just follow the link. Cards themselves never get previews.
+- **Styles:** `.gh-card*` and `.gh-pop` in `web/src/styles/global.css`.
+
+Don't:
+
+- Call the GitHub API from the browser, or ship a token to the client.
+- Make a build fail because GitHub is unreachable; keep the null fallback.
+- Add avatars, OG images or other remote images to cards.
 
 ## SEO / frontmatter cheat (canonical site)
 

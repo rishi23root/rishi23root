@@ -1,0 +1,94 @@
+---
+import { formatCount, formatShortDate, type GithubRef, type PrData, type RepoData } from '../../lib/github'
+
+type Props = { data: RepoData | PrData | null; fallback: GithubRef }
+const { data, fallback } = Astro.props
+const kind = data?.kind ?? fallback.kind
+const owner = data?.owner ?? fallback.owner
+const repo = data?.repo ?? fallback.repo
+const number = data?.kind === 'pr' ? data.number : fallback.kind === 'pr' ? fallback.number : 0
+const stateLabel = { open: 'Open', draft: 'Draft', merged: 'Merged', closed: 'Closed' } as const
+const n = (v: number) => v.toLocaleString('en-US')
+---
+
+<div class="gh-card-top">
+  <span class="gh-card-eyebrow">
+    {
+      kind === 'repo' ? (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5.5 4.5A1.5 1.5 0 0 1 7 3h11.5v14H7a1.5 1.5 0 0 0-1.5 1.5v-14Z" />
+          <path d="M5.5 18.5A1.5 1.5 0 0 0 7 20h11.5" />
+        </svg>
+      ) : data?.kind === 'pr' && data.state === 'merged' ? (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="7" cy="5.5" r="2" />
+          <circle cx="7" cy="18.5" r="2" />
+          <circle cx="17" cy="12" r="2" />
+          <path d="M7 7.5v9M7 7.5c0 3 2.5 4.5 5.5 4.5H15" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="7" cy="5.5" r="2" />
+          <circle cx="7" cy="18.5" r="2" />
+          <circle cx="17" cy="18.5" r="2" />
+          <path d="M7 7.5v9M17 16.5V10a3 3 0 0 0-3-3h-3.5M12.5 4.5 10 7l2.5 2.5" />
+        </svg>
+      )
+    }
+    {kind === 'repo' ? <span>Repository · {owner}</span> : <span>Pull request · {owner}/{repo}</span>}
+  </span>
+  {
+    data?.kind === 'repo' && data.stars > 0 ? (
+      <span class="gh-card-stat" aria-label={`${n(data.stars)} stars`}>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m12 4 2.35 4.76 5.25.77-3.8 3.7.9 5.23L12 15.99l-4.7 2.47.9-5.23-3.8-3.7 5.25-.77Z" />
+        </svg>
+        {formatCount(data.stars)}
+      </span>
+    ) : data?.kind === 'pr' ? (
+      <span class:list={['gh-card-state', `is-${data.state}`]}>{stateLabel[data.state]}</span>
+    ) : null
+  }
+</div>
+
+<p class="gh-card-title">
+  {
+    kind === 'repo' ? (
+      repo
+    ) : (
+      <>
+        <span class="gh-card-num">#{number}</span> {data?.kind === 'pr' ? data.title : 'Pull request'}
+      </>
+    )
+  }
+</p>
+
+{data?.kind === 'repo' && data.description ? <p class="gh-card-desc">{data.description}</p> : null}
+{data?.kind === 'pr' && data.excerpt ? <p class="gh-card-desc">{data.excerpt}</p> : null}
+
+<p class="gh-card-meta">
+  {
+    data?.kind === 'repo' ? (
+      data.language ? (
+        <span class="gh-card-lang">
+          <i style={data.languageColor ? `--lang: ${data.languageColor}` : undefined} />
+          {data.language}
+        </span>
+      ) : (
+        <span>github.com</span>
+      )
+    ) : data?.kind === 'pr' ? (
+      <>
+        <span class="gh-card-diff">
+          <span class="gh-card-add">+{n(data.additions)}</span> <span class="gh-card-del">−{n(data.deletions)}</span>
+        </span>
+        <span>{n(data.files)} files</span>
+        <span>{n(data.commits)} commits</span>
+        {data.author ? <span>{data.author}</span> : null}
+        {data.date ? <span>{formatShortDate(data.date)}</span> : null}
+      </>
+    ) : (
+      <span>github.com</span>
+    )
+  }
+</p>

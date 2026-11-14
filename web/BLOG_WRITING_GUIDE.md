@@ -40,6 +40,7 @@ Use the names as the `##` headings, in this order. A short qualifier after a col
 5. **Code:** fenced, with a language (` ```ts `). Keep snippets small enough to read; link out to the full code.
 6. **Images:** meaningful `alt` text. Keep them in `web/public/writing/<slug>/`.
    **Diagrams:** `<ExcalidrawBoard src="/diagrams/<name>.json" />` for Excalidraw scenes (rendered to SVG, read-only) stored in `web/public/diagrams/` (see `AGENTS.md` → Excalidraw boards). The text around a board must still make sense without it.
+   **GitHub:** `<RepoCard owner="…" repo="…" />` or `<PrCard owner="…" repo="…" number={21} />` for a repo or PR worth a card; plain github.com repo/PR links get a hover preview on their own (see `AGENTS.md` → GitHub cards and link previews). Use a card when the repo or PR is the subject, a plain link when it's a reference.
 7. **End:** the "What I recommend" section is the ending. No "thanks for reading" sign-off.
 
 ## 4. Frontmatter (validated at build)

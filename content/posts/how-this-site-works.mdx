@@ -85,6 +85,21 @@ Dark mode is one CSS filter on the SVG, the same invert-and-rotate Excalidraw us
 
 **Themes.** Pages ship dark. A tiny inline script in `<head>` applies a saved light choice before the first paint, so there's no flash of the wrong theme. The toggle writes to `localStorage`, and everything that has colour, including the diagrams, follows the `data-theme` attribute on `<html>`.
 
+**GitHub cards.** When a post talks about a repository or a pull request, I can drop in a card instead of a bare link:
+
+```mdx
+<RepoCard owner="rishi23root" repo="rishi23root" />
+<PrCard owner="rishi23root" repo="rishi23root" number={21} />
+```
+
+<RepoCard owner="rishi23root" repo="rishi23root" />
+
+<PrCard owner="rishi23root" repo="rishi23root" number={21} />
+
+Both are filled in from the GitHub API when the site builds, so your browser never talks to GitHub, and the stars or the PR's state are as fresh as the last deploy. If the API is down or rate-limited, the card falls back to a plain labelled link and the build carries on.
+
+Plain links get a lighter version. Hover a link to [this site's repository](https://github.com/rishi23root/rishi23root) or to [the pull request that added the diagrams and these cards](https://github.com/rishi23root/rishi23root/pull/21), and a small preview opens under it. The post page scans its own source for GitHub links at build time and renders a preview for each into the HTML. A short script shows the right one on hover or keyboard focus. On a phone, a tap just follows the link.
+
 **Feeds and search.** RSS, the sitemap, structured data and `llms.txt` are all generated from the same posts and `site.json`, so there's nothing hand-kept to go stale. The details are under Architecture.
 
 ## What failed
@@ -317,6 +332,7 @@ I measured these from the production build (`npm run build:web`) and the browser
 - **One edit, both surfaces.** Changing my bio or publishing a post is one commit. The README and the site both pick it up on the next push to `master`, with no copy step.
 - **A plain post ships no React.** Its scripts are the 1.1 KB palette listener; the shared stylesheet is 37.5 KB (8.3 KB gzipped). The home page HTML is about 21 KB.
 - **React is opt-in.** The mood island is 7.5 KB plus the React runtime (66 KB gzipped), only on desktop. A post with a diagram adds a 6 KB island and, once a board scrolls into view, the Excalidraw library (about 1.1 MB, 372 KB gzipped).
+- **GitHub cards are plain HTML.** They ship no script at all. Link previews add a 2.4 KB inline script, and only to posts that link to a repo or PR.
 - **Diagrams got lighter.** Moving from the live canvas to SVG took 145 KB of CSS off every post. Self-hosting fonts took a 1.8 MB script and a CDN request off every board.
 - **Mood images cost phones nothing.** The seven stills total about 540 KB, but a desktop visit downloads one up front plus one low-priority prefetch after load, and a phone downloads none.
 - **Feeds stay in sync for free.** RSS, `llms.txt` and the sitemap are rebuilt on every deploy. The sitemap has five URLs today: home, Projects, Writing and the two published posts. Moods, redirects and drafts stay out.

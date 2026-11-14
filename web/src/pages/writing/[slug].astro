@@ -4,6 +4,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import Callout from '../../components/Callout.astro'
 import ContactIcons from '../../components/ContactIcons.astro'
 import ExcalidrawBoard from '../../components/ExcalidrawBoard.astro'
+import GithubLinkPreviews from '../../components/github/GithubLinkPreviews.astro'
+import PrCard from '../../components/github/PrCard.astro'
+import RepoCard from '../../components/github/RepoCard.astro'
 import MetaLine from '../../components/MetaLine.astro'
 import { absoluteUrl, site } from '../../lib/site'
 import {
@@ -15,6 +18,7 @@ import {
   readingTimeMinutes,
   type Post,
 } from '../../lib/posts'
+import { findGithubRefs } from '../../lib/githubRefs'
 import { publicImageSize } from '../../lib/imageSize'
 
 export async function getStaticPaths() {
@@ -30,6 +34,7 @@ const path = postPath(d.slug)
 const canonical = absoluteUrl(path)
 const ogImage = d.image ?? d.cover ?? '/og-default.png'
 const coverSize = d.cover ? publicImageSize(d.cover) : undefined
+const hasGithubLinks = findGithubRefs(post.body ?? '').length > 0
 // Rail outline: each H2 owns the H3s that follow it. H3s before the first H2
 // have no parent, so they stay top-level and always visible.
 type TocLink = { slug: string; text: string }
@@ -151,8 +156,9 @@ if (d.faq.length) {
         }
 
         <div class="prose post-body">
-          <Content components={{ Callout, ExcalidrawBoard }} />
+          <Content components={{ Callout, ExcalidrawBoard, RepoCard, PrCard }} />
         </div>
+        {hasGithubLinks ? <GithubLinkPreviews source={post.body ?? ''} /> : null}
 
         {
           d.faq.length ? (

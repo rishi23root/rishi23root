@@ -1,0 +1,14 @@
+---
+/** MDX: <PrCard owner="rishi23root" repo="rishi23root" number={21} /> — fetched at build time. */
+import { getPr } from '../../lib/github'
+import GithubCardBody from './GithubCardBody.astro'
+
+type Props = { owner: string; repo: string; number: number | string }
+const { owner, repo } = Astro.props
+const number = Number(Astro.props.number)
+const data = await getPr(owner, repo, number)
+---
+
+<a class="gh-card gh-card-block" href={data?.url ?? `https://github.com/${owner}/${repo}/pull/${number}`}>
+  <GithubCardBody data={data} fallback={{ kind: 'pr', owner, repo, number }} />
+</a>
