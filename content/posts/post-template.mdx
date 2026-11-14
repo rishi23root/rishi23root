@@ -1,0 +1,103 @@
+---
+title: How I write posts on rishi23root.in
+date: 2026-11-11
+slug: post-template
+summary: The template every post starts from — answer first, short sections, a quotable FAQ, and a pre-publish checklist.
+draft: true
+author: Rishabh
+tags: [meta, writing]
+cover: /writing/post-template/cover.webp
+image: /writing/post-template/cover.webp
+primaryKeyword: blog writing checklist
+secondaryKeywords: [answer-first writing, technical blog template]
+faq:
+  - q: What goes in the first paragraph?
+    a: A one- or two-sentence answer to the question the title asks, so a reader (or an answer engine) gets the point without scrolling.
+  - q: When should a post have an FAQ?
+    a: When readers are likely to ask follow-up questions that have short, stand-alone answers. Skip it for short notes.
+  - q: Where do post images live?
+    a: Under web/public/writing/<slug>/, then referenced from frontmatter cover or as /writing/<slug>/… in the body, each with meaningful alt text.
+---
+
+This is a draft template (it never ships). Every post opens by answering its own title in one or two sentences, then earns the rest of the page with specifics. I also keep this file long enough to visually check headings, images, the "On this page" rail, and reading progress in local dev.
+
+<Callout tone="answer">Lead with the answer, keep sections short, show real code or numbers, and finish with what to do next.</Callout>
+
+## Structure
+
+Use `##` for sections and `###` for sub-steps. Never skip a level, and keep headings descriptive so the "On this page" rail reads like an outline. The page already renders the H1 from `title`, so starting the body at `##` is deliberate, not a missing heading.
+
+Short paragraphs of two to four sentences leave enough space to judge measure width, heading clearance, and how a long post scrolls. If a section only needs one sentence, it probably belongs as a bullet or a line in the opening answer.
+
+### Sections and the rail
+
+The rail on the right (and the compact outline on smaller screens, if it appears) is built from `##` and `###` headings, plus the FAQ when one exists. Nested `###` items should sit at depth 3 so you can tell a sub-step from a section at a glance.
+
+Scroll this page and watch the current item highlight as the heading crosses the marker. That is also a check that `scroll-margin` clears the sticky nav, and that IDs from the markdown headings match the anchor links.
+
+A useful heading names the idea ("Why the slug must match the file") instead of the position ("Part 2"). If the rail looks vague, the headings are too generic, not the CSS.
+
+### Lists and code
+
+- Steps that happen in order go in a numbered list.
+- Commands and config go in fenced code blocks with a language.
+- Unordered points stay as bullets, one idea each, short enough to scan.
+
+```ts
+const post = await getEntry('posts', 'post-template')
+if (!post) throw new Error('missing draft template')
+```
+
+A code block should be small enough to read in the text column without horizontal panic. Link out if the real file is longer. After a fence, a short paragraph confirms spacing between the block, lists, and the next heading.
+
+## Images
+
+Images live in `web/public/writing/<slug>/` and are referenced with a rooted path like `/writing/post-template/cover.webp`. Give every image meaningful alt text; the cover in frontmatter also becomes the Open Graph image unless `image` is set on its own.
+
+This draft ships three original test assets (small WebP graphics, clearly labeled) so the layout can be checked without leaning on mood-plate photos. Replace them when a real post needs real pictures.
+
+### Cover
+
+The cover is set in frontmatter as `cover` and renders once, under the header, at the width of the article column. Check the rounded corners against the title block, the gap before the first paragraph, and how a 16:9 asset crops (it should not) on a narrow phone.
+
+If a post does not need a cover, omit the field. Do not add a decorative image just to fill the slot.
+
+### Inline figures
+
+A figure with a caption is the usual way to show a screenshot or a diagram in the body. The image should stay inside the measure; the caption should be smaller and quieter than the body copy.
+
+<figure>
+  <img src="/writing/post-template/figure-wide.webp" alt="Labeled three-panel test graphic for a full-width figure, marked FIGURE FULL WIDTH, 1600 by 900, used to check image rounding and caption spacing." />
+  <figcaption>A full-width figure with a caption. Check the gap above the image, the rounded corners, and how the caption sits against the next paragraph.</figcaption>
+</figure>
+
+A second image without a caption should still have alt text, and should not collapse the spacing into the following copy.
+
+![A second original test graphic labeled INLINE IMAGE, 1200 by 800, with a circular color study on the left and a dark side panel of dimensions.](/writing/post-template/inline-second.webp)
+
+<Callout>This file stays `draft: true`. It is visible in `npm run dev:web` at `/writing/post-template` so the layout can be checked, and it is omitted from production builds, RSS, the sitemap, and the GitHub README.</Callout>
+
+If either image looks soft, oversized, or tight against a heading, fix the asset or the markdown before touching global prose styles.
+
+## Before you publish
+
+<Callout tone="warning">Never paste secrets, tokens, client names or private screenshots. Redact first.</Callout>
+
+Flip `draft` to `false` only when the post is ready to ship. The slug must already match the file name; the build fails otherwise. If you are editing a post that is already public, set `updated` so the page can show that the text changed.
+
+### Checklist
+
+1. Title answers a real question and is under 90 characters.
+2. Summary is one sentence under 220 characters.
+3. `slug` matches the file name; flip `draft` to `false`.
+4. Headings are `##` / `###` only and read like an outline in the rail.
+5. Code blocks have a language. Images have alt text and live under `web/public/writing/<slug>/`.
+6. `npm run build:web` passes, and the post has been read once at mobile width.
+
+Use this list as the last pass, not a substitute for reading the page. If something looks off only on a phone, it is not done.
+
+### Voice and guardrails
+
+Write in the first person, as I actually talk about the work: plain, specific, with real commands and real trade-offs. Cut filler and hype. Opinions are fine when I say what they rest on.
+
+Do not publish secrets, client names, other people's personal data, or claims I cannot back up. If this template is the starting point for a new post, duplicate it, change the slug and file name together, drop the test images, and write the real thing before flipping `draft`.

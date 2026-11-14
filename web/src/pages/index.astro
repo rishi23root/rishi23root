@@ -1,23 +1,23 @@
 ---
-import { getCollection } from 'astro:content'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { githubAvatarUrl, publishedPostsFilter, site } from '../lib/site'
+import ContactIcons from '../components/ContactIcons.astro'
+import SiteChrome from '../components/SiteChrome.astro'
+import HeroMoodShell from '../components/HeroMoodShell'
+import { firstMoodPreloadScript } from '../components/moods/preload'
+import { DESKTOP_MQ } from '../components/moods/media'
+import { githubAvatarUrl, site, socialLinks } from '../lib/site'
+import { getPublishedPosts, isoDay, postPath } from '../lib/posts'
 
-const posts = (await getCollection('posts', publishedPostsFilter)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-)
+const posts = (await getPublishedPosts()).slice(0, 5)
 
-const featured = site.opensource.active.slice(0, 6)
-const socials = [
-  { label: 'Email', href: `mailto:${site.contact.email}` },
-  { label: 'Website', href: site.contact.socials.website },
-  { label: 'X', href: site.contact.socials.x },
-  { label: 'LinkedIn', href: site.contact.socials.linkedin },
-  { label: 'GitHub', href: site.contact.socials.github },
-  { label: 'PyPI', href: site.contact.socials.pypi },
-]
+const projects = (site.projects ?? [])
+  .slice()
+  .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+  .slice(0, 3)
 
-const avatarUrl = githubAvatarUrl(320)
+const capabilities = site.capabilities ?? []
+const moods = site.moods ?? []
+const voiceBio = site.voiceBio ?? site.fullDescription
 
 const personJsonLd = {
   '@context': 'https://schema.org',
@@ -26,98 +26,113 @@ const personJsonLd = {
   url: site.siteUrl,
   email: site.contact.email,
   description: site.fullDescription,
-  image: avatarUrl,
-  sameAs: [
-    site.contact.socials.website,
-    site.contact.socials.x,
-    site.contact.socials.linkedin,
-    site.contact.socials.github,
-    site.contact.socials.pypi,
-  ],
+  // Avatar for schema only — never rendered as an on-page <img>.
+  image: githubAvatarUrl(320),
+  sameAs: socialLinks.filter((link) => link.id !== 'email').map((link) => link.href),
 }
 ---
 
 <BaseLayout path="/" jsonLd={personJsonLd}>
-  <section class="hero">
-    <div class="hero-identity">
-      <img
-        class="hero-avatar"
-        src={avatarUrl}
-        alt={site.github.name}
-        width="96"
-        height="96"
-        decoding="async"
-      />
-      <div class="hero-copy">
-        <p class="prompt">$ whoami</p>
-        <h1>
-          {site.github.name} — {site.shortBio}
-        </h1>
-        <p class="lede">{site.fullDescription}</p>
+  {
+    /* Start the first mood download from <head>, before React hydrates
+       HeroMoodShell (desktop only; see moods/preload.ts). */
+    moods.length ? <script is:inline slot="head" set:html={firstMoodPreloadScript(moods)} /> : null
+  }
+  {
+    /* Hold centered await until the first still is ready (lib/settleMood.ts
+       FLIPs mood out from behind the text). Skip when no moods. */
+    moods.length ? (
+      <script is:inline slot="head" define:vars={{ desktopMq: DESKTOP_MQ }}>
+        try {
+          if (
+            window.matchMedia(desktopMq).matches &&
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ) {
+            document.documentElement.classList.add('mood-await')
+          }
+        } catch (e) {}
+        window.addEventListener('pagereveal', function (e) {
+          if (e.viewTransition) window.__homePageVt = e.viewTransition.finished
+        })
+      </script>
+    ) : null
+  }
+  <div class="page home-split">
+    {/* Text column (≈60% on wide screens). Mood plate sits to its left. */}
+    <div class="home-text">
+      <SiteChrome path="/" />
+      <div class="home-copy">
+        <h1 class="visually-hidden">{site.github.name}</h1>
+
+        <section class="home-section reveal" style="--i: 0">
+          <p class="voice-bio">{voiceBio}</p>
+        </section>
+
+        <section class="home-section reveal" style="--i: 1">
+          <h2>Writing</h2>
+          {
+            posts.length ? (
+              <ul class="home-list home-writing-list">
+                {posts.map((post) => (
+                  <li class="hover-row">
+                    <a class="row-link" href={postPath(post.data.slug)}>{post.data.title}</a>
+                    <time datetime={post.data.date.toISOString()}>{isoDay(post.data.date)}</time>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="empty">No posts yet.</p>
+            )
+          }
+        </section>
+
+        <section class="home-section reveal" style="--i: 2">
+          <h2>Work</h2>
+          <ul class="home-list home-stack-list">
+            {
+              projects.map((project) => (
+                <li class="hover-row">
+                  <a class="row-link" href={project.url}>{project.title}</a>
+                  {project.blurb ? <span class="blurb">{project.blurb}</span> : null}
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        {
+          capabilities.length ? (
+            <section class="home-section reveal" style="--i: 3">
+              <h2>Capabilities</h2>
+              <ul class="home-list home-stack-list">
+                {capabilities.map((item) => (
+                  <li class="hover-row">
+                    <span class="capability-heading">{item.heading}</span>
+                    <span class="blurb">{item.body}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null
+        }
+
+        <div class="reveal" style="--i: 4">
+          <ContactIcons />
+        </div>
       </div>
     </div>
-  </section>
 
-  <section class="section">
-    <h2>Mottos</h2>
-    <p class="mottos">
-      {site.mottos.map((line) => `「${line}」`).join(' · ')}
-    </p>
-  </section>
-
-  <section class="section">
-    <h2>Stack</h2>
-    <p class="stack-line">{site.stackLine}</p>
-  </section>
-
-  <section class="section">
-    <h2>Featured work</h2>
-    <ul class="list">
-      {
-        featured.map((fullName) => {
-          const blurb = site.opensource.blurbs[fullName] ?? ''
-          return (
-            <li>
-              <a href={`https://github.com/${fullName}`}>{fullName}</a>
-              {blurb ? <span class="meta">{blurb}</span> : null}
-            </li>
-          )
-        })
-      }
-    </ul>
-  </section>
-
-  <section class="section">
-    <h2>Writing</h2>
     {
-      posts.length ? (
-        <ul class="list">
-          {posts.slice(0, 5).map((post) => (
-            <li>
-              <a href={`/blog/${post.data.slug}`}>{post.data.title}</a>
-              <span class="meta">
-                {post.data.date.toISOString().slice(0, 10)}
-                {post.data.summary ? ` — ${post.data.summary}` : ''}
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p class="empty">No posts yet.</p>
-      )
+      moods.length ? (
+        <aside class="home-mood reveal" style="--i: 0" aria-label="Mood illustration">
+          <div class="home-mood-sticky">
+            {/* Desktop-only island: client:media defers the React download
+                below 1024px. SSR-safe shell + __heroMoodFirst handoff avoid
+                flash / double shuffle-bag advance (see HeroMoodShell). */}
+            <HeroMoodShell client:media={DESKTOP_MQ} moods={moods} />
+          </div>
+        </aside>
+      ) : null
     }
-  </section>
-
-  <section class="section">
-    <h2>Contact</h2>
-    <ul class="contact">
-      {
-        socials.map((item) => (
-          <li>
-            <a href={item.href}>{item.label}</a>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
+  </div>
 </BaseLayout>

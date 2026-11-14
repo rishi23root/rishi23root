@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { site } from '../lib/site'
+
+const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
+---
+
+<BaseLayout
+  title="Moods"
+  description="Moods that appear on the home page. Click one to open the site with it."
+  path="/mood/"
+  robots="noindex, nofollow"
+>
+  <div class="page">
+    <section class="page-intro reveal" style="--i: 0">
+      <h1>Moods</h1>
+      <p class="lede">
+        These moods appear on the home page, one at a time. Click one to open it there.
+      </p>
+    </section>
+
+    {
+      moods.length ? (
+        <ul class="mood-index-grid reveal" style="--i: 1">
+          {moods.map((mood) => (
+            <li>
+              <a class="mood-index-link" href={`/?mood=${mood.id}`}>
+                <div class="mood-index-frame mood-inset">
+                  <img
+                    src={mood.src}
+                    alt={mood.alt || mood.id}
+                    loading="lazy"
+                    decoding="async"
+                    width="720"
+                    height="1280"
+                  />
+                </div>
+                <span class="mood-index-id">{mood.id}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No moods configured.</p>
+      )
+    }
+  </div>
+</BaseLayout>

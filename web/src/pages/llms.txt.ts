@@ -1,17 +1,16 @@
-import { getCollection } from 'astro:content'
 import type { APIRoute } from 'astro'
-import { publishedPostsFilter, site } from '../lib/site'
+import { site } from '../lib/site'
+import { getPublishedPosts, isoDay, postPath } from '../lib/posts'
 
 export const GET: APIRoute = async () => {
-  const posts = (await getCollection('posts', publishedPostsFilter)).sort(
-    (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-  )
+  const posts = await getPublishedPosts()
 
   const socials = site.contact.socials
+  const blurbs: Record<string, string | undefined> = site.opensource.blurbs
   const featured = site.opensource.active
     .slice(0, 6)
     .map((fullName) => {
-      const blurb = site.opensource.blurbs[fullName]
+      const blurb = blurbs[fullName]
       return blurb ? `${fullName} — ${blurb}` : fullName
     })
     .join('; ')
@@ -35,7 +34,7 @@ export const GET: APIRoute = async () => {
     '## Key pages',
     '',
     `- Home: ${site.siteUrl}/`,
-    `- Blog: ${site.siteUrl}/blog`,
+    `- Writing: ${site.siteUrl}/writing/`,
     `- RSS: ${site.siteUrl}/rss.xml`,
     `- This file: ${site.siteUrl}/llms.txt`,
     '',
@@ -44,7 +43,7 @@ export const GET: APIRoute = async () => {
     ...(posts.length
       ? posts.map(
           (post) =>
-            `- ${post.data.date.toISOString().slice(0, 10)} — ${post.data.title}: ${post.data.summary} (${site.siteUrl}/blog/${post.data.slug})`,
+            `- ${isoDay(post.data.date)} — ${post.data.title}: ${post.data.summary} (${site.siteUrl}${postPath(post.data.slug)})`,
         )
       : ['- (no published posts yet)']),
     '',
@@ -56,8 +55,6 @@ export const GET: APIRoute = async () => {
   ].filter((line): line is string => line !== null)
 
   return new Response(lines.join('\n'), {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-    },
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   })
 }

@@ -1,0 +1,28 @@
+---
+/** Inline meta separated by dots, e.g. "Rishabh · November 5, 2026 · 1 min read". */
+export type MetaItem = { text: string; datetime?: string; class?: string }
+
+type Props = {
+  /** Falsy entries are skipped, so optional items can be written inline. */
+  items: (MetaItem | false | null | undefined)[]
+  class?: string
+}
+
+const { items, class: className } = Astro.props
+const shown = items.filter((item): item is MetaItem => Boolean(item))
+---
+
+<p class={className}>
+  {
+    shown.map((item, i) => (
+      <>
+        {i > 0 ? <span aria-hidden="true">·</span> : null}
+        {item.datetime ? (
+          <time datetime={item.datetime}>{item.text}</time>
+        ) : (
+          <span class={item.class}>{item.text}</span>
+        )}
+      </>
+    ))
+  }
+</p>

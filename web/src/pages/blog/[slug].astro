@@ -1,59 +1,11 @@
 ---
-import { getCollection, render } from 'astro:content'
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import { publishedPostsFilter, site } from '../../lib/site'
+import { getPublishedPosts, postPath } from '../../lib/posts'
 
+/** Legacy `/blog/<slug>` → `/writing/<slug>` for old links. */
 export async function getStaticPaths() {
-  const posts = await getCollection('posts', publishedPostsFilter)
-  return posts.map((post) => ({
-    params: { slug: post.data.slug },
-    props: { post },
-  }))
+  const posts = await getPublishedPosts()
+  return posts.map((post) => ({ params: { slug: post.data.slug } }))
 }
 
-const { post } = Astro.props
-const { Content } = await render(post)
-const path = `/blog/${post.data.slug}`
-const date = post.data.date.toISOString().slice(0, 10)
-const canonical = new URL(path, site.siteUrl).toString()
-const ogImage = post.data.image ?? '/og-default.png'
-const ogImageAbsolute = new URL(ogImage, site.siteUrl).toString()
-
-const blogPostingJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'BlogPosting',
-  headline: post.data.title,
-  description: post.data.summary,
-  datePublished: post.data.date.toISOString(),
-  url: canonical,
-  mainEntityOfPage: canonical,
-  image: ogImageAbsolute,
-  author: {
-    '@type': 'Person',
-    name: site.github.name,
-    url: site.siteUrl,
-  },
-  publisher: {
-    '@type': 'Person',
-    name: site.github.name,
-    url: site.siteUrl,
-  },
-}
+return Astro.redirect(postPath(Astro.params.slug!), 301)
 ---
-
-<BaseLayout
-  title={post.data.title}
-  description={post.data.summary}
-  path={path}
-  type="article"
-  publishedTime={post.data.date}
-  image={ogImage}
-  jsonLd={blogPostingJsonLd}
->
-  <a class="back" href="/blog">← Blog</a>
-  <article class="prose">
-    <h1>{post.data.title}</h1>
-    <p class="post-meta">{date}</p>
-    <Content />
-  </article>
-</BaseLayout>

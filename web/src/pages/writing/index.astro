@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import ContactIcons from '../../components/ContactIcons.astro'
+import MetaLine from '../../components/MetaLine.astro'
+import { formatPostDate, getPublishedPosts, postPath, readingTimeMinutes } from '../../lib/posts'
+
+const posts = await getPublishedPosts()
+---
+
+<BaseLayout title="Writing" description="Notes on SaaS, automation, and security." path="/writing/">
+  <div class="page blog-page blog-index">
+    <section class="page-intro reveal" style="--i: 0">
+      <p class="page-eyebrow">Writing</p>
+      <h1>Notes from building</h1>
+      <p class="lede">
+        Short, answer-first notes on SaaS, automation and security. Same posts
+        tree as the profile README.
+      </p>
+    </section>
+
+    {
+      posts.length ? (
+        <ul class="post-list reveal" style="--i: 1">
+          {posts.map((post) => (
+            <li class="post-list-item hover-row">
+              <div class="post-list-top">
+                <h2 class="post-list-heading">
+                  <a class="row-link" href={postPath(post.data.slug)}>{post.data.title}</a>
+                </h2>
+                <MetaLine
+                  class="post-list-meta"
+                  items={[
+                    { text: formatPostDate(post.data.date), datetime: post.data.date.toISOString() },
+                    { text: `${readingTimeMinutes(post)} min read` },
+                    post.data.draft && { text: 'Draft', class: 'post-draft' },
+                  ]}
+                />
+              </div>
+              <p class="post-list-summary">{post.data.summary}</p>
+              {post.data.tags.length ? (
+                <p class="post-list-tags">{post.data.tags.join(' · ')}</p>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No posts yet.</p>
+      )
+    }
+
+    <ContactIcons />
+  </div>
+</BaseLayout>

@@ -31,9 +31,97 @@
       "rishi23root/selenium-automations": "Selenium scripts for repetitive browser workflows"
     }
   },
-  "mottos": ["timshel", "fac quod debes"],
-  "shortBio": "freelancer · SaaS · security · automation",
+  "mottos": [
+    "timshel",
+    "fac quod debes"
+  ],
+  "shortBio": "freelancer \u00b7 SaaS \u00b7 security \u00b7 automation",
   "fullDescription": "I build SaaS products, automate the boring parts, and keep security in the loop.",
-  "stackLine": "TypeScript · Python · Node.js · React · React Native",
-  "recentLikedCount": 8
+  "stackLine": "TypeScript \u00b7 Python \u00b7 Node.js \u00b7 React \u00b7 React Native",
+  "recentLikedCount": 8,
+  "voiceBio": "I build SaaS products, automate the boring parts, and keep security in the loop. This site is where I write and ship in public \u2014 quieter than a r\u00e9sum\u00e9, clearer than a README.",
+  "moods": [
+    {
+      "id": "cyclist",
+      "src": "/mood/cyclist.webp",
+      "alt": "Cyclist in green hills under drifting clouds"
+    },
+    {
+      "id": "park",
+      "src": "/mood/park.webp",
+      "alt": "Aerial park lawn with people and long shadows"
+    },
+    {
+      "id": "building",
+      "src": "/mood/building.webp",
+      "alt": "Terracotta building facade with a walker and dog"
+    },
+    {
+      "id": "warehouse",
+      "src": "/mood/warehouse.webp",
+      "alt": "Dusty warehouse interior with shafts of light"
+    },
+    {
+      "id": "seaside",
+      "src": "/mood/seaside.webp",
+      "alt": "Coastal path along cliffs above the sea"
+    },
+    {
+      "id": "ghat",
+      "src": "/mood/ghat.webp",
+      "alt": "Stone temple ghat with marigold garlands, a boat, and a radiant sun"
+    }
+  ],
+  "projects": [
+    {
+      "title": "Maryam",
+      "blurb": "Open-source OSINT framework",
+      "url": "https://github.com/saeeddhqan/Maryam",
+      "order": 1
+    },
+    {
+      "title": "Pixel Streaming Infrastructure",
+      "blurb": "Unreal Pixel Streaming servers and frontend",
+      "url": "https://github.com/EpicGames/PixelStreamingInfrastructure",
+      "order": 2
+    },
+    {
+      "title": "opencv_wrap",
+      "blurb": "Thin OpenCV wrappers for everyday CV scripts",
+      "url": "https://github.com/rishi23root/opencv_wrap",
+      "order": 3
+    },
+    {
+      "title": "pyblink",
+      "blurb": "Blink-counter automation to ease eye strain",
+      "url": "https://github.com/rishi23root/pyblink",
+      "order": 4
+    },
+    {
+      "title": "resume-editor",
+      "blurb": "Web app for crafting professional resumes fast",
+      "url": "https://github.com/rishi23root/resume-editor",
+      "order": 5
+    },
+    {
+      "title": "selenium-automations",
+      "blurb": "Selenium scripts for repetitive browser workflows",
+      "url": "https://github.com/rishi23root/selenium-automations",
+      "order": 6
+    }
+  ],
+  "capabilities": [
+    {
+      "heading": "Product engineering",
+      "body": "TypeScript, React, and Node \u2014 shipping SaaS surfaces end to end."
+    },
+    {
+      "heading": "Automation & systems",
+      "body": "Python tooling, browser automation, and quiet pipelines that remove busywork."
+    },
+    {
+      "heading": "Security-minded build",
+      "body": "Threat-aware defaults without turning every page into a consulting pitch."
+    }
+  ]
 }

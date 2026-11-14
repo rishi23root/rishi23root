@@ -1,0 +1,826 @@
+---
+import { render } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Callout from '../../components/Callout.astro'
+import ContactIcons from '../../components/ContactIcons.astro'
+import MetaLine from '../../components/MetaLine.astro'
+import { absoluteUrl, site } from '../../lib/site'
+import {
+  assertSlugMatchesFile,
+  formatPostDate,
+  getPublishedPosts,
+  postKeywords,
+  postPath,
+  readingTimeMinutes,
+  type Post,
+} from '../../lib/posts'
+import { publicImageSize } from '../../lib/imageSize'
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts()
+  posts.forEach(assertSlugMatchesFile)
+  return posts.map((post) => ({ params: { slug: post.data.slug }, props: { post } }))
+}
+
+const { post } = Astro.props as { post: Post }
+const { Content, headings } = await render(post)
+const d = post.data
+const path = postPath(d.slug)
+const canonical = absoluteUrl(path)
+const ogImage = d.image ?? d.cover ?? '/og-default.png'
+const coverSize = d.cover ? publicImageSize(d.cover) : undefined
+// Rail outline: each H2 owns the H3s that follow it. H3s before the first H2
+// have no parent, so they stay top-level and always visible.
+type TocLink = { slug: string; text: string }
+type TocGroup = TocLink & { depth: 2 | 3; children: TocLink[] }
+const toc: TocGroup[] = []
+for (const h of headings) {
+  if (h.depth === 2) toc.push({ slug: h.slug, text: h.text, depth: 2, children: [] })
+  else if (h.depth === 3) {
+    const parent = toc.at(-1)
+    if (parent?.depth === 2) parent.children.push({ slug: h.slug, text: h.text })
+    else toc.push({ slug: h.slug, text: h.text, depth: 3, children: [] })
+  }
+}
+if (d.faq.length) toc.push({ slug: 'faq', text: 'FAQ', depth: 2, children: [] })
+const keywords = postKeywords(post)
+const author = { '@type': 'Person', name: d.author, alternateName: site.github.name, url: site.siteUrl }
+
+const jsonLd: Record<string, unknown>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: d.title,
+    description: d.summary,
+    datePublished: d.date.toISOString(),
+    ...(d.updated ? { dateModified: d.updated.toISOString() } : {}),
+    url: canonical,
+    mainEntityOfPage: canonical,
+    image: absoluteUrl(ogImage),
+    ...(keywords.length ? { keywords: keywords.join(', ') } : {}),
+    author,
+    publisher: author,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: site.siteUrl },
+      { '@type': 'ListItem', position: 2, name: 'Writing', item: absoluteUrl('/writing') },
+      { '@type': 'ListItem', position: 3, name: d.title, item: canonical },
+    ],
+  },
+]
+if (d.faq.length) {
+  jsonLd.push({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: d.faq.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  })
+}
+---
+
+<BaseLayout
+  title={d.seoTitle ?? d.title}
+  description={d.summary}
+  path={path}
+  type="article"
+  publishedTime={d.date}
+  image={ogImage}
+  jsonLd={jsonLd}
+>
+  <noscript>
+    <style>
+      .post-cover img,
+      .post-body img {
+        opacity: 1;
+      }
+    </style>
+  </noscript>
+  <div class="page blog-page">
+    <div class="post-layout">
+      <article class="post reveal" style="--i: 0" data-longform>
+        <nav class="post-crumbs" aria-label="Breadcrumb">
+          <a href="/writing/">Writing</a>
+          <span aria-hidden="true">/</span>
+          <span class="post-crumbs-current">{d.title}</span>
+        </nav>
+
+        <header class="post-header">
+          <h1>{d.title}</h1>
+          <p class="post-deck">{d.summary}</p>
+          <MetaLine
+            class="post-meta"
+            items={[
+              { text: d.author },
+              { text: formatPostDate(d.date), datetime: d.date.toISOString() },
+              d.updated && { text: `Updated ${formatPostDate(d.updated)}` },
+              { text: `${readingTimeMinutes(post)} min read` },
+              d.draft && { text: 'Draft', class: 'post-draft' },
+            ]}
+          />
+          {
+            d.tags.length ? (
+              <ul class="post-tags" aria-label="Tags">
+                {d.tags.map((t) => (
+                  <li class="post-tag">{t}</li>
+                ))}
+              </ul>
+            ) : null
+          }
+        </header>
+
+        {
+          d.cover ? (
+            <figure class="post-cover">
+              <img
+                src={d.cover}
+                alt={`Cover for ${d.title}`}
+                width={coverSize?.width}
+                height={coverSize?.height}
+                decoding="async"
+                fetchpriority="high"
+              />
+            </figure>
+          ) : null
+        }
+
+        <div class="prose post-body">
+          <Content components={{ Callout }} />
+        </div>
+
+        {
+          d.faq.length ? (
+            <section class="post-faq" aria-labelledby="faq">
+              <h2 id="faq">FAQ</h2>
+              <dl>
+                {d.faq.map((f) => (
+                  <div>
+                    <dt>{f.q}</dt>
+                    <dd>{f.a}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ) : null
+        }
+      </article>
+
+      <aside class="post-rail" aria-label="Page tools">
+        <div class="post-rail-sticky">
+          {
+            toc.length ? (
+              <nav class="post-toc" aria-label="On this page">
+                <p class="post-rail-label">On this page</p>
+                <svg class="toc-rail-svg" aria-hidden="true">
+                  <path class="toc-rail-track" />
+                  <path class="toc-rail-mark" />
+                </svg>
+                <ul>
+                  {toc.map((g) => (
+                    <li class={`toc-depth-${g.depth}`}>
+                      <a href={`#${g.slug}`} data-toc={g.slug}>
+                        {g.text}
+                      </a>
+                      {g.children.length ? (
+                        <div class="toc-sub" data-toc-sub>
+                          <ul>
+                            {g.children.map((c) => (
+                              <li class="toc-depth-3">
+                                <a href={`#${c.slug}`} data-toc={c.slug}>
+                                  {c.text}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ) : null
+          }
+          <div class="post-rail-tools">
+            <button type="button" class="post-progress" id="postProgress" title="Back to top">
+              <span class="post-progress-ring">
+                <svg viewBox="0 0 36 36" aria-hidden="true">
+                  <circle cx="18" cy="18" r="14" class="post-progress-track" />
+                  <circle cx="18" cy="18" r="14" class="post-progress-bar" />
+                </svg>
+                <span class="post-progress-pct">0%</span>
+              </span>
+              <span class="post-progress-label">↑ Back to top</span>
+            </button>
+            <button type="button" class="post-tool" id="postShare" aria-label="Share this post">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" /></svg>
+              <span class="post-tool-label" id="postShareLabel">Share</span>
+            </button>
+            <a class="post-tool" href="/writing/" aria-label="All writing">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10" /></svg>
+              <span class="post-tool-label">All writing</span>
+            </a>
+            <a class="post-tool" href="/" aria-label="Home">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7" /><path d="M5 10v10h14V10" /></svg>
+              <span class="post-tool-label">Home</span>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <ContactIcons />
+  </div>
+
+  <script is:inline>
+    ;(function () {
+      var root = document.querySelector('[data-longform]')
+      if (!root) return
+      // Fade each post image in once it has decoded. Already-complete
+      // (cached) images get .is-loaded now so they never hide-then-fade.
+      root.querySelectorAll('.post-cover img, .post-body img').forEach(function (img) {
+        var show = function () {
+          img.classList.add('is-loaded')
+        }
+        if (img.complete && img.naturalWidth > 0) {
+          show()
+          return
+        }
+        img.addEventListener('load', show, { once: true })
+        img.addEventListener('error', show, { once: true })
+        if (img.complete) show()
+      })
+      var btn = document.getElementById('postProgress')
+      if (!btn) return
+      var bar = btn.querySelector('.post-progress-bar')
+      var pct = btn.querySelector('.post-progress-pct')
+      var ring = 2 * Math.PI * 14 // circumference; r=14 in the SVG
+      if (bar) bar.style.strokeDasharray = String(ring)
+      var links = Array.prototype.slice.call(document.querySelectorAll('[data-toc]'))
+      var motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+      var toc = document.querySelector('.post-toc')
+      var subs = Array.prototype.slice.call(document.querySelectorAll('[data-toc-sub]'))
+      // Each link's group: an H3's nested list, or the list an H2 owns.
+      function groupOf(a) {
+        if (!a) return null
+        return a.closest('[data-toc-sub]') || (a.parentElement && a.parentElement.querySelector(':scope > [data-toc-sub]'))
+      }
+
+      // Parse a CSS time custom property as milliseconds. Open/close
+      // durations and the close delay live on .post-toc so JS and CSS
+      // share one source; the numeric fallbacks are only if a var is missing.
+      function cssTime(el, prop, fallback) {
+        if (!el) return fallback
+        var raw = getComputedStyle(el).getPropertyValue(prop).trim()
+        var n = parseFloat(raw)
+        if (!raw || !isFinite(n)) return fallback
+        if (/ms$/i.test(raw)) return n
+        if (/s$/i.test(raw)) return n * 1000
+        return n
+      }
+
+      // Traveling rail mark: one SVG path for the quiet track, a second
+      // stroke on the same path whose dash start/length spring between
+      // the active item's range so the highlight slides around the bends.
+      function initTocRail(toc, motion) {
+        var svg = toc.querySelector('.toc-rail-svg')
+        var track = toc.querySelector('.toc-rail-track')
+        var mark = toc.querySelector('.toc-rail-mark')
+        if (!svg || !track || !mark) return function () {}
+
+        var K = 170
+        var C = 20
+        var fromS = { x: 0, v: 0 }
+        var toS = { x: 0, v: 0 }
+        var targetFrom = 0
+        var targetTo = 0
+        var totalLen = 0
+        var ranges = []
+        var currentLink = null
+        var running = false
+        var lastT = 0
+        var layoutUntil = 0
+        var roPending = false
+
+        function cssPx(el, prop) {
+          var raw = getComputedStyle(el).getPropertyValue(prop).trim()
+          if (!raw) return 0
+          if (/^-?[\d.]+px$/.test(raw)) return parseFloat(raw)
+          var tmp = document.createElement('div')
+          tmp.style.cssText =
+            'position:absolute;visibility:hidden;pointer-events:none;box-sizing:content-box;margin:0;padding:0;border:0;width:' +
+            raw
+          el.appendChild(tmp)
+          var px = tmp.getBoundingClientRect().width
+          tmp.remove()
+          return px
+        }
+        function snap(v, line, dpr) {
+          if (Math.round(line * dpr) % 2 === 1) {
+            return (Math.round(v * dpr - 0.5) + 0.5) / dpr
+          }
+          return Math.round(v * dpr) / dpr
+        }
+        function fmt(v) {
+          return Math.round(v * 100) / 100
+        }
+
+        function PathPen() {
+          this.d = ''
+          this.len = 0
+          this.x = 0
+          this.y = 0
+        }
+        PathPen.prototype.move = function (x, y) {
+          this.d += 'M' + fmt(x) + ' ' + fmt(y)
+          this.x = x
+          this.y = y
+        }
+        PathPen.prototype.line = function (x, y) {
+          var dx = x - this.x
+          var dy = y - this.y
+          var l = Math.hypot(dx, dy)
+          if (l < 0.01) return
+          this.d += 'L' + fmt(x) + ' ' + fmt(y)
+          this.len += l
+          this.x = x
+          this.y = y
+        }
+        PathPen.prototype.cubic = function (c1x, c1y, c2x, c2y, x, y) {
+          var x0 = this.x
+          var y0 = this.y
+          var n = 16
+          var len = 0
+          var px = x0
+          var py = y0
+          for (var i = 1; i <= n; i++) {
+            var tt = i / n
+            var u = 1 - tt
+            var bx = u * u * u * x0 + 3 * u * u * tt * c1x + 3 * u * tt * tt * c2x + tt * tt * tt * x
+            var by = u * u * u * y0 + 3 * u * u * tt * c1y + 3 * u * tt * tt * c2y + tt * tt * tt * y
+            len += Math.hypot(bx - px, by - py)
+            px = bx
+            py = by
+          }
+          this.d +=
+            'C' +
+            fmt(c1x) +
+            ' ' +
+            fmt(c1y) +
+            ' ' +
+            fmt(c2x) +
+            ' ' +
+            fmt(c2y) +
+            ' ' +
+            fmt(x) +
+            ' ' +
+            fmt(y)
+          this.len += len
+          this.x = x
+          this.y = y
+        }
+        PathPen.prototype.gotoSpine = function (xs, y) {
+          if (!this.d) this.move(xs, y)
+          else this.line(xs, y)
+        }
+
+        function applyDash() {
+          var a = fromS.x
+          var b = toS.x
+          var start = Math.min(a, b)
+          var len = Math.abs(b - a)
+          var gap = Math.max(totalLen * 2, 1)
+          mark.setAttribute('stroke-dasharray', fmt(len) + ' ' + fmt(gap))
+          mark.setAttribute('stroke-dashoffset', String(-fmt(start)))
+        }
+
+        function snapDash() {
+          fromS.x = targetFrom
+          fromS.v = 0
+          toS.x = targetTo
+          toS.v = 0
+          applyDash()
+        }
+
+        function settled(s, target) {
+          return Math.abs(s.x - target) < 0.2 && Math.abs(s.v) < 2
+        }
+
+        function stepSpring(s, target, dt) {
+          if (dt > 0.064) dt = 0.064
+          var acc = K * (target - s.x) - C * s.v
+          s.v += acc * dt
+          s.x += s.v * dt
+        }
+
+        function tick(now) {
+          if (now < layoutUntil) rebuild()
+          var dt = lastT ? (now - lastT) / 1000 : 1 / 60
+          lastT = now
+          if (motion.matches) {
+            snapDash()
+            running = false
+            return
+          }
+          stepSpring(fromS, targetFrom, dt)
+          stepSpring(toS, targetTo, dt)
+          applyDash()
+          var done = settled(fromS, targetFrom) && settled(toS, targetTo)
+          if (done && now >= layoutUntil) {
+            snapDash()
+            running = false
+            return
+          }
+          requestAnimationFrame(tick)
+        }
+
+        function startLoop() {
+          if (running) return
+          running = true
+          lastT = 0
+          requestAnimationFrame(tick)
+        }
+
+        function setTargets(instant) {
+          var range = null
+          if (currentLink) {
+            for (var i = 0; i < ranges.length; i++) {
+              if (ranges[i].link === currentLink) {
+                range = ranges[i]
+                break
+              }
+            }
+          }
+          if (range) {
+            targetFrom = range.start
+            targetTo = range.end
+          } else {
+            var mid = (fromS.x + toS.x) / 2
+            targetFrom = mid
+            targetTo = mid
+          }
+          if (instant || motion.matches || (!range && totalLen === 0)) {
+            snapDash()
+            return
+          }
+          startLoop()
+        }
+
+        function rebuild() {
+          var origin = toc.getBoundingClientRect()
+          var dpr = window.devicePixelRatio || 1
+          var line = cssPx(toc, '--toc-line') || 1
+          var curveR = cssPx(toc, '--toc-curve-r') || 8
+          var curveH = cssPx(toc, '--toc-curve-h') || 13
+          var space4 = cssPx(toc, '--space-4') || 16
+          var w = toc.clientWidth
+          var h = toc.clientHeight
+          svg.setAttribute('width', String(w))
+          svg.setAttribute('height', String(h))
+          svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h)
+
+          var xs = snap(0, line, dpr)
+          var items = toc.querySelectorAll(':scope > ul > li.toc-depth-2')
+          var firstA = toc.querySelector(':scope > ul > li.toc-depth-2 > a')
+          if (firstA) {
+            var fa = firstA.getBoundingClientRect()
+            xs = snap(fa.left - origin.left + line / 2, line, dpr)
+          }
+          var xi = snap(xs + space4 - line, line, dpr)
+
+          var pen = new PathPen()
+          ranges = []
+
+          function addRange(link, start, end) {
+            if (!link) return
+            ranges.push({ link: link, start: start, end: Math.max(start, end) })
+          }
+
+          for (var i = 0; i < items.length; i++) {
+            var li = items[i]
+            var a = li.querySelector(':scope > a')
+            if (!a) continue
+            var ar = a.getBoundingClientRect()
+            var yTop = ar.top - origin.top
+            var yBot = ar.bottom - origin.top
+            var start = pen.len
+            pen.gotoSpine(xs, yTop)
+            // If a sub is already diverting from yBot, the H2 segment
+            // still owns the spine through the heading itself.
+            pen.line(xs, yBot)
+            addRange(a, start, pen.len)
+
+            var sub = li.querySelector(':scope > [data-toc-sub]')
+            if (!sub) continue
+            var sr = sub.getBoundingClientRect()
+            var sTop = sr.top - origin.top
+            var sBot = sr.bottom - origin.top
+            var sH = sBot - sTop
+            if (sH < 0.75) continue
+
+            // The 8023011 CSS rail is a ╰╮ pair (two 8px quarters in a
+            // ~15px-tall, 15px-wide box after a short ~5px ╰ drop). At
+            // 1px that rasterizes as one tight hook — the thin-* curve.
+            // Drawing those two quarters in SVG reads as "2 curved"; a
+            // single cubic with the same endpoints keeps the thin shape.
+            var minFull = 2 * (curveH + curveR)
+            var scale = Math.min(1, sH / Math.max(minFull, 1))
+            var r = curveR * scale
+            var ch = curveH * scale
+            if (sH < 2) {
+              r = 0
+              ch = sH / 2
+            }
+            var drop = Math.max(0, ch - r)
+            var hookRise = Math.max(0, ch + r - line - drop)
+            // 0.55 keeps the ends vertical longer, like the thin hook,
+            // without a mid shelf that would read as two corners.
+            var handle = hookRise * 0.55
+            var h3s = [].slice.call(sub.querySelectorAll(':scope > ul > li.toc-depth-3 > a'))
+            var openStart = pen.len
+            if (sTop > pen.y + 0.5) {
+              pen.line(xs, sTop)
+            }
+            var yOpen0 = sTop + drop
+            var indentTop = yOpen0 + hookRise
+            var indentBot = sBot - drop - hookRise
+            if (indentBot < indentTop) indentBot = indentTop
+            // First H3 owns the opening curve.
+            if (yOpen0 > pen.y + 0.25) pen.line(xs, yOpen0)
+            if (hookRise > 0.25) {
+              pen.cubic(xs, yOpen0 + handle, xi, indentTop - handle, xi, indentTop)
+            } else if (indentTop > pen.y + 0.25) {
+              pen.line(xi, indentTop)
+            }
+
+            // Map each H3 to a slice of the indent, clamped to the
+            // visible window so a mid-close still has a shrinking path.
+            var slots = h3s.map(function (link) {
+              var rr = link.getBoundingClientRect()
+              return {
+                link: link,
+                top: Math.max(indentTop, Math.min(indentBot, rr.top - origin.top)),
+                bot: Math.max(indentTop, Math.min(indentBot, rr.bottom - origin.top)),
+              }
+            })
+            if (slots.length) {
+              slots[0].top = indentTop
+              slots[slots.length - 1].bot = indentBot
+            }
+            var lastRangeAt = -1
+            for (var j = 0; j < slots.length; j++) {
+              var slotStart = j === 0 ? openStart : pen.len
+              if (slots[j].bot > pen.y + 0.25) pen.line(xi, slots[j].bot)
+              addRange(slots[j].link, slotStart, pen.len)
+              lastRangeAt = ranges.length - 1
+            }
+            if (!slots.length && indentBot > pen.y + 0.25) {
+              pen.line(xi, indentBot)
+            }
+            // Closing curve is a quiet return to the next H2 spine, like
+            // the old ╭. The last H3's mark also covers this hook so it
+            // has a full-height active stroke (the indent alone is only
+            // a sliver — the hook lives in the last item's box).
+            var yClose1 = sBot - drop
+            if (hookRise > 0.25 && yClose1 > indentBot + 0.25) {
+              pen.cubic(xi, indentBot + handle, xs, yClose1 - handle, xs, yClose1)
+            }
+            if (sBot > pen.y + 0.25) pen.line(xs, sBot)
+            if (lastRangeAt >= 0) {
+              ranges[lastRangeAt].end = Math.max(ranges[lastRangeAt].end, pen.len)
+            }
+          }
+
+          track.setAttribute('d', pen.d)
+          mark.setAttribute('d', pen.d)
+          totalLen = pen.len
+          toc.classList.add('is-rail-svg')
+          setTargets(false)
+        }
+
+        function markCurrent(link) {
+          currentLink = link || null
+          setTargets(false)
+        }
+
+        onRailOpen = function (kind) {
+          var wait = 0
+          if (!motion.matches) {
+            var openMs = cssTime(toc, '--toc-sub-dur-open', 520)
+            var closeMs = cssTime(toc, '--toc-sub-dur-close', 620)
+            if (kind && kind.closing) wait = closeMs
+            else if (kind && kind.switching) wait = Math.max(openMs, closeMs)
+            else wait = openMs
+            wait += 48
+          }
+          layoutUntil = performance.now() + wait
+          rebuild()
+          startLoop()
+        }
+
+        var ro = new ResizeObserver(function () {
+          if (roPending) return
+          roPending = true
+          requestAnimationFrame(function () {
+            roPending = false
+            rebuild()
+          })
+        })
+        ro.observe(toc)
+        subs.forEach(function (s) {
+          ro.observe(s)
+        })
+        window.addEventListener('resize', rebuild)
+        if (motion.addEventListener) {
+          motion.addEventListener('change', function () {
+            rebuild()
+            setTargets(true)
+          })
+        }
+        rebuild()
+        setTargets(true)
+        return markCurrent
+      }
+
+      var openSub = null
+      var onRailOpen = function () {}
+      var closeTimer = 0
+      function applyOpen(sub) {
+        if (sub === openSub) return
+        var prev = openSub
+        openSub = sub
+        subs.forEach(function (s) {
+          var on = s === sub
+          s.classList.toggle('is-open', on)
+          s.inert = !on
+        })
+        onRailOpen({ closing: !sub && !!prev, switching: !!(sub && prev) })
+      }
+      function clearCloseTimer() {
+        if (closeTimer) {
+          window.clearTimeout(closeTimer)
+          closeTimer = 0
+        }
+      }
+      function setOpen(sub) {
+        if (sub === openSub) {
+          clearCloseTimer()
+          return
+        }
+        // A close is already scheduled and we still want no sub:
+        // don't restart the delay on every scroll tick.
+        if (!sub && closeTimer) return
+        clearCloseTimer()
+        // Delay collapse only when leaving a sub for no sub, so a
+        // quick scroll-through doesn't flicker. Switching sections
+        // or opening starts immediately; reduced motion snaps.
+        if (!sub && openSub && !(motion && motion.matches)) {
+          closeTimer = window.setTimeout(function () {
+            closeTimer = 0
+            applyOpen(null)
+          }, cssTime(toc, '--toc-sub-delay-close', 120))
+          return
+        }
+        applyOpen(sub)
+      }
+      // Collapse only once JS can reopen them; without JS every H3 stays listed.
+      if (toc && subs.length) {
+        subs.forEach(function (s) {
+          s.inert = true
+        })
+        toc.classList.add('is-collapsible')
+      }
+      var pinned = null // link chosen by a rail click, held while its heading is still on screen
+      var pinnedY = 0
+      var animating = false
+
+      function sync() {
+        var r = root.getBoundingClientRect()
+        var top = window.scrollY + r.top
+        var start = top - 96
+        var end = top + root.offsetHeight - window.innerHeight * 0.4
+        var p = Math.min(100, Math.max(0, Math.round(((window.scrollY - start) / Math.max(1, end - start)) * 100)))
+        if (bar) bar.style.strokeDashoffset = String(ring * (1 - p / 100))
+        if (pct) pct.textContent = p + '%'
+        btn.setAttribute('aria-label', 'Reading progress ' + p + ' percent. Back to top.')
+        if (animating) return
+        var current = null
+        if (pinned && Math.abs(window.scrollY - pinnedY) < 4) current = pinned
+        else {
+          pinned = null
+          var marker = window.innerHeight * 0.28
+          links.forEach(function (a) {
+            var el = document.getElementById(a.getAttribute('data-toc'))
+            if (el && el.getBoundingClientRect().top <= marker) current = a
+          })
+        }
+        setCurrent(current)
+      }
+      function setCurrent(current) {
+        links.forEach(function (a) {
+          a.toggleAttribute('aria-current', a === current)
+        })
+        setOpen(groupOf(current))
+        if (railMark) railMark(current)
+      }
+
+      var railMark = null
+      if (toc) railMark = initTocRail(toc, motion)
+
+      sync()
+      window.addEventListener('scroll', sync, { passive: true })
+      window.addEventListener('resize', sync)
+      btn.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: motion.matches ? 'auto' : 'smooth' })
+      })
+
+      // Rail clicks: eased scroll to the heading (instant with reduced motion).
+      // The clicked item is marked current up front so the rail doesn't flicker
+      // through every section on the way.
+      var raf = 0
+      function ease(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+      }
+      function stop() {
+        if (!animating) return
+        cancelAnimationFrame(raf)
+        animating = false
+        pinned = null
+        sync()
+      }
+      ;['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(function (type) {
+        window.addEventListener(type, stop, { passive: true })
+      })
+      function scrollToHeading(a, el) {
+        var margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0
+        var max = document.documentElement.scrollHeight - window.innerHeight
+        var to = Math.max(0, Math.min(max, Math.round(window.scrollY + el.getBoundingClientRect().top - margin)))
+        var from = window.scrollY
+        var done = function () {
+          animating = false
+          pinned = a
+          pinnedY = window.scrollY
+          if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1')
+          el.focus({ preventScroll: true })
+        }
+        cancelAnimationFrame(raf)
+        setCurrent(a)
+        var dist = Math.abs(to - from)
+        if (motion.matches || dist < 2) {
+          window.scrollTo(0, to)
+          done()
+          return
+        }
+        var dur = Math.min(800, 480 + dist * 0.08)
+        var t0 = 0
+        animating = true
+        raf = requestAnimationFrame(function step(now) {
+          if (!t0) t0 = now
+          var t = Math.min(1, (now - t0) / dur)
+          window.scrollTo(0, from + (to - from) * ease(t))
+          if (t < 1) raf = requestAnimationFrame(step)
+          else done()
+        })
+      }
+      links.forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+          var id = a.getAttribute('data-toc')
+          var el = document.getElementById(id)
+          if (!el) return
+          e.preventDefault()
+          history.replaceState(history.state, '', '#' + id)
+          scrollToHeading(a, el)
+        })
+      })
+
+      var share = document.getElementById('postShare')
+      if (share) {
+        share.addEventListener('click', function () {
+          var data = { title: document.title, url: location.href }
+          if (navigator.share) {
+            navigator.share(data).catch(function () {})
+            return
+          }
+          navigator.clipboard &&
+            navigator.clipboard.writeText(location.href).then(
+              function () {
+                var lbl = document.getElementById('postShareLabel')
+                share.classList.add('is-open')
+                if (lbl) lbl.textContent = 'Link copied'
+                setTimeout(function () {
+                  share.classList.remove('is-open')
+                  if (lbl) lbl.textContent = 'Share'
+                }, 1800)
+              },
+              function () {},
+            )
+        })
+      }
+    })()
+  </script>
+</BaseLayout>
