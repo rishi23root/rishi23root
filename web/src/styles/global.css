@@ -1862,13 +1862,10 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 /* Mobile/tablet: no TOC; progress/back-to-top left, CTAs right.
-   Drop the reserved rail from the shell so the page isn't half-empty. */
+   Keep the same shell measure as Writing index (--post-group + --page-pad).
+   Do not shrink chrome/main to --article-max here — that centered a narrower
+   column and added extra side gutters vs the listing. */
 @media (max-width: 1023px) {
-  body:has(.post-layout) .chrome-bar .chrome,
-  body:has(.post-layout) .shell-inner > main {
-    max-width: var(--article-max);
-  }
-
   .post-rail {
     margin-top: var(--space-7);
   }
