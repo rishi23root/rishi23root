@@ -1791,14 +1791,6 @@ html[data-theme='light'] .theme-icon-moon {
   border-radius: 8px;
 }
 
-/* Phone only: keep ↑ Back to top, hide the % ring. Tablet+ keeps the ring.
-   48rem (~768px) — 40rem left the ring visible on some phone widths. */
-@media (max-width: 48rem) {
-  .post-progress-ring {
-    display: none;
-  }
-}
-
 .post-rail-ctas {
   display: flex;
   flex-direction: column;
@@ -1866,7 +1858,10 @@ html[data-theme='light'] .theme-icon-moon {
    Do not shrink chrome/main to --article-max here — that centered a narrower
    column and added extra side gutters vs the listing.
    Also drop .post's article-max so content uses the full shell (no reserved
-   rail gutter while the sidebar is hidden). */
+   rail gutter while the sidebar is hidden).
+   Hide the % ring through the site mobile breakpoint (1023px); rem-based
+   max-width: 48rem still left the ring visible on some viewports. Keep
+   ↑ Back to top + rail CTAs. */
 @media (max-width: 1023px) {
   .post,
   .blog-page:not(.blog-index) .contact-icons {
@@ -1889,6 +1884,11 @@ html[data-theme='light'] .theme-icon-moon {
     gap: var(--space-3);
     width: 100%;
     margin-top: 0;
+  }
+
+  /* More specific than base `.post-progress-ring { display: inline-flex }` */
+  .post-rail-tools .post-progress .post-progress-ring {
+    display: none !important;
   }
 
   .post-rail-ctas {
