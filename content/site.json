@@ -39,7 +39,8 @@
   "fullDescription": "I build useful things at the intersection of AI, SaaS, and automation.",
   "stackLine": "TypeScript \u00b7 Python \u00b7 Node.js \u00b7 React \u00b7 React Native",
   "recentLikedCount": 8,
-  "voiceBio": "I\u2019m Rishabh, a software engineer building useful things at the intersection of AI, SaaS, and automation.\n\nI write about the systems I build, the problems I solve, and what I learn along the way.",
+  "voiceBio": "I\u2019m Rishabh, a software engineer building useful things at the intersection of AI, SaaS, and automation. I write about the systems I build, the problems I solve, and what I learn along the way.",
+
   "moods": [
     {
       "id": "cyclist",

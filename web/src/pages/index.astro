@@ -17,11 +17,8 @@ const projects = (site.projects ?? [])
 
 const capabilities = site.capabilities ?? []
 const moods = site.moods ?? []
-const voiceBio = site.voiceBio ?? site.fullDescription
-const voiceBioParagraphs = voiceBio
-  .split(/\n\n+/)
-  .map((para) => para.trim())
-  .filter(Boolean)
+// Soft-join so blank lines in JSON never become multiple hero blocks.
+const voiceBio = (site.voiceBio ?? site.fullDescription).replace(/\s+/g, ' ').trim()
 
 const personJsonLd = {
   '@context': 'https://schema.org',
