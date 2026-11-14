@@ -12,18 +12,37 @@ Posts live in `content/posts/<slug>.mdx`. The same files feed the site (`/writin
 - Write for a smart reader who is busy. Explain a term once, then use it.
 - Opinions are welcome, but say what they're based on.
 
-## 2. Structure (answer first)
+## 2. Article structure
+
+Writing posts follow this section order. It's the story of the work as it actually happened, so a reader can see why the final answer is the final answer.
+
+1. **Title**: the frontmatter `title` (rendered as the H1). Names the problem or answers a real question.
+2. **TL;DR**: one or two sentences with the answer. A reader who stops here still gets the point.
+3. **What problem I had**: the situation and why it hurt. Concrete: what broke, what it cost, what I needed.
+4. **What I tried**: the options I looked at or attempted, briefly, in the order I tried them.
+5. **What worked**: the approach I kept, and the reason it beat the others.
+6. **What failed**: dead ends and mistakes, with what each one taught me. Be honest; this is often the most useful part.
+7. **Architecture**: how the pieces fit together. A diagram (`<ExcalidrawBoard>`) or a short list of components and data flow.
+8. **Code**: the smallest real snippets that show how it works. Link to the full files.
+9. **Results**: what changed, with numbers where I have them (time, size, cost, errors). Say how I measured.
+10. **What I recommend**: what I'd tell someone facing the same problem, including when *not* to do it this way.
+
+Use the names as the `##` headings, in this order. A short qualifier after a colon is fine when it helps the rail (`## What failed: exporting PNGs`). Use `###` inside a section for sub-steps. If a section has nothing real in it (nothing failed, no numbers yet), drop it rather than pad it, and keep the rest in order. Short notes that aren't a build story can skip the structure and just answer first.
+
+`content/posts/draft-template.mdx` has this skeleton ready to copy.
+
+## 3. Formatting
 
 1. **Title:** answers or names a real question. Under 90 characters (enforced). No clickbait.
-2. **First paragraph:** answers the title in one or two sentences. A reader who stops here should still get the point. You can repeat it in `<Callout tone="answer">`.
-3. **Body:** `##` for sections and `###` for sub-steps. Never skip a level or use `#`, since the page already renders the H1 from `title`. Headings feed the "On this page" rail, so make them descriptive ("Why replay beats prompts", not "Part 2").
+2. **TL;DR / first paragraph:** answers the title in one or two sentences. You can repeat it in `<Callout tone="answer">`.
+3. **Body:** `##` for sections and `###` for sub-steps. Never skip a level or use `#`, since the page already renders the H1 from `title`. Headings feed the "On this page" rail: use the section names from the structure above, and make any `###` inside them descriptive ("Why replay beats prompts", not "Step 2").
 4. **Lists:** numbered for steps that happen in order, bullets for unordered points.
 5. **Code:** fenced, with a language (` ```ts `). Keep snippets small enough to read; link out to the full code.
 6. **Images:** meaningful `alt` text. Keep them in `web/public/writing/<slug>/`.
    **Diagrams:** `<ExcalidrawBoard src="/diagrams/<name>.json" />` for live, read-only Excalidraw scenes stored in `web/public/diagrams/` (see `AGENTS.md` → Excalidraw boards). The text around a board must still make sense without it.
-7. **End:** what to do next, or what you'd do differently. No "thanks for reading" sign-off.
+7. **End:** the "What I recommend" section is the ending. No "thanks for reading" sign-off.
 
-## 3. Frontmatter (validated at build)
+## 4. Frontmatter (validated at build)
 
 | Field | Required | Rule |
 | --- | --- | --- |
@@ -40,13 +59,13 @@ Posts live in `content/posts/<slug>.mdx`. The same files feed the site (`/writin
 | `cover` / `image` | no | Cover under the header / OG image. Falls back to cover, then `/og-default.png` |
 | `faq` | no | `- q:` / `a:` pairs. Rendered on the page and as FAQPage JSON-LD |
 
-## 4. FAQ rules
+## 5. FAQ rules
 
 - Add an FAQ only when readers are likely to ask follow-up questions. Two to four items.
 - Each answer stands alone in 1-2 sentences, so it can be quoted without the rest of the post.
 - Don't repeat the first paragraph word for word.
 
-## 5. Callouts
+## 6. Callouts
 
 Use `<Callout>` in MDX. It's available without an import:
 
@@ -56,7 +75,7 @@ Use `<Callout>` in MDX. It's available without an import:
 
 Use at most two or three per post. If everything is a callout, nothing is.
 
-## 6. Guardrails (never publish)
+## 7. Guardrails (never publish)
 
 - Secrets of any kind: tokens, keys, passwords, `.env` values, internal URLs, signed links.
 - Client or employer names, internal screenshots or numbers, unless you have written permission.
@@ -66,9 +85,10 @@ Use at most two or three per post. If everything is a callout, nothing is.
 - AI-generated text you haven't read, checked and rewritten in your own voice.
 - Exploit details for unpatched vulnerabilities (security posts follow responsible disclosure).
 
-## 7. Pre-publish checklist
+## 8. Pre-publish checklist
 
-- [ ] The title answers a real question. The first paragraph answers the title.
+- [ ] The title answers a real question. The TL;DR answers the title.
+- [ ] Sections follow the article structure, in order (empty ones dropped, not padded).
 - [ ] The summary is one sentence and reads well as a search snippet.
 - [ ] `slug` matches the file name. `draft: false`. `date` is today.
 - [ ] Headings are `##`/`###` only and read like an outline.

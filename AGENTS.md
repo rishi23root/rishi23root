@@ -50,7 +50,22 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 
 ## Writing rules
 
-Before writing or editing a post, read `web/BLOG_WRITING_GUIDE.md` (voice, answer-first structure, frontmatter rules, FAQ, callouts, guardrails, pre-publish checklist). There's a short Cursor rule for it in `.cursor/rules/blog-writing.mdc`. Start new posts from `content/posts/draft-template.mdx` (a draft that never ships). `content/posts/post-template.mdx` is a real post (the Excalidraw boards writeup), not a template, despite its slug.
+Before writing or editing a post, read `web/BLOG_WRITING_GUIDE.md` (voice, answer-first structure, frontmatter rules, FAQ, callouts, guardrails, pre-publish checklist). There's a short Cursor rule for it in `.cursor/rules/blog-writing.mdc`. Start new posts from `content/posts/draft-template.mdx` (a draft that never ships).
+
+Writing posts follow this section order (frontmatter `title` is the H1; the rest are `##` headings):
+
+1. Title
+2. TL;DR
+3. What problem I had
+4. What I tried
+5. What worked
+6. What failed
+7. Architecture
+8. Code
+9. Results
+10. What I recommend
+
+Keep the order. A short qualifier after a colon is fine (`## What failed: exporting PNGs`); drop a section that has nothing real rather than pad it. Details per section are in `web/BLOG_WRITING_GUIDE.md` §2. `content/posts/post-template.mdx` is a real post (the Excalidraw boards writeup), not a template, despite its slug.
 
 ## Excalidraw boards
 

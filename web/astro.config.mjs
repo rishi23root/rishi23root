@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'astro/config'
 import { rehypePublicImageSize } from './src/lib/rehypePublicImageSize.ts'
 import mdx from '@astrojs/mdx'
@@ -30,5 +31,19 @@ export default defineConfig({
   },
   markdown: {
     rehypePlugins: [rehypePublicImageSize],
+  },
+  vite: {
+    resolve: {
+      alias: [
+        // The package exports `./index.css` only under `development` / `production`
+        // conditions (no `default`), so resolvers without them fail. Pin the file.
+        {
+          find: /^@excalidraw\/excalidraw\/index\.css$/,
+          replacement: fileURLToPath(
+            new URL('./node_modules/@excalidraw/excalidraw/dist/prod/index.css', import.meta.url),
+          ),
+        },
+      ],
+    },
   },
 })
