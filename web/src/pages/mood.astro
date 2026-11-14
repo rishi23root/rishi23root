@@ -6,13 +6,12 @@ import { site } from '../lib/site'
 const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
 ---
 
-<BaseLayout title="Moods" description="Homepage mood stills used on rishi23root.in." path="/mood">
+<BaseLayout title="Moods" description="Moods that appear on the home page. Click one to open the site with it." path="/mood">
   <div class="page mood-index">
-    <a class="back" href="/">← Home</a>
     <section class="page-intro reveal" style="--i: 0">
       <h1>Moods</h1>
       <p class="lede">
-        Every homepage mood ({moods.length}). The home page cycles through all of them before repeating. Pick one to open it there.
+        These moods appear on the home page, one at a time. Click one to open it there.
       </p>
     </section>
 
@@ -34,7 +33,7 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
             return (
               <li>
                 <a class="mood-index-link" href={`/?mood=${mood.id}`}>
-                  <div class="mood-index-frame">
+                  <div class="mood-index-frame mood-inset">
                     {fallback ? (
                       <picture>
                         <source srcset={mood.src} type="image/webp" />
