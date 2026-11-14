@@ -100,6 +100,10 @@ html[data-theme='light'] {
   --stagger: 60ms;
   --mood-xfade: 420ms; /* mirrored by XFADE_MS in HeroMoodShell.tsx */
   --mood-settle: 900ms; /* home settle slide; mirrored by SETTLE_MS in settleMood.ts */
+  /* Caption row below the homepage plate: gap + reserved line height. */
+  --mood-caption-gap: 0.45rem;
+  --mood-caption-row: 1.15rem;
+  --mood-caption-space: calc(var(--mood-caption-gap) + var(--mood-caption-row));
   --ease-settle: cubic-bezier(0.45, 0, 0.15, 1); /* soft start, long glide in */
 
   /* Inset shadow on the mood plate; set to none to drop it */
@@ -512,11 +516,14 @@ html[data-theme='light'] .theme-icon-moon {
 
   .home-mood .hero-shell {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: stretch;
+    /* Plate + caption share this width; height fits the sticky column. */
+    width: min(100%, calc((100svh - 2 * var(--page-pad-block) - var(--mood-caption-space)) * 9 / 16));
   }
 
   .home-mood .hero-shell-stage {
-    width: min(100%, calc((100svh - 2 * var(--page-pad-block)) * 9 / 16));
+    width: 100%;
   }
 
   .home-text {
@@ -558,7 +565,7 @@ html[data-theme='light'] .theme-icon-moon {
     pointer-events: none;
   }
 
-  html.mood-await .mood-overlay {
+  html.mood-await .mood-caption {
     opacity: 0;
   }
 
@@ -591,7 +598,7 @@ html[data-theme='light'] .theme-icon-moon {
     will-change: transform;
   }
 
-  html.mood-settling .mood-overlay {
+  html.mood-settling .mood-caption {
     opacity: 0;
   }
 }
@@ -688,111 +695,102 @@ html[data-theme='light'] .theme-icon-moon {
   }
 }
 
-/* Overlay chips: hidden until hover or a tap on the plate */
-.mood-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: var(--space-3);
-  pointer-events: none;
-}
-
-.mood-overlay-row {
+/* Caption: always-visible row directly below the plate, not overlaid. */
+.mood-caption {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  opacity: 0;
-  transition:
-    opacity var(--dur) var(--ease-out),
-    transform var(--dur) var(--ease-out);
+  width: 100%;
+  margin-top: var(--mood-caption-gap);
+  min-height: var(--mood-caption-row);
+  pointer-events: none;
+  font-size: 0.68rem;
+  line-height: 1.3;
+  letter-spacing: 0.03em;
+  color: var(--muted);
 }
 
-.mood-overlay-top {
-  transform: translateY(-4px);
+.mood-caption-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.mood-overlay-bottom {
-  transform: translateY(4px);
-  transition-delay: 40ms;
-}
-
-.hero-shell-stage:hover .mood-overlay-row,
-.hero-shell-stage:has(:focus-visible) .mood-overlay-row,
-.hero-shell[data-revealed='true'] .mood-overlay-row {
-  opacity: 1;
-  transform: none;
+.mood-caption-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
   pointer-events: auto;
 }
 
-/* Touch screens: faintly visible by default, tap the plate for full */
-@media (hover: none) {
-  .mood-overlay-row {
-    opacity: 0.55;
-    transform: none;
-    pointer-events: auto;
-  }
+.mood-caption-all,
+.mood-caption-next {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
 }
 
-.mood-chip {
+.mood-caption-next {
   display: inline-flex;
   align-items: center;
-  gap: 0.35em;
-  padding: 0.18rem 0.5rem;
-  border: 0;
-  border-radius: 999px;
-  font: inherit;
-  font-size: 0.68rem;
-  line-height: 1.4;
-  letter-spacing: 0.04em;
-  text-transform: lowercase;
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.92);
-  background: rgba(20, 19, 17, 0.38);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  gap: 0.22em;
+  /* Slightly stronger than the name, still quiet. */
+  color: color-mix(in srgb, var(--fg) 38%, var(--muted));
+  /* Invisible extra hit area; negative margin keeps the visual right edge. */
+  padding: 0.28rem 0.35rem;
+  margin: -0.28rem -0.35rem;
+  border-radius: 3px;
 }
 
-.mood-chip-label {
-  opacity: 0.7;
-}
-
-.mood-chip-count {
-  font-variant-numeric: tabular-nums;
-}
-
-.mood-chip-link,
-.mood-chip-next {
-  cursor: pointer;
-  transition:
-    background var(--dur-fast) ease,
-    color var(--dur-fast) ease;
-}
-
-.mood-chip-link:is(:hover, :focus-visible),
-.mood-chip-next:is(:hover, :focus-visible) {
-  color: #fff;
-  background: rgba(20, 19, 17, 0.6);
-}
-
-.mood-chip-link:focus-visible,
-.mood-chip-next:focus-visible {
-  outline: 1px solid rgba(255, 255, 255, 0.7);
-  outline-offset: 1px;
-}
-
-.mood-chip-link span,
-.mood-chip-next span {
-  display: inline-block;
+.mood-caption-next-arrow {
+  display: block;
+  width: 0.9em;
+  height: 0.75em;
+  flex-shrink: 0;
+  overflow: visible;
   transition: transform var(--dur-fast) var(--ease-out);
 }
 
-.mood-chip-link:hover span,
-.mood-chip-next:hover span {
-  transform: translateX(2px);
+.mood-caption-sep {
+  color: var(--muted);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hero-shell[data-revealed='true'] .mood-caption-all,
+.hero-shell[data-revealed='true'] .mood-caption-next,
+.mood-caption-all:is(:hover, :focus-visible),
+.mood-caption-next:is(:hover, :focus-visible) {
+  color: var(--fg);
+}
+
+.mood-caption-next:is(:hover, :focus-visible) .mood-caption-next-arrow {
+  transform: translateX(2.5px);
+}
+
+.mood-caption-all:focus-visible,
+.mood-caption-next:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mood-caption-next-arrow,
+  .mood-caption-next:is(:hover, :focus-visible) .mood-caption-next-arrow {
+    transition: none;
+    transform: none;
+  }
 }
 
 /* ---------------------------------------------------------------
