@@ -21,12 +21,16 @@ export function githubAvatarUrl(size = 160): string {
   return `https://github.com/${site.github.name}.png?size=${size}`
 }
 
-export type SocialId = 'email' | 'website' | 'x' | 'linkedin' | 'github' | 'pypi'
+/** Site chrome / bio icon ids (no website self-link — already on-site). */
+export type SocialId = 'email' | 'x' | 'linkedin' | 'github' | 'pypi'
 
-/** Contact links in display order (footer icons, Person JSON-LD). */
+/**
+ * Contact links for site icon rows + Person JSON-LD `sameAs`.
+ * Omits `contact.socials.website` (canonical URL is `Person.url` / the open tab).
+ * README contact inject still renders Website separately via `index.ts`.
+ */
 export const socialLinks: { id: SocialId; label: string; href: string }[] = [
   { id: 'email', label: 'Email', href: `mailto:${site.contact.email}` },
-  { id: 'website', label: 'Website', href: site.contact.socials.website },
   { id: 'x', label: 'X', href: site.contact.socials.x },
   { id: 'linkedin', label: 'LinkedIn', href: site.contact.socials.linkedin },
   { id: 'github', label: 'GitHub', href: site.contact.socials.github },
