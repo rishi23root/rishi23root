@@ -1,10 +1,10 @@
 ---
-description: Rules for writing or editing blog posts on rishi23root.in (content/posts)
+description: Rules for writing or editing writing posts on rishi23root.in (content/posts)
 globs: content/posts/**/*.mdx,content/posts/**/*.md
 alwaysApply: false
 ---
 
-# Blog posts (rishi23root.in)
+# Writing posts (rishi23root.in)
 
 Follow `web/BLOG_WRITING_GUIDE.md`. Short version:
 

@@ -7,7 +7,7 @@ Generate `README.md` from `readme.template.md` + `content/site.json` (via `confi
 | Piece | Role |
 | --- | --- |
 | `content/site.json` | Bio, mottos, stack line, Featured Work, socials, liked count, site URL |
-| `content/posts/*.mdx` | Blog posts (`title`, `date`, `slug`, `summary`, `draft?`) |
+| `content/posts/*.mdx` | Writing posts (`title`, `date`, `slug`, `summary`, `draft?`) |
 | `config.ts` | Thin re-exports from `content/site.json` for the README build |
 | `posts.ts` | Lists posts + renders README “Writing” markdown |
 | `toolbox.ts` | Flat shields.io badge list + `renderToolbox()` |
@@ -32,7 +32,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Socials / email / site URL | `content/site.json` → `contact`, `siteUrl` | Bottom text links (not icons) |
 | Featured Work | `content/site.json` → `opensource.active` + `blurbs` | `owner/repo` strings |
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
-| Blog post | `content/posts/<slug>.mdx` | Frontmatter required; skip `draft: true` in public lists (see SEO cheat below) |
+| Writing post | `content/posts/<slug>.mdx` | Frontmatter required; skip `draft: true` in public lists (see SEO cheat below) |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
 | Landing / writing UI | `web/src/` | Lee soft-dark folio; left wordmark; mood-left / text-right; `HeroMoodShell` island; no on-site avatar |
 | Site-only content | `content/site.json` → `voiceBio`, `moods`, `projects`, `capabilities` | README loaders ignore these; README shape unchanged |
@@ -44,7 +44,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Regenerate README on GitHub | Actions → **README build** → **Run workflow** | Or push to `master` |
 | Deploy site on GitHub | Actions → **Deploy site** → **Run workflow** | Or push `web/` / `content/` to `master` |
 
-## Blog writing rules
+## Writing rules
 
 Before writing or editing a post, read `web/BLOG_WRITING_GUIDE.md` (voice, answer-first structure, frontmatter rules, FAQ, callouts, guardrails, pre-publish checklist). There's a short Cursor rule for it in `.cursor/rules/blog-writing.mdc`. Start new posts from `content/posts/post-template.mdx` (a draft that never ships).
 
