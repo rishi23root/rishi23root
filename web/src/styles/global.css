@@ -400,6 +400,7 @@ html[data-theme='light'] .theme-icon-moon {
 
 .voice-bio {
   margin: 0;
+  max-width: 34ch;
   width: 100%;
   font-size: clamp(1.38rem, 1.15rem + 0.7vw, 1.7rem);
   line-height: 1.45;
@@ -544,10 +545,16 @@ html[data-theme='light'] .theme-icon-moon {
     justify-content: flex-start;
   }
 
+  /* Pre-finalize (cddf0b62) bio measure: base 34ch, desktop overridden to
+     the settled text track so settle does not re-wrap the lead. */
+  .voice-bio,
+  .home-stack-list li > * {
+    max-width: var(--home-col);
+  }
+
   /* Before the mood still is ready: text+nav sit in the middle at the
-     Writing / post-group measure; copy fills that track. settleMood.ts
-     FLIP-animates .home-text width into the split — children stay at 100%
-     so lines ease with the column (no premature --home-col lock). */
+     Writing / post-group measure. settleMood.ts FLIP-animates .home-text
+     width into the split; bio stays on --home-col (no wrap pop). */
   html.mood-await .home-split {
     grid-template-columns: minmax(0, 1fr);
   }
