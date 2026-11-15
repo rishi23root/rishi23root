@@ -702,6 +702,48 @@ if (d.faq.length) {
       var pinned = null // link chosen by a rail click, held while its heading is still on screen
       var pinnedY = 0
       var animating = false
+      var progressHideTimer = 0
+      var progressShowRaf = 0
+      var progressVisible = false
+
+      // Fade opacity/transform in CSS; only apply [hidden] after fade-out so
+      // the control leaves layout once invisible. Instant when reduce-motion.
+      function setProgressVisible(show) {
+        if (!btn) return
+        if (show === progressVisible && !(show && btn.hidden)) return
+        progressVisible = show
+        if (progressHideTimer) {
+          clearTimeout(progressHideTimer)
+          progressHideTimer = 0
+        }
+        if (progressShowRaf) {
+          cancelAnimationFrame(progressShowRaf)
+          progressShowRaf = 0
+        }
+        if (show) {
+          btn.hidden = false
+          btn.removeAttribute('aria-hidden')
+          if (motion.matches) {
+            btn.classList.add('is-visible')
+            return
+          }
+          btn.classList.remove('is-visible')
+          progressShowRaf = requestAnimationFrame(function () {
+            progressShowRaf = requestAnimationFrame(function () {
+              progressShowRaf = 0
+              btn.classList.add('is-visible')
+            })
+          })
+          return
+        }
+        btn.classList.remove('is-visible')
+        btn.setAttribute('aria-hidden', 'true')
+        var dur = motion.matches ? 0 : cssTime(document.documentElement, '--dur', 280)
+        progressHideTimer = window.setTimeout(function () {
+          progressHideTimer = 0
+          if (!progressVisible) btn.hidden = true
+        }, dur)
+      }
 
       function sync() {
         var r = root.getBoundingClientRect()
@@ -715,7 +757,7 @@ if (d.faq.length) {
         if (pct) pct.textContent = p + '%'
         // Hide the whole control at the top (0%); only show once the reader has scrolled.
         if (btn) {
-          btn.hidden = p === 0
+          setProgressVisible(p > 0)
           btn.setAttribute('aria-label', 'Reading progress ' + p + ' percent. Back to top.')
         }
         if (animating) return

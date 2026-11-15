@@ -1040,9 +1040,6 @@ html[data-theme='light'] .socials-menu-panel {
 .socials-menu-panel.is-open .socials-menu-item:nth-child(5) {
   transition-delay: calc(var(--socials-stagger) * 5);
 }
-.socials-menu-panel.is-open .socials-menu-item:nth-child(6) {
-  transition-delay: calc(var(--socials-stagger) * 6);
-}
 
 /* Fixed icon column so X glyph + “X” label don’t look doubled/cramped */
 .socials-menu-icon {
@@ -2533,11 +2530,30 @@ html[data-theme='dark'] .excal-stage svg {
   color: var(--fg);
   cursor: pointer;
   font: inherit;
+  opacity: 0;
+  transform: translateY(0.35rem);
+  pointer-events: none;
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
 }
 
-/* Author `display` must not defeat the HTML `hidden` attribute (0% state). */
+.post-progress.is-visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* After fade-out, collapse from layout. Author `display` must not defeat `hidden`. */
 .post-progress[hidden] {
   display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-progress {
+    transition: none;
+    transform: none;
+  }
 }
 
 .post-progress-ring {

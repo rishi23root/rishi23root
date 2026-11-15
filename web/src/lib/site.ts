@@ -21,13 +21,13 @@ export function githubAvatarUrl(size = 160): string {
   return `https://github.com/${site.github.name}.png?size=${size}`
 }
 
-/** Site chrome / bio icon ids (no website self-link — already on-site). */
+/** Ids for the chrome `@` SocialsMenu (+ Person JSON-LD `sameAs`). */
 export type SocialId = 'email' | 'x' | 'linkedin' | 'github' | 'pypi'
 
 /**
- * Contact links for site icon rows + Person JSON-LD `sameAs`.
- * Omits `contact.socials.website` (canonical URL is `Person.url` / the open tab).
- * README contact inject still renders Website separately via `index.ts`.
+ * Site social links for `SocialsMenu` and Person JSON-LD `sameAs`.
+ * Omits `contact.socials.website` (already on-site; canonical is `Person.url`).
+ * README `contact_inject` still renders Website via `index.ts`.
  */
 export const socialLinks: { id: SocialId; label: string; href: string }[] = [
   { id: 'email', label: 'Email', href: `mailto:${site.contact.email}` },
