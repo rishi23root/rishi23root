@@ -213,7 +213,7 @@ if (d.faq.length) {
             ) : null
           }
           <div class="post-rail-tools">
-            <button type="button" class="post-progress" id="postProgress" title="Back to top" aria-label="Back to top">
+            <button type="button" class="post-progress" id="postProgress" hidden title="Back to top" aria-label="Back to top">
               <span class="post-progress-ring">
                 <svg viewBox="0 0 36 36" aria-hidden="true">
                   <circle cx="18" cy="18" r="14" class="post-progress-track" />
@@ -714,7 +714,11 @@ if (d.faq.length) {
         var p = Math.min(100, Math.max(0, Math.round(((window.scrollY - start) / Math.max(1, end - start)) * 100)))
         if (bar) bar.style.strokeDashoffset = String(ring * (1 - p / 100))
         if (pct) pct.textContent = p + '%'
-        if (btn) btn.setAttribute('aria-label', 'Reading progress ' + p + ' percent. Back to top.')
+        // Hide the whole control at the top (0%); only show once the reader has scrolled.
+        if (btn) {
+          btn.hidden = p === 0
+          btn.setAttribute('aria-label', 'Reading progress ' + p + ' percent. Back to top.')
+        }
         if (animating) return
         var current = null
         if (pinned && Math.abs(window.scrollY - pinnedY) < 4) current = pinned
