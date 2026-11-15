@@ -2518,6 +2518,7 @@ html[data-theme='dark'] .excal-stage svg {
   );
 }
 
+/* Always occupies its slot (2.25rem) so sibling CTAs don't jump when it fades. */
 .post-progress {
   display: inline-flex;
   align-items: center;
@@ -2533,26 +2534,32 @@ html[data-theme='dark'] .excal-stage svg {
   opacity: 0;
   transform: translateY(0.35rem);
   pointer-events: none;
+  visibility: hidden;
   transition:
     opacity var(--dur) var(--ease-out),
-    transform var(--dur) var(--ease-out);
+    transform var(--dur) var(--ease-out),
+    visibility 0s linear var(--dur);
 }
 
 .post-progress.is-visible {
   opacity: 1;
   transform: none;
   pointer-events: auto;
-}
-
-/* After fade-out, collapse from layout. Author `display` must not defeat `hidden`. */
-.post-progress[hidden] {
-  display: none !important;
+  visibility: visible;
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out),
+    visibility 0s linear 0s;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .post-progress {
     transition: none;
     transform: none;
+  }
+
+  .post-progress.is-visible {
+    transition: none;
   }
 }
 
