@@ -1,5 +1,5 @@
 ---
-import ContactIcons from './ContactIcons.astro'
+import SocialsMenu from './SocialsMenu.astro'
 import { site } from '../lib/site'
 
 type Props = {
@@ -26,8 +26,7 @@ const wordmark = `@${site.github.name}`
         >Writing</a
       >
     </nav>
-    {/* Variant A: compact socials beside the theme toggle (shown when data-socials=nav). */}
-    <ContactIcons variant="nav" />
+    <SocialsMenu />
     <button
       type="button"
       class="theme-toggle"

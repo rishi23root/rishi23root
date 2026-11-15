@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import ContactIcons from '../components/ContactIcons.astro'
 import SiteChrome from '../components/SiteChrome.astro'
 import HeroMoodShell from '../components/HeroMoodShell'
 import { firstMoodPreloadScript } from '../components/moods/preload'
@@ -67,8 +66,6 @@ const personJsonLd = {
 
         <section class="home-section reveal" style="--i: 0">
           <p class="voice-bio">{voiceBio}</p>
-          {/* Variant B: quiet strip under the voice bio (shown when data-socials=bio). */}
-          <ContactIcons variant="bio" />
         </section>
 
         <section class="home-section reveal" style="--i: 1">
