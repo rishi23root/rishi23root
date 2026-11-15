@@ -42,7 +42,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | GitHub card in a post | `<RepoCard owner="…" repo="…" />` or `<PrCard owner="…" repo="…" number={21} />` in the MDX | No import; plain github.com repo/PR links get hover previews automatically; see **GitHub cards and link previews** |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
 | Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; chrome actions: theme then `@` socials; mood-left / text-right; `HeroMoodShell` island; no on-site avatar |
-| Command palette (kbar) | `web/src/components/CommandPalette.astro` | Hidden UI; Cmd/Ctrl+K or `?`; boot is tiny, palette chunk lazy-loaded |
+| Command palette (kbar) | `web/src/components/CommandPalette.astro` | Hidden UI; Cmd/Ctrl+K or `?`; chords `gh`/`gp`/`gw`/`gm` navigate, `tt` toggles theme; boot is tiny, palette chunk lazy-loaded |
 | Site-only content | `content/site.json` → `voiceBio`, `moods`, `projects`, `capabilities` | README loaders ignore these; README shape unchanged |
 | OG / Twitter / JSON-LD | `web/src/layouts/BaseLayout.astro` (+ page props) | Default OG image in `web/public`; posts use `og:type=article` |
 | RSS / llms.txt | `web/src/pages/rss.xml.ts`, `llms.txt.ts` | Built from content — no stale hand copy in `public/` |
