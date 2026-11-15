@@ -60,14 +60,26 @@ const iconPaths: Record<SocialId, string> = {
     var panel = root.querySelector('.socials-menu-panel')
     if (!trigger || !panel) return
 
-    var closeTimer = 0
+    var animTimer = 0
+    var leaveTimer = 0
+    var pinned = false
     var reduceMotion = false
+    var hoverCapable = false
     try {
       reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    } catch (e) {}
+    try {
+      // Fine pointer + real hover: open on hover. Touch / coarse: click only.
+      hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches
     } catch (e) {}
 
     function isOpen() {
       return trigger.getAttribute('aria-expanded') === 'true'
+    }
+
+    function setPinned(next) {
+      pinned = !!next
+      trigger.toggleAttribute('data-pinned', pinned)
     }
 
     // Fixed + body portal escapes chrome view-transition stacking so the
@@ -89,10 +101,24 @@ const iconPaths: Record<SocialId, string> = {
       panel.style.bottom = ''
     }
 
-    function open() {
-      if (closeTimer) {
-        clearTimeout(closeTimer)
-        closeTimer = 0
+    function cancelLeave() {
+      if (leaveTimer) {
+        clearTimeout(leaveTimer)
+        leaveTimer = 0
+      }
+    }
+
+    function open(opts) {
+      opts = opts || {}
+      cancelLeave()
+      if (animTimer) {
+        clearTimeout(animTimer)
+        animTimer = 0
+      }
+      if (opts.pin) setPinned(true)
+      if (isOpen()) {
+        placePanel()
+        return
       }
       document.body.appendChild(panel)
       panel.hidden = false
@@ -101,8 +127,10 @@ const iconPaths: Record<SocialId, string> = {
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
           panel.classList.add('is-open')
-          var first = panel.querySelector('[role="menuitem"]')
-          if (first) first.focus()
+          if (opts.focus) {
+            var first = panel.querySelector('[role="menuitem"]')
+            if (first) first.focus()
+          }
         })
       })
     }
@@ -113,19 +141,25 @@ const iconPaths: Record<SocialId, string> = {
       clearPlace()
       if (panel.parentNode !== root) root.appendChild(panel)
       trigger.setAttribute('aria-expanded', 'false')
+      setPinned(false)
       if (restoreFocus !== false) trigger.focus()
     }
 
     function close(restoreFocus) {
-      if (!isOpen()) return
+      cancelLeave()
+      if (!isOpen()) {
+        setPinned(false)
+        return
+      }
       panel.classList.remove('is-open')
       trigger.setAttribute('aria-expanded', 'false')
+      setPinned(false)
       if (reduceMotion) {
         finishClose(restoreFocus)
         return
       }
-      closeTimer = window.setTimeout(function () {
-        closeTimer = 0
+      animTimer = window.setTimeout(function () {
+        animTimer = 0
         panel.hidden = true
         clearPlace()
         if (panel.parentNode !== root) root.appendChild(panel)
@@ -133,15 +167,39 @@ const iconPaths: Record<SocialId, string> = {
       }, 180)
     }
 
-    function toggle() {
-      if (isOpen()) close()
-      else open()
+    function scheduleHoverClose() {
+      if (pinned) return
+      cancelLeave()
+      // Bridge the 6px gap between trigger and portaled panel.
+      leaveTimer = window.setTimeout(function () {
+        leaveTimer = 0
+        if (!pinned) close(false)
+      }, 160)
     }
 
+    // Click pins (or toggles pin off). Touch devices land here with no hover.
     trigger.addEventListener('click', function (e) {
       e.stopPropagation()
-      toggle()
+      cancelLeave()
+      if (pinned) {
+        close()
+        return
+      }
+      if (isOpen()) {
+        setPinned(true)
+        return
+      }
+      open({ pin: true, focus: true })
     })
+
+    if (hoverCapable) {
+      trigger.addEventListener('mouseenter', function () {
+        open({ focus: false })
+      })
+      trigger.addEventListener('mouseleave', scheduleHoverClose)
+      panel.addEventListener('mouseenter', cancelLeave)
+      panel.addEventListener('mouseleave', scheduleHoverClose)
+    }
 
     document.addEventListener('click', function (e) {
       if (!isOpen()) return
