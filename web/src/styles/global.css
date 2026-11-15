@@ -68,6 +68,9 @@ html[data-theme='light'] {
 
   /* Inner pages: article + rail form one centered group; the nav row matches it */
   --article-max: 51rem;
+  /* Continuous reading column inside .prose (~65–70ch at body size).
+     Wide MDX blocks (pre, tables, boards, cards) stay on --article-max. */
+  --prose-measure: 40rem;
   --rail-w: 15rem;
   --rail-gap: clamp(var(--space-7), 5vw, 5rem);
   --post-group: calc(var(--article-max) + var(--rail-gap) + var(--rail-w));
@@ -1281,9 +1284,9 @@ html[data-theme='light'] .socials-menu-item {
 
 .post-deck {
   margin: var(--space-3) 0 0;
-  max-width: 38rem;
-  font-size: clamp(1.08rem, 1rem + 0.35vw, 1.22rem);
-  line-height: 1.55;
+  max-width: var(--prose-measure);
+  font-size: clamp(1.08rem, 1rem + 0.35vw, 1.2rem);
+  line-height: 1.65;
   color: var(--muted);
   text-wrap: pretty;
 }
@@ -1352,49 +1355,59 @@ html[data-theme='light'] .socials-menu-item {
   outline: none;
 }
 
-/* Long-form body (MDX). Spacing and type instead of rules. */
+/* Long-form body (MDX). Spacing and type instead of rules.
+   Tuned for reading comfort (measure / leading / section rhythm) while
+   keeping Source Sans + charcoal/beige — not a visual clone of other blogs. */
 .prose {
   width: 100%;
-  font-size: 1.2rem;
-  line-height: 1.75;
+  font-size: 1.175rem;
+  line-height: 1.8;
+  text-wrap: pretty;
+}
+
+/* Keep continuous text on a calm measure; wide blocks use the article column. */
+.prose > :where(p, ul, ol, blockquote, h2, h3, h4, hr, .callout) {
+  max-width: var(--prose-measure);
 }
 
 .prose :is(h2, h3, h4) {
   font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.3;
-  margin: 2rem 0 0.65rem;
+  letter-spacing: -0.018em;
+  line-height: 1.25;
+  margin: 2.25rem 0 0.75rem;
+  text-wrap: balance;
 }
 
 .prose h2 {
-  margin-top: var(--space-7);
-  font-size: 1.35rem;
+  margin-top: 3.25rem;
+  font-size: 1.42rem;
 }
 
 .prose h3 {
-  font-size: 1.15rem;
+  margin-top: 2.25rem;
+  font-size: 1.22rem;
 }
 
 .prose h4 {
-  font-size: 1.05rem;
+  font-size: 1.08rem;
 }
 
 .prose p {
-  margin: 0 0 1.15rem;
+  margin: 0 0 1.35em;
 }
 
 .prose :is(ul, ol) {
-  margin: 0 0 1.15rem;
-  padding-left: 1.25rem;
+  margin: 0 0 1.35em;
+  padding-left: 1.3rem;
 }
 
 .prose li + li {
-  margin-top: 0.35rem;
+  margin-top: 0.45em;
 }
 
 .prose a {
   color: var(--fg);
-  text-underline-offset: 0.12em;
+  text-underline-offset: 0.14em;
 }
 
 .prose a:hover {
@@ -1406,8 +1419,8 @@ html[data-theme='light'] .socials-menu-item {
 }
 
 .prose blockquote {
-  margin: 0 0 1.25rem;
-  padding: 0.15rem 0 0.15rem 1rem;
+  margin: 0 0 1.5em;
+  padding: 0.2rem 0 0.2rem 1.05rem;
   border-left: 2px solid var(--border);
   color: var(--muted);
 }
@@ -1418,20 +1431,20 @@ html[data-theme='light'] .socials-menu-item {
 
 .prose :is(code, kbd) {
   font-family: var(--mono);
-  font-size: 0.9em;
+  font-size: 0.86em;
   padding: 0.12em 0.35em;
   border-radius: 4px;
   background: var(--frame-bg);
 }
 
 .prose pre {
-  margin: 0 0 1.25rem;
-  padding: 1rem 1.1rem;
+  margin: 0 0 1.5em;
+  padding: 1.05rem 1.15rem;
   overflow-x: auto;
   border-radius: 10px;
   background: var(--frame-bg);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.875rem;
+  line-height: 1.55;
 }
 
 .prose pre code {
@@ -1567,13 +1580,13 @@ html[data-theme='light'] .socials-menu-item {
 
 /* <Callout tone="note|warning|answer">: faint fill + quiet left accent */
 .callout {
-  margin: 0 0 1.25rem;
+  margin: 0 0 1.5em;
   padding: var(--space-3) var(--space-4);
   border-left: 2px solid color-mix(in srgb, var(--fg) 28%, transparent);
   border-radius: 0 var(--row-radius) var(--row-radius) 0;
   background: color-mix(in srgb, var(--fg) 4%, transparent);
-  font-size: 1.05rem;
-  line-height: 1.6;
+  font-size: 0.95em;
+  line-height: 1.7;
 }
 
 .callout .callout-label {
@@ -2095,13 +2108,15 @@ html[data-theme='dark'] .excal-stage svg {
 
 .post-faq {
   margin-top: var(--space-8);
+  max-width: var(--prose-measure);
 }
 
 .post-faq h2 {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 1.42rem;
   font-weight: 600;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.018em;
+  line-height: 1.25;
 }
 
 .post-faq dl {
@@ -2113,14 +2128,14 @@ html[data-theme='dark'] .excal-stage svg {
 
 .post-faq dt {
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
 }
 
 .post-faq dd {
   margin: var(--space-1) 0 0;
   color: var(--muted);
   font-size: 1.05rem;
-  line-height: 1.6;
+  line-height: 1.75;
 }
 
 /* Rail: "On this page" + progress/back-to-top + CTA icons (share / writing / home) */
