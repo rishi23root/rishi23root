@@ -68,8 +68,27 @@ const personJsonLd = {
           <p class="voice-bio">{voiceBio}</p>
         </section>
 
-        <section class="home-section reveal" style="--i: 1">
-          <h2>Writing</h2>
+        {
+          capabilities.length ? (
+            <section class="home-section reveal" style="--i: 1">
+              <h2>Capabilities</h2>
+              <ul class="home-list home-stack-list">
+                {capabilities.map((item) => (
+                  <li class="hover-row">
+                    <span class="capability-heading">{item.heading}</span>
+                    <span class="blurb">{item.body}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null
+        }
+
+        <section class="home-section reveal" style="--i: 2">
+          <div class="home-section-head">
+            <h2>Writing</h2>
+            <a class="home-section-more" href="/writing" aria-label="All writing">→</a>
+          </div>
           {
             posts.length ? (
               <ul class="home-list home-writing-list">
@@ -86,8 +105,11 @@ const personJsonLd = {
           }
         </section>
 
-        <section class="home-section reveal" style="--i: 2">
-          <h2>Work</h2>
+        <section class="home-section reveal" style="--i: 3">
+          <div class="home-section-head">
+            <h2>Work</h2>
+            <a class="home-section-more" href="/projects" aria-label="All projects">→</a>
+          </div>
           <ul class="home-list home-stack-list">
             {
               projects.map((project) => (
@@ -99,22 +121,6 @@ const personJsonLd = {
             }
           </ul>
         </section>
-
-        {
-          capabilities.length ? (
-            <section class="home-section reveal" style="--i: 3">
-              <h2>Capabilities</h2>
-              <ul class="home-list home-stack-list">
-                {capabilities.map((item) => (
-                  <li class="hover-row">
-                    <span class="capability-heading">{item.heading}</span>
-                    <span class="blurb">{item.body}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null
-        }
       </div>
     </div>
 
