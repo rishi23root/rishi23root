@@ -212,7 +212,7 @@ if (d.faq.length) {
             ) : null
           }
           <div class="post-rail-tools">
-            <button type="button" class="post-progress" id="postProgress" hidden title="Back to top" aria-label="Back to top">
+            <button type="button" class="post-progress" id="postProgress" aria-hidden="true" tabindex="-1" title="Back to top" aria-label="Back to top">
               <span class="post-progress-ring">
                 <svg viewBox="0 0 36 36" aria-hidden="true">
                   <circle cx="18" cy="18" r="14" class="post-progress-track" />
@@ -702,27 +702,23 @@ if (d.faq.length) {
       var pinned = null // link chosen by a rail click, held while its heading is still on screen
       var pinnedY = 0
       var animating = false
-      var progressHideTimer = 0
       var progressShowRaf = 0
       var progressVisible = false
 
-      // Fade opacity/transform in CSS; only apply [hidden] after fade-out so
-      // the control leaves layout once invisible. Instant when reduce-motion.
+      // Keep the control in flow so Share / All writing / Home never reflow.
+      // Only opacity/transform fade; inert via aria-hidden + tabindex + CSS
+      // pointer-events. Instant when reduce-motion.
       function setProgressVisible(show) {
         if (!btn) return
-        if (show === progressVisible && !(show && btn.hidden)) return
+        if (show === progressVisible) return
         progressVisible = show
-        if (progressHideTimer) {
-          clearTimeout(progressHideTimer)
-          progressHideTimer = 0
-        }
         if (progressShowRaf) {
           cancelAnimationFrame(progressShowRaf)
           progressShowRaf = 0
         }
         if (show) {
-          btn.hidden = false
           btn.removeAttribute('aria-hidden')
+          btn.removeAttribute('tabindex')
           if (motion.matches) {
             btn.classList.add('is-visible')
             return
@@ -738,11 +734,7 @@ if (d.faq.length) {
         }
         btn.classList.remove('is-visible')
         btn.setAttribute('aria-hidden', 'true')
-        var dur = motion.matches ? 0 : cssTime(document.documentElement, '--dur', 280)
-        progressHideTimer = window.setTimeout(function () {
-          progressHideTimer = 0
-          if (!progressVisible) btn.hidden = true
-        }, dur)
+        btn.setAttribute('tabindex', '-1')
       }
 
       function sync() {
