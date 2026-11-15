@@ -211,7 +211,8 @@ a:hover {
 .chrome-end {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  /* Even rhythm: nav group → socials trigger → theme toggle */
+  gap: 0.85rem;
   min-width: 0;
 }
 
@@ -885,8 +886,9 @@ html[data-theme='light'] .socials-menu-trigger {
 
 .socials-menu-trigger svg {
   display: block;
-  width: 1.2rem;
-  height: 1.2rem;
+  /* Match .theme-icon optical size so the pair aligns */
+  width: 1.45rem;
+  height: 1.45rem;
 }
 
 .socials-menu-panel {
@@ -943,7 +945,7 @@ html[data-theme='light'] .socials-menu-item {
 
 @media (max-width: 40rem) {
   .chrome-end {
-    gap: var(--space-2) var(--space-3);
+    gap: 0.65rem;
   }
 }
 
