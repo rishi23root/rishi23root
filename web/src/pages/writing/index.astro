@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import ContactIcons from '../../components/ContactIcons.astro'
 import MetaLine from '../../components/MetaLine.astro'
 import PageIntro from '../../components/PageIntro.astro'
 import { formatPostDate, getPublishedPosts, postPath, readingTimeMinutes } from '../../lib/posts'
@@ -43,7 +42,5 @@ const posts = await getPublishedPosts()
         <p class="empty">No posts yet.</p>
       )
     }
-
-    <ContactIcons />
   </div>
 </BaseLayout>

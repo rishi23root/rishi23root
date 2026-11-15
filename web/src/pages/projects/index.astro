@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import ContactIcons from '../../components/ContactIcons.astro'
 import PageIntro from '../../components/PageIntro.astro'
 import { site } from '../../lib/site'
 
@@ -39,7 +38,5 @@ const projects = (site.projects ?? [])
         <p class="empty">No projects yet.</p>
       )
     }
-
-    <ContactIcons />
   </div>
 </BaseLayout>

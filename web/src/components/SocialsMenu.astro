@@ -1,0 +1,243 @@
+---
+import { socialLinks, type SocialId } from '../lib/site'
+
+/** 24×24 filled icon paths for menu rows. */
+const iconPaths: Record<SocialId, string> = {
+  email:
+    'M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z',
+  x: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.727-8.849L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z',
+  linkedin:
+    'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.5 18H6v-8h2.5v8zM7.25 9.25A1.75 1.75 0 1 1 7.25 5.75a1.75 1.75 0 0 1 0 3.5zM18 18h-2.5v-4.2c0-1.55-.55-2.05-1.4-2.05-.9 0-1.35.65-1.55 1.25-.05.2-.05.45-.05.7V18H10v-8h2.4v1.1c.45-.75 1.2-1.35 2.55-1.35 1.85 0 3.05 1.2 3.05 3.8V18z',
+  github:
+    'M12 .5C5.73.5.5 5.74.5 12.02c0 5.1 3.29 9.43 7.86 10.96.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.64 1.58.24 2.75.12 3.04.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.25 5.69.41.36.78 1.07.78 2.16 0 1.56-.01 2.81-.01 3.19 0 .31.21.68.8.56A10.52 10.52 0 0 0 23.5 12C23.5 5.74 18.27.5 12 .5z',
+  pypi: 'M12 2C7.58 2 4 2.9 4 4.5v3c0 1.6 3.58 2.5 8 2.5s8-.9 8-2.5v-3C20 2.9 16.42 2 12 2zm0 1.5c3.87 0 6.5.7 6.5 1.5S15.87 6.5 12 6.5 5.5 5.8 5.5 5 8.13 3.5 12 3.5zM4 9v3c0 1.6 3.58 2.5 8 2.5s8-.9 8-2.5V9c-1.3.9-4.2 1.5-8 1.5S5.3 9.9 4 9zm0 5v3c0 1.6 3.58 2.5 8 2.5s8-.9 8-2.5v-3c-1.3.9-4.2 1.5-8 1.5S5.3 14.9 4 14zm0 5v.5C4 21.1 7.58 22 12 22s8-.9 8-2.5V19c-1.3.9-4.2 1.5-8 1.5S5.3 19.9 4 19z',
+}
+---
+
+<div class="socials-menu" data-socials-menu>
+  <button
+    type="button"
+    class="socials-menu-trigger"
+    id="socialsMenuTrigger"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    aria-controls="socialsMenu"
+    aria-label="Social links"
+    title="Social links"
+  >
+    <span class="socials-menu-at" aria-hidden="true">@</span>
+  </button>
+  <div class="socials-menu-panel" id="socialsMenu" role="menu" hidden>
+    {
+      socialLinks.map((item) => (
+        <a
+          class="socials-menu-item"
+          role="menuitem"
+          href={item.href}
+          data-icon={item.id}
+          {...(item.href.startsWith('http')
+            ? { target: '_blank', rel: 'noopener noreferrer' }
+            : {})}
+        >
+          <span class="socials-menu-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path fill="currentColor" d={iconPaths[item.id]} />
+            </svg>
+          </span>
+          <span class="socials-menu-label">{item.label}</span>
+        </a>
+      ))
+    }
+  </div>
+</div>
+
+<script is:inline>
+  ;(function () {
+    var root = document.querySelector('[data-socials-menu]')
+    if (!root) return
+    var trigger = root.querySelector('.socials-menu-trigger')
+    var panel = root.querySelector('.socials-menu-panel')
+    if (!trigger || !panel) return
+
+    var animTimer = 0
+    var leaveTimer = 0
+    var pinned = false
+    var reduceMotion = false
+    var hoverCapable = false
+    try {
+      reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    } catch (e) {}
+    try {
+      // Fine pointer + real hover: open on hover. Touch / coarse: click only.
+      hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    } catch (e) {}
+
+    function isOpen() {
+      return trigger.getAttribute('aria-expanded') === 'true'
+    }
+
+    function setPinned(next) {
+      pinned = !!next
+      trigger.toggleAttribute('data-pinned', pinned)
+    }
+
+    // Fixed + body portal escapes chrome view-transition stacking so the
+    // opaque panel paints above the sticky writing TOC rail.
+    function placePanel() {
+      var r = trigger.getBoundingClientRect()
+      panel.style.position = 'fixed'
+      panel.style.top = Math.round(r.bottom + 6) + 'px'
+      panel.style.right = Math.round(window.innerWidth - r.right) + 'px'
+      panel.style.left = 'auto'
+      panel.style.bottom = 'auto'
+    }
+
+    function clearPlace() {
+      panel.style.position = ''
+      panel.style.top = ''
+      panel.style.right = ''
+      panel.style.left = ''
+      panel.style.bottom = ''
+    }
+
+    function cancelLeave() {
+      if (leaveTimer) {
+        clearTimeout(leaveTimer)
+        leaveTimer = 0
+      }
+    }
+
+    function open(opts) {
+      opts = opts || {}
+      cancelLeave()
+      if (animTimer) {
+        clearTimeout(animTimer)
+        animTimer = 0
+      }
+      if (opts.pin) setPinned(true)
+      if (isOpen()) {
+        placePanel()
+        return
+      }
+      document.body.appendChild(panel)
+      panel.hidden = false
+      placePanel()
+      trigger.setAttribute('aria-expanded', 'true')
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          panel.classList.add('is-open')
+          if (opts.focus) {
+            var first = panel.querySelector('[role="menuitem"]')
+            if (first) first.focus()
+          }
+        })
+      })
+    }
+
+    function finishClose(restoreFocus) {
+      panel.classList.remove('is-open')
+      panel.hidden = true
+      clearPlace()
+      if (panel.parentNode !== root) root.appendChild(panel)
+      trigger.setAttribute('aria-expanded', 'false')
+      setPinned(false)
+      if (restoreFocus !== false) trigger.focus()
+    }
+
+    function close(restoreFocus) {
+      cancelLeave()
+      if (!isOpen()) {
+        setPinned(false)
+        return
+      }
+      panel.classList.remove('is-open')
+      trigger.setAttribute('aria-expanded', 'false')
+      setPinned(false)
+      if (reduceMotion) {
+        finishClose(restoreFocus)
+        return
+      }
+      animTimer = window.setTimeout(function () {
+        animTimer = 0
+        panel.hidden = true
+        clearPlace()
+        if (panel.parentNode !== root) root.appendChild(panel)
+        if (restoreFocus !== false) trigger.focus()
+      }, 180)
+    }
+
+    function scheduleHoverClose() {
+      if (pinned) return
+      cancelLeave()
+      // Bridge the 6px gap between trigger and portaled panel.
+      leaveTimer = window.setTimeout(function () {
+        leaveTimer = 0
+        if (!pinned) close(false)
+      }, 160)
+    }
+
+    // Click pins (or toggles pin off). Touch devices land here with no hover.
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation()
+      cancelLeave()
+      if (pinned) {
+        close()
+        return
+      }
+      if (isOpen()) {
+        setPinned(true)
+        return
+      }
+      open({ pin: true, focus: true })
+    })
+
+    if (hoverCapable) {
+      trigger.addEventListener('mouseenter', function () {
+        open({ focus: false })
+      })
+      trigger.addEventListener('mouseleave', scheduleHoverClose)
+      panel.addEventListener('mouseenter', cancelLeave)
+      panel.addEventListener('mouseleave', scheduleHoverClose)
+    }
+
+    document.addEventListener('click', function (e) {
+      if (!isOpen()) return
+      if (root.contains(e.target) || panel.contains(e.target)) return
+      close(false)
+    })
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen()) {
+        e.preventDefault()
+        close()
+      }
+    })
+
+    window.addEventListener(
+      'resize',
+      function () {
+        if (isOpen()) placePanel()
+      },
+      { passive: true },
+    )
+
+    panel.addEventListener('keydown', function (e) {
+      var items = Array.prototype.slice.call(panel.querySelectorAll('[role="menuitem"]'))
+      if (!items.length) return
+      var i = items.indexOf(document.activeElement)
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        items[(i + 1) % items.length].focus()
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        items[(i - 1 + items.length) % items.length].focus()
+      } else if (e.key === 'Home') {
+        e.preventDefault()
+        items[0].focus()
+      } else if (e.key === 'End') {
+        e.preventDefault()
+        items[items.length - 1].focus()
+      }
+    })
+  })()
+</script>
