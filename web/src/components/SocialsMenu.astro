@@ -25,7 +25,7 @@ const iconPaths: Record<SocialId, string> = {
     aria-label="Social links"
     title="Social links"
   >
-    {/* Typographic @ — “find me online,” brand-aligned with the wordmark */}
+    {/* Typographic @ — kept while Rishi picks a final glyph */}
     <span class="socials-menu-at" aria-hidden="true">@</span>
   </button>
   <div class="socials-menu-panel" id="socialsMenu" role="menu" hidden>
@@ -40,10 +40,12 @@ const iconPaths: Record<SocialId, string> = {
             ? { target: '_blank', rel: 'noopener noreferrer' }
             : {})}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path fill="currentColor" d={iconPaths[item.id]} />
-          </svg>
-          <span>{item.label}</span>
+          <span class="socials-menu-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path fill="currentColor" d={iconPaths[item.id]} />
+            </svg>
+          </span>
+          <span class="socials-menu-label">{item.label}</span>
         </a>
       ))
     }
@@ -58,22 +60,77 @@ const iconPaths: Record<SocialId, string> = {
     var panel = root.querySelector('.socials-menu-panel')
     if (!trigger || !panel) return
 
+    var closeTimer = 0
+    var reduceMotion = false
+    try {
+      reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    } catch (e) {}
+
     function isOpen() {
       return trigger.getAttribute('aria-expanded') === 'true'
     }
 
+    // Fixed + body portal escapes chrome view-transition stacking so the
+    // opaque panel paints above the sticky writing TOC rail.
+    function placePanel() {
+      var r = trigger.getBoundingClientRect()
+      panel.style.position = 'fixed'
+      panel.style.top = Math.round(r.bottom + 6) + 'px'
+      panel.style.right = Math.round(window.innerWidth - r.right) + 'px'
+      panel.style.left = 'auto'
+      panel.style.bottom = 'auto'
+    }
+
+    function clearPlace() {
+      panel.style.position = ''
+      panel.style.top = ''
+      panel.style.right = ''
+      panel.style.left = ''
+      panel.style.bottom = ''
+    }
+
     function open() {
+      if (closeTimer) {
+        clearTimeout(closeTimer)
+        closeTimer = 0
+      }
+      document.body.appendChild(panel)
       panel.hidden = false
+      placePanel()
       trigger.setAttribute('aria-expanded', 'true')
-      var first = panel.querySelector('[role="menuitem"]')
-      if (first) first.focus()
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          panel.classList.add('is-open')
+          var first = panel.querySelector('[role="menuitem"]')
+          if (first) first.focus()
+        })
+      })
+    }
+
+    function finishClose(restoreFocus) {
+      panel.classList.remove('is-open')
+      panel.hidden = true
+      clearPlace()
+      if (panel.parentNode !== root) root.appendChild(panel)
+      trigger.setAttribute('aria-expanded', 'false')
+      if (restoreFocus !== false) trigger.focus()
     }
 
     function close(restoreFocus) {
       if (!isOpen()) return
-      panel.hidden = true
+      panel.classList.remove('is-open')
       trigger.setAttribute('aria-expanded', 'false')
-      if (restoreFocus !== false) trigger.focus()
+      if (reduceMotion) {
+        finishClose(restoreFocus)
+        return
+      }
+      closeTimer = window.setTimeout(function () {
+        closeTimer = 0
+        panel.hidden = true
+        clearPlace()
+        if (panel.parentNode !== root) root.appendChild(panel)
+        if (restoreFocus !== false) trigger.focus()
+      }, 180)
     }
 
     function toggle() {
@@ -88,7 +145,7 @@ const iconPaths: Record<SocialId, string> = {
 
     document.addEventListener('click', function (e) {
       if (!isOpen()) return
-      if (root.contains(e.target)) return
+      if (root.contains(e.target) || panel.contains(e.target)) return
       close(false)
     })
 
@@ -99,7 +156,14 @@ const iconPaths: Record<SocialId, string> = {
       }
     })
 
-    // Arrow keys within the open menu
+    window.addEventListener(
+      'resize',
+      function () {
+        if (isOpen()) placePanel()
+      },
+      { passive: true },
+    )
+
     panel.addEventListener('keydown', function (e) {
       var items = Array.prototype.slice.call(panel.querySelectorAll('[role="menuitem"]'))
       if (!items.length) return
