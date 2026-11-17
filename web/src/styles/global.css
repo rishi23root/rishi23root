@@ -1136,8 +1136,8 @@ html[data-theme='light'] .socials-menu-item {
 }
 
 /* ---------------------------------------------------------------
- * 404 — night water, drawn in the page. The copy sits in a dark
- * pool on the left so the words stay light.
+ * 404 — a planet limb in open space, drawn in the page. The copy
+ * sits in a dark pool on the left so the words stay light.
  * ------------------------------------------------------------- */
 html[data-theme] body:has(.lost) {
   background: #061018;

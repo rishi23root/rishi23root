@@ -19,61 +19,49 @@ import BaseLayout from '../layouts/BaseLayout.astro'
       <defs>
         <linearGradient id="lost-sky" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#07080c"></stop>
-          <stop offset="62%" stop-color="#121820"></stop>
-          <stop offset="100%" stop-color="#24343f"></stop>
+          <stop offset="100%" stop-color="#10141a"></stop>
         </linearGradient>
-        <linearGradient id="lost-sea" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#2a5364"></stop>
-          <stop offset="12%" stop-color="#163848"></stop>
-          <stop offset="46%" stop-color="#0c1e2a"></stop>
-          <stop offset="100%" stop-color="#070b10"></stop>
-        </linearGradient>
-        <radialGradient id="lost-halo" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#f4efe4" stop-opacity="0.5"></stop>
-          <stop offset="42%" stop-color="#f4efe4" stop-opacity="0.1"></stop>
-          <stop offset="100%" stop-color="#f4efe4" stop-opacity="0"></stop>
+        <radialGradient id="lost-planet" cx="720" cy="560" r="640" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#e7f6fb"></stop>
+          <stop offset="14%" stop-color="#8ec4d4"></stop>
+          <stop offset="36%" stop-color="#24556a"></stop>
+          <stop offset="68%" stop-color="#102833"></stop>
+          <stop offset="100%" stop-color="#0a1216"></stop>
         </radialGradient>
-        <linearGradient id="lost-horizon" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#d5ecf4" stop-opacity="0"></stop>
-          <stop offset="50%" stop-color="#d5ecf4" stop-opacity="0.22"></stop>
-          <stop offset="100%" stop-color="#d5ecf4" stop-opacity="0"></stop>
-        </linearGradient>
+        <clipPath id="lost-disc">
+          <circle cx="720" cy="1320" r="820"></circle>
+        </clipPath>
       </defs>
 
       <rect width="1440" height="900" fill="url(#lost-sky)"></rect>
 
       <g fill="#f4efe4">
-        <circle cx="150" cy="96" r="1.05" opacity="0.7"></circle>
-        <circle cx="280" cy="180" r="0.6" opacity="0.4"></circle>
-        <circle cx="460" cy="64" r="0.85" opacity="0.55"></circle>
-        <circle cx="610" cy="150" r="0.55" opacity="0.35"></circle>
-        <circle cx="980" cy="78" r="1.15" opacity="0.6"></circle>
-        <circle cx="1160" cy="140" r="0.7" opacity="0.45"></circle>
-        <circle cx="1300" cy="56" r="0.9" opacity="0.5"></circle>
+        <circle cx="140" cy="88" r="1.05" opacity="0.7"></circle>
+        <circle cx="260" cy="170" r="0.6" opacity="0.4"></circle>
+        <circle cx="430" cy="56" r="0.85" opacity="0.55"></circle>
+        <circle cx="590" cy="140" r="0.55" opacity="0.35"></circle>
+        <circle cx="980" cy="72" r="1.1" opacity="0.6"></circle>
+        <circle cx="1140" cy="150" r="0.7" opacity="0.4"></circle>
+        <circle cx="1310" cy="64" r="0.9" opacity="0.5"></circle>
+        <circle cx="220" cy="320" r="0.55" opacity="0.3"></circle>
+        <circle cx="1240" cy="280" r="0.6" opacity="0.35"></circle>
       </g>
 
-      <circle cx="800" cy="168" r="92" fill="url(#lost-halo)"></circle>
-      <circle cx="800" cy="168" r="26" fill="#f3eee4"></circle>
-
-      <path
-        fill="url(#lost-sea)"
-        d="M0 468C220 446 380 488 620 458C860 428 1040 486 1280 450C1360 438 1410 446 1440 442V900H0Z"
-      ></path>
-      <rect x="0" y="410" width="1440" height="90" fill="url(#lost-horizon)"></rect>
-
-      <g fill="none" stroke="#d7eef6" stroke-linecap="round">
-        <path d="M900 548C1080 530 1240 566 1420 540" stroke-width="1.25" opacity="0.32"></path>
-        <path d="M820 640C1020 622 1220 668 1420 636" stroke-width="1.1" opacity="0.2"></path>
+      <circle cx="720" cy="1320" r="820" fill="url(#lost-planet)"></circle>
+      <g clip-path="url(#lost-disc)" fill="#f7fbfe">
+        <ellipse cx="560" cy="560" rx="150" ry="18" opacity="0.45" transform="rotate(-12 560 560)"></ellipse>
+        <ellipse cx="820" cy="530" rx="120" ry="14" opacity="0.38" transform="rotate(8 820 530)"></ellipse>
+        <ellipse cx="1040" cy="620" rx="130" ry="16" opacity="0.28" transform="rotate(18 1040 620)"></ellipse>
+        <ellipse cx="400" cy="680" rx="110" ry="14" opacity="0.22" transform="rotate(-20 400 680)"></ellipse>
       </g>
 
-      <g fill="#f3eee4">
-        <ellipse cx="802" cy="498" rx="3" ry="10" opacity="0.7"></ellipse>
-        <ellipse cx="792" cy="534" rx="11" ry="4" opacity="0.42"></ellipse>
-        <ellipse cx="812" cy="568" rx="5" ry="3.5" opacity="0.34"></ellipse>
-        <ellipse cx="786" cy="608" rx="16" ry="4.5" opacity="0.28"></ellipse>
-        <ellipse cx="808" cy="652" rx="7" ry="3" opacity="0.2"></ellipse>
-        <ellipse cx="778" cy="700" rx="20" ry="4" opacity="0.16"></ellipse>
-        <ellipse cx="816" cy="748" rx="8" ry="3" opacity="0.12"></ellipse>
+      <g transform="translate(900 430) scale(0.62) rotate(14)" fill="none" stroke="#f4efe4" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="0" cy="0" r="3.2" fill="#f4efe4" stroke="none"></circle>
+        <path d="M0 3.2v8"></path>
+        <path d="M0 6-6 9.5"></path>
+        <path d="M0 6 5 9"></path>
+        <path d="M0 11-3.2 18"></path>
+        <path d="M0 11 3.4 17.5"></path>
       </g>
     </svg>
 
