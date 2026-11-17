@@ -1,6 +1,7 @@
 ---
 title: How rishi23root.in is put together
 date: 2026-11-14
+updated: 2026-11-17
 slug: how-this-site-works
 summary: rishi23root.in and my GitHub profile README are built from one content folder; this is how the writing, diagrams, mood images, projects, RSS and SEO fit together.
 draft: false
@@ -16,7 +17,7 @@ faq:
   - q: Why are the diagrams SVG instead of a live Excalidraw canvas?
     a: The live canvas flashed an empty whiteboard on load and pushed about 145 KB of editor CSS onto every post. An SVG export loads cleanly, stays sharp at any zoom and follows the theme with one CSS rule.
   - q: Does every page load React?
-    a: No. Plain posts ship no React at all. React loads only for the home page mood on desktop and for posts that embed a diagram, after it scrolls into view.
+    a: No. Plain posts ship no React. React loads for the home page mood on desktop. A diagram is SVG baked when the site builds, so a post that has one still does not load React or Excalidraw.
 ---
 
 I keep one folder of content in the repo, and two builds read it: one writes my GitHub profile README, the other builds this site. Everything else here (the writing pipeline, the diagrams, the small touches on the home page) is built so that folder stays the only place I edit.
@@ -73,7 +74,7 @@ That line renders this:
 
 <ExcalidrawBoard src="/diagrams/board-pipeline.json" height={420} />
 
-A thin Astro wrapper hydrates the component with `client:visible`, so nothing happens until the board is about to scroll into view. Then it loads Excalidraw, calls `exportToSvg` once, fits the result to the frame and fades it in. Hover it and a small control bar shows up for zoom, reset and expand. Drag pans; the scroll wheel stays with the page.
+The site bakes every scene to SVG before the pages render, and the board inlines that file. The browser never downloads Excalidraw. Hover the board and a small control bar shows up for zoom, reset and expand. Drag pans; the scroll wheel stays with the page.
 
 Dark mode is one CSS filter on the SVG, the same invert-and-rotate Excalidraw uses for its own dark theme, so I draw every scene in light mode with dark strokes. The hand-drawn fonts are hosted here, so a board never reaches out to a CDN.
 
@@ -126,7 +127,7 @@ In words: `content/` holds the data. The README build reads the bio and post tit
 | --- | --- | --- |
 | README build<br />`index.ts`, `posts.ts` | `site.json`, post frontmatter, GitHub API | `README.md` |
 | Astro site<br />`web/` | `site.json`, full posts, board scenes | pages, RSS, sitemap, `llms.txt` |
-| Board island<br />`ExcalidrawBoard` | one scene JSON | inline SVG, in the browser |
+| Diagram bake<br />`bake-diagrams.mjs` | scene JSON in `web/public/diagrams/` | SVG inlined into the post |
 
 ### What's in `site.json`
 
@@ -266,14 +267,20 @@ const posts = defineCollection({
 })
 ```
 
-And the diagram export, which is the only Excalidraw function the site calls:
+And the diagram export, which runs in Node while the site builds. `register()` has to run before the import, or Node rejects a JSON file inside the package:
 
-```tsx
+```js
+await register('./excalidraw-loader.mjs', import.meta.url)
 const { exportToSvg } = await import('@excalidraw/excalidraw')
 const svg = await exportToSvg({
   elements: scene.elements,
-  appState: { ...scene.appState, exportBackground: false, viewBackgroundColor: 'transparent' },
-  files: scene.files,
+  appState: {
+    ...scene.appState,
+    exportBackground: false,
+    exportWithDarkMode: false,
+    viewBackgroundColor: 'transparent',
+  },
+  files: scene.files ?? null,
   exportPadding: 16,
   skipInliningFonts: true,
 })
@@ -323,15 +330,15 @@ return Astro.redirect(postPath(Astro.params.slug!), 301)
 ---
 ```
 
-The full files are `posts.ts`, `web/src/content.config.ts`, `web/src/components/ExcalidrawBoard.tsx`, `web/src/components/moods/preload.ts`, `web/src/pages/rss.xml.ts` and `web/src/pages/llms.txt.ts` in the [repo](https://github.com/rishi23root/rishi23root).
+The full files are `posts.ts`, `web/src/content.config.ts`, `web/scripts/bake-diagrams.mjs`, `web/src/components/ExcalidrawBoard.astro`, `web/src/components/moods/preload.ts`, `web/src/pages/rss.xml.ts` and `web/src/pages/llms.txt.ts` in the [repo](https://github.com/rishi23root/rishi23root).
 
 ## Results
 
 I measured these from the production build (`npm run build:web`) and the browser's network panel:
 
 - **One edit, both surfaces.** Changing my bio or publishing a post is one commit. The README and the site both pick it up on the next push to `master`, with no copy step.
-- **A plain post ships no React.** Its scripts are the 1.1 KB palette listener; the shared stylesheet is 37.5 KB (8.3 KB gzipped). The home page HTML is about 21 KB.
-- **React is opt-in.** The mood island is 7.5 KB plus the React runtime (66 KB gzipped), only on desktop. A post with a diagram adds a 6 KB island and, once a board scrolls into view, the Excalidraw library (about 1.1 MB, 372 KB gzipped).
+- **A plain post ships no React.** I measured `web/dist` after `npm run build` in `web/`. `hello-world` references one external script, the palette listener at 2.3 KB (1.2 KB gzipped). The shared stylesheet is 45.0 KB (9.5 KB gzipped). The home page HTML is 25.8 KB (8.1 KB gzipped).
+- **Diagrams do not ship the editor.** None of the client JS files in `web/dist/_astro` contain `@excalidraw/excalidraw`. The writing post's HTML does not reference the React chunk (210.5 KB, 65.5 KB gzipped). Pan and zoom are one 5.6 KB inline script (1.8 KB gzipped). The SVG is already in the HTML.
 - **GitHub cards are plain HTML.** They ship no script at all. Link previews add a 2.4 KB inline script, and only to posts that link to a repo or PR.
 - **Diagrams got lighter.** Moving from the live canvas to SVG took 145 KB of CSS off every post. Self-hosting fonts took a 1.8 MB script and a CDN request off every board.
 - **Mood images cost phones nothing.** The seven stills total about 540 KB, but a desktop visit downloads one up front plus one low-priority prefetch after load, and a phone downloads none.
@@ -345,6 +352,6 @@ Share data, not layout. A JSON file and a folder of MDX are boring on purpose: a
 
 Make JavaScript earn its place per page. Astro's `client:visible` and `client:media` did most of the work. A feature that only matters on desktop shouldn't cost a phone anything.
 
-If you embed diagrams, render them to SVG. I'd go one step further than I have: render the SVG at build time. Readers would skip the 1.1 MB download, and RSS readers and no-JS browsers would see the diagram instead of a placeholder. That's the next change I'm making.
+If you embed diagrams, bake them to SVG when the site builds. The page has the drawing with no editor library, and a browser with JavaScript off still shows it. Keep Excalidraw installed for that bake and nowhere else. Import it from Node only after a loader that can read its JSON and CSS, and don't inline the fonts.
 
 Don't do this if you only want a blog. A hosted platform will get you writing sooner. This setup pays off when you have more than one surface to keep in sync and you'd rather edit a file than a dashboard.

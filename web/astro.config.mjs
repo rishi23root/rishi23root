@@ -4,12 +4,14 @@ import { rehypeTableLabels } from './src/lib/rehypeTableLabels.ts'
 import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
+import { excalidrawBake } from './scripts/excalidraw-integration.mjs'
 
 export default defineConfig({
   site: 'https://rishi23root.in',
   output: 'static',
   trailingSlash: 'always',
   integrations: [
+    excalidrawBake(),
     mdx({ rehypePlugins: [rehypePublicImageSize, rehypeTableLabels] }),
     react(),
     sitemap({
