@@ -2,7 +2,7 @@
 @font-face {
   font-family: 'Source Sans 3';
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 300 600;
   font-display: optional;
   src: url('/fonts/source-sans-3-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
@@ -1353,11 +1353,12 @@ html[data-theme='light'] .socials-menu-item {
 }
 
 /* Long-form body (MDX). Spacing and type instead of rules.
-   Paragraphs sit a step under the headings. The face stops at 400, so the step is color. */
+   Paragraphs are weight 300; headings stay 600. */
 .prose {
   width: 100%;
   font-size: 1.2rem;
   line-height: 1.75;
+  font-weight: 300;
   color: color-mix(in srgb, var(--fg) 82%, transparent);
 }
 
