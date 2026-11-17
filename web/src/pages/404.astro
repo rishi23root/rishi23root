@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-
-const photo = '/lost/earth.webp'
 ---
 
 <BaseLayout
@@ -10,17 +8,82 @@ const photo = '/lost/earth.webp'
   path="/404/"
   robots="noindex, nofollow"
 >
-  <link slot="head" rel="preload" as="image" href={photo} type="image/webp" fetchpriority="high" />
   <div class="lost">
-    <img
-      class="lost-photo"
-      src={photo}
-      alt=""
-      width="736"
-      height="1307"
-      fetchpriority="high"
-      decoding="async"
-    />
+    <svg
+      class="lost-scene"
+      viewBox="0 0 1440 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id="lost-space" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#03050b"></stop>
+          <stop offset="58%" stop-color="#07111e"></stop>
+          <stop offset="100%" stop-color="#10243a"></stop>
+        </linearGradient>
+        <radialGradient id="lost-ground" cx="720" cy="360" r="980" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#d7f3ff"></stop>
+          <stop offset="16%" stop-color="#7ec4e4"></stop>
+          <stop offset="38%" stop-color="#2f78a4"></stop>
+          <stop offset="68%" stop-color="#143e5e"></stop>
+          <stop offset="100%" stop-color="#071826"></stop>
+        </radialGradient>
+        <radialGradient id="lost-day" cx="18%" cy="0%" r="70%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"></stop>
+          <stop offset="45%" stop-color="#9ad7ff" stop-opacity="0.18"></stop>
+          <stop offset="100%" stop-color="#9ad7ff" stop-opacity="0"></stop>
+        </radialGradient>
+        <filter id="lost-air" x="-20%" y="-80%" width="140%" height="260%">
+          <feGaussianBlur stdDeviation="10"></feGaussianBlur>
+        </filter>
+        <clipPath id="lost-globe">
+          <circle cx="720" cy="1942" r="1600"></circle>
+        </clipPath>
+      </defs>
+
+      <rect width="1440" height="900" fill="url(#lost-space)"></rect>
+
+      <g fill="#f4f8ff">
+        <circle cx="180" cy="120" r="1.1" opacity="0.7"></circle>
+        <circle cx="420" cy="70" r="0.7" opacity="0.45"></circle>
+        <circle cx="640" cy="150" r="0.9" opacity="0.55"></circle>
+        <circle cx="860" cy="54" r="1.2" opacity="0.65"></circle>
+        <circle cx="1040" cy="130" r="0.7" opacity="0.4"></circle>
+        <circle cx="1240" cy="88" r="1" opacity="0.6"></circle>
+        <circle cx="1320" cy="210" r="0.6" opacity="0.35"></circle>
+      </g>
+
+      <circle cx="720" cy="1942" r="1600" fill="url(#lost-ground)"></circle>
+      <path
+        d="M-80 520Q720 292 1520 520"
+        fill="none"
+        stroke="#d7f4ff"
+        stroke-width="16"
+        filter="url(#lost-air)"
+        opacity="0.85"></path>
+      <g clip-path="url(#lost-globe)">
+        <rect width="1440" height="900" fill="url(#lost-day)"></rect>
+        <g fill="#f4fbff">
+          <ellipse cx="360" cy="400" rx="220" ry="16" opacity="0.34"></ellipse>
+          <ellipse cx="560" cy="378" rx="170" ry="13" opacity="0.42"></ellipse>
+          <ellipse cx="760" cy="388" rx="200" ry="14" opacity="0.38"></ellipse>
+          <ellipse cx="980" cy="408" rx="190" ry="15" opacity="0.3"></ellipse>
+          <ellipse cx="1180" cy="450" rx="170" ry="14" opacity="0.22"></ellipse>
+          <ellipse cx="640" cy="460" rx="260" ry="18" opacity="0.16"></ellipse>
+        </g>
+      </g>
+
+      <g transform="translate(748 278) scale(0.82) rotate(-10)" fill="none" stroke="#f4f8ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="0" cy="0" r="3.4" fill="#f4f8ff" stroke="none"></circle>
+        <path d="M0 3.4v8.5"></path>
+        <path d="M0 6.2-6.5 10"></path>
+        <path d="M0 6.2 5.2 9.4"></path>
+        <path d="M0 11.8-3.6 20"></path>
+        <path d="M0 11.8 3.8 19.2"></path>
+      </g>
+    </svg>
+
     <div class="lost-copy reveal" style="--i: 1">
       <p class="page-eyebrow">Lost</p>
       <h1>This page isn't here.</h1>
