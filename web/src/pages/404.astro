@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="Not found"
+  description="This page isn't here."
+  path="/404/"
+  robots="noindex, nofollow"
+>
+  <div class="lost">
+    <svg
+      class="lost-scene"
+      viewBox="0 0 1440 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id="lost-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#07080c"></stop>
+          <stop offset="100%" stop-color="#10141a"></stop>
+        </linearGradient>
+        <radialGradient id="lost-planet" cx="720" cy="560" r="640" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#e7f6fb"></stop>
+          <stop offset="14%" stop-color="#8ec4d4"></stop>
+          <stop offset="36%" stop-color="#24556a"></stop>
+          <stop offset="68%" stop-color="#102833"></stop>
+          <stop offset="100%" stop-color="#0a1216"></stop>
+        </radialGradient>
+        <clipPath id="lost-disc">
+          <circle cx="720" cy="1320" r="820"></circle>
+        </clipPath>
+      </defs>
+
+      <rect width="1440" height="900" fill="url(#lost-sky)"></rect>
+
+      <g fill="#f4efe4">
+        <circle cx="140" cy="88" r="1.05" opacity="0.7"></circle>
+        <circle cx="260" cy="170" r="0.6" opacity="0.4"></circle>
+        <circle cx="430" cy="56" r="0.85" opacity="0.55"></circle>
+        <circle cx="590" cy="140" r="0.55" opacity="0.35"></circle>
+        <circle cx="980" cy="72" r="1.1" opacity="0.6"></circle>
+        <circle cx="1140" cy="150" r="0.7" opacity="0.4"></circle>
+        <circle cx="1310" cy="64" r="0.9" opacity="0.5"></circle>
+        <circle cx="220" cy="320" r="0.55" opacity="0.3"></circle>
+        <circle cx="1240" cy="280" r="0.6" opacity="0.35"></circle>
+      </g>
+
+      <circle cx="720" cy="1320" r="820" fill="url(#lost-planet)"></circle>
+      <g clip-path="url(#lost-disc)" fill="#f7fbfe">
+        <ellipse cx="560" cy="560" rx="150" ry="18" opacity="0.45" transform="rotate(-12 560 560)"></ellipse>
+        <ellipse cx="820" cy="530" rx="120" ry="14" opacity="0.38" transform="rotate(8 820 530)"></ellipse>
+        <ellipse cx="1040" cy="620" rx="130" ry="16" opacity="0.28" transform="rotate(18 1040 620)"></ellipse>
+        <ellipse cx="400" cy="680" rx="110" ry="14" opacity="0.22" transform="rotate(-20 400 680)"></ellipse>
+      </g>
+
+      <g transform="translate(900 430) scale(0.62) rotate(14)" fill="none" stroke="#f4efe4" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="0" cy="0" r="3.2" fill="#f4efe4" stroke="none"></circle>
+        <path d="M0 3.2v8"></path>
+        <path d="M0 6-6 9.5"></path>
+        <path d="M0 6 5 9"></path>
+        <path d="M0 11-3.2 18"></path>
+        <path d="M0 11 3.4 17.5"></path>
+      </g>
+    </svg>
+
+    <div class="lost-copy reveal" style="--i: 1">
+      <p class="page-eyebrow">Lost</p>
+      <h1>This page isn't here.</h1>
+      <p class="lost-lede">
+        You kept walking past the last page. The rest of the site is still where you left it.
+      </p>
+      <a class="lost-home" href="/">Home</a>
+    </div>
+  </div>
+</BaseLayout>

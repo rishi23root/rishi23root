@@ -1136,6 +1136,114 @@ html[data-theme='light'] .socials-menu-item {
 }
 
 /* ---------------------------------------------------------------
+ * 404 — a planet limb in open space, drawn in the page. The copy
+ * sits in a dark pool on the left so the words stay light.
+ * ------------------------------------------------------------- */
+html[data-theme] body:has(.lost) {
+  background: #061018;
+}
+
+html[data-theme] body:has(.lost) .chrome-bar {
+  background: linear-gradient(to bottom, rgba(6, 10, 16, 0.72), rgba(6, 10, 16, 0));
+}
+
+html[data-theme] body:has(.lost) :is(.wordmark, .nav a, .theme-toggle, .socials-menu-trigger) {
+  color: rgba(242, 235, 224, 0.86);
+}
+
+html[data-theme] body:has(.lost) :is(.wordmark, .nav a, .theme-toggle, .socials-menu-trigger):is(:hover, :focus-visible),
+html[data-theme] body:has(.lost) .nav a[aria-current='page'],
+html[data-theme] body:has(.lost) .socials-menu-trigger[aria-expanded='true'] {
+  color: #f2ebe0;
+}
+
+html[data-theme] body:has(.lost) :is(.wordmark, .nav a, .theme-toggle, .socials-menu-trigger, .lost-home):focus-visible {
+  outline-color: #f2ebe0;
+}
+
+.lost {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: calc(
+    100svh - var(--nav-height) - var(--page-pad-block) - var(--section-gap) - var(--page-pad-block)
+  );
+  padding-bottom: clamp(0.5rem, 4vh, 2.5rem);
+}
+
+.lost-scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.lost::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      78% 70% at 16% 92%,
+      rgba(4, 8, 14, 0.94),
+      rgba(4, 8, 14, 0.62) 46%,
+      transparent 72%
+    ),
+    linear-gradient(to top, rgba(4, 8, 14, 0.78) 0%, rgba(4, 8, 14, 0.28) 30%, transparent 52%);
+}
+
+.lost-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 34rem;
+  color: #fff;
+}
+
+.lost-copy .page-eyebrow {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.lost-copy h1 {
+  margin: 0 0 0.55rem;
+  font-size: clamp(1.65rem, 3vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  color: #fff;
+  text-shadow: 0 1px 16px rgba(4, 8, 14, 0.65);
+}
+
+.lost-lede {
+  margin: 0;
+  max-width: 32rem;
+  color: rgba(255, 255, 255, 0.92);
+  text-wrap: pretty;
+  text-shadow: 0 1px 12px rgba(4, 8, 14, 0.7);
+}
+
+.lost-home {
+  display: inline-block;
+  margin-top: var(--space-5);
+  color: #fff;
+}
+
+.lost-home:hover {
+  color: #fff;
+}
+
+.lost-home:focus-visible {
+  outline: 2px solid #f2ebe0;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ---------------------------------------------------------------
  * Listing pages (Writing / Projects / Mood) + post-list rows
  * ------------------------------------------------------------- */
 .post-list {
