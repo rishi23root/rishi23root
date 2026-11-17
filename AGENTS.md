@@ -18,7 +18,7 @@ Generate `README.md` from `readme.template.md` + `content/site.json` (via `confi
 | `web/src/pages/llms.txt.ts` | Generated `llms.txt` from `site.json` + posts (do not hand-edit a public copy) |
 | `web/public/og-default.png` | Default Open Graph / Twitter card image |
 | `web/public/favicon.svg` | Site favicon |
-| `web/src/components/ExcalidrawBoard.{astro,tsx}` | Read-only Excalidraw diagram (scene → SVG) for Writing posts (see **Excalidraw boards**) |
+| `web/src/components/ExcalidrawBoard.astro` | Read-only Excalidraw diagram for Writing posts. SVG is baked at dev/build; the component inlines it (see **Excalidraw boards**) |
 | `web/public/diagrams/*.json` | Excalidraw scene files the boards load |
 | `web/public/fonts/excalidraw/` | Self-hosted Excalifont + Virgil for board text |
 | `web/src/components/github/` + `web/src/lib/github.ts` | `<RepoCard>` / `<PrCard>` and GitHub link hover previews in Writing posts, from build-time API data (see **GitHub cards and link previews**) |
@@ -73,15 +73,16 @@ Keep the order. A short qualifier after a colon is fine (`## What failed: export
 
 ## Excalidraw boards
 
-Writing posts can embed Excalidraw diagrams. A board renders the scene to a static SVG in the browser (`exportToSvg`), fits it to the frame and fades it in. There's no editor canvas. A control pill (zoom out, %, zoom in, reset, expand) appears on hover or keyboard focus and stays pinned after any control is used, until the pointer has been off the board for ~1.2 s (or the modal closes). Drag pans. Expand shows the same SVG in a modal at ~70% of the viewport that closes on backdrop click, Escape or Close. Dark mode is a CSS `invert(93%) hue-rotate(180deg)` filter on the SVG, so theme switches are instant.
+Writing posts can embed Excalidraw diagrams. `astro dev` and `astro build` render each scene to SVG with `exportToSvg` before pages render, and the board inlines that SVG. There's no editor canvas, and the browser does not download `@excalidraw/excalidraw`. A control pill (zoom out, %, zoom in, reset, expand) appears on hover or keyboard focus and stays pinned after any control is used, until the pointer has been off the board for ~1.2 s (or the modal closes). Drag pans. Expand shows the same SVG in a modal at ~70% of the viewport that closes on backdrop click, Escape or Close. Dark mode is a CSS `invert(93%) hue-rotate(180deg)` filter on the SVG, so theme switches are instant.
 
 How it fits together:
 
-- **Scenes:** `web/public/diagrams/<name>.json`, served at `/diagrams/<name>.json`. A scene is a full Excalidraw document (`type`, `version`, `elements`, `appState`, `files`). A `.excalidraw` download is already this format; just rename it.
-- **Component:** `web/src/components/ExcalidrawBoard.astro` wraps `ExcalidrawBoard.tsx` with `client:visible`. The React island fetches the JSON and dynamically imports `@excalidraw/excalidraw` after mounting, so the library only downloads when a board scrolls into view, and only on posts that use one.
-- **MDX wiring:** `web/src/pages/writing/[slug].astro` passes `components={{ Callout, ExcalidrawBoard, RepoCard, PrCard }}` to `<Content />`, so posts use the tag with no import. Posts don't write `client:visible` themselves.
+- **Scenes:** `web/public/diagrams/<name>.json`. A scene is a full Excalidraw document (`type`, `version`, `elements`, `appState`, `files`). A `.excalidraw` download is already this format; just rename it. The JSON is the source; it is not fetched by the browser.
+- **Bake:** `web/scripts/bake-diagrams.mjs` calls `register('./excalidraw-loader.mjs', import.meta.url)` and only then imports `@excalidraw/excalidraw`. The loader is the classic `node:module` `register()` API (Node 20 on GitHub Pages, and Node 26 locally). It turns `.json` imports into modules and `.css` imports into empty modules. The script installs a jsdom `window` / `document` (plus `DOMParser`, `XMLSerializer`, `SVGElement`, `HTMLElement`, `navigator`) and calls `exportToSvg` with `exportBackground: false`, `exportWithDarkMode: false`, `viewBackgroundColor: 'transparent'`, `exportPadding: 16`, and `skipInliningFonts: true`. Output is `web/.generated/diagrams/<name>.svg`, gitignored. `web/scripts/excalidraw-integration.mjs` runs that bake from `astro:config:setup` on both `dev` and `build`. A scene that fails to export fails the build. No native `canvas` module. `@excalidraw/excalidraw` stays a dependency only for this Node bake. Do not use `module.registerHooks` — Node 20 does not have it.
+- **Component:** `web/src/components/ExcalidrawBoard.astro` reads the baked SVG and inlines it for `<ExcalidrawBoard src="/diagrams/<name>.json" />`. A small inline script (MDX does not hoist a processed `<script>`) does pan, zoom, the pill, and the modal. One copy of that script per page.
+- **MDX wiring:** `web/src/pages/writing/[slug].astro` passes `components={{ Callout, ExcalidrawBoard, RepoCard, PrCard }}` to `<Content />`, so posts use the tag with no import.
 - **Styles:** `.excal-board*`, `.excal-viewport`, `.excal-pill`, `.excal-modal*` in `web/src/styles/global.css`. Full article width, 500px tall (360px on mobile), transparent background, no card frame.
-- **Fonts:** the SVG is exported with `skipInliningFonts: true`; text uses the `@font-face` rules for Excalifont and Virgil in `global.css` (files in `web/public/fonts/excalidraw/`). The island waits for those fonts before fading in. Other Excalidraw fonts fall back to system fonts.
+- **Fonts:** the SVG is exported with `skipInliningFonts: true`; text uses the `@font-face` rules for Excalifont and Virgil in `global.css` (files in `web/public/fonts/excalidraw/`). Other Excalidraw fonts fall back to system fonts.
 
 Adding a board:
 
@@ -97,10 +98,10 @@ Don't:
 
 - Add object storage, remote scene URLs, `ref:` indirection or diff/patch formats. Scenes are static files in the repo.
 - Add in-browser editing, saving or a CMS for diagrams. Edits happen in Excalidraw and land by commit.
-- Use boards on home, mood or projects pages, or load the island outside Writing posts.
-- Put the only copy of essential information in a board. No-JS readers and RSS only get a placeholder, so the text must stand on its own.
+- Use boards on home, mood or projects pages, or outside Writing posts.
+- Put the only copy of essential information in a board. The SVG is in the page, so no-JS readers see the drawing. RSS does not include the board, so the text must still stand on its own.
 - Paste large screenshots into scenes; they're stored inline in the JSON as data URLs.
-- Statically import `@excalidraw/excalidraw` (or its `index.css`) in the component. The island only needs `exportToSvg`, loaded with a client-side dynamic `import()`, so SSR never resolves the package and no editor CSS ships. Keep it that way.
+- Import `@excalidraw/excalidraw` (or its CSS) from the Astro component or any client script. The package is only for the Node bake.
 - Drop `skipInliningFonts: true`. Inlining pulls a ~1.8 MB font-subsetting chunk and fetches fonts from esm.sh; the self-hosted `@font-face` rules cover it.
 
 ## GitHub cards and link previews
