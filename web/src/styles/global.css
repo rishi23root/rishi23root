@@ -1352,11 +1352,13 @@ html[data-theme='light'] .socials-menu-item {
   outline: none;
 }
 
-/* Long-form body (MDX). Spacing and type instead of rules. */
+/* Long-form body (MDX). Spacing and type instead of rules.
+   Paragraphs sit a step under the headings. The face stops at 400, so the step is color. */
 .prose {
   width: 100%;
   font-size: 1.2rem;
   line-height: 1.75;
+  color: color-mix(in srgb, var(--fg) 82%, transparent);
 }
 
 .prose :is(h2, h3, h4) {
@@ -1364,6 +1366,7 @@ html[data-theme='light'] .socials-menu-item {
   letter-spacing: -0.015em;
   line-height: 1.3;
   margin: 2rem 0 0.65rem;
+  color: var(--fg);
 }
 
 .prose h2 {
@@ -1404,6 +1407,7 @@ html[data-theme='light'] .socials-menu-item {
 
 .prose :is(strong, b) {
   font-weight: 600;
+  color: var(--fg);
 }
 
 .prose blockquote {
