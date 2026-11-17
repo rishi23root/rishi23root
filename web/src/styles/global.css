@@ -1359,7 +1359,7 @@ html[data-theme='light'] .socials-menu-item {
   font-size: 1.2rem;
   line-height: 1.75;
   font-weight: 300;
-  color: color-mix(in srgb, var(--fg) 82%, transparent);
+  color: var(--fg);
 }
 
 .prose :is(h2, h3, h4) {
