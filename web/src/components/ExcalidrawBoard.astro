@@ -1,11 +1,14 @@
 ---
 /**
- * MDX / post wrapper: hydrates the React island when scrolled into view.
- * Prefer this over importing the .tsx from content/posts (awkward relative path).
- * Passed into MDX via `components={{ ExcalidrawBoard }}` on the writing page,
- * so posts can use `<ExcalidrawBoard src="/diagrams/….json" />` with no import.
+ * Read-only Excalidraw diagram for Writing posts.
+ * The SVG is baked at dev/build time (`web/scripts/bake-diagrams.mjs`); this
+ * component only inlines it. Pan, zoom, and the expand modal are a small
+ * script below. Posts use `<ExcalidrawBoard src="/diagrams/….json" />` with
+ * no import, via the MDX component map on the writing page.
  */
-import Board from './ExcalidrawBoard.tsx'
+import { existsSync, readFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 type Props = {
   src: string
@@ -15,6 +18,249 @@ type Props = {
 }
 
 const { src, height, class: className, className: classNameAlt } = Astro.props
+
+const file = src.split(/[/\\]/).pop() ?? ''
+if (!/^[a-z0-9-]+\.json$/.test(file)) {
+  throw new Error(`ExcalidrawBoard src must be /diagrams/<name>.json, got ${JSON.stringify(src)}`)
+}
+
+const svgName = file.replace(/\.json$/, '.svg')
+// `astro build` bundles this file under `dist/`, so a URL relative to
+// `import.meta.url` no longer points at `web/.generated`. The dev and Pages
+// commands run with `web/` as the working directory.
+const svgCandidates = [
+  path.resolve(process.cwd(), '.generated', 'diagrams', svgName),
+  path.resolve(process.cwd(), 'web', '.generated', 'diagrams', svgName),
+  fileURLToPath(new URL(`../../.generated/diagrams/${svgName}`, import.meta.url)),
+]
+const svgPath = svgCandidates.find((candidate) => existsSync(candidate))
+if (!svgPath) {
+  throw new Error(`Missing baked diagram for ${src} (looked in ${svgCandidates.join(', ')})`)
+}
+const svg = readFileSync(svgPath, 'utf8')
+
+function readSvgSize(markup: string) {
+  const vb = /viewBox="([\d.\-\s]+)"/.exec(markup)?.[1]?.trim().split(/\s+/).map(Number)
+  if (vb && vb.length === 4 && vb.every((n) => Number.isFinite(n))) return { w: vb[2], h: vb[3] }
+  const w = Number(/width="([\d.]+)"/.exec(markup)?.[1] ?? 0)
+  const h = Number(/height="([\d.]+)"/.exec(markup)?.[1] ?? 0)
+  return { w, h }
+}
+
+const size = readSvgSize(svg)
+const heightCss = height == null || height === '' ? undefined : typeof height === 'number' ? `${height}px` : height
+const label = `Diagram: ${file.replace(/\.json$/, '').replace(/[-_]/g, ' ')}`
+const stageStyle = `width:${size.w}px;height:${size.h}px;transform:translate(-50%, -50%)`
+
+// MDX does not hoist a processed <script>, so the behavior ships inline.
+// One copy per page: later boards on the same render skip it. The script
+// waits for DOMContentLoaded, so it still sees every board.
+const locals = Astro.locals as { excalScript?: boolean }
+const emitScript = !locals.excalScript
+locals.excalScript = true
 ---
 
-<Board client:visible src={src} height={height} className={className ?? classNameAlt} />
+<figure
+  class:list={['excal-board', 'is-ready', className, classNameAlt]}
+  style={heightCss ? `--excal-h: ${heightCss}` : undefined}
+>
+  <div class="excal-board-frame">
+    <div class="excal-board-placeholder" aria-hidden="true"><span>Whiteboard</span></div>
+    <div class="excal-viewport" role="group" aria-label={label}>
+      <div class="excal-stage" role="img" aria-label={label} data-w={size.w} data-h={size.h} style={stageStyle} set:html={svg} />
+      <div class="excal-pill" role="toolbar" aria-label="Diagram controls">
+        <button type="button" data-excal="out" aria-label="Zoom out">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M8.5 11h5M16 16l4 4" /></svg>
+        </button>
+        <span class="excal-pill-zoom" aria-live="polite">100%</span>
+        <button type="button" data-excal="in" aria-label="Zoom in">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M8.5 11h5M11 8.5v5M16 16l4 4" /></svg>
+        </button>
+        <span class="excal-pill-sep" aria-hidden="true"></span>
+        <button type="button" data-excal="reset" aria-label="Reset view">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2.05-4.95" /><path d="M5 4.5V8h3.5" /></svg>
+        </button>
+        <span class="excal-pill-sep" aria-hidden="true"></span>
+        <button type="button" data-excal="expand" aria-label="Expand">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</figure>
+
+{emitScript && (
+<script is:inline>
+  const MIN_ZOOM = 0.1
+  const MAX_ZOOM = 4
+  const ZOOM_STEP = 1.25
+  const UNPIN_DELAY = 1200
+  const CLOSE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>'
+
+  const boards = new WeakMap()
+
+  function bindViewer(viewport, onClose) {
+    const stage = viewport.querySelector('.excal-stage')
+    if (!stage) return
+    const size = { w: Number(stage.dataset.w) || 0, h: Number(stage.dataset.h) || 0 }
+    let frame = { w: 0, h: 0 }
+    let zoom = null
+    let pan = { x: 0, y: 0 }
+    let drag = null
+    let pinned = false
+    let hovering = false
+    let hold = false
+    let unpinTimer = 0
+
+    const zoomLabel = viewport.querySelector('.excal-pill-zoom')
+    const cancelUnpin = () => window.clearTimeout(unpinTimer)
+    const fit = () =>
+      size.w && size.h && frame.w && frame.h ? Math.min(frame.w / size.w, frame.h / size.h, 1) : 1
+    const scale = () => zoom ?? fit()
+    const apply = () => {
+      const s = scale()
+      stage.style.transform = `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${s})`
+      if (zoomLabel) zoomLabel.textContent = `${Math.round(s * 100)}%`
+    }
+    const setScale = (next) => {
+      zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next))
+      apply()
+    }
+
+    const ro = new ResizeObserver(() => {
+      frame = { w: viewport.clientWidth, h: viewport.clientHeight }
+      apply()
+    })
+    ro.observe(viewport)
+
+    viewport.addEventListener('pointerenter', () => {
+      hovering = true
+      cancelUnpin()
+    })
+    viewport.addEventListener('pointerleave', () => {
+      hovering = false
+      if (pinned && !hold) scheduleUnpin()
+    })
+
+    const pill = viewport.querySelector('.excal-pill')
+    pill?.addEventListener(
+      'click',
+      () => {
+        cancelUnpin()
+        pinned = true
+        viewport.classList.add('is-pinned')
+      },
+      true,
+    )
+
+    viewport.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || (e.target instanceof Element && e.target.closest('.excal-pill'))) return
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, px: pan.x, py: pan.y }
+      viewport.setPointerCapture(e.pointerId)
+    })
+    viewport.addEventListener('pointermove', (e) => {
+      if (!drag || drag.id !== e.pointerId) return
+      pan = { x: drag.px + e.clientX - drag.x, y: drag.py + e.clientY - drag.y }
+      apply()
+    })
+    const endDrag = (e) => {
+      if (drag?.id === e.pointerId) drag = null
+    }
+    viewport.addEventListener('pointerup', endDrag)
+    viewport.addEventListener('pointercancel', endDrag)
+
+    pill?.querySelector('[data-excal="out"]')?.addEventListener('click', () => setScale(scale() / ZOOM_STEP))
+    pill?.querySelector('[data-excal="in"]')?.addEventListener('click', () => setScale(scale() * ZOOM_STEP))
+    pill?.querySelector('[data-excal="reset"]')?.addEventListener('click', () => {
+      zoom = null
+      pan = { x: 0, y: 0 }
+      apply()
+    })
+
+    const closeBtn = pill?.querySelector('[data-excal="close"]')
+    if (onClose && closeBtn) closeBtn.addEventListener('click', onClose)
+
+    function scheduleUnpin() {
+      cancelUnpin()
+      unpinTimer = window.setTimeout(() => {
+        pinned = false
+        viewport.classList.remove('is-pinned')
+      }, UNPIN_DELAY)
+    }
+
+    return {
+      setHold(next) {
+        hold = next
+        if (hold) cancelUnpin()
+        else if (pinned && !hovering) scheduleUnpin()
+      },
+      focusClose() {
+        closeBtn?.focus()
+      },
+    }
+  }
+
+  function openModal(board, source) {
+    const opener = document.activeElement
+    const label = source.getAttribute('aria-label') || 'Diagram'
+    const viewport = source.cloneNode(true)
+    viewport.classList.remove('is-pinned')
+    const expand = viewport.querySelector('[data-excal="expand"]')
+    if (expand) {
+      expand.dataset.excal = 'close'
+      expand.setAttribute('aria-label', 'Close')
+      expand.innerHTML = CLOSE_ICON
+    }
+
+    const dialog = document.createElement('div')
+    dialog.className = 'excal-modal-board'
+    dialog.setAttribute('role', 'dialog')
+    dialog.setAttribute('aria-modal', 'true')
+    dialog.setAttribute('aria-label', label)
+    dialog.append(viewport)
+
+    const modal = document.createElement('div')
+    modal.className = 'excal-modal'
+    modal.append(dialog)
+    document.body.append(modal)
+
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const api = boards.get(board)
+    api?.setHold(true)
+
+    const close = () => {
+      document.removeEventListener('keydown', onKey)
+      modal.remove()
+      document.body.style.overflow = prevOverflow
+      api?.setHold(false)
+      if (opener instanceof HTMLElement) opener.focus()
+    }
+    const onKey = (e) => {
+      if (e.key === 'Escape') close()
+    }
+    document.addEventListener('keydown', onKey)
+    modal.addEventListener('pointerdown', (e) => {
+      if (e.target === modal) close()
+    })
+
+    bindViewer(viewport, close)?.focusClose()
+  }
+
+  function initBoard(board) {
+    if (board.dataset.excalInit === '1') return
+    board.dataset.excalInit = '1'
+    const viewport = board.querySelector(':scope > .excal-board-frame > .excal-viewport')
+    if (!viewport) return
+    const api = bindViewer(viewport)
+    if (api) boards.set(board, api)
+    viewport.querySelector('[data-excal="expand"]')?.addEventListener('click', () => openModal(board, viewport))
+  }
+
+  function boot() {
+    document.querySelectorAll('.excal-board').forEach(initBoard)
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot)
+  else boot()
+</script>
+)}
