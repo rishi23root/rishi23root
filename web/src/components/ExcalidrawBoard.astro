@@ -127,11 +127,13 @@ locals.excalScript = true
       apply()
     }
 
-    const ro = new ResizeObserver(() => {
+    const measure = () => {
       frame = { w: viewport.clientWidth, h: viewport.clientHeight }
       apply()
-    })
+    }
+    const ro = new ResizeObserver(measure)
     ro.observe(viewport)
+    measure()
 
     viewport.addEventListener('pointerenter', () => {
       hovering = true
