@@ -1136,8 +1136,8 @@ html[data-theme='light'] .socials-menu-item {
 }
 
 /* ---------------------------------------------------------------
- * 404 — an inline orbit scene, no image request. Copy sits in a
- * dark pool so the words stay light on the clouds.
+ * 404 — night water, drawn in the page. The copy sits in a dark
+ * pool on the left so the words stay light.
  * ------------------------------------------------------------- */
 html[data-theme] body:has(.lost) {
   background: #061018;
@@ -1188,13 +1188,14 @@ html[data-theme] body:has(.lost) :is(.wordmark, .nav a, .theme-toggle, .socials-
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: linear-gradient(
-    to top,
-    rgba(4, 8, 14, 0.94) 0%,
-    rgba(4, 8, 14, 0.9) 24%,
-    rgba(4, 8, 14, 0.62) 42%,
-    transparent 64%
-  );
+  background:
+    radial-gradient(
+      78% 70% at 16% 92%,
+      rgba(4, 8, 14, 0.94),
+      rgba(4, 8, 14, 0.62) 46%,
+      transparent 72%
+    ),
+    linear-gradient(to top, rgba(4, 8, 14, 0.78) 0%, rgba(4, 8, 14, 0.28) 30%, transparent 52%);
 }
 
 .lost-copy {
