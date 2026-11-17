@@ -20,6 +20,7 @@ export default defineConfig({
           const { pathname } = new URL(page)
           if (pathname === '/mood' || pathname.startsWith('/mood/')) return false
           if (pathname === '/blog' || pathname.startsWith('/blog/')) return false
+          if (pathname === '/404' || pathname === '/404/' || pathname === '/404.html') return false
           return true
         } catch {
           return true
