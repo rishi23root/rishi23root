@@ -1,11 +1,19 @@
 import type { APIRoute } from 'astro'
-import { site } from '../lib/site'
+import { site, socialLinks } from '../lib/site'
 import { getPublishedPosts, isoDay, postPath } from '../lib/posts'
+
+/** Same set as the README contact row: email, website, then the chrome socials. */
+const contactLinks = [
+  { label: 'Email', href: `mailto:${site.contact.email}` },
+  { label: 'Website', href: site.contact.socials.website },
+  ...socialLinks
+    .filter((link) => link.id !== 'email')
+    .map(({ label, href }) => ({ label, href })),
+]
 
 export const GET: APIRoute = async () => {
   const posts = await getPublishedPosts()
 
-  const socials = site.contact.socials
   const blurbs: Record<string, string | undefined> = site.opensource.blurbs
   const featured = site.opensource.active
     .slice(0, 6)
@@ -27,9 +35,11 @@ export const GET: APIRoute = async () => {
     `- Stack: ${site.stackLine}`,
     `- Mottos: ${site.mottos.map((m) => `「${m}」`).join(' · ')}`,
     `- Canonical site (source of truth for syndication): ${site.siteUrl}`,
-    `- Contact: ${site.contact.email}`,
-    `- Also: ${socials.github} · ${socials.x} · ${socials.linkedin} · ${socials.pypi}`,
     featured ? `- Featured work: ${featured}` : null,
+    '',
+    '## Socials',
+    '',
+    ...contactLinks.map((link) => `- [${link.label}](${link.href})`),
     '',
     '## Key pages',
     '',
