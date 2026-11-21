@@ -113,12 +113,9 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood/' }: Props)
 
   useEffect(() => () => window.clearTimeout(timer.current), [])
 
-  // If the first still never loads, don't leave the page stuck in await.
-  useEffect(() => {
-    const fallback = window.setTimeout(() => settleMoodLayout(), 2500)
-    return () => window.clearTimeout(fallback)
-  }, [])
-
+  // The 2.5s await failsafe and <1024px listener live in index.astro's <head>
+  // so failed/blocked hydration cannot stick in mood-await; settle smoothly
+  // once the first still is ready.
   const onPlateReady = useCallback(() => {
     if (plateReady.current) return
     plateReady.current = true
