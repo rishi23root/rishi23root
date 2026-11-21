@@ -12,7 +12,7 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
   path="/mood/"
   robots="noindex, nofollow"
 >
-  <noscript>
+  <noscript slot="head">
     <style>
       .mood-index-img {
         opacity: 1;
@@ -56,16 +56,17 @@ const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
   <script is:inline>
     ;(function () {
       document.querySelectorAll('.mood-index-img').forEach(function (img) {
+        if (img.complete) {
+          img.classList.add('is-loaded')
+          return
+        }
         var show = function () {
           img.classList.add('is-loaded')
-        }
-        if (img.complete && img.naturalWidth > 0) {
-          show()
-          return
+          img.removeEventListener('load', show)
+          img.removeEventListener('error', show)
         }
         img.addEventListener('load', show, { once: true })
         img.addEventListener('error', show, { once: true })
-        if (img.complete) show()
       })
     })()
   </script>

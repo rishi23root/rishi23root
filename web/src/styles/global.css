@@ -1430,16 +1430,15 @@ html[data-theme] body:has(.lost) :is(.wordmark, .nav a, .theme-toggle, .socials-
   border-radius: var(--row-radius);
 }
 
-/* Per-image load fade on writing posts. The box is reserved via width/height
-   (and height: auto); the image starts quiet and fades in once .is-loaded
-   is set. Reduced-motion inherits the global 1ms duration. */
-.post-cover img,
+/* Per-image load fade on body images in writing posts. Cover images render
+   immediately so the LCP element is never blocked on JS. The box is reserved
+   via width/height (and height: auto); body images start quiet and fade in
+   once .is-loaded is set. Reduced-motion inherits the global 1ms duration. */
 .post-body img {
   opacity: 0;
   transition: opacity var(--dur) var(--ease-out);
 }
 
-.post-cover img.is-loaded,
 .post-body img.is-loaded {
   opacity: 1;
 }
@@ -2254,11 +2253,7 @@ html[data-theme='dark'] .excal-stage svg {
      crisp at both 1x and 2x. */
   --toc-line: 1px;
   --toc-mark: color-mix(in srgb, var(--fg) 62%, transparent);
-  /* Mark motion: 460ms spring. The cubic-bezier is the fallback;
-     browsers that understand linear() get a damped spring (~9.5% overshoot).
-     Color/opacity use --ease-out so they don't overshoot. */
   --toc-mark-dur: 460ms;
-  --toc-mark-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
   /* Tall enough for a short straight drop before the bend, so the
      ╰ stays on the same 1px centerline as the H2 spine. */
   --toc-curve-h: calc(0.28rem + 0.54rem);
@@ -2272,38 +2267,6 @@ html[data-theme='dark'] .excal-stage svg {
   --toc-sub-ease-open: var(--ease-out);
   --toc-sub-ease-close: cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-}
-
-@supports (transition-timing-function: linear(0, 1)) {
-  .post-toc {
-    --toc-mark-ease: linear(
-      0,
-      0.0522 4.2%,
-      0.1791 8.3%,
-      0.3429 12.5%,
-      0.5151 16.7%,
-      0.6759 20.8%,
-      0.8135 25.0%,
-      0.9225 29.2%,
-      1.0019 33.3%,
-      1.0540 37.5%,
-      1.0831 41.7%,
-      1.0942 45.8%,
-      1.0923 50.0%,
-      1.0821 54.2%,
-      1.0673 58.3%,
-      1.0510 62.5%,
-      1.0352 66.7%,
-      1.0214 70.8%,
-      1.0102 75.0%,
-      1.0019 79.2%,
-      0.9962 83.3%,
-      0.9928 87.5%,
-      0.9912 91.7%,
-      0.9911 95.8%,
-      1
-    );
-  }
 }
 
 /* Quiet track + traveling mark, 1:1 with the TOC box. JS fills the path. */
@@ -2332,22 +2295,6 @@ html[data-theme='dark'] .excal-stage svg {
   stroke: var(--toc-mark);
 }
 
-/* JS-drawn rail: hide the CSS strokes and in-place marks so they
-   don't double-paint. The 1px transparent H2 border stays for layout. */
-.post-toc.is-rail-svg > ul > li.toc-depth-2 > a {
-  border-left-color: transparent;
-}
-
-.post-toc.is-rail-svg .toc-sub::before,
-.post-toc.is-rail-svg .toc-sub > ul::before,
-.post-toc.is-rail-svg .toc-sub::after,
-.post-toc.is-rail-svg .toc-sub > ul > li:last-child::after,
-.post-toc.is-rail-svg .toc-sub > ul::after,
-.post-toc.is-rail-svg > ul > li.toc-depth-2 > a::before,
-.post-toc.is-rail-svg .toc-depth-3 a::before {
-  content: none;
-}
-
 .post-toc ul {
   list-style: none;
   margin: 0;
@@ -2365,40 +2312,12 @@ html[data-theme='dark'] .excal-stage svg {
   line-height: 1.35;
   color: var(--muted);
   text-decoration: none;
-  transition:
-    color var(--toc-mark-dur) var(--ease-out),
-    border-color var(--toc-mark-dur) var(--ease-out);
+  transition: color var(--toc-mark-dur) var(--ease-out);
 }
 
-/* One quiet spine: each H2 carries a segment. No full-height track,
-   so the line can curve into an open sub-list instead of running
-   past it as a second bar. */
-.post-toc > ul > li.toc-depth-2 > a {
+/* No-JS fallback quiet spine + curves (inactive once JS draws .is-rail-svg). */
+.post-toc:not(.is-rail-svg) > ul > li.toc-depth-2 > a {
   border-left-color: var(--toc-spine);
-}
-
-/* No-JS fallback mark: overlay on the quiet spine/indent so it can
-   scale and settle without moving the text or the curve joins.
-   Hidden when JS draws the traveling SVG dash (.is-rail-svg). */
-.post-toc > ul > li.toc-depth-2 > a::before,
-.post-toc .toc-depth-3 a::before {
-  content: "";
-  position: absolute;
-  left: calc(-1 * var(--toc-line));
-  top: 0;
-  bottom: 0;
-  width: var(--toc-line);
-  background: var(--toc-mark);
-  opacity: 0;
-  transform: scaleY(0.88) translateY(2px);
-  pointer-events: none;
-}
-/* H2: origin at the top so overshoot grows up, not into the opening curve. */
-.post-toc > ul > li.toc-depth-2 > a::before {
-  transform-origin: top center;
-}
-.post-toc .toc-depth-3 a::before {
-  transform-origin: center center;
 }
 
 /* H3s sit in from the H2 spine. */
@@ -2413,8 +2332,6 @@ html[data-theme='dark'] .excal-stage svg {
 }
 
 .post-toc .toc-depth-3 a {
-  /* No left border: the indent track is the ::after on .toc-sub.
-     A ::before overlay, inset by --toc-line, sits on that same stroke. */
   border-left-width: 0;
   padding-left: var(--space-3);
   font-size: 0.8rem;
@@ -2422,7 +2339,7 @@ html[data-theme='dark'] .excal-stage svg {
 
 /* Opening ╰: spine drops, then turns right. Width stops at the
    indent-side ╮ so the two 8px arcs meet on a horizontal tangent. */
-.post-toc .toc-sub::before {
+.post-toc:not(.is-rail-svg) .toc-sub::before {
   content: "";
   position: absolute;
   left: 0;
@@ -2438,7 +2355,7 @@ html[data-theme='dark'] .excal-stage svg {
 
 /* Opening ╮: the indent-side turn, same 8px radius, sitting on the
    ╰ arm and handing a downward tangent to the indent track. */
-.post-toc .toc-sub > ul::before {
+.post-toc:not(.is-rail-svg) .toc-sub > ul::before {
   content: "";
   position: absolute;
   left: calc(-1 * var(--toc-curve-r));
@@ -2453,7 +2370,7 @@ html[data-theme='dark'] .excal-stage svg {
 }
 
 /* Diverted indent track, from the ╮ down to the ╯. */
-.post-toc .toc-sub::after {
+.post-toc:not(.is-rail-svg) .toc-sub::after {
   content: "";
   position: absolute;
   z-index: -1;
@@ -2466,11 +2383,11 @@ html[data-theme='dark'] .excal-stage svg {
 }
 
 /* Closing ╯: indent-side turn back toward the spine, mirror of the ╮. */
-.post-toc .toc-sub > ul > li:last-child {
+.post-toc:not(.is-rail-svg) .toc-sub > ul > li:last-child {
   position: relative;
 }
 
-.post-toc .toc-sub > ul > li:last-child::after {
+.post-toc:not(.is-rail-svg) .toc-sub > ul > li:last-child::after {
   content: "";
   position: absolute;
   left: calc(-1 * var(--toc-curve-r));
@@ -2486,7 +2403,7 @@ html[data-theme='dark'] .excal-stage svg {
 
 /* Closing ╭: returns to the main spine and meets the next H2 flush.
    Width stops at the ╯ so the arcs join on a horizontal tangent. */
-.post-toc .toc-sub > ul::after {
+.post-toc:not(.is-rail-svg) .toc-sub > ul::after {
   content: "";
   position: absolute;
   left: calc(-1 * var(--space-4));
@@ -2500,23 +2417,6 @@ html[data-theme='dark'] .excal-stage svg {
   pointer-events: none;
 }
 
-/* Color crossfades on a smooth ease so they don't overshoot;
-   scale/translate on the H2/H3 mark uses the spring. Bends are
-   color-only — transforming them would open gaps in the joins. */
-.post-toc > ul > li.toc-depth-2 > a::before,
-.post-toc .toc-depth-3 a::before {
-  transition:
-    opacity var(--toc-mark-dur) var(--ease-out),
-    background-color var(--toc-mark-dur) var(--ease-out),
-    transform var(--toc-mark-dur) var(--toc-mark-ease);
-}
-
-.post-toc .toc-sub::before,
-.post-toc .toc-sub > ul::before,
-.post-toc .toc-sub > ul > li:last-child::after {
-  transition: border-color var(--toc-mark-dur) var(--ease-out);
-}
-
 .post-toc a:hover {
   color: var(--fg);
 }
@@ -2524,7 +2424,7 @@ html[data-theme='dark'] .excal-stage svg {
 /* Subheadings show only under the section being read. Grid 0fr -> 1fr
    animates to the list's real height; visibility flips after the close
    so collapsed links leave the tab order and accessibility tree.
-   Close is slightly slower than open. A short JS delay (see [slug].astro)
+   Close is slightly slower than open. A short JS delay (see post-page.ts)
    holds the open list so a quick scroll-through doesn't flicker. */
 .post-toc.is-collapsible .toc-sub {
   display: grid;
@@ -2553,9 +2453,6 @@ html[data-theme='dark'] .excal-stage svg {
 }
 
 .post-toc .toc-sub > ul {
-  /* min-height 0 lets the 0fr grid row shrink. Overflow is clipped by
-     .toc-sub so an H3's active overlay can sit in the indent, on
-     the track, without being cut off. */
   min-height: 0;
   position: relative;
 }
@@ -2564,39 +2461,6 @@ html[data-theme='dark'] .excal-stage svg {
   z-index: 1;
   color: var(--fg);
   font-weight: 600;
-}
-
-/* H2/H3 active mark: fade in and spring-settle onto the track.
-   The quiet spine/indent stays put; only the overlay moves. */
-.post-toc > ul > li.toc-depth-2 > a[aria-current]::before,
-.post-toc .toc-depth-3 a[aria-current]::before {
-  opacity: 1;
-  transform: scaleY(1) translateY(0);
-}
-
-/* First H3 mark starts below the ╮; last H3 mark stops above the ╯
-   so a square overlay doesn't cut across those curves. Origins are
-   set so spring overshoot grows away from the nearest bend. */
-.post-toc .toc-sub > ul > li:first-child > a::before {
-  top: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
-  transform-origin: top center;
-}
-
-.post-toc .toc-sub > ul > li:last-child > a::before {
-  bottom: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
-  transform-origin: bottom center;
-}
-
-/* First H3 current: the opening ╰╮ is that item's segment. */
-.post-toc .toc-sub:has(> ul > li:first-child > a[aria-current])::before,
-.post-toc .toc-sub:has(> ul > li:first-child > a[aria-current]) > ul::before {
-  border-color: var(--toc-mark);
-}
-
-/* Last H3 current: the closing ╯ is that item's segment; the ╭
-   return to the next H2 spine stays quiet. */
-.post-toc .toc-sub:has(> ul > li:last-child > a[aria-current]) > ul > li:last-child::after {
-  border-color: var(--toc-mark);
 }
 
 /* Default: horizontal bar (mobile + desktop without a TOC rail).
@@ -3161,14 +3025,5 @@ html.kbar-open {
   .post-toc.is-collapsible .toc-sub,
   .post-toc.is-collapsible .toc-sub.is-open {
     transition: none !important;
-  }
-
-  .post-toc > ul > li.toc-depth-2 > a::before,
-  .post-toc .toc-depth-3 a::before,
-  .post-toc .toc-sub::before,
-  .post-toc .toc-sub > ul::before,
-  .post-toc .toc-sub > ul > li:last-child::after {
-    transition: none;
-    transform: none;
   }
 }
