@@ -10,7 +10,8 @@
   },
   "ts-node": {
     "moduleTypes": {
-      "web/src/lib/site.ts": "cjs"
+      "web/src/lib/site.ts": "cjs",
+      "web/src/components/command-palette/palette.ts": "cjs"
     }
   },
   "include": ["*.ts"],
