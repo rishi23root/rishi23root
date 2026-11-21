@@ -27,7 +27,6 @@ const posts = await getPublishedPosts()
                   items={[
                     { text: formatPostDate(post.data.date), datetime: post.data.date.toISOString() },
                     { text: `${readingTimeMinutes(post)} min read` },
-                    post.data.draft && { text: 'Draft', class: 'post-draft' },
                   ]}
                 />
               </div>

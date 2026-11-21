@@ -9,9 +9,15 @@ import {
   likedMarkdown,
   type GHItem,
 } from './index'
-import { listPosts, parseFrontmatter, renderRecentPosts } from './posts'
+import {
+  escapeMdTitle,
+  listPosts,
+  parseFrontmatter,
+  renderRecentPosts,
+} from './posts'
 import { renderToolbox } from './toolbox'
 import {
+  absoluteUrl,
   getFeaturedProjects,
   getOrderedProjects,
   getProjectTags,
@@ -68,15 +74,21 @@ async function main() {
   // 3. index.ts retry-axios on githubReq + 404 fallback via Promise.allSettled
   const origAdapter = githubReq.defaults.adapter
   const origRaxConfig = { ...githubReq.defaults.raxConfig }
+  const origWarn = console.warn
+  const warnings: string[] = []
   let retryCalls = 0
+  let networkRetryCalls = 0
+  let exhaustCalls = 0
   try {
+    console.warn = (...args: unknown[]) => {
+      warnings.push(args.map(String).join(' '))
+    }
     assert.strictEqual(githubReq.defaults.raxConfig?.retry, 5)
     githubReq.defaults.raxConfig = {
       ...origRaxConfig,
       retry: 2,
       retryDelay: 1,
       backoffType: 'static',
-      onRetryAttempt: async () => {},
     }
     githubReq.defaults.adapter = async (cfg) => {
       if (cfg.url === '/retry-test') {
@@ -90,6 +102,27 @@ async function main() {
           throw err
         }
         return { data: { ok: true }, status: 200, statusText: 'OK', headers: {}, config: cfg }
+      }
+      if (cfg.url === '/network-retry-test') {
+        networkRetryCalls++
+        if (networkRetryCalls === 1) {
+          const err = Object.assign(new Error('Connection reset'), {
+            isAxiosError: true,
+            config: cfg,
+            code: 'ECONNRESET',
+          })
+          throw err
+        }
+        return { data: { ok: true }, status: 200, statusText: 'OK', headers: {}, config: cfg }
+      }
+      if (cfg.url === '/exhaust-test') {
+        exhaustCalls++
+        const err = Object.assign(new Error('Server Error'), {
+          isAxiosError: true,
+          config: cfg,
+          response: { status: 500, statusText: 'ERR', headers: {}, config: cfg, data: {} },
+        })
+        throw err
       }
       if (cfg.url === '/repos/missing/repo') {
         const err = Object.assign(new Error('Not Found'), {
@@ -113,15 +146,29 @@ async function main() {
       }
     }
 
+    warnings.length = 0
     await githubReq.get('/retry-test')
     assert.strictEqual(retryCalls, 2)
+    assert.ok(
+      warnings.some((w) => w.includes('#1') && w.includes('/retry-test')),
+      `Expected retry warning with #1 and /retry-test, got: ${JSON.stringify(warnings)}`,
+    )
 
-    const origWarn = console.warn
-    console.warn = () => {}
+    warnings.length = 0
+    await githubReq.get('/network-retry-test')
+    assert.strictEqual(networkRetryCalls, 2)
+    assert.ok(
+      warnings.some((w) => w.includes('ECONNRESET')),
+      `Expected network retry warning mentioning ECONNRESET, got: ${JSON.stringify(warnings)}`,
+    )
+
+    warnings.length = 0
+    await assert.rejects(() => githubReq.get('/exhaust-test'))
+    assert.strictEqual(exhaustCalls, 3)
+
     const fetched = await fetchFeaturedRepos(['ok/repo', 'missing/repo'], {
       'missing/repo': 'Fallback blurb',
     })
-    console.warn = origWarn
     assert.strictEqual(fetched.length, 2)
     assert.strictEqual(fetched[0].stargazers_count, 10)
     assert.deepStrictEqual(fetched[1], {
@@ -130,6 +177,7 @@ async function main() {
       description: 'Fallback blurb',
     })
   } finally {
+    console.warn = origWarn
     githubReq.defaults.adapter = origAdapter
     githubReq.defaults.raxConfig = origRaxConfig
   }
@@ -164,6 +212,26 @@ async function main() {
 
   const fm3 = parseFrontmatter('---\ndraft: False # comment\n---\n')
   assert.strictEqual(fm3.draft, false)
+
+  const fmBlockFolded = parseFrontmatter(
+    '---\ntitle: >-\n  Wrapped\n  title\n---\n',
+  )
+  assert.strictEqual(fmBlockFolded.title, 'Wrapped title')
+
+  const fmBlockLiteral = parseFrontmatter(
+    '---\nsummary: |\n  Line 1\n  Line 2\n---\n',
+  )
+  assert.strictEqual(fmBlockLiteral.summary, 'Line 1\nLine 2\n')
+
+  const fmBlockLiteralStrip = parseFrontmatter(
+    '---\nsummary: |-\n  Line 1\n  Line 2\n---\n',
+  )
+  assert.strictEqual(fmBlockLiteralStrip.summary, 'Line 1\nLine 2')
+
+  assert.strictEqual(
+    escapeMdTitle('Using <ExcalidrawBoard> for [draft] foo_bar *bold*'),
+    'Using \\<ExcalidrawBoard\\> for \\[draft\\] foo\\_bar \\*bold\\*',
+  )
 
   const published = await listPosts()
   assert.ok(published.length >= 2)
@@ -223,6 +291,16 @@ async function main() {
     { tag: 'beta', count: 1 },
     { tag: 'zeta', count: 1 },
   ])
+
+  assert.strictEqual(absoluteUrl('/writing'), 'https://rishi23root.in/writing/')
+  assert.strictEqual(
+    absoluteUrl('/og-default.png'),
+    'https://rishi23root.in/og-default.png',
+  )
+  assert.strictEqual(
+    absoluteUrl('https://images.unsplash.com/photo-123?w=1200'),
+    'https://images.unsplash.com/photo-123?w=1200',
+  )
 
   // 8. socialLinks single source of truth + kbar @ filter
   assert.deepStrictEqual(
