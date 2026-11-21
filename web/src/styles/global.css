@@ -555,10 +555,12 @@ html[data-theme='light'] .theme-icon-moon {
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     column-gap: var(--home-gap);
     align-items: start;
-    /* Width of the settled columns (2fr mood / 3fr text), from the split. */
+    /* Width of the settled columns (2fr mood / 3fr text), from the split,
+       plus --home-await-w matching inner pages' centered --post-group measure. */
     container-type: inline-size;
     --home-mood-col: calc((100cqi - var(--home-gap)) * 2 / 5);
     --home-col: calc((100cqi - var(--home-gap)) * 3 / 5);
+    --home-await-w: min(100cqi, var(--post-group));
   }
 
   .home-mood {
@@ -583,7 +585,7 @@ html[data-theme='light'] .theme-icon-moon {
     flex-direction: column;
     align-items: stretch;
     /* Plate + caption share this width; height fits the sticky column. */
-    width: min(100%, calc((100svh - 2 * var(--page-pad-block) - var(--mood-caption-space)) * 9 / 16));
+    width: min(100%, var(--home-mood-col), calc((100svh - 2 * var(--page-pad-block) - var(--mood-caption-space)) * 9 / 16));
   }
 
   .home-mood .hero-shell-stage {
@@ -599,17 +601,22 @@ html[data-theme='light'] .theme-icon-moon {
     justify-content: flex-start;
   }
 
-  /* Bio + stack blurbs stay on the settled text track so lines don't
-     re-wrap when await → split. Below 1024px bio is uncapped (full track). */
+  /* Bio + stack blurbs + writing links stay on the settled text track so
+     lines don't re-wrap when await → split. Below 1024px bio is uncapped. */
   .voice-bio,
   .home-stack-list li > * {
     max-width: var(--home-col);
   }
 
-  /* Before the mood still is ready: text+nav sit centered at the settled
-     text track (--home-col) so await → split only translates on the
-     compositor with zero width animation or text reflow. Mood sits behind
-     at its settled track width (--home-mood-col) so it stays fully covered. */
+  .home-writing-list a {
+    max-width: calc(var(--home-col) - 7rem);
+  }
+
+  /* Before the mood still is ready: text+nav sit centered at --post-group
+     so returning from /writing or /projects keeps site-chrome in place.
+     Mood sits centered inside the left --home-col sub-band behind text so
+     it stays fully covered at t=0; settleMood.ts glides text + trailing
+     right-aligned items on the compositor with zero width animation. */
   html.mood-await .home-split {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -617,7 +624,7 @@ html[data-theme='light'] .theme-icon-moon {
   html.mood-await .home-text {
     grid-column: 1;
     grid-row: 1;
-    width: var(--home-col);
+    width: var(--home-await-w);
     margin-inline: auto;
     z-index: 2;
     position: relative;
@@ -627,7 +634,8 @@ html[data-theme='light'] .theme-icon-moon {
   html.mood-await .home-mood {
     grid-column: 1;
     grid-row: 1;
-    width: var(--home-mood-col);
+    width: var(--home-await-w);
+    padding-right: max(0px, calc(var(--home-await-w) - var(--home-col)));
     margin-inline: auto;
     z-index: 1;
     pointer-events: none;

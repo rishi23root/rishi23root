@@ -3,11 +3,12 @@ import { DESKTOP_MQ } from '../components/moods/media'
 /**
  * Settles the homepage from the centered "await" layout into the split.
  *
- * Mood emerges from behind the text (compositor-only FLIP). Because await and
- * settled share the same column widths (--home-col / --home-mood-col), neither
- * element animates width or triggers layout/reflow during the slide. Text eases
- * to the right track first; the plate follows a beat later at slightly lower
- * opacity so a clear gap opens — no flush edge, no vertical offset, no bounce.
+ * `mood-await` matches inner pages' `--post-group` width so coming back from
+ * `/writing`, `/projects`, or `/mood` keeps `site-chrome` and the centered
+ * measure seamless. `slide()` moves `.home-text` (`translate`), the mood plate,
+ * and trailing right-aligned elements (`.chrome-end`, `.home-section-more`,
+ * `.home-writing-list time` via `translateX`) purely on the compositor with zero
+ * `width` animation or text reflow.
  */
 
 /** Fallback for --mood-settle / --ease-settle in global.css; keep in sync. */
@@ -98,25 +99,35 @@ function slide(text: HTMLElement, plate: HTMLElement): Promise<unknown> {
     textTiming,
   )
 
+  const anims: Animation[] = [plateAnim, textAnim]
+  const widthDelta = firstText.width - lastText.width
+  if (Math.abs(widthDelta) > 0.5) {
+    text
+      .querySelectorAll<HTMLElement>('.chrome-end, .home-section-more, .home-writing-list time')
+      .forEach((el) => {
+        anims.push(
+          el.animate([{ transform: `translateX(${widthDelta}px)` }, { transform: 'none' }], textTiming),
+        )
+      })
+  }
+
   // If the viewport drops below desktop mid-slide, abort immediately so
   // mobile layout is never held offset by a desktop transform.
   const mq = window.matchMedia(DESKTOP_MQ)
   const onMqChange = () => {
     if (!mq.matches) {
-      textAnim.cancel()
-      plateAnim.cancel()
+      anims.forEach((a) => a.cancel())
     }
   }
   mq.addEventListener('change', onMqChange)
 
-  return Promise.all([plateAnim.finished, textAnim.finished])
+  return Promise.all(anims.map((a) => a.finished))
     .catch(() => undefined)
     .finally(() => {
       mq.removeEventListener('change', onMqChange)
       html.classList.remove('mood-settling')
       // Drop fill:both so resting layout owns transform/opacity cleanly.
-      textAnim.cancel()
-      plateAnim.cancel()
+      anims.forEach((a) => a.cancel())
     })
 }
 
