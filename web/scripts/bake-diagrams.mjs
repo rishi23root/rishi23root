@@ -1,16 +1,16 @@
 /**
- * Render every `web/public/diagrams/*.json` scene to SVG with Excalidraw's
+ * Render every `web/diagrams/*.json` scene to SVG with Excalidraw's
  * `exportToSvg`. The register() call has to happen before the package import:
  * a static import would run first and die on the JSON/CSS loads.
  */
 import { register } from 'node:module'
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { JSDOM } from 'jsdom'
 
 const webRoot = fileURLToPath(new URL('..', import.meta.url))
-const diagramsDir = path.join(webRoot, 'public', 'diagrams')
+const diagramsDir = path.join(webRoot, 'diagrams')
 const outDir = path.join(webRoot, '.generated', 'diagrams')
 
 await register('./excalidraw-loader.mjs', import.meta.url)
@@ -124,7 +124,17 @@ const { exportToSvg } = await import('@excalidraw/excalidraw')
 
 mkdirSync(outDir, { recursive: true })
 
-const scenes = readdirSync(diagramsDir).filter((name) => name.endsWith('.json'))
+const scenes = existsSync(diagramsDir)
+  ? readdirSync(diagramsDir).filter((name) => name.endsWith('.json'))
+  : []
+const expectedSvgs = new Set(scenes.map((name) => name.replace(/\.json$/, '.svg')))
+
+for (const existing of readdirSync(outDir)) {
+  if (existing.endsWith('.svg') && !expectedSvgs.has(existing)) {
+    unlinkSync(path.join(outDir, existing))
+    console.log(`removed stale ${existing}`)
+  }
+}
 
 for (const name of scenes) {
   const scenePath = path.join(diagramsDir, name)
