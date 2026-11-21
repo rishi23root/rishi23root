@@ -7,6 +7,9 @@ import GithubCardBody from './GithubCardBody.astro'
 type Props = { owner: string; repo: string; number: number | string }
 const { owner, repo } = Astro.props
 const number = Number(Astro.props.number)
+if (!Number.isInteger(number) || number <= 0) {
+  throw new Error(`<PrCard> requires a positive integer number, got ${JSON.stringify(Astro.props.number)}`)
+}
 const ref: GithubRef = { kind: 'pr', owner, repo, number }
 const data = await getPr(owner, repo, number)
 ---

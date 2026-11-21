@@ -13,125 +13,132 @@ type Props = { refs: GithubRef[] }
 const previews = Object.entries(await getLinkPreviews(Astro.props.refs))
 ---
 
-<div class="gh-previews" hidden>
-  {
-    previews.map(([key, data]) => (
-      <template data-gh-preview={key}>
-        <div class="gh-card">
-          <GithubCardBody data={data} fallback={data} />
-          <p class="gh-card-foot">github.com · {data.kind === 'pr' ? 'pr' : 'repo'}</p>
-        </div>
-      </template>
-    ))
-  }
-</div>
+{
+  previews.length > 0 && (
+    <>
+      <div class="gh-previews" hidden>
+        {previews.map(([key, data]) => (
+          <template data-gh-preview={key}>
+            <a class="gh-card" href={data.url} tabindex="-1">
+              <GithubCardBody data={data} fallback={data} />
+              <p class="gh-card-foot">github.com · {data.kind === 'pr' ? 'pr' : 'repo'}</p>
+            </a>
+          </template>
+        ))}
+      </div>
 
-<script>
-  import { parseGithubUrl, refKey } from '../../lib/githubRefs'
+      <script>
+        import { parseGithubUrl, refKey } from '../../lib/githubRefs'
 
-  const SHOW_DELAY = 280
-  const HIDE_DELAY = 160
-  const GAP = 8
-  const EDGE = 12
+        const SHOW_DELAY = 280
+        const HIDE_DELAY = 160
+        const GAP = 8
+        const EDGE = 12
 
-  const templates = new Map<string, HTMLTemplateElement>()
-  document.querySelectorAll<HTMLTemplateElement>('template[data-gh-preview]').forEach((t) => {
-    if (t.dataset.ghPreview) templates.set(t.dataset.ghPreview, t)
-  })
-  if (templates.size) initPreviews()
+        const templates = new Map<string, HTMLTemplateElement>()
+        document.querySelectorAll<HTMLTemplateElement>('template[data-gh-preview]').forEach((t) => {
+          if (t.dataset.ghPreview) templates.set(t.dataset.ghPreview, t)
+        })
+        if (templates.size) initPreviews()
 
-  function initPreviews() {
-    const pop = document.createElement('div')
-    pop.className = 'gh-pop'
-    pop.id = 'gh-pop'
-    pop.setAttribute('role', 'tooltip')
-    document.body.append(pop)
+        function initPreviews() {
+          const pop = document.createElement('div')
+          pop.className = 'gh-pop'
+          pop.id = 'gh-pop'
+          pop.setAttribute('role', 'tooltip')
+          document.body.append(pop)
 
-    let current: HTMLAnchorElement | null = null
-    let anchorY = 0
-    let showTimer = 0
-    let hideTimer = 0
+          let current: HTMLAnchorElement | null = null
+          let lineIndex = 0
+          let showTimer = 0
+          let hideTimer = 0
 
-    const hide = () => {
-      clearTimeout(showTimer)
-      clearTimeout(hideTimer)
-      pop.classList.remove('is-open')
-      current?.removeAttribute('aria-describedby')
-      current = null
-    }
+          const hide = () => {
+            clearTimeout(showTimer)
+            clearTimeout(hideTimer)
+            pop.classList.remove('is-open')
+            current?.removeAttribute('aria-describedby')
+            current = null
+          }
 
-    // Fixed positioning, under the hovered line of the link; flips above near the bottom edge.
-    const place = () => {
-      if (!current) return false
-      const bounds = current.getBoundingClientRect()
-      if (bounds.bottom < 0 || bounds.top > innerHeight || bounds.right < 0 || bounds.left > innerWidth) {
-        hide()
-        return false
-      }
-      const rects = [...current.getClientRects()]
-      const rect = rects.find((r) => anchorY >= r.top && anchorY <= r.bottom) ?? rects[0] ?? bounds
-      const w = pop.offsetWidth
-      const h = pop.offsetHeight
-      let top = rect.bottom + GAP
-      if (top + h > innerHeight - EDGE && rect.top - GAP - h > EDGE) top = rect.top - GAP - h
-      const left = Math.max(EDGE, Math.min(rect.left, innerWidth - w - EDGE))
-      pop.style.top = `${Math.round(top)}px`
-      pop.style.left = `${Math.round(left)}px`
-      return true
-    }
+          // Fixed positioning, under the hovered line of the link; flips above near the bottom edge.
+          const place = () => {
+            if (!current) return false
+            const bounds = current.getBoundingClientRect()
+            if (bounds.bottom < 0 || bounds.top > innerHeight || bounds.right < 0 || bounds.left > innerWidth) {
+              hide()
+              return false
+            }
+            const rects = [...current.getClientRects()]
+            const rect = rects[lineIndex] ?? rects[0] ?? bounds
+            const w = pop.offsetWidth
+            const h = pop.offsetHeight
+            let top = rect.bottom + GAP
+            if (top + h > innerHeight - EDGE && rect.top - GAP - h > EDGE) top = rect.top - GAP - h
+            const left = Math.max(EDGE, Math.min(rect.left, innerWidth - w - EDGE))
+            pop.style.top = `${Math.round(top)}px`
+            pop.style.left = `${Math.round(left)}px`
+            return true
+          }
 
-    const show = (link: HTMLAnchorElement, key: string) => {
-      clearTimeout(showTimer)
-      clearTimeout(hideTimer)
-      if (current === link) return
-      const tpl = templates.get(key)
-      if (!tpl) return
-      current?.removeAttribute('aria-describedby')
-      pop.replaceChildren(tpl.content.cloneNode(true))
-      current = link
-      link.setAttribute('aria-describedby', pop.id)
-      if (place()) pop.classList.add('is-open')
-    }
+          const show = (link: HTMLAnchorElement, key: string) => {
+            clearTimeout(showTimer)
+            clearTimeout(hideTimer)
+            if (current === link) return
+            const tpl = templates.get(key)
+            if (!tpl) return
+            current?.removeAttribute('aria-describedby')
+            pop.replaceChildren(tpl.content.cloneNode(true))
+            pop.querySelector<HTMLAnchorElement>('a.gh-card')?.setAttribute('href', link.href)
+            current = link
+            link.setAttribute('aria-describedby', pop.id)
+            if (place()) pop.classList.add('is-open')
+          }
 
-    const scheduleHide = () => {
-      clearTimeout(showTimer)
-      clearTimeout(hideTimer)
-      hideTimer = window.setTimeout(hide, HIDE_DELAY)
-    }
+          const scheduleHide = () => {
+            clearTimeout(showTimer)
+            clearTimeout(hideTimer)
+            hideTimer = window.setTimeout(hide, HIDE_DELAY)
+          }
 
-    document.querySelectorAll<HTMLAnchorElement>('.post-body a[href*="github.com/"]').forEach((link) => {
-      if (link.closest('.gh-card')) return
-      const ref = parseGithubUrl(link.href)
-      if (!ref) return
-      const key = refKey(ref)
-      if (!templates.has(key)) return
-      link.addEventListener('pointerenter', (e) => {
-        if (e.pointerType !== 'mouse') return
-        anchorY = e.clientY
-        clearTimeout(hideTimer)
-        clearTimeout(showTimer)
-        showTimer = window.setTimeout(() => show(link, key), current ? 0 : SHOW_DELAY)
-      })
-      link.addEventListener('pointerleave', scheduleHide)
-      link.addEventListener('focus', () => {
-        if (!link.matches(':focus-visible')) return
-        anchorY = link.getBoundingClientRect().top + 1
-        show(link, key)
-      })
-      link.addEventListener('blur', hide)
-    })
+          document.querySelectorAll<HTMLAnchorElement>('.post-body a[href*="github.com/"]').forEach((link) => {
+            if (link.closest('.gh-card')) return
+            const ref = parseGithubUrl(link.href)
+            if (!ref) return
+            const key = refKey(ref)
+            if (!templates.has(key)) return
+            link.addEventListener('pointerenter', (e) => {
+              if (e.pointerType !== 'mouse') return
+              const rects = [...link.getClientRects()]
+              lineIndex = Math.max(0, rects.findIndex((r) => e.clientY >= r.top && e.clientY <= r.bottom))
+              clearTimeout(hideTimer)
+              clearTimeout(showTimer)
+              showTimer = window.setTimeout(() => show(link, key), current ? 0 : SHOW_DELAY)
+            })
+            link.addEventListener('pointerleave', scheduleHide)
+            link.addEventListener('focus', () => {
+              if (!link.matches(':focus-visible')) return
+              lineIndex = 0
+              show(link, key)
+            })
+            link.addEventListener('blur', hide)
+          })
 
-    pop.addEventListener('pointerenter', () => clearTimeout(hideTimer))
-    pop.addEventListener('pointerleave', scheduleHide)
-    pop.addEventListener('click', () => current?.click())
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && current) hide()
-    })
-    addEventListener('scroll', () => current && place(), { passive: true })
-    let width = innerWidth
-    addEventListener('resize', () => {
-      if (innerWidth !== width) hide()
-      width = innerWidth
-    })
-  }
-</script>
+          pop.addEventListener('pointerenter', () => clearTimeout(hideTimer))
+          pop.addEventListener('pointerdown', () => clearTimeout(hideTimer))
+          pop.addEventListener('mousedown', (e) => e.preventDefault())
+          pop.addEventListener('pointerleave', scheduleHide)
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && current) hide()
+          })
+          addEventListener('scroll', () => current && place(), { passive: true })
+          let width = innerWidth
+          addEventListener('resize', () => {
+            if (innerWidth !== width) hide()
+            width = innerWidth
+          })
+        }
+      </script>
+    </>
+  )
+}

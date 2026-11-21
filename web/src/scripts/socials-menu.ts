@@ -1,4 +1,4 @@
-function initSocialsMenu(root: HTMLElement) {
+export function initSocialsMenu(root: HTMLElement) {
   if (root.dataset.socialsInit === '1') return
   const triggerEl = root.querySelector<HTMLButtonElement>('.socials-menu-trigger')
   const panelEl = root.querySelector<HTMLElement>('.socials-menu-panel')
@@ -9,9 +9,6 @@ function initSocialsMenu(root: HTMLElement) {
 
   let animTimer = 0
   let leaveTimer = 0
-  let openRaf1 = 0
-  let openRaf2 = 0
-  let scrollRaf = 0
   let pinned = false
   let reduceMotion = false
   let hoverCapable = false
@@ -37,33 +34,6 @@ function initSocialsMenu(root: HTMLElement) {
     trigger.toggleAttribute('data-pinned', pinned)
   }
 
-  function isTriggerVisible(rect: DOMRect): boolean {
-    return (
-      rect.bottom > 0 &&
-      rect.top < window.innerHeight &&
-      rect.right > 0 &&
-      rect.left < window.innerWidth
-    )
-  }
-
-  // Fixed + body portal escapes chrome view-transition stacking so the
-  // opaque panel paints above the sticky writing TOC rail.
-  function placePanel(rect = trigger.getBoundingClientRect()) {
-    panel.style.position = 'fixed'
-    panel.style.top = `${Math.round(rect.bottom + 6)}px`
-    panel.style.right = `${Math.round(window.innerWidth - rect.right)}px`
-    panel.style.left = 'auto'
-    panel.style.bottom = 'auto'
-  }
-
-  function clearPlace() {
-    panel.style.position = ''
-    panel.style.top = ''
-    panel.style.right = ''
-    panel.style.left = ''
-    panel.style.bottom = ''
-  }
-
   function cancelLeave() {
     if (leaveTimer) {
       window.clearTimeout(leaveTimer)
@@ -78,102 +48,34 @@ function initSocialsMenu(root: HTMLElement) {
     }
   }
 
-  function cancelOpenRaf() {
-    if (openRaf1) {
-      window.cancelAnimationFrame(openRaf1)
-      openRaf1 = 0
-    }
-    if (openRaf2) {
-      window.cancelAnimationFrame(openRaf2)
-      openRaf2 = 0
-    }
+  function menuItems(): HTMLElement[] {
+    return Array.from(panel.querySelectorAll<HTMLElement>('[role="menuitem"]'))
   }
 
-  function cancelScrollRaf() {
-    if (scrollRaf) {
-      window.cancelAnimationFrame(scrollRaf)
-      scrollRaf = 0
-    }
-  }
-
-  function syncPosition() {
-    if (!isOpen()) return
-    const rect = trigger.getBoundingClientRect()
-    if (!isTriggerVisible(rect)) {
-      close(false)
-      return
-    }
-    placePanel(rect)
-  }
-
-  function onScrollOrResize() {
-    if (!isOpen() || scrollRaf) return
-    scrollRaf = window.requestAnimationFrame(() => {
-      scrollRaf = 0
-      syncPosition()
-    })
-  }
-
-  function attachPositionListeners() {
-    window.addEventListener('scroll', onScrollOrResize, { passive: true, capture: true })
-    window.addEventListener('resize', onScrollOrResize, { passive: true })
-  }
-
-  function detachPositionListeners() {
-    window.removeEventListener('scroll', onScrollOrResize, true)
-    window.removeEventListener('resize', onScrollOrResize)
-    cancelScrollRaf()
-  }
-
-  function open(opts: { pin?: boolean; focus?: boolean } = {}) {
+  function open(opts: { pin?: boolean; focus?: 'first' | 'last' | false } = {}) {
     cancelLeave()
     cancelAnim()
     if (opts.pin) setPinned(true)
-    if (isOpen()) {
-      placePanel()
-      return
+    if (!isOpen()) {
+      panel.hidden = false
+      panel.inert = false
+      // Force layout before adding .is-open so opacity/transform transitions play cleanly.
+      void panel.offsetWidth
+      panel.classList.add('is-open')
+      trigger.setAttribute('aria-expanded', 'true')
     }
-    cancelOpenRaf()
-    document.body.appendChild(panel)
-    panel.hidden = false
-    panel.inert = false
-    placePanel()
-    trigger.setAttribute('aria-expanded', 'true')
-    attachPositionListeners()
-    openRaf1 = window.requestAnimationFrame(() => {
-      openRaf1 = 0
-      openRaf2 = window.requestAnimationFrame(() => {
-        openRaf2 = 0
-        if (!isOpen()) return
-        panel.classList.add('is-open')
-        if (opts.focus) {
-          const first = panel.querySelector<HTMLElement>('[role="menuitem"]')
-          first?.focus()
-        }
-      })
-    })
+    if (opts.focus === 'last') menuItems().at(-1)?.focus()
+    else if (opts.focus === 'first') menuItems()[0]?.focus()
   }
 
-  function finishClose(restoreFocus = true) {
-    cancelLeave()
-    cancelAnim()
-    cancelOpenRaf()
-    detachPositionListeners()
-    panel.classList.remove('is-open')
+  function hidePanel() {
     panel.hidden = true
     panel.inert = false
-    clearPlace()
-    if (panel.parentNode !== root) root.appendChild(panel)
-    trigger.setAttribute('aria-expanded', 'false')
-    setPinned(false)
-    if (restoreFocus) trigger.focus()
   }
 
-  function close(restoreFocus = true) {
+  function close(restoreFocus = false) {
     cancelLeave()
     cancelAnim()
-    cancelOpenRaf()
-    detachPositionListeners()
     if (!isOpen()) {
       setPinned(false)
       return
@@ -184,22 +86,19 @@ function initSocialsMenu(root: HTMLElement) {
     setPinned(false)
     if (restoreFocus) trigger.focus()
     if (reduceMotion) {
-      finishClose(false)
+      hidePanel()
       return
     }
     animTimer = window.setTimeout(() => {
       animTimer = 0
-      panel.hidden = true
-      panel.inert = false
-      clearPlace()
-      if (panel.parentNode !== root) root.appendChild(panel)
+      hidePanel()
     }, 180)
   }
 
   function scheduleHoverClose() {
     if (pinned) return
     cancelLeave()
-    // Bridge the 6px gap between trigger and portaled panel.
+    // Bridge the 0.45rem gap between trigger and dropdown panel.
     leaveTimer = window.setTimeout(() => {
       leaveTimer = 0
       if (!pinned) close(false)
@@ -218,28 +117,33 @@ function initSocialsMenu(root: HTMLElement) {
       setPinned(true)
       return
     }
-    open({ pin: true, focus: true })
+    open({ pin: true, focus: 'first' })
   })
 
   trigger.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab' && isOpen()) {
-      finishClose(false)
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      open({ pin: true, focus: 'first' })
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      open({ pin: true, focus: 'last' })
     }
   })
 
+  root.addEventListener('focusout', (e) => {
+    if (!isOpen()) return
+    if (!(e.relatedTarget instanceof Node) || root.contains(e.relatedTarget)) return
+    close(false)
+  })
+
   if (hoverCapable) {
-    trigger.addEventListener('mouseenter', () => {
-      open({ focus: false })
-    })
-    trigger.addEventListener('mouseleave', scheduleHoverClose)
-    panel.addEventListener('mouseenter', cancelLeave)
-    panel.addEventListener('mouseleave', scheduleHoverClose)
+    root.addEventListener('mouseenter', () => open())
+    root.addEventListener('mouseleave', scheduleHoverClose)
   }
 
   document.addEventListener('click', (e) => {
     if (!isOpen()) return
-    const target = e.target
-    if (target instanceof Node && (root.contains(target) || panel.contains(target))) return
+    if (e.target instanceof Node && root.contains(e.target)) return
     close(false)
   })
 
@@ -251,15 +155,14 @@ function initSocialsMenu(root: HTMLElement) {
     }
   })
 
+  window.addEventListener('socials:close', () => close(false))
+
+  panel.addEventListener('mousedown', (e) => {
+    if (e.target === panel) e.preventDefault()
+  })
+
   panel.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
-      // Restore DOM position + focus trigger before default Tab runs so focus
-      // continues naturally from the trigger instead of the end of <body>.
-      finishClose(false)
-      trigger.focus()
-      return
-    }
-    const items = Array.from(panel.querySelectorAll<HTMLElement>('[role="menuitem"]'))
+    const items = menuItems()
     if (!items.length) return
     const i = items.indexOf(document.activeElement as HTMLElement)
     if (e.key === 'ArrowDown') {
@@ -282,8 +185,10 @@ function boot() {
   document.querySelectorAll<HTMLElement>('[data-socials-menu]').forEach(initSocialsMenu)
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot)
-} else {
-  boot()
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot)
+  } else {
+    boot()
+  }
 }

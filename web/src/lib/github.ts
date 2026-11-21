@@ -38,7 +38,7 @@ export type PrData = {
 
 const API = 'https://api.github.com'
 const cache = new Map<string, Promise<unknown>>()
-let warned = false
+const warnedPaths = new Set<string>()
 
 // GitHub's linguist colours for the languages likely to show up here.
 const LANGUAGE_COLORS: Record<string, string> = {
@@ -148,8 +148,8 @@ async function api<T>(path: string): Promise<T | null> {
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
     return (await res.json()) as T
   } catch (err) {
-    if (!warned) {
-      warned = true
+    if (!warnedPaths.has(path)) {
+      warnedPaths.add(path)
       console.warn(`[github] ${path}: ${(err as Error).message}; cards fall back to plain links`)
     }
     return null
@@ -157,15 +157,15 @@ async function api<T>(path: string): Promise<T | null> {
 }
 
 /** First prose paragraph of a PR body as plain text, about two lines long. */
-function excerpt(body: unknown, max = 180): string | null {
+export function excerpt(body: unknown, max = 180): string | null {
   if (typeof body !== 'string') return null
   const text = body
     .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/<[^>]+>/g, '')
+    .replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/g, '')
+    .replace(/(`+)([\s\S]*?)\1|<\/?[a-zA-Z][^>]*>/g, (m, ticks, inner) => (ticks ? inner : ''))
     .split(/\n\s*\n/)
     .map((p) => p.trim())
-    .find((p) => p && !/^(#|[-*] |\||!\[)/.test(p))
+    .find((p) => p && !/^(#|[-*] |\||!\[|>|(?:---+|\*\*\*+|___+)$)/.test(p))
   if (!text) return null
   const plain = text
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')

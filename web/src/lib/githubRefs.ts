@@ -44,9 +44,12 @@ function stripFencedCode(source: string): string {
   return out.join('\n')
 }
 
-/** Repo and PR links in a post's MDX source, ignoring fenced and inline code. */
+/** Repo and PR links in a post's MDX source, ignoring fenced/inline code and comments. */
 export function findGithubRefs(source: string): GithubRef[] {
-  const text = stripFencedCode(source).replace(/(?<!`)(`+)(?!`)(?:(?!\r?\n[ \t]*\r?\n)[\s\S])*?(?<!`)\1(?!`)/g, '')
+  const text = stripFencedCode(source).replace(
+    /(?<!`)(`+)(?!`)(?:(?!\r?\n[ \t]*\r?\n)[\s\S])*?(?<!`)\1(?!`)|<!--[\s\S]*?-->|\{\/\*[\s\S]*?\*\/\}/g,
+    '',
+  )
   const seen = new Map<string, GithubRef>()
   for (const [raw] of text.matchAll(/https?:\/\/(?:www\.)?github\.com\/[^\s)"'<>\]]+/g)) {
     const url = raw.replace(/[.,;:!?)]+$/, '')

@@ -49,7 +49,6 @@ function slide(text: HTMLElement, plate: HTMLElement): Promise<unknown> {
 
   html.classList.add('mood-settling', 'mood-settled')
   html.classList.remove('mood-await')
-  clearHeadFailsafe()
 
   // Final layout (sync, before paint).
   const lastText = text.getBoundingClientRect()
@@ -123,19 +122,14 @@ function slide(text: HTMLElement, plate: HTMLElement): Promise<unknown> {
 
 async function run() {
   const html = document.documentElement
-  if (!html.classList.contains('mood-await')) {
-    clearHeadFailsafe()
-    return
-  }
+  if (!html.classList.contains('mood-await')) return
 
   await pageVtFinished()
   // A short beat so the centered layout is actually seen.
   await new Promise((r) => window.setTimeout(r, 240))
 
-  if (!html.classList.contains('mood-await')) {
-    clearHeadFailsafe()
-    return
-  }
+  if (!html.classList.contains('mood-await')) return
+  clearHeadFailsafe()
 
   const text = document.querySelector<HTMLElement>('.home-text')
   const plate = document.querySelector<HTMLElement>('.home-mood .hero-shell-stage')
@@ -145,7 +139,6 @@ async function run() {
   if (reduced || !desktop || !text || !plate || typeof text.animate !== 'function') {
     html.classList.add('mood-settled')
     html.classList.remove('mood-await')
-    clearHeadFailsafe()
     return
   }
 

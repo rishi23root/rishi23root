@@ -203,7 +203,7 @@ a:hover {
  * ------------------------------------------------------------- */
 .chrome {
   position: relative;
-  z-index: 1;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -633,9 +633,9 @@ html[data-theme='light'] .theme-icon-moon {
     pointer-events: none;
   }
 
-  html.mood-await .mood-caption,
-  html.mood-await .hero-shell:is(:hover, :focus-within) .mood-caption,
-  html.mood-await .hero-shell[data-revealed='true'] .mood-caption {
+  :is(html.mood-await, html.mood-settling) .mood-caption,
+  :is(html.mood-await, html.mood-settling) .hero-shell:is(:hover, :focus-within) .mood-caption,
+  :is(html.mood-await, html.mood-settling) .hero-shell[data-revealed='true'] .mood-caption {
     opacity: 0;
     transform: translateY(calc(-100% - var(--mood-caption-gap)));
     transition: none;
@@ -669,14 +669,6 @@ html[data-theme='light'] .theme-icon-moon {
     transform-origin: 0 0;
     will-change: transform, opacity;
   }
-
-  html.mood-settling .mood-caption,
-  html.mood-settling .hero-shell:is(:hover, :focus-within) .mood-caption,
-  html.mood-settling .hero-shell[data-revealed='true'] .mood-caption {
-    opacity: 0;
-    transform: translateY(calc(-100% - var(--mood-caption-gap)));
-    transition: none;
-  }
 }
 
 /* ---------------------------------------------------------------
@@ -697,7 +689,6 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .hero-shell-art,
-.hero-shell-empty,
 .mood-still-scene,
 .mood-layer {
   position: absolute;
@@ -713,12 +704,6 @@ html[data-theme='light'] .theme-icon-moon {
   box-shadow: var(--mood-inset-shadow);
   pointer-events: none;
   z-index: 1;
-}
-
-.hero-shell-empty {
-  background:
-    radial-gradient(80% 70% at 50% 40%, color-mix(in srgb, var(--fg) 6%, transparent), transparent 70%),
-    linear-gradient(160deg, color-mix(in srgb, var(--fg) 4%, transparent), transparent 55%);
 }
 
 .mood-layer {
@@ -958,7 +943,6 @@ html[data-theme='light'] .socials-menu-trigger {
   --socials-panel-dur: 160ms;
   --socials-item-dur: 140ms;
   --socials-stagger: 28ms;
-  /* JS sets fixed coords + portals to body when open (above TOC). */
   position: absolute;
   top: calc(100% + 0.45rem);
   right: 0;
@@ -1845,7 +1829,8 @@ html[data-theme] body:has(.lost) :is(.wordmark, .nav a, .theme-toggle, .socials-
   margin: 0;
 }
 
-.prose a.gh-card {
+.prose a.gh-card,
+.gh-pop a.gh-card {
   text-decoration: none;
   color: var(--fg);
 }
@@ -2357,16 +2342,11 @@ html[data-theme='dark'] .excal-stage svg {
   --toc-line: 1px;
   --toc-mark: color-mix(in srgb, var(--fg) 62%, transparent);
   --toc-mark-dur: 460ms;
-  /* Tall enough for a short straight drop before the bend, so the
-     ╰ stays on the same 1px centerline as the H2 spine. */
-  --toc-curve-h: calc(0.28rem + 0.54rem);
-  --toc-curve-r: 8px;
   /* Sub-list open/close. Close is a touch slower and uses a
      smoother ease so the list doesn't vanish in the first beat
      (the old 280ms ease-out felt like it hid too quickly). */
   --toc-sub-dur-open: 520ms;
   --toc-sub-dur-close: 620ms;
-  --toc-sub-delay-close: 120ms;
   --toc-sub-ease-open: var(--ease-out);
   --toc-sub-ease-close: cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -2440,84 +2420,8 @@ html[data-theme='dark'] .excal-stage svg {
   font-size: 0.8rem;
 }
 
-/* Opening ╰: spine drops, then turns right. Width stops at the
-   indent-side ╮ so the two 8px arcs meet on a horizontal tangent. */
-.post-toc:not(.is-rail-svg) .toc-sub::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: calc(var(--space-4) - var(--toc-curve-r));
-  height: var(--toc-curve-h);
-  box-sizing: border-box;
+.post-toc:not(.is-rail-svg) .toc-sub > ul {
   border-left: var(--toc-line) solid var(--toc-spine);
-  border-bottom: var(--toc-line) solid var(--toc-spine);
-  border-bottom-left-radius: var(--toc-curve-r);
-  pointer-events: none;
-}
-
-/* Opening ╮: the indent-side turn, same 8px radius, sitting on the
-   ╰ arm and handing a downward tangent to the indent track. */
-.post-toc:not(.is-rail-svg) .toc-sub > ul::before {
-  content: "";
-  position: absolute;
-  left: calc(-1 * var(--toc-curve-r));
-  top: calc(var(--toc-curve-h) - var(--toc-line));
-  width: var(--toc-curve-r);
-  height: var(--toc-curve-r);
-  box-sizing: border-box;
-  border-top: var(--toc-line) solid var(--toc-spine);
-  border-right: var(--toc-line) solid var(--toc-spine);
-  border-top-right-radius: var(--toc-curve-r);
-  pointer-events: none;
-}
-
-/* Diverted indent track, from the ╮ down to the ╯. */
-.post-toc:not(.is-rail-svg) .toc-sub::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: calc(var(--space-4) - var(--toc-line));
-  top: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
-  bottom: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
-  width: var(--toc-line);
-  background: var(--toc-spine);
-  pointer-events: none;
-}
-
-/* Closing ╯: indent-side turn back toward the spine, mirror of the ╮. */
-.post-toc:not(.is-rail-svg) .toc-sub > ul > li:last-child {
-  position: relative;
-}
-
-.post-toc:not(.is-rail-svg) .toc-sub > ul > li:last-child::after {
-  content: "";
-  position: absolute;
-  left: calc(-1 * var(--toc-curve-r));
-  bottom: calc(var(--toc-curve-h) - var(--toc-line));
-  width: var(--toc-curve-r);
-  height: var(--toc-curve-r);
-  box-sizing: border-box;
-  border-right: var(--toc-line) solid var(--toc-spine);
-  border-bottom: var(--toc-line) solid var(--toc-spine);
-  border-bottom-right-radius: var(--toc-curve-r);
-  pointer-events: none;
-}
-
-/* Closing ╭: returns to the main spine and meets the next H2 flush.
-   Width stops at the ╯ so the arcs join on a horizontal tangent. */
-.post-toc:not(.is-rail-svg) .toc-sub > ul::after {
-  content: "";
-  position: absolute;
-  left: calc(-1 * var(--space-4));
-  bottom: 0;
-  width: calc(var(--space-4) - var(--toc-curve-r));
-  height: var(--toc-curve-h);
-  box-sizing: border-box;
-  border-left: var(--toc-line) solid var(--toc-spine);
-  border-top: var(--toc-line) solid var(--toc-spine);
-  border-top-left-radius: var(--toc-curve-r);
-  pointer-events: none;
 }
 
 .post-toc a:hover {
@@ -2889,7 +2793,6 @@ html[data-theme='dark'] .excal-stage svg {
 .mood-index-img {
   opacity: 0;
   transform: scale(1.02);
-  will-change: opacity, transform;
 }
 
 .mood-index-img.is-loaded {

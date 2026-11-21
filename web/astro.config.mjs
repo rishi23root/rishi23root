@@ -5,7 +5,6 @@ import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import { excalidrawBake } from './scripts/excalidraw-integration.mjs'
-import { draftAssets } from './scripts/draft-assets-integration.mjs'
 
 export default defineConfig({
   site: 'https://rishi23root.in',
@@ -13,7 +12,6 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [
     excalidrawBake(),
-    draftAssets(),
     mdx({ rehypePlugins: [rehypePublicImageSize, rehypeTableLabels] }),
     react(),
     sitemap({

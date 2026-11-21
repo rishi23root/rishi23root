@@ -64,7 +64,7 @@ Every post follows the same section order: TL;DR, the problem, what I tried, wha
 
 ### Diagrams as SVG
 
-A diagram is an Excalidraw scene saved as JSON under `web/public/diagrams/`, and in a post it's one line with no import:
+A diagram is an Excalidraw scene saved as JSON under `web/diagrams/`, and in a post it's one line with no import:
 
 ```mdx
 <ExcalidrawBoard src="/diagrams/board-pipeline.json" />
@@ -127,7 +127,7 @@ In words: `content/` holds the data. The README build reads the bio and post tit
 | --- | --- | --- |
 | README build<br />`index.ts`, `posts.ts` | `site.json`, post frontmatter, GitHub API | `README.md` |
 | Astro site<br />`web/` | `site.json`, full posts, board scenes | pages, RSS, sitemap, `llms.txt` |
-| Diagram bake<br />`bake-diagrams.mjs` | scene JSON in `web/public/diagrams/` | SVG inlined into the post |
+| Diagram bake<br />`bake-diagrams.mjs` | scene JSON in `web/diagrams/` | SVG inlined into the post |
 
 ### What's in `site.json`
 

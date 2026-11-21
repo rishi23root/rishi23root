@@ -12,7 +12,7 @@ const posts = (await getPublishedPosts()).slice(0, 5)
 const projects = getFeaturedProjects().slice(0, 3)
 
 const capabilities = site.capabilities ?? []
-const moods = site.moods ?? []
+const moods = (site.moods ?? []).filter((m) => Boolean(m.src))
 // Soft-join so blank lines in JSON never become multiple hero blocks.
 const voiceBio = (site.voiceBio ?? site.fullDescription).replace(/\s+/g, ' ').trim()
 

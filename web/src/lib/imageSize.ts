@@ -1,20 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { isAbsolute, join, normalize, relative, resolve, sep } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 export type ImageSize = { width: number; height: number }
 
-function findDir(dirName: string): string | undefined {
-  // `astro build` bundles pages under `dist/`, so a URL relative to
-  // `import.meta.url` no longer points at `web/`. Mirror ExcalidrawBoard's
-  // candidate resolution so both dev and bundled builds resolve `web/public`.
-  const candidates = [
-    resolve(process.cwd(), dirName),
-    resolve(process.cwd(), 'web', dirName),
-    fileURLToPath(new URL(`../../${dirName}`, import.meta.url)),
-  ]
-  return candidates.find((dir) => existsSync(dir))
-}
+// `astro build` bundles pages under `dist/`, so resolve relative to cwd (`web/`
+// during Astro commands, repo root during root tests).
+const publicDir = [resolve(process.cwd(), 'public'), resolve(process.cwd(), 'web', 'public')].find((dir) =>
+  existsSync(dir),
+)
 
 function resolveInside(baseDir: string, rel: string): string | undefined {
   const file = normalize(join(baseDir, rel))
@@ -29,7 +22,7 @@ function resolveInside(baseDir: string, rel: string): string | undefined {
  * can reserve their box before the bytes arrive. Remote URLs are skipped.
  */
 export function publicImageSize(src: string | undefined | null): ImageSize | undefined {
-  if (!src) return
+  if (!src || !publicDir) return
   const raw = src.trim()
   if (!raw.startsWith('/') || raw.startsWith('//') || raw.includes('://')) return
   let rel: string
@@ -40,12 +33,7 @@ export function publicImageSize(src: string | undefined | null): ImageSize | und
   }
   if (!rel || rel === '/') return
 
-  const publicDir = findDir('public')
-  let file = publicDir ? resolveInside(publicDir, rel) : undefined
-  if (!file && process.env.NODE_ENV !== 'production') {
-    const draftDir = findDir('draft-assets')
-    if (draftDir) file = resolveInside(draftDir, rel)
-  }
+  const file = resolveInside(publicDir, rel)
   if (!file) return
 
   try {
@@ -56,7 +44,7 @@ export function publicImageSize(src: string | undefined | null): ImageSize | und
   }
 }
 
-function sniff(buf: Buffer): ImageSize | undefined {
+export function sniff(buf: Buffer): ImageSize | undefined {
   if (buf.length >= 24 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) {
     return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) }
   }

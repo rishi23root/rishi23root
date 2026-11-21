@@ -11,7 +11,8 @@
   "ts-node": {
     "moduleTypes": {
       "web/src/lib/site.ts": "cjs",
-      "web/src/components/command-palette/palette.ts": "cjs"
+      "web/src/components/command-palette/palette.ts": "cjs",
+      "web/src/components/command-palette/actions.ts": "cjs"
     }
   },
   "include": ["*.ts"],

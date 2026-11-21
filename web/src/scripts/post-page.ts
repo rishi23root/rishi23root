@@ -4,95 +4,26 @@
  * heading navigation, and share / copy-link action.
  */
 
-type TocMetrics = {
-  line: number
-  curveR: number
-  curveH: number
-  space4: number
-  subDurOpen: number
-  subDurClose: number
-  subDelayClose: number
-}
-
-type RailOpenKind = {
-  closing: boolean
-  switching: boolean
-}
-
 type TocRailController = {
-  markCurrent: (link: HTMLAnchorElement | null) => void
-  onRailOpen: (kind: RailOpenKind) => void
+  markCurrent: (link: HTMLAnchorElement | null, instant?: boolean) => void
   rebuild: (frameTime?: number) => void
 }
 
-type SpringState = {
-  x: number
-  v: number
-}
+type SpringState = { x: number; v: number }
+type TocRange = { link: HTMLAnchorElement; start: number; end: number }
+type TocItemNodes = { a: HTMLAnchorElement; isTopH3: boolean; sub: HTMLElement | null; h3s: HTMLAnchorElement[] }
 
-type TocRange = {
-  link: HTMLAnchorElement
-  start: number
-  end: number
-}
+const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '])
 
-type TocItemNodes = {
-  a: HTMLAnchorElement
-  sub: HTMLElement | null
-  h3s: HTMLAnchorElement[]
-}
-
-const SIMPLE_CALC_RE = /^\s*[+-]?[\d.]+(?:px|rem)(\s+[+-]\s+[\d.]+(?:px|rem))*\s*$/i
-const CALC_TERM_RE = /([+-]?)\s*([\d.]+)(px|rem)/gi
-
-function parseCssTime(raw: string, fallback: number): number {
-  const trimmed = raw.trim()
-  const n = parseFloat(trimmed)
-  if (!trimmed || !Number.isFinite(n)) return fallback
-  if (/ms$/i.test(trimmed)) return n
-  if (/s$/i.test(trimmed)) return n * 1000
-  return n
-}
-
-function parseCssPx(raw: string, rootPx: number, probeHost: HTMLElement): number {
-  const trimmed = raw.trim()
-  if (!trimmed || trimmed === '0') return 0
-  if (/^-?[\d.]+px$/i.test(trimmed)) return parseFloat(trimmed)
-  if (/^-?[\d.]+rem$/i.test(trimmed)) return parseFloat(trimmed) * rootPx
-  const calcMatch = trimmed.match(/^calc\(([^()]+)\)$/i)
-  if (calcMatch && SIMPLE_CALC_RE.test(calcMatch[1])) {
-    let sum = 0
-    for (const match of calcMatch[1].matchAll(CALC_TERM_RE)) {
-      const sign = match[1] === '-' ? -1 : 1
-      const value = parseFloat(match[2])
-      const unit = match[3].toLowerCase()
-      sum += sign * (unit === 'rem' ? value * rootPx : value)
-    }
-    return sum
-  }
-  // Fallback for arbitrary CSS length expressions, mounted outside the ResizeObserver-watched toc.
-  const tmp = document.createElement('div')
-  tmp.style.cssText =
-    'position:absolute;visibility:hidden;pointer-events:none;box-sizing:content-box;margin:0;padding:0;border:0;width:' +
-    trimmed
-  probeHost.appendChild(tmp)
-  const px = tmp.getBoundingClientRect().width
-  tmp.remove()
-  return px
-}
-
-function readTocMetrics(toc: HTMLElement): TocMetrics {
-  const cs = getComputedStyle(toc)
+function readTocMetrics() {
   const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
-  const probeHost = toc.parentElement && toc.parentElement !== toc ? toc.parentElement : document.body
   return {
-    line: parseCssPx(cs.getPropertyValue('--toc-line'), rootPx, probeHost) || 1,
-    curveR: parseCssPx(cs.getPropertyValue('--toc-curve-r'), rootPx, probeHost) || 8,
-    curveH: parseCssPx(cs.getPropertyValue('--toc-curve-h'), rootPx, probeHost) || 13,
-    space4: parseCssPx(cs.getPropertyValue('--space-4'), rootPx, probeHost) || 16,
-    subDurOpen: parseCssTime(cs.getPropertyValue('--toc-sub-dur-open'), 520),
-    subDurClose: parseCssTime(cs.getPropertyValue('--toc-sub-dur-close'), 620),
-    subDelayClose: parseCssTime(cs.getPropertyValue('--toc-sub-delay-close'), 120),
+    line: 1,
+    curveR: 8,
+    // Curve height (0.82rem) and --space-4 (1rem).
+    curveH: 0.82 * rootPx,
+    space4: rootPx,
+    subDelayClose: 120,
   }
 }
 
@@ -120,9 +51,7 @@ class PathPen {
   }
 
   line(x: number, y: number) {
-    const dx = x - this.x
-    const dy = y - this.y
-    const l = Math.hypot(dx, dy)
+    const l = Math.hypot(x - this.x, y - this.y)
     if (l < 0.01) return
     this.d += `L${fmt(x)} ${fmt(y)}`
     this.len += l
@@ -160,25 +89,17 @@ class PathPen {
 
 function blurIfFocused(el: HTMLElement) {
   const active = document.activeElement
-  if (active instanceof HTMLElement && el.contains(active)) {
-    active.blur()
-  }
+  if (active instanceof HTMLElement && el.contains(active)) active.blur()
 }
 
 function initPostPage(root: HTMLElement) {
-  // Fade each body image in once it has decoded. Cover images stay visible
-  // immediately so the LCP element is never delayed by JS. Already-complete
-  // (cached or broken) images get .is-loaded right away with no orphan listeners.
+  // Cover stays visible immediately for LCP; fade body images once decoded.
   root.querySelectorAll<HTMLImageElement>('.post-body img').forEach((img) => {
     if (img.complete) {
       img.classList.add('is-loaded')
       return
     }
-    const show = () => {
-      img.classList.add('is-loaded')
-      img.removeEventListener('load', show)
-      img.removeEventListener('error', show)
-    }
+    const show = () => img.classList.add('is-loaded')
     img.addEventListener('load', show, { once: true })
     img.addEventListener('error', show, { once: true })
   })
@@ -202,13 +123,9 @@ function initPostPage(root: HTMLElement) {
   const toc = document.querySelector<HTMLElement>('.post-toc')
   const subs = Array.from(document.querySelectorAll<HTMLElement>('[data-toc-sub]'))
 
-  let metrics: TocMetrics | null = toc ? readTocMetrics(toc) : null
+  let metrics = toc ? readTocMetrics() : null
+  const isTocVisible = () => Boolean(toc && toc.offsetParent !== null)
 
-  function isTocVisible(): boolean {
-    return Boolean(toc && toc.offsetParent !== null)
-  }
-
-  // Each link's group: an H3's nested list, or the list an H2 owns.
   function groupOf(a: HTMLAnchorElement | null): HTMLElement | null {
     if (!a) return null
     return (
@@ -227,14 +144,15 @@ function initPostPage(root: HTMLElement) {
     if (!svg || !track || !mark) return null
 
     const tocItems: TocItemNodes[] = []
-    tocEl.querySelectorAll<HTMLLIElement>(':scope > ul > li.toc-depth-2').forEach((li) => {
+    tocEl.querySelectorAll<HTMLLIElement>(':scope > ul > li').forEach((li) => {
       const a = li.querySelector<HTMLAnchorElement>(':scope > a')
       if (!a) return
-      const sub = li.querySelector<HTMLElement>(':scope > [data-toc-sub]')
+      const isTopH3 = li.classList.contains('toc-depth-3')
+      const sub = isTopH3 ? null : li.querySelector<HTMLElement>(':scope > [data-toc-sub]')
       const h3s = sub
         ? Array.from(sub.querySelectorAll<HTMLAnchorElement>(':scope > ul > li.toc-depth-3 > a'))
         : []
-      tocItems.push({ a, sub, h3s })
+      tocItems.push({ a, isTopH3, sub, h3s })
     })
 
     const K = 170
@@ -248,8 +166,6 @@ function initPostPage(root: HTMLElement) {
     let currentLink: HTMLAnchorElement | null = null
     let running = false
     let lastT = 0
-    let layoutUntil = 0
-    let roPending = false
     let lastRebuildFrame = -1
     let lastW = -1
     let lastH = -1
@@ -289,7 +205,6 @@ function initPostPage(root: HTMLElement) {
         running = false
         return
       }
-      if (now < layoutUntil) rebuild(now)
       const dt = lastT ? (now - lastT) / 1000 : 1 / 60
       lastT = now
       if (motion.matches) {
@@ -300,8 +215,7 @@ function initPostPage(root: HTMLElement) {
       stepSpring(fromS, targetFrom, dt)
       stepSpring(toS, targetTo, dt)
       applyDash()
-      const done = settled(fromS, targetFrom) && settled(toS, targetTo)
-      if (done && now >= layoutUntil) {
+      if (settled(fromS, targetFrom) && settled(toS, targetTo)) {
         snapDash()
         running = false
         return
@@ -317,15 +231,7 @@ function initPostPage(root: HTMLElement) {
     }
 
     function setTargets(instant: boolean) {
-      let range: TocRange | null = null
-      if (currentLink) {
-        for (let i = 0; i < ranges.length; i++) {
-          if (ranges[i].link === currentLink) {
-            range = ranges[i]
-            break
-          }
-        }
-      }
+      const range = currentLink ? ranges.find((r) => r.link === currentLink) ?? null : null
       if (range) {
         targetFrom = range.start
         targetTo = range.end
@@ -353,53 +259,55 @@ function initPostPage(root: HTMLElement) {
       if (w === 0 && h === 0) return
       const dpr = window.devicePixelRatio || 1
 
-      const measured: Array<{
-        a: HTMLAnchorElement
-        aRect: DOMRect
-        subRect: DOMRect | null
-        h3Rects: Array<{ link: HTMLAnchorElement; rect: DOMRect }>
-      }> = []
-
-      for (const item of tocItems) {
+      const measured = tocItems.map((item) => {
         const aRect = item.a.getBoundingClientRect()
         let subRect: DOMRect | null = null
         let h3Rects: Array<{ link: HTMLAnchorElement; rect: DOMRect }> = []
         if (item.sub) {
           subRect = item.sub.getBoundingClientRect()
           if (subRect.bottom - subRect.top >= 0.75) {
-            h3Rects = item.h3s.map((link) => ({
-              link,
-              rect: link.getBoundingClientRect(),
-            }))
+            h3Rects = item.h3s.map((link) => ({ link, rect: link.getBoundingClientRect() }))
           }
         }
-        measured.push({ a: item.a, aRect, subRect, h3Rects })
-      }
+        return { a: item.a, isTopH3: item.isTopH3, aRect, subRect, h3Rects }
+      })
 
       // Phase 2: Pure path geometry computation (zero DOM access).
-      const m = metrics ?? (metrics = readTocMetrics(tocEl))
-      const { line, curveR, curveH, space4 } = m
-
+      const { line, curveR, curveH, space4 } = metrics ?? (metrics = readTocMetrics())
+      const firstH2 = measured.find((item) => !item.isTopH3)
       let xs = snap(0, line, dpr)
-      if (measured.length > 0) {
-        xs = snap(measured[0].aRect.left - origin.left + line / 2, line, dpr)
+      if (firstH2) {
+        xs = snap(firstH2.aRect.left - origin.left + line / 2, line, dpr)
+      } else if (measured.length > 0) {
+        xs = snap(measured[0].aRect.left - origin.left + line / 2 - space4, line, dpr)
       }
       const xi = snap(xs + space4 - line, line, dpr)
 
       const pen = new PathPen()
       ranges = []
-
       const addRange = (link: HTMLAnchorElement, start: number, end: number) => {
         ranges.push({ link, start, end: Math.max(start, end) })
       }
 
+      let prevTopH3 = false
       for (const item of measured) {
         const yTop = item.aRect.top - origin.top
         const yBot = item.aRect.bottom - origin.top
         const start = pen.len
-        pen.gotoSpine(xs, yTop)
-        // If a sub is already diverting from yBot, the H2 segment
-        // still owns the spine through the heading itself.
+        if (item.isTopH3) {
+          pen.move(xi, yTop)
+          pen.line(xi, yBot)
+          addRange(item.a, start, pen.len)
+          prevTopH3 = true
+          continue
+        }
+        if (prevTopH3) {
+          pen.move(xs, yTop)
+          prevTopH3 = false
+        } else {
+          pen.gotoSpine(xs, yTop)
+        }
+        // If a sub is already diverting from yBot, the H2 segment still owns the spine through the heading.
         pen.line(xs, yBot)
         addRange(item.a, start, pen.len)
 
@@ -409,11 +317,6 @@ function initPostPage(root: HTMLElement) {
         const sH = sBot - sTop
         if (sH < 0.75) continue
 
-        // The 8023011 CSS rail is a ╰╮ pair (two 8px quarters in a
-        // ~15px-tall, 15px-wide box after a short ~5px ╰ drop). At
-        // 1px that rasterizes as one tight hook — the thin-* curve.
-        // Drawing those two quarters in SVG reads as "2 curved"; a
-        // single cubic with the same endpoints keeps the thin shape.
         const minFull = 2 * (curveH + curveR)
         const scale = Math.min(1, sH / Math.max(minFull, 1))
         let r = curveR * scale
@@ -424,27 +327,16 @@ function initPostPage(root: HTMLElement) {
         }
         const drop = Math.max(0, ch - r)
         const hookRise = Math.max(0, ch + r - line - drop)
-        // 0.55 keeps the ends vertical longer, like the thin hook,
-        // without a mid shelf that would read as two corners.
         const handle = hookRise * 0.55
         const openStart = pen.len
-        if (sTop > pen.y + 0.5) {
-          pen.line(xs, sTop)
-        }
+        if (sTop > pen.y + 0.5) pen.line(xs, sTop)
         const yOpen0 = sTop + drop
         const indentTop = yOpen0 + hookRise
-        let indentBot = sBot - drop - hookRise
-        if (indentBot < indentTop) indentBot = indentTop
-        // First H3 owns the opening curve.
+        const indentBot = Math.max(indentTop, sBot - drop - hookRise)
         if (yOpen0 > pen.y + 0.25) pen.line(xs, yOpen0)
-        if (hookRise > 0.25) {
-          pen.cubic(xs, yOpen0 + handle, xi, indentTop - handle, xi, indentTop)
-        } else if (indentTop > pen.y + 0.25) {
-          pen.line(xi, indentTop)
-        }
+        if (hookRise > 0.25) pen.cubic(xs, yOpen0 + handle, xi, indentTop - handle, xi, indentTop)
+        else if (indentTop > pen.y + 0.25) pen.line(xi, indentTop)
 
-        // Map each H3 to a slice of the indent, clamped to the
-        // visible window so a mid-close still has a shrinking path.
         const slots = item.h3Rects.map(({ link, rect }) => ({
           link,
           top: Math.max(indentTop, Math.min(indentBot, rect.top - origin.top)),
@@ -461,21 +353,13 @@ function initPostPage(root: HTMLElement) {
           addRange(slots[j].link, slotStart, pen.len)
           lastRangeAt = ranges.length - 1
         }
-        if (!slots.length && indentBot > pen.y + 0.25) {
-          pen.line(xi, indentBot)
-        }
-        // Closing curve is a quiet return to the next H2 spine, like
-        // the old ╭. The last H3's mark also covers this hook so it
-        // has a full-height active stroke (the indent alone is only
-        // a sliver — the hook lives in the last item's box).
+        if (!slots.length && indentBot > pen.y + 0.25) pen.line(xi, indentBot)
         const yClose1 = sBot - drop
         if (hookRise > 0.25 && yClose1 > indentBot + 0.25) {
           pen.cubic(xi, indentBot + handle, xs, yClose1 - handle, xs, yClose1)
         }
         if (sBot > pen.y + 0.25) pen.line(xs, sBot)
-        if (lastRangeAt >= 0) {
-          ranges[lastRangeAt].end = Math.max(ranges[lastRangeAt].end, pen.len)
-        }
+        if (lastRangeAt >= 0) ranges[lastRangeAt].end = Math.max(ranges[lastRangeAt].end, pen.len)
       }
 
       // Phase 3: Batch all SVG & DOM writes after reads finish.
@@ -496,54 +380,32 @@ function initPostPage(root: HTMLElement) {
       setTargets(false)
     }
 
-    function markCurrent(link: HTMLAnchorElement | null) {
+    function markCurrent(link: HTMLAnchorElement | null, instant = false) {
       currentLink = link
-      if (!isTocVisible()) return
-      setTargets(false)
+      setTargets(instant)
     }
 
-    function onRailOpen(kind: RailOpenKind) {
-      if (!isTocVisible()) return
-      let wait = 0
-      if (!motion.matches) {
-        const m = metrics ?? (metrics = readTocMetrics(tocEl))
-        if (kind.closing) wait = m.subDurClose
-        else if (kind.switching) wait = Math.max(m.subDurOpen, m.subDurClose)
-        else wait = m.subDurOpen
-        wait += 48
-      }
-      layoutUntil = performance.now() + wait
-      rebuild()
-      startLoop()
-    }
-
+    // ResizeObserver watches tocEl + every collapsible sub-list, keeping the
+    // SVG curves synced throughout CSS grid transitions without extra polling.
     const ro = new ResizeObserver(() => {
-      if (roPending || !isTocVisible()) return
-      roPending = true
-      requestAnimationFrame((now) => {
-        roPending = false
-        rebuild(now)
-      })
+      if (!isTocVisible()) return
+      rebuild(performance.now())
     })
     ro.observe(tocEl)
-    subs.forEach((s) => {
-      ro.observe(s)
-    })
+    subs.forEach((s) => ro.observe(s))
 
-    if (motion.addEventListener) {
-      motion.addEventListener('change', () => {
-        if (!isTocVisible()) return
-        rebuild()
-        setTargets(true)
-      })
-    }
+    motion.addEventListener?.('change', () => {
+      if (!isTocVisible()) return
+      rebuild()
+      setTargets(true)
+    })
 
     if (isTocVisible()) {
       rebuild()
       setTargets(true)
     }
 
-    return { markCurrent, onRailOpen, rebuild }
+    return { markCurrent, rebuild }
   }
 
   let openSub: HTMLElement | null = null
@@ -551,14 +413,12 @@ function initPostPage(root: HTMLElement) {
 
   function applyOpen(sub: HTMLElement | null) {
     if (sub === openSub) return
-    const prev = openSub
     openSub = sub
     subs.forEach((s) => {
       const on = s === sub
       s.classList.toggle('is-open', on)
       s.inert = !on
     })
-    rail?.onRailOpen({ closing: !sub && Boolean(prev), switching: Boolean(sub && prev) })
   }
 
   function clearCloseTimer() {
@@ -573,111 +433,93 @@ function initPostPage(root: HTMLElement) {
       clearCloseTimer()
       return
     }
-    // A close is already scheduled and we still want no sub:
-    // don't restart the delay on every scroll tick.
     if (!sub && closeTimer) return
     clearCloseTimer()
-    // Delay collapse only when leaving a sub for no sub, so a
-    // quick scroll-through doesn't flicker. Switching sections
-    // or opening starts immediately; reduced motion snaps.
     if (!sub && openSub && !motion.matches) {
-      const delay = metrics?.subDelayClose ?? 120
       closeTimer = window.setTimeout(() => {
         closeTimer = 0
         applyOpen(null)
-      }, delay)
+      }, metrics?.subDelayClose ?? 120)
       return
     }
     applyOpen(sub)
   }
 
-  // Collapse only once JS can reopen them; without JS every H3 stays listed.
   if (toc && subs.length) {
     subs.forEach((s) => {
       s.inert = true
     })
-    toc.classList.add('is-collapsible')
   }
 
-  let pinned: HTMLAnchorElement | null = null // link chosen by a rail click, held while its heading is still on screen
+  let pinned: { link: HTMLAnchorElement; heading: HTMLElement } | null = null
   let pinnedY = 0
   let animating = false
-  let progressShowRaf = 0
   let progressVisible = false
   let lastProgress = -1
   let lastCurrent: HTMLAnchorElement | null | undefined = undefined
 
-  // Keep the control in flow so Share / All writing / Home never reflow.
-  // Only opacity/transform fade; inert via aria-hidden + tabindex + CSS
-  // pointer-events. Instant when reduce-motion.
   function setProgressVisible(show: boolean) {
-    if (!btn) return
-    if (show === progressVisible) return
+    if (!btn || show === progressVisible) return
     progressVisible = show
-    if (progressShowRaf) {
-      cancelAnimationFrame(progressShowRaf)
-      progressShowRaf = 0
-    }
     if (show) {
       btn.removeAttribute('aria-hidden')
       btn.removeAttribute('tabindex')
-      if (motion.matches) {
-        btn.classList.add('is-visible')
-        return
-      }
-      btn.classList.remove('is-visible')
-      progressShowRaf = requestAnimationFrame(() => {
-        progressShowRaf = requestAnimationFrame(() => {
-          progressShowRaf = 0
-          btn.classList.add('is-visible')
-        })
-      })
+      btn.classList.add('is-visible')
       return
     }
-    // Never leave focus on an aria-hidden="true" element.
     blurIfFocused(btn)
     btn.classList.remove('is-visible')
     btn.setAttribute('aria-hidden', 'true')
     btn.setAttribute('tabindex', '-1')
   }
 
-  function setCurrent(current: HTMLAnchorElement | null) {
+  function setCurrent(current: HTMLAnchorElement | null, instant = false) {
     if (current === lastCurrent) return
     lastCurrent = current
     for (const a of links) {
       if (a === current) a.setAttribute('aria-current', 'location')
       else a.removeAttribute('aria-current')
     }
-    setOpen(groupOf(current))
-    rail?.markCurrent(current)
+    if (instant) {
+      applyOpen(groupOf(current))
+      rail?.rebuild()
+    } else {
+      setOpen(groupOf(current))
+    }
+    rail?.markCurrent(current, instant)
   }
 
-  function sync() {
+  function sync(instant = false) {
     // Phase 1: DOM reads.
     const scrollY = window.scrollY
     const vh = window.innerHeight
+    const maxScroll = Math.max(0, document.documentElement.scrollHeight - vh)
     const r = root.getBoundingClientRect()
     const top = scrollY + r.top
     const start = top - 96
-    const end = top + root.offsetHeight - vh * 0.4
+    const end = Math.min(top + root.offsetHeight - vh * 0.4, maxScroll)
     let p = Math.min(100, Math.max(0, Math.round(((scrollY - start) / Math.max(1, end - start)) * 100)))
-    // At the absolute top of the page, always treat progress as 0%.
     if (scrollY < 8) p = 0
+    else if (maxScroll > 0 && scrollY >= maxScroll - 2) p = 100
 
     const tocVisible = isTocVisible()
     let shouldUpdateToc = false
     let current: HTMLAnchorElement | null = null
     if (!animating && tocVisible && tocEntries.length > 0) {
       shouldUpdateToc = true
-      if (pinned && Math.abs(scrollY - pinnedY) < 4) {
-        current = pinned
+      const atBottom = maxScroll > 0 && scrollY >= maxScroll - 2
+      if (pinned && (Math.abs(scrollY - pinnedY) < 4 || (atBottom && pinned.heading.getBoundingClientRect().top < vh))) {
+        current = pinned.link
       } else {
         pinned = null
         const marker = vh * 0.28
         for (const entry of tocEntries) {
-          if (entry.heading.getBoundingClientRect().top <= marker) {
-            current = entry.link
-          }
+          if (entry.heading.getBoundingClientRect().top <= marker) current = entry.link
+          else break
+        }
+        if (atBottom) {
+          const last = tocEntries[tocEntries.length - 1]
+          if (last.heading.getBoundingClientRect().top < vh) current = last.link
         }
       }
     } else if (!tocVisible) {
@@ -689,19 +531,18 @@ function initPostPage(root: HTMLElement) {
       lastProgress = p
       if (bar) bar.style.strokeDashoffset = String(ring * (1 - p / 100))
       if (pct) pct.textContent = `${p}%`
-      // Hide the whole control at the top (0%); only show once the reader has scrolled.
       if (btn) {
         setProgressVisible(p > 0)
         btn.setAttribute('aria-label', `Reading progress ${p} percent. Back to top.`)
       }
     }
 
-    if (shouldUpdateToc) {
-      setCurrent(current)
-    }
+    if (shouldUpdateToc) setCurrent(current, instant)
   }
 
   const rail = toc ? initTocRail(toc) : null
+  sync(true)
+  if (toc && subs.length) toc.classList.add('is-collapsible')
 
   let syncRaf = 0
   function scheduleSync() {
@@ -718,26 +559,23 @@ function initPostPage(root: HTMLElement) {
     resizeRaf = requestAnimationFrame((now) => {
       resizeRaf = 0
       if (toc) {
-        metrics = readTocMetrics(toc)
+        metrics = readTocMetrics()
         rail?.rebuild(now)
       }
       sync()
     })
   }
 
-  sync()
   window.addEventListener('scroll', scheduleSync, { passive: true })
   window.addEventListener('resize', scheduleResize, { passive: true })
 
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => {
-      if (toc) {
-        metrics = readTocMetrics(toc)
-        rail?.rebuild()
-      }
-      sync()
-    })
-  }
+  document.fonts?.ready?.then(() => {
+    if (toc) {
+      metrics = readTocMetrics()
+      rail?.rebuild()
+    }
+    sync()
+  })
 
   if (btn) {
     btn.addEventListener('click', () => {
@@ -747,8 +585,6 @@ function initPostPage(root: HTMLElement) {
   }
 
   // Rail clicks: eased scroll to the heading (instant with reduced motion).
-  // The clicked item is marked current up front so the rail doesn't flicker
-  // through every section on the way.
   let raf = 0
   function ease(t: number): number {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
@@ -760,9 +596,16 @@ function initPostPage(root: HTMLElement) {
     pinned = null
     sync()
   }
-  ;(['wheel', 'touchstart', 'keydown', 'mousedown'] as const).forEach((type) => {
+  ;(['wheel', 'touchstart', 'mousedown'] as const).forEach((type) => {
     window.addEventListener(type, stop, { passive: true })
   })
+  window.addEventListener(
+    'keydown',
+    (e) => {
+      if (SCROLL_KEYS.has(e.key)) stop()
+    },
+    { passive: true },
+  )
 
   function scrollToHeading(a: HTMLAnchorElement, el: HTMLElement) {
     const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0
@@ -771,7 +614,7 @@ function initPostPage(root: HTMLElement) {
     const from = window.scrollY
     const done = () => {
       animating = false
-      pinned = a
+      pinned = { link: a, heading: el }
       pinnedY = window.scrollY
       if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1')
       el.focus({ preventScroll: true })
@@ -814,7 +657,6 @@ function initPostPage(root: HTMLElement) {
     const lbl = document.getElementById('postShareLabel')
     const status = document.getElementById('postShareStatus')
     let shareTimer = 0
-    let shareStatusRaf = 0
 
     share.addEventListener('click', () => {
       const data = { title: document.title, url: location.href }
@@ -822,33 +664,14 @@ function initPostPage(root: HTMLElement) {
         navigator.share(data).catch(() => {})
         return
       }
-      if (!navigator.clipboard) return
-      navigator.clipboard.writeText(location.href).then(
+      navigator.clipboard?.writeText(location.href).then(
         () => {
           if (shareTimer) window.clearTimeout(shareTimer)
-          if (shareStatusRaf) {
-            cancelAnimationFrame(shareStatusRaf)
-            shareStatusRaf = 0
-          }
           share.classList.add('is-open')
           if (lbl) lbl.textContent = 'Link copied'
-          if (status) {
-            if (status.textContent === 'Link copied') {
-              status.textContent = ''
-              shareStatusRaf = requestAnimationFrame(() => {
-                shareStatusRaf = 0
-                status.textContent = 'Link copied'
-              })
-            } else {
-              status.textContent = 'Link copied'
-            }
-          }
+          if (status) status.textContent = 'Link copied'
           shareTimer = window.setTimeout(() => {
             shareTimer = 0
-            if (shareStatusRaf) {
-              cancelAnimationFrame(shareStatusRaf)
-              shareStatusRaf = 0
-            }
             share.classList.remove('is-open')
             if (lbl) lbl.textContent = 'Share'
             if (status) status.textContent = ''
@@ -861,6 +684,4 @@ function initPostPage(root: HTMLElement) {
 }
 
 const root = document.querySelector<HTMLElement>('[data-longform]')
-if (root) {
-  initPostPage(root)
-}
+if (root) initPostPage(root)

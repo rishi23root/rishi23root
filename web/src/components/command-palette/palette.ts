@@ -1,7 +1,7 @@
+import { readActions, runAction } from './actions'
 import type { CommandAction } from './types'
 
 const ROOT_ID = 'site-kbar'
-const DATA_ID = 'site-kbar-actions'
 const LIST_ID = 'site-kbar-list'
 
 let open = false
@@ -15,18 +15,7 @@ function optionId(index: number): string {
   return `site-kbar-opt-${index}`
 }
 
-function readActions(): CommandAction[] {
-  const el = document.getElementById(DATA_ID)
-  if (!el?.textContent) return []
-  try {
-    const parsed = JSON.parse(el.textContent) as CommandAction[]
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
-
-function score(hay: string, needle: string): number {
+export function score(hay: string, needle: string): number {
   const h = hay.toLowerCase()
   const n = needle.toLowerCase().trim()
   if (!n) return 1
@@ -64,23 +53,23 @@ export function filterActions(q: string, list: CommandAction[] = actions): Comma
 }
 
 function run(action: CommandAction) {
-  if (action.perform === 'theme') {
-    close(true)
-    const toggle = document.getElementById('themeToggle')
-    if (toggle) toggle.click()
-    return
-  }
-  if (action.href) {
-    if (/^https?:\/\//i.test(action.href)) {
-      close(true)
-      window.open(action.href, '_blank', 'noopener,noreferrer')
-    } else {
-      close(false)
-      window.location.assign(action.href)
+  close(!action.href || /^https?:\/\//i.test(action.href))
+  runAction(action)
+}
+
+function syncActive(listEl: HTMLElement, input: HTMLInputElement, scroll = true) {
+  let activeId = ''
+  listEl.querySelectorAll<HTMLElement>('.kbar-item').forEach((el, i) => {
+    const on = i === active
+    el.classList.toggle('is-active', on)
+    el.setAttribute('aria-selected', on ? 'true' : 'false')
+    if (on) {
+      activeId = el.id
+      if (scroll && 'scrollIntoView' in el) el.scrollIntoView({ block: 'nearest' })
     }
-    return
-  }
-  close(true)
+  })
+  if (activeId) input.setAttribute('aria-activedescendant', activeId)
+  else input.removeAttribute('aria-activedescendant')
 }
 
 function renderList(listEl: HTMLElement, emptyEl: HTMLElement, input: HTMLInputElement) {
@@ -98,32 +87,21 @@ function renderList(listEl: HTMLElement, emptyEl: HTMLElement, input: HTMLInputE
   emptyEl.hidden = true
 
   let lastSection = ''
-  let groupEl: HTMLElement | null = null
-  let groupIndex = 0
-
   filtered.forEach((action, i) => {
     const section = action.section || 'Jump'
-    if (section !== lastSection || !groupEl) {
+    if (section !== lastSection) {
       lastSection = section
-      const groupId = `site-kbar-group-${groupIndex++}`
-      groupEl = document.createElement('div')
-      groupEl.setAttribute('role', 'group')
-      groupEl.setAttribute('aria-labelledby', groupId)
-
       const label = document.createElement('p')
-      label.id = groupId
       label.className = 'kbar-section'
-      label.setAttribute('role', 'presentation')
+      label.setAttribute('aria-hidden', 'true')
       label.textContent = section
-      groupEl.appendChild(label)
-      listEl.appendChild(groupEl)
+      listEl.appendChild(label)
     }
 
     const opt = document.createElement('div')
     opt.id = optionId(i)
-    opt.className = 'kbar-item' + (i === active ? ' is-active' : '')
+    opt.className = 'kbar-item'
     opt.setAttribute('role', 'option')
-    opt.setAttribute('aria-selected', i === active ? 'true' : 'false')
     opt.dataset.index = String(i)
 
     if (action.iconPath) {
@@ -164,49 +142,15 @@ function renderList(listEl: HTMLElement, emptyEl: HTMLElement, input: HTMLInputE
       opt.appendChild(meta)
     }
 
-    opt.addEventListener('mousedown', (e) => e.preventDefault())
-    opt.addEventListener('click', () => run(action))
-    opt.addEventListener('mousemove', () => {
-      if (active !== i) {
-        active = i
-        syncActive(listEl, input, false)
-      }
-    })
-    groupEl.appendChild(opt)
+    listEl.appendChild(opt)
   })
 
   input.setAttribute('aria-expanded', 'true')
-  input.setAttribute('aria-activedescendant', optionId(active))
-}
-
-function syncActive(listEl: HTMLElement, input: HTMLInputElement, scroll = true) {
-  let activeId = ''
-  listEl.querySelectorAll<HTMLElement>('.kbar-item').forEach((el, i) => {
-    const on = i === active
-    el.classList.toggle('is-active', on)
-    el.setAttribute('aria-selected', on ? 'true' : 'false')
-    if (on) {
-      activeId = el.id
-      if (scroll && 'scrollIntoView' in el) {
-        el.scrollIntoView({ block: 'nearest' })
-      }
-    }
-  })
-  if (activeId) input.setAttribute('aria-activedescendant', activeId)
-  else input.removeAttribute('aria-activedescendant')
-}
-
-function onFocusIn(e: FocusEvent) {
-  if (!open || !root) return
-  const dialog = root.querySelector('.kbar-dialog')
-  if (dialog && e.target instanceof Node && !dialog.contains(e.target)) {
-    const input = root.querySelector('.kbar-input') as HTMLInputElement | null
-    input?.focus()
-  }
+  syncActive(listEl, input, false)
 }
 
 function onKeyDown(e: KeyboardEvent) {
-  if (!open) return
+  if (!open || e.isComposing) return
   if (e.key === 'Escape') {
     e.preventDefault()
     e.stopPropagation()
@@ -216,34 +160,15 @@ function onKeyDown(e: KeyboardEvent) {
   }
   if (e.key === 'Tab') {
     e.preventDefault()
-    const dialog = root?.querySelector('.kbar-dialog') as HTMLElement | null
-    if (!dialog) return
-    const focusables = Array.from(
-      dialog.querySelectorAll<HTMLElement>(
-        'input:not([disabled]), button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
-      ),
-    ).filter((el) => !el.hidden && !el.closest('[hidden]'))
-    if (!focusables.length) return
-    const idx = focusables.indexOf(document.activeElement as HTMLElement)
-    const next = e.shiftKey
-      ? focusables[(idx <= 0 ? focusables.length : idx) - 1]
-      : focusables[(idx + 1) % focusables.length]
-    next.focus()
+    e.stopPropagation()
+    const input = root?.querySelector<HTMLInputElement>('.kbar-input')
+    if (input && document.activeElement !== input) input.focus()
     return
   }
-  if (e.key === 'ArrowDown') {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
     e.preventDefault()
     if (!filtered.length) return
-    active = (active + 1) % filtered.length
-    const list = root?.querySelector('.kbar-list') as HTMLElement | null
-    const input = root?.querySelector('.kbar-input') as HTMLInputElement | null
-    if (list && input) syncActive(list, input)
-    return
-  }
-  if (e.key === 'ArrowUp') {
-    e.preventDefault()
-    if (!filtered.length) return
-    active = (active - 1 + filtered.length) % filtered.length
+    active = (active + (e.key === 'ArrowDown' ? 1 : filtered.length - 1)) % filtered.length
     const list = root?.querySelector('.kbar-list') as HTMLElement | null
     const input = root?.querySelector('.kbar-input') as HTMLInputElement | null
     if (list && input) syncActive(list, input)
@@ -285,13 +210,33 @@ function ensureRoot(): HTMLElement {
   document.body.appendChild(root)
 
   root.querySelector('[data-kbar-dismiss]')?.addEventListener('click', () => close(true))
+  const dialog = root.querySelector('.kbar-dialog') as HTMLElement
   const input = root.querySelector('.kbar-input') as HTMLInputElement
   const list = root.querySelector('.kbar-list') as HTMLElement
   const empty = root.querySelector('.kbar-empty') as HTMLElement
+
   input.addEventListener('input', () => {
     filtered = filterActions(input.value)
     active = 0
     renderList(list, empty, input)
+  })
+  dialog.addEventListener('mousedown', (e) => {
+    if (e.target !== input) e.preventDefault()
+  })
+  list.addEventListener('click', (e) => {
+    const item = (e.target as Element | null)?.closest<HTMLElement>('[data-index]')
+    const hit = item ? filtered[Number(item.dataset.index)] : undefined
+    if (hit) run(hit)
+  })
+  list.addEventListener('mousemove', (e) => {
+    if (e.movementX === 0 && e.movementY === 0) return
+    const item = (e.target as Element | null)?.closest<HTMLElement>('[data-index]')
+    if (!item) return
+    const i = Number(item.dataset.index)
+    if (Number.isInteger(i) && active !== i) {
+      active = i
+      syncActive(list, input, false)
+    }
   })
   return root
 }
@@ -314,7 +259,6 @@ export function openPalette() {
   input.value = ''
   input.focus()
   window.addEventListener('keydown', onKeyDown, true)
-  document.addEventListener('focusin', onFocusIn)
 }
 
 export function close(restoreFocus = true) {
@@ -322,7 +266,6 @@ export function close(restoreFocus = true) {
   open = false
   document.documentElement.classList.remove('kbar-open')
   window.removeEventListener('keydown', onKeyDown, true)
-  document.removeEventListener('focusin', onFocusIn)
   if (root) {
     const input = root.querySelector('.kbar-input') as HTMLInputElement | null
     input?.setAttribute('aria-expanded', 'false')
@@ -331,9 +274,7 @@ export function close(restoreFocus = true) {
   }
   const prev = opener
   opener = null
-  if (restoreFocus && prev && prev.isConnected) {
-    prev.focus()
-  }
+  if (restoreFocus && prev && prev.isConnected) prev.focus()
 }
 
 export function togglePalette() {

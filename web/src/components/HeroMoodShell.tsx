@@ -14,23 +14,6 @@ type Props = {
 /** Crossfade length; mirrored by --mood-xfade in global.css. */
 const XFADE_MS = 420
 
-/**
- * SSR-safe desktop gate. `client:media` still SSRs this island; start false so
- * markup matches, then flip on the client. The head preload already advanced
- * the bag into `window.__heroMoodFirst`, so first paint adopts that pick.
- */
-function useDesktop(): boolean {
-  const [desktop, setDesktop] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia(DESKTOP_MQ)
-    const onChange = () => setDesktop(mq.matches)
-    onChange()
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
-  return desktop
-}
-
 /** `?mood=<id>` (links from /mood) forces the first mood shown. */
 function readMoodParam(): string | null {
   return new URLSearchParams(window.location.search).get('mood')
@@ -50,11 +33,11 @@ function displayName(id: string): string {
 
 function initialSlot(moods: MoodSlot[], forced?: string | null): MoodSlot | null {
   if (!moods.length) return null
+  const early = window.__heroMoodFirst
+  window.__heroMoodFirst = undefined
   const hit = byId(moods, forced)
   if (hit) return hit
   // The head script already advanced the bag for this load: adopt its pick.
-  const early = window.__heroMoodFirst
-  window.__heroMoodFirst = undefined
   if (early) {
     const adopted = byId(moods, adoptCurrentMood(moods) ?? early)
     if (adopted) return adopted
@@ -98,20 +81,28 @@ function afterLoad(fn: () => void): () => void {
  * downloads React; each full desktop load advances the shuffle-bag cycle (no
  * repeats until every mood has been seen). "next" in the caption (below the
  * plate) advances the same cycle in place with a crossfade.
+ * Starts desktop=false to match SSR markup, then sets desktop + initial slot in one pass.
  */
 export default function HeroMoodShell({ moods, allMoodsHref = '/mood/' }: Props) {
-  const desktop = useDesktop()
-  // Below 1024px the plate is display:none — pick nothing, mount no <img>.
-  // The first mood is chosen the first time the viewport is desktop-sized.
-  const [slot, setSlot] = useState<MoodSlot | null>(() =>
-    desktop ? initialSlot(moods, readMoodParam()) : null,
-  )
+  const [desktop, setDesktop] = useState(false)
+  const [slot, setSlot] = useState<MoodSlot | null>(null)
   const [leaving, setLeaving] = useState<MoodSlot | null>(null)
   const [revealed, setRevealed] = useState(false)
   const timer = useRef<number | undefined>(undefined)
   const plateReady = useRef(false)
 
   useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  useEffect(() => {
+    const mq = window.matchMedia(DESKTOP_MQ)
+    const sync = () => {
+      setDesktop(mq.matches)
+      if (mq.matches) setSlot((cur) => cur ?? initialSlot(moods, readMoodParam()))
+    }
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [moods])
 
   // The 2.5s await failsafe and <1024px listener live in index.astro's <head>
   // so failed/blocked hydration cannot stick in mood-await; settle smoothly
@@ -121,12 +112,6 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood/' }: Props)
     plateReady.current = true
     settleMoodLayout()
   }, [])
-
-  useEffect(() => {
-    if (desktop && !slot) {
-      setSlot(initialSlot(moods, readMoodParam()))
-    }
-  }, [desktop, slot, moods])
 
   // Warm the cache for the one mood "next" will show — desktop only, and only
   // once the current image has loaded so it never competes with it.
@@ -138,12 +123,10 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood/' }: Props)
     })
   }, [desktop, moods, slot])
 
-  useEffect(() => {
-    if (slot && !slot.src) onPlateReady()
-  }, [slot, onPlateReady])
-
   const next = useCallback(() => {
-    const target = byId(moods, advanceMood(moods))
+    let id = advanceMood(moods)
+    if (id === slot?.id && moods.length > 1) id = advanceMood(moods)
+    const target = byId(moods, id)
     if (!target || target.id === slot?.id) return
     window.clearTimeout(timer.current)
     setLeaving(slot)
@@ -163,10 +146,7 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood/' }: Props)
         className={className}
         onReady={reportReady ? onPlateReady : undefined}
       />
-    ) : (
-      // Placeholder for a mood with no image yet.
-      <div key={key} className="hero-shell-empty" aria-hidden="true" />
-    )
+    ) : null
 
   return (
     <div
@@ -184,11 +164,7 @@ export default function HeroMoodShell({ moods, allMoodsHref = '/mood/' }: Props)
       >
         <div className="hero-shell-art" role="img" aria-label={label}>
           {leaving ? renderSlot(leaving, `out-${leaving.id}`, 'is-leaving') : null}
-          {slot ? (
-            renderSlot(slot, `in-${slot.id}`, leaving ? 'is-entering' : '', !leaving)
-          ) : (
-            <div className="hero-shell-empty" aria-hidden="true" />
-          )}
+          {slot ? renderSlot(slot, `in-${slot.id}`, leaving ? 'is-entering' : '', !leaving) : null}
         </div>
       </div>
 

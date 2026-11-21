@@ -4,15 +4,41 @@
  * a static import would run first and die on the JSON/CSS loads.
  */
 import { register } from 'node:module'
-import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { JSDOM } from 'jsdom'
 
 const webRoot = fileURLToPath(new URL('..', import.meta.url))
 const diagramsDir = path.join(webRoot, 'diagrams')
 const outDir = path.join(webRoot, '.generated', 'diagrams')
 
+mkdirSync(outDir, { recursive: true })
+
+const scenes = existsSync(diagramsDir)
+  ? readdirSync(diagramsDir).filter((name) => name.endsWith('.json'))
+  : []
+const expectedSvgs = new Set(scenes.map((name) => name.replace(/\.json$/, '.svg')))
+
+for (const existing of readdirSync(outDir)) {
+  if (existing.endsWith('.svg') && !expectedSvgs.has(existing)) {
+    unlinkSync(path.join(outDir, existing))
+    console.log(`removed stale ${existing}`)
+  }
+}
+
+const scriptMtime = statSync(fileURLToPath(import.meta.url)).mtimeMs
+const staleScenes = scenes.filter((name) => {
+  const svgPath = path.join(outDir, name.replace(/\.json$/, '.svg'))
+  if (!existsSync(svgPath)) return true
+  const srcMtime = Math.max(statSync(path.join(diagramsDir, name)).mtimeMs, scriptMtime)
+  return statSync(svgPath).mtimeMs < srcMtime
+})
+
+if (staleScenes.length === 0) {
+  process.exit(0)
+}
+
+const { JSDOM } = await import('jsdom')
 await register('./excalidraw-loader.mjs', import.meta.url)
 
 const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
@@ -122,21 +148,7 @@ Object.defineProperty(window.document, 'fonts', {
 
 const { exportToSvg } = await import('@excalidraw/excalidraw')
 
-mkdirSync(outDir, { recursive: true })
-
-const scenes = existsSync(diagramsDir)
-  ? readdirSync(diagramsDir).filter((name) => name.endsWith('.json'))
-  : []
-const expectedSvgs = new Set(scenes.map((name) => name.replace(/\.json$/, '.svg')))
-
-for (const existing of readdirSync(outDir)) {
-  if (existing.endsWith('.svg') && !expectedSvgs.has(existing)) {
-    unlinkSync(path.join(outDir, existing))
-    console.log(`removed stale ${existing}`)
-  }
-}
-
-for (const name of scenes) {
+for (const name of staleScenes) {
   const scenePath = path.join(diagramsDir, name)
   const scene = JSON.parse(readFileSync(scenePath, 'utf8'))
   try {
