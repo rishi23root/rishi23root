@@ -267,6 +267,19 @@ async function main() {
     ['social-email'],
   )
   assert.deepStrictEqual(filterActions('@nonexistent', kbarActions), [])
+  assert.deepStrictEqual(
+    filterActions('@l', kbarActions).map((a) => a.id),
+    ['social-linkedin', 'social-email'],
+  )
+  assert.deepStrictEqual(
+    filterActions('@x', kbarActions).map((a) => a.id),
+    ['social-x'],
+  )
+  assert.deepStrictEqual(
+    filterActions('x', kbarActions).map((a) => a.id),
+    ['post-x', 'social-x'],
+  )
+  assert.deepStrictEqual(filterActions('@c', kbarActions), [])
 
   console.log('scripts.test.ts: all assertions passed')
 }

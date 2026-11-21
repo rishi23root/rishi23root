@@ -46,7 +46,11 @@ export function filterActions(q: string, list: CommandAction[] = actions): Comma
   return pool
     .map((a) => ({
       a,
-      s: Math.max(score(a.name, needle), score(a.section ?? '', needle), score(a.meta ?? '', needle)),
+      s: Math.max(
+        score(a.name, needle),
+        atMode ? 0 : score(a.section ?? '', needle),
+        score(a.meta ?? '', needle),
+      ),
     }))
     .filter((x) => x.s > 0)
     .sort((x, y) => y.s - x.s)
@@ -71,6 +75,7 @@ function run(action: CommandAction) {
 
 function renderList(listEl: HTMLElement) {
   listEl.replaceChildren()
+  listEl.scrollTop = 0
   if (!filtered.length) {
     const empty = document.createElement('p')
     empty.className = 'kbar-empty'
