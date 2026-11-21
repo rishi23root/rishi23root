@@ -221,7 +221,7 @@ The README's Featured Work is built from repository names (`owner/repo`) instead
 
 ### RSS
 
-`/rss.xml` is a short endpoint. It takes the published posts, newest first, and maps each to a title, the post's `summary` as the description, the publish date and its link. Because it calls the same `getPublishedPosts()` as the Writing page, a draft can't appear in the feed by accident. Every page advertises it with `<link rel="alternate" type="application/rss+xml">`, so feed readers find it from any URL.
+`/rss.xml` is a short endpoint. It takes the published posts, newest first, and maps each to a title, the post's `summary` as the description, the publish date and its link. Because it calls the same `getPublishedPosts()` as the home page, a draft can't appear in the feed by accident. Every page advertises it with `<link rel="alternate" type="application/rss+xml">`, so feed readers find it from any URL.
 
 ### SEO and answer engines
 

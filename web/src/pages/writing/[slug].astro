@@ -120,11 +120,11 @@ if (d.faq.length) {
           <MetaLine
             class="post-meta"
             items={[
+              d.draft && { text: 'Draft', class: 'post-draft' },
               { text: d.author },
               { text: formatPostDate(d.date), datetime: d.date.toISOString() },
               d.updated && { text: `Updated ${formatPostDate(d.updated)}` },
               { text: `${readingTimeMinutes(post)} min read` },
-              d.draft && { text: 'Draft', class: 'post-draft' },
             ]}
           />
           {
