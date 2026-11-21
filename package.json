@@ -3,10 +3,13 @@
   "private": true,
   "description": "rishi23root's profile",
   "scripts": {
-    "build": "npm run build:readme",
+    "dev": "npm --prefix web run dev --",
+    "build": "npm --prefix web run build --",
+    "preview": "npm --prefix web run preview --",
     "build:readme": "tsx index.ts",
-    "build:web": "npm run build --prefix web",
-    "dev:web": "npm run dev --prefix web",
+    "build:web": "npm --prefix web run build --",
+    "dev:web": "npm --prefix web run dev --",
+    "preview:web": "npm --prefix web run preview --",
     "check": "tsc --noEmit && npm run check --prefix web",
     "test": "tsx scripts.test.ts"
   },
