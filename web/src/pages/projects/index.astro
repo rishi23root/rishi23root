@@ -68,7 +68,7 @@ const tags = getProjectTags(projects)
               <li
                 class="post-list-item hover-row"
                 data-project-item
-                data-tags={project.normalizedTags.join(',')}
+                data-tags={JSON.stringify(project.normalizedTags)}
                 data-search={[project.title, project.blurb ?? '', ...project.normalizedTags]
                   .join(' ')
                   .toLowerCase()}
@@ -140,7 +140,7 @@ const tags = getProjectTags(projects)
       let shown = 0
 
       for (const item of items) {
-        const itemTags = (item.dataset.tags ?? '').split(',').filter(Boolean)
+        const itemTags: string[] = JSON.parse(item.dataset.tags || '[]')
         const itemSearch = item.dataset.search ?? ''
         const tagMatch = !activeTag || itemTags.includes(activeTag)
         const queryMatch = !tokens.length || tokens.every((token) => itemSearch.includes(token))

@@ -8,6 +8,11 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
+  "ts-node": {
+    "moduleTypes": {
+      "web/src/lib/site.ts": "cjs"
+    }
+  },
   "include": ["*.ts"],
   "exclude": ["web", "dist", "node_modules"]
 }

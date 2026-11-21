@@ -11,6 +11,13 @@ import {
 } from './index'
 import { listPosts, parseFrontmatter, renderRecentPosts } from './posts'
 import { renderToolbox } from './toolbox'
+import {
+  getFeaturedProjects,
+  getOrderedProjects,
+  getProjectTags,
+  normalizeProjectTags,
+  type Project,
+} from './web/src/lib/site'
 
 async function main() {
   // 1. config.ts derives opensource from unified projects[]
@@ -165,6 +172,54 @@ async function main() {
   // 6. toolbox.ts escapes hyphens and underscores for shields.io
   const badge = renderToolbox([{ label: 'Next-Auth_v2', color: '000000' }])
   assert.ok(badge.includes('/badge/Next--Auth__v2-000000?style=flat'))
+
+  // 7. web/src/lib/site.ts project & tag helpers
+  assert.deepStrictEqual(normalizeProjectTags(undefined), [])
+  assert.deepStrictEqual(normalizeProjectTags([]), [])
+  assert.deepStrictEqual(
+    normalizeProjectTags([' Python ', 'python', '', '   ', 'Open-Source', 'ai, ml']),
+    ['python', 'open-source', 'ai, ml'],
+  )
+
+  const sampleProjects: Project[] = [
+    { title: 'Unordered', url: 'https://example.com/u', tags: ['zeta', 'ai, ml'] },
+    { title: 'Hundred', url: 'https://example.com/100', order: 100, tags: ['Python', ' python '] },
+    { title: 'Zero', url: 'https://example.com/0', order: 0, tags: ['alpha', 'python'] },
+    { title: 'Two', url: 'https://example.com/2', order: 2, featured: false, tags: ['beta'] },
+    { title: 'Thousand', url: 'https://example.com/1000', order: 1000 },
+  ]
+  const sampleCopy = [...sampleProjects]
+
+  assert.deepStrictEqual(
+    getOrderedProjects(sampleProjects).map((p) => p.title),
+    ['Zero', 'Two', 'Hundred', 'Thousand', 'Unordered'],
+  )
+  assert.deepStrictEqual(sampleProjects, sampleCopy)
+  assert.deepStrictEqual(
+    getOrderedProjects().map((p) => p.title),
+    [
+      'Maryam',
+      'Pixel Streaming Infrastructure',
+      'opencv_wrap',
+      'pyblink',
+      'resume-editor',
+      'selenium-automations',
+    ],
+  )
+
+  assert.deepStrictEqual(
+    getFeaturedProjects(sampleProjects).map((p) => p.title),
+    ['Zero', 'Hundred', 'Thousand', 'Unordered'],
+  )
+  assert.strictEqual(getFeaturedProjects().length, 6)
+
+  assert.deepStrictEqual(getProjectTags(sampleProjects), [
+    { tag: 'python', count: 2 },
+    { tag: 'ai, ml', count: 1 },
+    { tag: 'alpha', count: 1 },
+    { tag: 'beta', count: 1 },
+    { tag: 'zeta', count: 1 },
+  ])
 
   console.log('scripts.test.ts: all assertions passed')
 }

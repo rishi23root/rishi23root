@@ -29,7 +29,10 @@ const featuredProjects = [...((site.projects ?? []) as SiteProject[])]
     (p): p is SiteProject & { repo: string } =>
       Boolean(p.repo) && p.featured !== false,
   )
-  .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+  .sort(
+    (a, b) =>
+      (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
+  )
 
 const opensourceBlurbs: Record<string, string> = {}
 for (const project of featuredProjects) {

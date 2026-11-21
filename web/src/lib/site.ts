@@ -27,15 +27,20 @@ export function normalizeProjectTags(tags?: string[]): string[] {
 }
 
 /** Projects sorted by explicit `order` ascending (unordered items last). */
-export function getOrderedProjects(): Project[] {
-  return [...((site.projects ?? []) as Project[])].sort(
-    (a, b) => (a.order ?? 99) - (b.order ?? 99),
+export function getOrderedProjects(
+  projects: Project[] = (site.projects ?? []) as Project[],
+): Project[] {
+  return [...projects].sort(
+    (a, b) =>
+      (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
   )
 }
 
 /** Featured projects (`featured !== false`), sorted by `order` ascending. */
-export function getFeaturedProjects(): Project[] {
-  return getOrderedProjects().filter((project) => project.featured !== false)
+export function getFeaturedProjects(
+  projects: Project[] = (site.projects ?? []) as Project[],
+): Project[] {
+  return getOrderedProjects(projects).filter((project) => project.featured !== false)
 }
 
 /** Unique project tags with counts, sorted by count descending then alphabetically. */
