@@ -5,7 +5,6 @@ const DATA_ID = 'site-kbar-actions'
 
 let open = false
 let active = 0
-let query = ''
 let actions: CommandAction[] = []
 let filtered: CommandAction[] = []
 let root: HTMLElement | null = null
@@ -138,13 +137,15 @@ function renderList(listEl: HTMLElement) {
       btn.appendChild(meta)
     }
 
-    btn.addEventListener('click', () => run(action))
-    btn.addEventListener('mousemove', () => {
+    const activate = () => {
       if (active !== i) {
         active = i
         syncActive(listEl)
       }
-    })
+    }
+    btn.addEventListener('click', () => run(action))
+    btn.addEventListener('mousemove', activate)
+    btn.addEventListener('focus', activate)
     listEl.appendChild(btn)
   })
 }
@@ -209,8 +210,7 @@ function ensureRoot(): HTMLElement {
   root.querySelector('[data-kbar-dismiss]')?.addEventListener('click', close)
   const input = root.querySelector('.kbar-input') as HTMLInputElement
   input.addEventListener('input', () => {
-    query = input.value
-    filtered = filterActions(query)
+    filtered = filterActions(input.value)
     active = 0
     const list = root!.querySelector('.kbar-list') as HTMLElement
     renderList(list)
@@ -222,9 +222,8 @@ export function openPalette() {
   if (open) return
   actions = readActions()
   if (!actions.length) return
-  query = ''
   active = 0
-  filtered = filterActions(query)
+  filtered = filterActions('')
   const el = ensureRoot()
   el.hidden = false
   open = true

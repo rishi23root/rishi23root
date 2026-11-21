@@ -32,7 +32,11 @@ const actions: CommandAction[] = [
 ]
 ---
 
-<script type="application/json" id="site-kbar-actions" set:html={JSON.stringify(actions)} />
+<script
+  type="application/json"
+  id="site-kbar-actions"
+  set:html={JSON.stringify(actions).replace(/</g, '\\u003c')}
+/>
 <script>
   import './command-palette/boot.ts'
 </script>

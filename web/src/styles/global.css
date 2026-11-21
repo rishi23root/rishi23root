@@ -3093,7 +3093,7 @@ html[data-theme='dark'] .excal-stage svg {
 .kbar-dialog {
   position: relative;
   width: min(100%, 32rem);
-  max-height: min(70vh, 28rem);
+  max-height: min(74vh, 46rem);
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
