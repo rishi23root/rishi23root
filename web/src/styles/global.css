@@ -203,7 +203,7 @@ a:hover {
  * ------------------------------------------------------------- */
 .chrome {
   position: relative;
-  z-index: 1;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -433,17 +433,14 @@ html[data-theme='light'] .theme-icon-moon {
   font-size: 0.95rem;
   line-height: 1;
   color: var(--muted);
-  opacity: 0.55;
   text-decoration: none;
   transition:
     color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
 }
 
 .home-section-more:is(:hover, :focus-visible) {
   color: var(--fg);
-  opacity: 1;
   transform: translateX(2px);
 }
 
@@ -455,7 +452,7 @@ html[data-theme='light'] .theme-icon-moon {
 @media (prefers-reduced-motion: reduce) {
   .home-section-more,
   .home-section-more:is(:hover, :focus-visible) {
-    transition: color var(--dur) var(--ease-out), opacity var(--dur) var(--ease-out);
+    transition: color var(--dur) var(--ease-out);
     transform: none;
   }
 }
@@ -558,9 +555,12 @@ html[data-theme='light'] .theme-icon-moon {
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     column-gap: var(--home-gap);
     align-items: start;
-    /* Width of the settled text column (the 3fr track), from the split. */
+    /* Width of the settled columns (2fr mood / 3fr text), from the split,
+       plus --home-await-w matching inner pages' centered --post-group measure. */
     container-type: inline-size;
+    --home-mood-col: calc((100cqi - var(--home-gap)) * 2 / 5);
     --home-col: calc((100cqi - var(--home-gap)) * 3 / 5);
+    --home-await-w: min(100cqi, var(--post-group));
   }
 
   .home-mood {
@@ -585,7 +585,7 @@ html[data-theme='light'] .theme-icon-moon {
     flex-direction: column;
     align-items: stretch;
     /* Plate + caption share this width; height fits the sticky column. */
-    width: min(100%, calc((100svh - 2 * var(--page-pad-block) - var(--mood-caption-space)) * 9 / 16));
+    width: min(100%, var(--home-mood-col), calc((100svh - 2 * var(--page-pad-block) - var(--mood-caption-space)) * 9 / 16));
   }
 
   .home-mood .hero-shell-stage {
@@ -601,16 +601,22 @@ html[data-theme='light'] .theme-icon-moon {
     justify-content: flex-start;
   }
 
-  /* Bio + stack blurbs stay on the settled text track so lines don't
-     re-wrap when await → split. Below 1024px bio is uncapped (full track). */
+  /* Bio + stack blurbs + writing links stay on the settled text track so
+     lines don't re-wrap when await → split. Below 1024px bio is uncapped. */
   .voice-bio,
   .home-stack-list li > * {
     max-width: var(--home-col);
   }
 
-  /* Before the mood still is ready: text+nav sit centered at the Writing
-     / post-group measure. Mood stacks behind; settleMood.ts FLIPs both
-     into the split (plate emerges from behind text). */
+  .home-writing-list a {
+    max-width: calc(var(--home-col) - 7rem);
+  }
+
+  /* Before the mood still is ready: text+nav sit centered at --post-group
+     so returning from /writing or /projects keeps site-chrome in place.
+     Mood sits centered inside the left --home-col sub-band behind text so
+     it stays fully covered at t=0; settleMood.ts glides text + trailing
+     right-aligned items on the compositor with zero width animation. */
   html.mood-await .home-split {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -618,7 +624,7 @@ html[data-theme='light'] .theme-icon-moon {
   html.mood-await .home-text {
     grid-column: 1;
     grid-row: 1;
-    width: min(100%, var(--post-group));
+    width: var(--home-await-w);
     margin-inline: auto;
     z-index: 2;
     position: relative;
@@ -628,13 +634,16 @@ html[data-theme='light'] .theme-icon-moon {
   html.mood-await .home-mood {
     grid-column: 1;
     grid-row: 1;
+    width: var(--home-await-w);
+    padding-right: max(0px, calc(var(--home-await-w) - var(--home-col)));
+    margin-inline: auto;
     z-index: 1;
     pointer-events: none;
   }
 
-  html.mood-await .mood-caption,
-  html.mood-await .hero-shell:is(:hover, :focus-within) .mood-caption,
-  html.mood-await .hero-shell[data-revealed='true'] .mood-caption {
+  :is(html.mood-await, html.mood-settling) .mood-caption,
+  :is(html.mood-await, html.mood-settling) .hero-shell:is(:hover, :focus-within) .mood-caption,
+  :is(html.mood-await, html.mood-settling) .hero-shell[data-revealed='true'] .mood-caption {
     opacity: 0;
     transform: translateY(calc(-100% - var(--mood-caption-gap)));
     transition: none;
@@ -650,16 +659,12 @@ html[data-theme='light'] .theme-icon-moon {
   }
 
   /* During the slide (lib/settleMood.ts): opaque text covers the plate
-     until it eases out from under the text's left edge into the gap.
-     Width is WAAPI-driven (may briefly exceed the settled track). */
+     until it eases out from under the text's left edge into the gap. */
   html.mood-settling .home-text {
     position: relative;
     z-index: 2;
     background: var(--bg);
-    max-width: none;
-    margin-inline: 0;
-    overflow: visible;
-    will-change: transform, width;
+    will-change: transform;
   }
 
   html.mood-settling .home-mood {
@@ -669,15 +674,8 @@ html[data-theme='light'] .theme-icon-moon {
   }
 
   html.mood-settling .home-mood .hero-shell-stage {
+    transform-origin: 0 0;
     will-change: transform, opacity;
-  }
-
-  html.mood-settling .mood-caption,
-  html.mood-settling .hero-shell:is(:hover, :focus-within) .mood-caption,
-  html.mood-settling .hero-shell[data-revealed='true'] .mood-caption {
-    opacity: 0;
-    transform: translateY(calc(-100% - var(--mood-caption-gap)));
-    transition: none;
   }
 }
 
@@ -699,7 +697,6 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .hero-shell-art,
-.hero-shell-empty,
 .mood-still-scene,
 .mood-layer {
   position: absolute;
@@ -715,12 +712,6 @@ html[data-theme='light'] .theme-icon-moon {
   box-shadow: var(--mood-inset-shadow);
   pointer-events: none;
   z-index: 1;
-}
-
-.hero-shell-empty {
-  background:
-    radial-gradient(80% 70% at 50% 40%, color-mix(in srgb, var(--fg) 6%, transparent), transparent 70%),
-    linear-gradient(160deg, color-mix(in srgb, var(--fg) 4%, transparent), transparent 55%);
 }
 
 .mood-layer {
@@ -960,7 +951,6 @@ html[data-theme='light'] .socials-menu-trigger {
   --socials-panel-dur: 160ms;
   --socials-item-dur: 140ms;
   --socials-stagger: 28ms;
-  /* JS sets fixed coords + portals to body when open (above TOC). */
   position: absolute;
   top: calc(100% + 0.45rem);
   right: 0;
@@ -1545,16 +1535,15 @@ html[data-theme] body:has(.lost) :is(.wordmark, .nav a, .theme-toggle, .socials-
   border-radius: var(--row-radius);
 }
 
-/* Per-image load fade on writing posts. The box is reserved via width/height
-   (and height: auto); the image starts quiet and fades in once .is-loaded
-   is set. Reduced-motion inherits the global 1ms duration. */
-.post-cover img,
+/* Per-image load fade on body images in writing posts. Cover images render
+   immediately so the LCP element is never blocked on JS. The box is reserved
+   via width/height (and height: auto); body images start quiet and fade in
+   once .is-loaded is set. Reduced-motion inherits the global 1ms duration. */
 .post-body img {
   opacity: 0;
   transition: opacity var(--dur) var(--ease-out);
 }
 
-.post-cover img.is-loaded,
 .post-body img.is-loaded {
   opacity: 1;
 }
@@ -1848,7 +1837,8 @@ html[data-theme] body:has(.lost) :is(.wordmark, .nav a, .theme-toggle, .socials-
   margin: 0;
 }
 
-.prose a.gh-card {
+.prose a.gh-card,
+.gh-pop a.gh-card {
   text-decoration: none;
   color: var(--fg);
 }
@@ -1999,7 +1989,7 @@ html[data-theme='light'] .gh-card-del {
 
 .gh-pop {
   position: fixed;
-  z-index: 60;
+  z-index: 120;
   width: min(23rem, calc(100vw - 24px));
   opacity: 0;
   visibility: hidden;
@@ -2117,30 +2107,11 @@ html[data-theme='light'] .gh-pop .gh-card {
   max-height: min(70vh, 640px);
 }
 
-.excal-board-placeholder {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
+.excal-board .excal-caption {
+  margin: var(--space-2) 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
   color: var(--muted);
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.55;
-  transition: opacity 360ms var(--ease-out);
-}
-
-.excal-board-placeholder [role='alert'] {
-  font-family: var(--sans);
-  font-size: 0.95rem;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.excal-board.is-ready .excal-board-placeholder {
-  opacity: 0;
-  pointer-events: none;
 }
 
 .excal-viewport {
@@ -2148,7 +2119,7 @@ html[data-theme='light'] .gh-pop .gh-card {
   inset: 0;
   overflow: hidden;
   cursor: grab;
-  touch-action: none;
+  touch-action: pan-y;
   animation: excal-fade-in 520ms var(--ease-out) both;
 }
 
@@ -2277,6 +2248,10 @@ html[data-theme='dark'] .excal-stage svg {
   text-align: center;
 }
 
+.excal-pill-zoom::before {
+  content: attr(data-zoom);
+}
+
 .excal-pill-sep {
   width: 1px;
   height: 16px;
@@ -2288,12 +2263,17 @@ html[data-theme='dark'] .excal-stage svg {
 .excal-modal {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  /* Above .chrome-bar (100) and .socials-menu-panel (200), below .kbar (1000) */
+  z-index: 300;
   display: grid;
   place-items: center;
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: blur(6px);
   animation: excal-backdrop-in var(--dur) var(--ease-out) both;
+}
+
+.excal-modal .excal-viewport {
+  touch-action: none;
 }
 
 @keyframes excal-backdrop-in {
@@ -2369,56 +2349,15 @@ html[data-theme='dark'] .excal-stage svg {
      crisp at both 1x and 2x. */
   --toc-line: 1px;
   --toc-mark: color-mix(in srgb, var(--fg) 62%, transparent);
-  /* Mark motion: 460ms spring. The cubic-bezier is the fallback;
-     browsers that understand linear() get a damped spring (~9.5% overshoot).
-     Color/opacity use --ease-out so they don't overshoot. */
   --toc-mark-dur: 460ms;
-  --toc-mark-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
-  /* Tall enough for a short straight drop before the bend, so the
-     ╰ stays on the same 1px centerline as the H2 spine. */
-  --toc-curve-h: calc(0.28rem + 0.54rem);
-  --toc-curve-r: 8px;
   /* Sub-list open/close. Close is a touch slower and uses a
      smoother ease so the list doesn't vanish in the first beat
      (the old 280ms ease-out felt like it hid too quickly). */
   --toc-sub-dur-open: 520ms;
   --toc-sub-dur-close: 620ms;
-  --toc-sub-delay-close: 120ms;
   --toc-sub-ease-open: var(--ease-out);
   --toc-sub-ease-close: cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-}
-
-@supports (transition-timing-function: linear(0, 1)) {
-  .post-toc {
-    --toc-mark-ease: linear(
-      0,
-      0.0522 4.2%,
-      0.1791 8.3%,
-      0.3429 12.5%,
-      0.5151 16.7%,
-      0.6759 20.8%,
-      0.8135 25.0%,
-      0.9225 29.2%,
-      1.0019 33.3%,
-      1.0540 37.5%,
-      1.0831 41.7%,
-      1.0942 45.8%,
-      1.0923 50.0%,
-      1.0821 54.2%,
-      1.0673 58.3%,
-      1.0510 62.5%,
-      1.0352 66.7%,
-      1.0214 70.8%,
-      1.0102 75.0%,
-      1.0019 79.2%,
-      0.9962 83.3%,
-      0.9928 87.5%,
-      0.9912 91.7%,
-      0.9911 95.8%,
-      1
-    );
-  }
 }
 
 /* Quiet track + traveling mark, 1:1 with the TOC box. JS fills the path. */
@@ -2447,22 +2386,6 @@ html[data-theme='dark'] .excal-stage svg {
   stroke: var(--toc-mark);
 }
 
-/* JS-drawn rail: hide the CSS strokes and in-place marks so they
-   don't double-paint. The 1px transparent H2 border stays for layout. */
-.post-toc.is-rail-svg > ul > li.toc-depth-2 > a {
-  border-left-color: transparent;
-}
-
-.post-toc.is-rail-svg .toc-sub::before,
-.post-toc.is-rail-svg .toc-sub > ul::before,
-.post-toc.is-rail-svg .toc-sub::after,
-.post-toc.is-rail-svg .toc-sub > ul > li:last-child::after,
-.post-toc.is-rail-svg .toc-sub > ul::after,
-.post-toc.is-rail-svg > ul > li.toc-depth-2 > a::before,
-.post-toc.is-rail-svg .toc-depth-3 a::before {
-  content: none;
-}
-
 .post-toc ul {
   list-style: none;
   margin: 0;
@@ -2480,40 +2403,12 @@ html[data-theme='dark'] .excal-stage svg {
   line-height: 1.35;
   color: var(--muted);
   text-decoration: none;
-  transition:
-    color var(--toc-mark-dur) var(--ease-out),
-    border-color var(--toc-mark-dur) var(--ease-out);
+  transition: color var(--toc-mark-dur) var(--ease-out);
 }
 
-/* One quiet spine: each H2 carries a segment. No full-height track,
-   so the line can curve into an open sub-list instead of running
-   past it as a second bar. */
-.post-toc > ul > li.toc-depth-2 > a {
+/* No-JS fallback quiet spine + curves (inactive once JS draws .is-rail-svg). */
+.post-toc:not(.is-rail-svg) > ul > li.toc-depth-2 > a {
   border-left-color: var(--toc-spine);
-}
-
-/* No-JS fallback mark: overlay on the quiet spine/indent so it can
-   scale and settle without moving the text or the curve joins.
-   Hidden when JS draws the traveling SVG dash (.is-rail-svg). */
-.post-toc > ul > li.toc-depth-2 > a::before,
-.post-toc .toc-depth-3 a::before {
-  content: "";
-  position: absolute;
-  left: calc(-1 * var(--toc-line));
-  top: 0;
-  bottom: 0;
-  width: var(--toc-line);
-  background: var(--toc-mark);
-  opacity: 0;
-  transform: scaleY(0.88) translateY(2px);
-  pointer-events: none;
-}
-/* H2: origin at the top so overshoot grows up, not into the opening curve. */
-.post-toc > ul > li.toc-depth-2 > a::before {
-  transform-origin: top center;
-}
-.post-toc .toc-depth-3 a::before {
-  transform-origin: center center;
 }
 
 /* H3s sit in from the H2 spine. */
@@ -2528,108 +2423,13 @@ html[data-theme='dark'] .excal-stage svg {
 }
 
 .post-toc .toc-depth-3 a {
-  /* No left border: the indent track is the ::after on .toc-sub.
-     A ::before overlay, inset by --toc-line, sits on that same stroke. */
   border-left-width: 0;
   padding-left: var(--space-3);
   font-size: 0.8rem;
 }
 
-/* Opening ╰: spine drops, then turns right. Width stops at the
-   indent-side ╮ so the two 8px arcs meet on a horizontal tangent. */
-.post-toc .toc-sub::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: calc(var(--space-4) - var(--toc-curve-r));
-  height: var(--toc-curve-h);
-  box-sizing: border-box;
+.post-toc:not(.is-rail-svg) .toc-sub > ul {
   border-left: var(--toc-line) solid var(--toc-spine);
-  border-bottom: var(--toc-line) solid var(--toc-spine);
-  border-bottom-left-radius: var(--toc-curve-r);
-  pointer-events: none;
-}
-
-/* Opening ╮: the indent-side turn, same 8px radius, sitting on the
-   ╰ arm and handing a downward tangent to the indent track. */
-.post-toc .toc-sub > ul::before {
-  content: "";
-  position: absolute;
-  left: calc(-1 * var(--toc-curve-r));
-  top: calc(var(--toc-curve-h) - var(--toc-line));
-  width: var(--toc-curve-r);
-  height: var(--toc-curve-r);
-  box-sizing: border-box;
-  border-top: var(--toc-line) solid var(--toc-spine);
-  border-right: var(--toc-line) solid var(--toc-spine);
-  border-top-right-radius: var(--toc-curve-r);
-  pointer-events: none;
-}
-
-/* Diverted indent track, from the ╮ down to the ╯. */
-.post-toc .toc-sub::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: calc(var(--space-4) - var(--toc-line));
-  top: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
-  bottom: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
-  width: var(--toc-line);
-  background: var(--toc-spine);
-  pointer-events: none;
-}
-
-/* Closing ╯: indent-side turn back toward the spine, mirror of the ╮. */
-.post-toc .toc-sub > ul > li:last-child {
-  position: relative;
-}
-
-.post-toc .toc-sub > ul > li:last-child::after {
-  content: "";
-  position: absolute;
-  left: calc(-1 * var(--toc-curve-r));
-  bottom: calc(var(--toc-curve-h) - var(--toc-line));
-  width: var(--toc-curve-r);
-  height: var(--toc-curve-r);
-  box-sizing: border-box;
-  border-right: var(--toc-line) solid var(--toc-spine);
-  border-bottom: var(--toc-line) solid var(--toc-spine);
-  border-bottom-right-radius: var(--toc-curve-r);
-  pointer-events: none;
-}
-
-/* Closing ╭: returns to the main spine and meets the next H2 flush.
-   Width stops at the ╯ so the arcs join on a horizontal tangent. */
-.post-toc .toc-sub > ul::after {
-  content: "";
-  position: absolute;
-  left: calc(-1 * var(--space-4));
-  bottom: 0;
-  width: calc(var(--space-4) - var(--toc-curve-r));
-  height: var(--toc-curve-h);
-  box-sizing: border-box;
-  border-left: var(--toc-line) solid var(--toc-spine);
-  border-top: var(--toc-line) solid var(--toc-spine);
-  border-top-left-radius: var(--toc-curve-r);
-  pointer-events: none;
-}
-
-/* Color crossfades on a smooth ease so they don't overshoot;
-   scale/translate on the H2/H3 mark uses the spring. Bends are
-   color-only — transforming them would open gaps in the joins. */
-.post-toc > ul > li.toc-depth-2 > a::before,
-.post-toc .toc-depth-3 a::before {
-  transition:
-    opacity var(--toc-mark-dur) var(--ease-out),
-    background-color var(--toc-mark-dur) var(--ease-out),
-    transform var(--toc-mark-dur) var(--toc-mark-ease);
-}
-
-.post-toc .toc-sub::before,
-.post-toc .toc-sub > ul::before,
-.post-toc .toc-sub > ul > li:last-child::after {
-  transition: border-color var(--toc-mark-dur) var(--ease-out);
 }
 
 .post-toc a:hover {
@@ -2639,7 +2439,7 @@ html[data-theme='dark'] .excal-stage svg {
 /* Subheadings show only under the section being read. Grid 0fr -> 1fr
    animates to the list's real height; visibility flips after the close
    so collapsed links leave the tab order and accessibility tree.
-   Close is slightly slower than open. A short JS delay (see [slug].astro)
+   Close is slightly slower than open. A short JS delay (see post-page.ts)
    holds the open list so a quick scroll-through doesn't flicker. */
 .post-toc.is-collapsible .toc-sub {
   display: grid;
@@ -2668,9 +2468,6 @@ html[data-theme='dark'] .excal-stage svg {
 }
 
 .post-toc .toc-sub > ul {
-  /* min-height 0 lets the 0fr grid row shrink. Overflow is clipped by
-     .toc-sub so an H3's active overlay can sit in the indent, on
-     the track, without being cut off. */
   min-height: 0;
   position: relative;
 }
@@ -2679,39 +2476,6 @@ html[data-theme='dark'] .excal-stage svg {
   z-index: 1;
   color: var(--fg);
   font-weight: 600;
-}
-
-/* H2/H3 active mark: fade in and spring-settle onto the track.
-   The quiet spine/indent stays put; only the overlay moves. */
-.post-toc > ul > li.toc-depth-2 > a[aria-current]::before,
-.post-toc .toc-depth-3 a[aria-current]::before {
-  opacity: 1;
-  transform: scaleY(1) translateY(0);
-}
-
-/* First H3 mark starts below the ╮; last H3 mark stops above the ╯
-   so a square overlay doesn't cut across those curves. Origins are
-   set so spring overshoot grows away from the nearest bend. */
-.post-toc .toc-sub > ul > li:first-child > a::before {
-  top: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
-  transform-origin: top center;
-}
-
-.post-toc .toc-sub > ul > li:last-child > a::before {
-  bottom: calc(var(--toc-curve-h) + var(--toc-curve-r) - var(--toc-line));
-  transform-origin: bottom center;
-}
-
-/* First H3 current: the opening ╰╮ is that item's segment. */
-.post-toc .toc-sub:has(> ul > li:first-child > a[aria-current])::before,
-.post-toc .toc-sub:has(> ul > li:first-child > a[aria-current]) > ul::before {
-  border-color: var(--toc-mark);
-}
-
-/* Last H3 current: the closing ╯ is that item's segment; the ╭
-   return to the next H2 spine stays quiet. */
-.post-toc .toc-sub:has(> ul > li:last-child > a[aria-current]) > ul > li:last-child::after {
-  border-color: var(--toc-mark);
 }
 
 /* Default: horizontal bar (mobile + desktop without a TOC rail).
@@ -3037,7 +2801,6 @@ html[data-theme='dark'] .excal-stage svg {
 .mood-index-img {
   opacity: 0;
   transform: scale(1.02);
-  will-change: opacity, transform;
 }
 
 .mood-index-img.is-loaded {
@@ -3305,14 +3068,5 @@ html.kbar-open {
   .post-toc.is-collapsible .toc-sub,
   .post-toc.is-collapsible .toc-sub.is-open {
     transition: none !important;
-  }
-
-  .post-toc > ul > li.toc-depth-2 > a::before,
-  .post-toc .toc-depth-3 a::before,
-  .post-toc .toc-sub::before,
-  .post-toc .toc-sub > ul::before,
-  .post-toc .toc-sub > ul > li:last-child::after {
-    transition: none;
-    transform: none;
   }
 }

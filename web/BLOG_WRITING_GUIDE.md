@@ -39,7 +39,7 @@ Use the names as the `##` headings, in this order. A short qualifier after a col
 4. **Lists:** numbered for steps that happen in order, bullets for unordered points.
 5. **Code:** fenced, with a language (` ```ts `). Keep snippets small enough to read; link out to the full code.
 6. **Images:** meaningful `alt` text. Keep them in `web/public/writing/<slug>/`.
-   **Diagrams:** `<ExcalidrawBoard src="/diagrams/<name>.json" />` for Excalidraw scenes (rendered to SVG, read-only) stored in `web/public/diagrams/` (see `AGENTS.md` → Excalidraw boards). The text around a board must still make sense without it.
+   **Diagrams:** `<ExcalidrawBoard src="/diagrams/<name>.json" />` for Excalidraw scenes (rendered to SVG, read-only) stored in `web/diagrams/` (see `AGENTS.md` → Excalidraw boards). The text around a board must still make sense without it.
    **GitHub:** `<RepoCard owner="…" repo="…" />` or `<PrCard owner="…" repo="…" number={21} />` for a repo or PR worth a card; plain github.com repo/PR links get a hover preview on their own (see `AGENTS.md` → GitHub cards and link previews). Use a card when the repo or PR is the subject, a plain link when it's a reference.
 7. **End:** the "What I recommend" section is the ending. No "thanks for reading" sign-off.
 
@@ -51,7 +51,7 @@ Use the names as the `##` headings, in this order. A short qualifier after a col
 | `date` | yes | `YYYY-MM-DD`, the publish date |
 | `slug` | yes | kebab-case, **must equal the file name** (the build fails otherwise) |
 | `summary` | yes | One sentence, ≤ 220 chars. Used for meta description, OG/Twitter, RSS, `llms.txt` and the README |
-| `draft` | no | `true` hides the post from the build, RSS, sitemap, `llms.txt` and the README. Drafts still render at their URL in `npm run dev:web`, but never appear in the Writing list, home page, command palette, RSS, sitemap, `llms.txt` or README |
+| `draft` | no | `true` hides the post from the build, RSS, sitemap, `llms.txt` and the README. In `npm run dev:web`, drafts appear on `/writing/` (marked `Draft`) and render at their URL, while staying hidden from the home page, command palette, RSS, sitemap, `llms.txt` and README |
 | `author` | no | Defaults to `Rishabh` |
 | `updated` | no | Set it when a published post materially changes (adds `dateModified`) |
 | `tags` | no | 1-4 short lowercase tags |

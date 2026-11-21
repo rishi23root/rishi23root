@@ -6,6 +6,7 @@
  * perform from the embedded actions JSON — same source the palette shows —
  * without loading the UI chunk.
  */
+import { readActions, runAction } from './actions'
 import type { CommandAction } from './types'
 
 let loading: Promise<typeof import('./palette')> | null = null
@@ -15,49 +16,42 @@ let chordMap: Map<string, CommandAction> | null = null
 let firstKeys: Set<string> | null = null
 
 function load() {
-  if (!loading) loading = import('./palette')
+  if (!loading) {
+    loading = import('./palette').catch((err) => {
+      loading = null
+      throw err
+    })
+  }
   return loading
+}
+
+function hasOpenModal(): boolean {
+  if (document.documentElement.classList.contains('kbar-open')) return true
+  for (const dialog of document.querySelectorAll('[role="dialog"][aria-modal="true"]')) {
+    if (!dialog.closest('[hidden]') && dialog.getAttribute('aria-hidden') !== 'true') {
+      return true
+    }
+  }
+  return Boolean(document.querySelector('dialog[open]'))
 }
 
 function isTypingTarget(t: EventTarget | null): boolean {
   if (!(t instanceof HTMLElement)) return false
   const tag = t.tagName
-  return (
-    tag === 'INPUT' ||
-    tag === 'TEXTAREA' ||
-    tag === 'SELECT' ||
-    t.isContentEditable
-  )
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable
 }
 
 function buildChords() {
   chordMap = new Map()
   firstKeys = new Set()
-  const el = document.getElementById('site-kbar-actions')
-  if (!el?.textContent) return
-  try {
-    const actions = JSON.parse(el.textContent) as CommandAction[]
-    for (const a of actions) {
-      if (!a.shortcut || a.shortcut.length !== 2) continue
-      if (!a.href && !a.perform) continue
-      const a0 = a.shortcut[0].toLowerCase()
-      const a1 = a.shortcut[1].toLowerCase()
-      chordMap.set(a0 + a1, a)
-      firstKeys.add(a0)
-    }
-  } catch {
-    /* ignore bad JSON */
+  for (const a of readActions()) {
+    if (!a.shortcut || a.shortcut.length !== 2) continue
+    if (!a.href && !a.perform) continue
+    const a0 = a.shortcut[0].toLowerCase()
+    const a1 = a.shortcut[1].toLowerCase()
+    chordMap.set(a0 + a1, a)
+    firstKeys.add(a0)
   }
-}
-
-function chords(): Map<string, CommandAction> {
-  if (!chordMap) buildChords()
-  return chordMap!
-}
-
-function chordStarters(): Set<string> {
-  if (!firstKeys) buildChords()
-  return firstKeys!
 }
 
 function clearChord() {
@@ -68,25 +62,24 @@ function clearChord() {
   }
 }
 
-function runChord(action: CommandAction) {
-  if (action.perform === 'theme') {
-    const toggle = document.getElementById('themeToggle')
-    if (toggle) toggle.click()
-    return
-  }
-  if (action.href) window.location.assign(action.href)
-}
-
 window.addEventListener('keydown', (e) => {
   if (e.defaultPrevented || e.altKey) return
   const meta = e.metaKey || e.ctrlKey
   const key = e.key.toLowerCase()
 
-  // Cmd/Ctrl+K — open / toggle
+  // Cmd/Ctrl+K — open / toggle (never stack over another open modal)
   if (meta && key === 'k') {
+    if (!document.documentElement.classList.contains('kbar-open') && hasOpenModal()) return
     e.preventDefault()
     clearChord()
-    load().then((m) => m.togglePalette())
+    window.dispatchEvent(new Event('socials:close'))
+    load().then((m) => m.togglePalette(), () => {})
+    return
+  }
+
+  // Ignore bare shortcuts while any modal dialog is open
+  if (hasOpenModal()) {
+    clearChord()
     return
   }
 
@@ -94,7 +87,8 @@ window.addEventListener('keydown', (e) => {
   if (!meta && e.key === '?' && !isTypingTarget(e.target)) {
     e.preventDefault()
     clearChord()
-    load().then((m) => m.openPalette())
+    window.dispatchEvent(new Event('socials:close'))
+    load().then((m) => m.openPalette(), () => {})
     return
   }
 
@@ -104,18 +98,20 @@ window.addEventListener('keydown', (e) => {
     return
   }
 
+  if (!chordMap) buildChords()
+
   if (chordPending) {
-    const action = chords().get(chordPending + key)
+    const action = chordMap!.get(chordPending + key)
     clearChord()
     if (action) {
       e.preventDefault()
-      runChord(action)
+      window.dispatchEvent(new Event('socials:close'))
+      runAction(action)
     }
     return
   }
 
-  if (chordStarters().has(key)) {
-    e.preventDefault()
+  if (firstKeys!.has(key)) {
     chordPending = key
     chordTimer = window.setTimeout(clearChord, 1200)
   }

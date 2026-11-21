@@ -1,4 +1,6 @@
 import assert from 'assert'
+import { execFileSync } from 'child_process'
+import { join } from 'path'
 import { opensource } from './config'
 import {
   escapeMd,
@@ -375,6 +377,13 @@ async function main() {
     filterActions('socials', kbarActions).map((a) => a.id),
     ['social-email', 'social-x', 'social-linkedin', 'social-github', 'social-pypi'],
   )
+
+  // 9. Run web helper tests (ESM modules under web/) via root tsx
+  const tsxBin = join(__dirname, 'node_modules', '.bin', 'tsx')
+  execFileSync(tsxBin, [join(__dirname, 'web', 'scripts', 'web.test.ts')], {
+    stdio: 'inherit',
+    cwd: join(__dirname, 'web'),
+  })
 
   console.log('scripts.test.ts: all assertions passed')
 }

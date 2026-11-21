@@ -1,3 +1,4 @@
+import { safeJson } from '../../lib/safeJson'
 import { createMoodBag, MOOD_CYCLE_KEY } from './cycle'
 import { DESKTOP_MQ } from './media'
 import type { MoodSlot } from './types'
@@ -47,7 +48,7 @@ function preloadFirstMood(
 export function firstMoodPreloadScript(moods: MoodSlot[]): string {
   // Only what the script needs; `<` escaped so data can't close the tag.
   const args = [moods.map(({ id, src }) => ({ id, src })), MOOD_CYCLE_KEY, DESKTOP_MQ]
-    .map((v) => JSON.stringify(v).replace(/</g, '\\u003c'))
+    .map((v) => safeJson(v))
     .join(',')
   return `(${preloadFirstMood})(${args},${createMoodBag})`
 }

@@ -6,8 +6,8 @@ summary: Private starter for new posts, never published — TL;DR, the problem, 
 draft: true
 author: Rishabh
 tags: [meta, writing]
-cover: /writing/draft-template/cover.webp
-image: /writing/draft-template/cover.webp
+cover: /mood/cyclist.webp
+image: /mood/cyclist.webp
 primaryKeyword: blog writing checklist
 secondaryKeywords: [technical blog template, article structure]
 faq:
@@ -16,10 +16,10 @@ faq:
   - q: What if a section has nothing in it?
     a: Drop it and keep the rest in order. An honest short post beats a padded long one.
   - q: Where do post images and diagrams live?
-    a: Images go under web/public/writing/<slug>/ and diagrams under web/public/diagrams/, each referenced with a rooted path.
+    a: Images go under web/public/writing/<slug>/ and diagrams under web/diagrams/, each referenced with a rooted path.
 ---
 
-This is the draft template. It never ships. Copy it, rename the file and `slug` together, replace every section with the real story, and delete the test images. It also doubles as a layout check in `npm run dev:web` at `/writing/draft-template`.
+This is the draft template. It never ships. Copy it, rename the file and `slug` together, replace every section with the real story, and delete the test images. It also doubles as a layout check in `npm run dev:web` at `/writing/draft-template/`.
 
 ## TL;DR
 
@@ -61,10 +61,10 @@ How the pieces fit together. A diagram usually says this faster than a paragraph
 
 <ExcalidrawBoard src="/diagrams/example-stack.json" height={360} />
 
-Boards are Excalidraw scenes from `web/public/diagrams/`, rendered to SVG; the text around one must still make sense without it. A static figure works too:
+Boards are Excalidraw scenes from `web/diagrams/`, rendered to SVG; the text around one must still make sense without it. A static figure works too:
 
 <figure>
-  <img src="/writing/draft-template/figure-wide.webp" alt="Labeled three-panel test graphic for a full-width figure, marked FIGURE FULL WIDTH, 1600 by 900, used to check image rounding and caption spacing." />
+  <img src="/mood/shore.webp" alt="Example full-width mood still used as a template figure to check image rounding and caption spacing." />
   <figcaption>A full-width figure with a caption. Check the gap above the image, the rounded corners, and how the caption sits against the next paragraph.</figcaption>
 </figure>
 
@@ -83,7 +83,7 @@ A short line after the block keeps the spacing honest before the next heading.
 
 What changed, with numbers when I have them, and how I measured. "Build time went from 14 to 3 minutes over 20 runs" is a result; "much faster" isn't.
 
-![A second original test graphic labeled INLINE IMAGE, 1200 by 800, with a circular color study on the left and a dark side panel of dimensions.](/writing/draft-template/inline-second.webp)
+![Example inline image reused from the mood collection to check prose spacing.](/mood/park.webp)
 
 If there are no numbers yet, say what I'm watching and drop the rest of this section.
 

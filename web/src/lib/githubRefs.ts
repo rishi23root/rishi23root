@@ -25,11 +25,34 @@ export function parseGithubUrl(href: string): GithubRef | null {
   return m[3] ? { kind: 'pr', owner: m[1], repo: m[2], number: Number(m[3]) } : { kind: 'repo', owner: m[1], repo: m[2] }
 }
 
-/** Repo and PR links in a post's MDX source, ignoring fenced code. */
+function stripFencedCode(source: string): string {
+  const out: string[] = []
+  let fence: { char: string; len: number } | null = null
+  for (const line of source.split('\n')) {
+    if (fence) {
+      const close = /^[ \t]*(`{3,}|~{3,})[ \t]*\r?$/.exec(line)
+      if (close && close[1][0] === fence.char && close[1].length >= fence.len) fence = null
+      continue
+    }
+    const open = /^[ \t]*(`{3,}|~{3,})(.*)$/.exec(line)
+    if (open && (open[1][0] === '~' || !open[2].includes('`'))) {
+      fence = { char: open[1][0], len: open[1].length }
+      continue
+    }
+    out.push(line)
+  }
+  return out.join('\n')
+}
+
+/** Repo and PR links in a post's MDX source, ignoring fenced/inline code and comments. */
 export function findGithubRefs(source: string): GithubRef[] {
-  const text = source.replace(/^```[\s\S]*?^```/gm, '')
+  const text = stripFencedCode(source).replace(
+    /(?<!`)(`+)(?!`)(?:(?!\r?\n[ \t]*\r?\n)[\s\S])*?(?<!`)\1(?!`)|<!--[\s\S]*?-->|\{\/\*[\s\S]*?\*\/\}/g,
+    '',
+  )
   const seen = new Map<string, GithubRef>()
-  for (const [url] of text.matchAll(/https?:\/\/(?:www\.)?github\.com\/[^\s)"'<>\]]+/g)) {
+  for (const [raw] of text.matchAll(/https?:\/\/(?:www\.)?github\.com\/[^\s)"'<>\]]+/g)) {
+    const url = raw.replace(/[.,;:!?)]+$/, '')
     const ref = parseGithubUrl(url)
     if (ref) seen.set(refKey(ref), ref)
   }
