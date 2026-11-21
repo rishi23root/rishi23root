@@ -1,9 +1,10 @@
 /**
  * Render every `web/diagrams/*.json` scene to SVG with Excalidraw's
- * `exportToSvg`. The register() call has to happen before the package import:
- * a static import would run first and die on the JSON/CSS loads.
+ * `exportToSvg`. The registerHooks() call has to happen before the package
+ * import: a static import would run first and die on the JSON/CSS loads.
  */
-import { register } from 'node:module'
+import { registerHooks } from 'node:module'
+import { load, resolve } from './excalidraw-loader.mjs'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -39,7 +40,7 @@ if (staleScenes.length === 0) {
 }
 
 const { JSDOM } = await import('jsdom')
-await register('./excalidraw-loader.mjs', import.meta.url)
+registerHooks({ resolve, load })
 
 const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
   url: 'https://rishi23root.in/',
