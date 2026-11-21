@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { getOrderedProjects, site, socialLinks } from '../lib/site'
+import { getFeaturedProjects, site, socialLinks } from '../lib/site'
 import { getPublishedPosts, isoDay, postPath } from '../lib/posts'
 
 /** Same set as the README contact row: email, website, then the chrome socials. */
@@ -14,8 +14,7 @@ const contactLinks = [
 export const GET: APIRoute = async () => {
   const posts = await getPublishedPosts()
 
-  const featured = getOrderedProjects()
-    .filter((project) => project.featured !== false)
+  const featured = getFeaturedProjects()
     .slice(0, 6)
     .map((project) => {
       const label = project.repo ?? project.title

@@ -1,9 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PageIntro from '../../components/PageIntro.astro'
-import { getOrderedProjects } from '../../lib/site'
+import { getOrderedProjects, getProjectTags, normalizeProjectTags } from '../../lib/site'
 
-const projects = getOrderedProjects()
+const projects = getOrderedProjects().map((project) => ({
+  ...project,
+  normalizedTags: normalizeProjectTags(project.tags),
+}))
+const tags = getProjectTags(projects)
 ---
 
 <BaseLayout
@@ -18,23 +22,182 @@ const projects = getOrderedProjects()
 
     {
       projects.length ? (
-        <ul class="post-list reveal" style="--i: 1">
-          {projects.map((project) => (
-            <li class="post-list-item hover-row">
-              <div class="post-list-top">
-                <h2 class="post-list-heading">
-                  <a class="row-link" href={project.url} rel="noopener noreferrer">
-                    {project.title}
-                  </a>
-                </h2>
+        <>
+          <div class="project-filters reveal" style="--i: 1" data-project-filters>
+            <div class="project-search-row">
+              <input
+                type="search"
+                class="project-search"
+                placeholder="Search projects…"
+                aria-label="Search projects"
+                autocomplete="off"
+                spellcheck="false"
+                data-project-search
+              />
+              <span class="project-count" aria-live="polite" data-project-count>
+                {projects.length} {projects.length === 1 ? 'project' : 'projects'}
+              </span>
+            </div>
+
+            {tags.length ? (
+              <div class="project-tag-bar" role="group" aria-label="Filter projects by tag">
+                <button
+                  type="button"
+                  class="project-tag-pill is-active"
+                  data-project-tag=""
+                  aria-pressed="true"
+                >
+                  all<span class="project-tag-count">{projects.length}</span>
+                </button>
+                {tags.map(({ tag, count }) => (
+                  <button
+                    type="button"
+                    class="project-tag-pill"
+                    data-project-tag={tag}
+                    aria-pressed="false"
+                  >
+                    {tag}<span class="project-tag-count">{count}</span>
+                  </button>
+                ))}
               </div>
-              {project.blurb ? <p class="post-list-summary">{project.blurb}</p> : null}
-            </li>
-          ))}
-        </ul>
+            ) : null}
+          </div>
+
+          <ul class="post-list reveal" style="--i: 2" data-project-list>
+            {projects.map((project) => (
+              <li
+                class="post-list-item hover-row"
+                data-project-item
+                data-tags={project.normalizedTags.join(',')}
+                data-search={[project.title, project.blurb ?? '', ...project.normalizedTags]
+                  .join(' ')
+                  .toLowerCase()}
+              >
+                <div class="post-list-top">
+                  <h2 class="post-list-heading">
+                    <a class="row-link" href={project.url} rel="noopener noreferrer">
+                      {project.title}
+                    </a>
+                  </h2>
+                </div>
+                {project.blurb ? <p class="post-list-summary">{project.blurb}</p> : null}
+                {project.normalizedTags.length ? (
+                  <p class="post-list-tags">{project.normalizedTags.join(' · ')}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+
+          <p class="empty project-empty" hidden data-project-empty>
+            No matching projects.{' '}
+            <button type="button" class="project-reset" data-project-reset>
+              Reset filters
+            </button>
+          </p>
+        </>
       ) : (
         <p class="empty">No projects yet.</p>
       )
     }
   </div>
 </BaseLayout>
+
+<script>
+  const filtersRoot = document.querySelector<HTMLElement>('[data-project-filters]')
+  const list = document.querySelector<HTMLElement>('[data-project-list]')
+
+  if (filtersRoot && list) {
+    const searchInput = filtersRoot.querySelector<HTMLInputElement>('[data-project-search]')
+    const countEl = filtersRoot.querySelector<HTMLElement>('[data-project-count]')
+    const tagButtons = Array.from(
+      filtersRoot.querySelectorAll<HTMLButtonElement>('[data-project-tag]'),
+    )
+    const items = Array.from(list.querySelectorAll<HTMLLIElement>('[data-project-item]'))
+    const emptyEl = document.querySelector<HTMLElement>('[data-project-empty]')
+    const resetBtn = document.querySelector<HTMLButtonElement>('[data-project-reset]')
+
+    const validTags = new Set(tagButtons.map((btn) => btn.dataset.projectTag ?? ''))
+    const params = new URLSearchParams(window.location.search)
+    const initialTag = (params.get('tag') ?? '').trim().toLowerCase()
+    let activeTag = validTags.has(initialTag) ? initialTag : ''
+    let query = (params.get('q') ?? '').trim()
+
+    if (searchInput && query) {
+      searchInput.value = query
+    }
+
+    const syncUrl = () => {
+      const next = new URLSearchParams()
+      if (activeTag) next.set('tag', activeTag)
+      if (query) next.set('q', query)
+      const qs = next.toString()
+      const target = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`
+      window.history.replaceState(null, '', target)
+    }
+
+    const apply = (updateUrl: boolean) => {
+      const tokens = query.toLowerCase().split(/\s+/).filter(Boolean)
+      let shown = 0
+
+      for (const item of items) {
+        const itemTags = (item.dataset.tags ?? '').split(',').filter(Boolean)
+        const itemSearch = item.dataset.search ?? ''
+        const tagMatch = !activeTag || itemTags.includes(activeTag)
+        const queryMatch = !tokens.length || tokens.every((token) => itemSearch.includes(token))
+        const match = tagMatch && queryMatch
+        item.hidden = !match
+        if (match) shown++
+      }
+
+      for (const btn of tagButtons) {
+        const isCurrent = (btn.dataset.projectTag ?? '') === activeTag
+        btn.classList.toggle('is-active', isCurrent)
+        btn.setAttribute('aria-pressed', String(isCurrent))
+      }
+
+      if (countEl) {
+        const total = items.length
+        countEl.textContent =
+          activeTag || tokens.length
+            ? `${shown} of ${total}`
+            : `${total} ${total === 1 ? 'project' : 'projects'}`
+      }
+
+      if (emptyEl) {
+        emptyEl.hidden = shown > 0
+      }
+
+      if (updateUrl) syncUrl()
+    }
+
+    for (const btn of tagButtons) {
+      btn.addEventListener('click', () => {
+        activeTag = btn.dataset.projectTag ?? ''
+        apply(true)
+      })
+    }
+
+    searchInput?.addEventListener('input', () => {
+      query = searchInput.value.trim()
+      apply(true)
+    })
+
+    searchInput?.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && searchInput.value) {
+        searchInput.value = ''
+        query = ''
+        apply(true)
+      }
+    })
+
+    resetBtn?.addEventListener('click', () => {
+      activeTag = ''
+      query = ''
+      if (searchInput) searchInput.value = ''
+      apply(true)
+      searchInput?.focus()
+    })
+
+    apply(false)
+  }
+</script>

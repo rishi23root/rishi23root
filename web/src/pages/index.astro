@@ -4,12 +4,12 @@ import SiteChrome from '../components/SiteChrome.astro'
 import HeroMoodShell from '../components/HeroMoodShell'
 import { firstMoodPreloadScript } from '../components/moods/preload'
 import { DESKTOP_MQ } from '../components/moods/media'
-import { getOrderedProjects, githubAvatarUrl, site, socialLinks } from '../lib/site'
+import { getFeaturedProjects, githubAvatarUrl, site, socialLinks } from '../lib/site'
 import { getPublishedPosts, isoDay, postPath } from '../lib/posts'
 
 const posts = (await getPublishedPosts()).slice(0, 5)
 
-const projects = getOrderedProjects().slice(0, 3)
+const projects = getFeaturedProjects().slice(0, 3)
 
 const capabilities = site.capabilities ?? []
 const moods = site.moods ?? []

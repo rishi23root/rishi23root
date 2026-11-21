@@ -1338,6 +1338,121 @@ html[data-theme] body:has(.lost) :is(.wordmark, .nav a, .theme-toggle, .socials-
   color: var(--warn);
 }
 
+/* Projects page: quiet search + tag filter bar */
+.project-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-5);
+}
+
+.project-search-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.project-search {
+  flex: 1 1 15rem;
+  max-width: 24rem;
+  font: inherit;
+  font-size: 0.92rem;
+  color: var(--fg);
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.45rem 0.7rem;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.project-search::placeholder {
+  color: var(--muted);
+}
+
+.project-search:focus {
+  border-color: color-mix(in srgb, var(--fg) 34%, transparent);
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
+}
+
+.project-search:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.project-count {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.project-tag-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.project-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.24rem 0.62rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+}
+
+.project-tag-pill:hover {
+  color: var(--fg);
+  border-color: color-mix(in srgb, var(--fg) 26%, transparent);
+}
+
+.project-tag-pill.is-active {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+  border-color: color-mix(in srgb, var(--fg) 30%, transparent);
+}
+
+.project-tag-pill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.project-tag-count {
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.project-empty {
+  margin-top: var(--space-4);
+}
+
+.project-reset {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.project-reset:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ---------------------------------------------------------------
  * Post page: article + utility rail
  * ------------------------------------------------------------- */

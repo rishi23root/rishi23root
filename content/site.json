@@ -73,6 +73,7 @@
       "repo": "saeeddhqan/Maryam",
       "blurb": "Open-source OSINT framework",
       "url": "https://github.com/saeeddhqan/Maryam",
+      "tags": ["open-source", "security", "python"],
       "order": 1,
       "featured": true
     },
@@ -81,6 +82,7 @@
       "repo": "EpicGames/PixelStreamingInfrastructure",
       "blurb": "Unreal Pixel Streaming servers and frontend",
       "url": "https://github.com/EpicGames/PixelStreamingInfrastructure",
+      "tags": ["open-source", "infrastructure", "web"],
       "order": 2,
       "featured": true
     },
@@ -89,6 +91,7 @@
       "repo": "rishi23root/opencv_wrap",
       "blurb": "Thin OpenCV wrappers for everyday CV scripts",
       "url": "https://github.com/rishi23root/opencv_wrap",
+      "tags": ["open-source", "python", "cv"],
       "order": 3,
       "featured": true
     },
@@ -97,6 +100,7 @@
       "repo": "rishi23root/pyblink",
       "blurb": "Blink-counter automation to ease eye strain",
       "url": "https://github.com/rishi23root/pyblink",
+      "tags": ["open-source", "python", "automation"],
       "order": 4,
       "featured": true
     },
@@ -105,6 +109,7 @@
       "repo": "rishi23root/resume-editor",
       "blurb": "Web app for crafting professional resumes fast",
       "url": "https://github.com/rishi23root/resume-editor",
+      "tags": ["open-source", "web-app"],
       "order": 5,
       "featured": true
     },
@@ -113,6 +118,7 @@
       "repo": "rishi23root/selenium-automations",
       "blurb": "Selenium scripts for repetitive browser workflows",
       "url": "https://github.com/rishi23root/selenium-automations",
+      "tags": ["open-source", "python", "automation"],
       "order": 6,
       "featured": true
     }

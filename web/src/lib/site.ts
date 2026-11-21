@@ -9,6 +9,21 @@ export type Project = {
   order?: number
   repo?: string
   featured?: boolean
+  tags?: string[]
+}
+
+/** Normalize a project's tags (trimmed, lowercase, deduplicated). */
+export function normalizeProjectTags(tags?: string[]): string[] {
+  if (!tags?.length) return []
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const raw of tags) {
+    const tag = raw.trim().toLowerCase()
+    if (!tag || seen.has(tag)) continue
+    seen.add(tag)
+    out.push(tag)
+  }
+  return out
 }
 
 /** Projects sorted by explicit `order` ascending (unordered items last). */
@@ -16,6 +31,24 @@ export function getOrderedProjects(): Project[] {
   return [...((site.projects ?? []) as Project[])].sort(
     (a, b) => (a.order ?? 99) - (b.order ?? 99),
   )
+}
+
+/** Featured projects (`featured !== false`), sorted by `order` ascending. */
+export function getFeaturedProjects(): Project[] {
+  return getOrderedProjects().filter((project) => project.featured !== false)
+}
+
+/** Unique project tags with counts, sorted by count descending then alphabetically. */
+export function getProjectTags(projects: Project[]): { tag: string; count: number }[] {
+  const counts = new Map<string, number>()
+  for (const project of projects) {
+    for (const tag of normalizeProjectTags(project.tags)) {
+      counts.set(tag, (counts.get(tag) ?? 0) + 1)
+    }
+  }
+  return [...counts.entries()]
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
 }
 
 /**

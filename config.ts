@@ -21,6 +21,7 @@ type SiteProject = {
   order?: number
   repo?: string
   featured?: boolean
+  tags?: string[]
 }
 
 const featuredProjects = [...((site.projects ?? []) as SiteProject[])]
