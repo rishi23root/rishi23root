@@ -6,13 +6,8 @@
     "declaration": false,
     "outDir": "./dist",
     "esModuleInterop": true,
-    "resolveJsonModule": true
-  },
-  "ts-node": {
-    "moduleTypes": {
-      "web/src/lib/site.ts": "cjs",
-      "web/src/components/command-palette/palette.ts": "cjs"
-    }
+    "resolveJsonModule": true,
+    "types": ["node"]
   },
   "include": ["*.ts"],
   "exclude": ["web", "dist", "node_modules"]

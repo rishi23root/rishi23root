@@ -41,9 +41,8 @@ export const githubReq = axios.create({
 })
 
 githubReq.defaults.raxConfig = {
-  instance: githubReq,
   retry: 5,
-  onRetryAttempt: (err) => {
+  onRetryAttempt: async (err) => {
     const cfg = raxGetConfig(err)
     const url = err.config?.url ?? 'unknown'
     const status = err.response?.status ?? err.code ?? 'network error'

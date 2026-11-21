@@ -70,13 +70,13 @@ async function main() {
   const origRaxConfig = { ...githubReq.defaults.raxConfig }
   let retryCalls = 0
   try {
-    assert.strictEqual(githubReq.defaults.raxConfig?.instance, githubReq)
+    assert.strictEqual(githubReq.defaults.raxConfig?.retry, 5)
     githubReq.defaults.raxConfig = {
       ...origRaxConfig,
       retry: 2,
       retryDelay: 1,
       backoffType: 'static',
-      onRetryAttempt: () => {},
+      onRetryAttempt: async () => {},
     }
     githubReq.defaults.adapter = async (cfg) => {
       if (cfg.url === '/retry-test') {
