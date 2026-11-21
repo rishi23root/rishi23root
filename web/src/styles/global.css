@@ -2002,30 +2002,11 @@ html[data-theme='light'] .gh-pop .gh-card {
   max-height: min(70vh, 640px);
 }
 
-.excal-board-placeholder {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
+.excal-board .excal-caption {
+  margin: var(--space-2) 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
   color: var(--muted);
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.55;
-  transition: opacity 360ms var(--ease-out);
-}
-
-.excal-board-placeholder [role='alert'] {
-  font-family: var(--sans);
-  font-size: 0.95rem;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.excal-board.is-ready .excal-board-placeholder {
-  opacity: 0;
-  pointer-events: none;
 }
 
 .excal-viewport {
@@ -2033,7 +2014,7 @@ html[data-theme='light'] .gh-pop .gh-card {
   inset: 0;
   overflow: hidden;
   cursor: grab;
-  touch-action: none;
+  touch-action: pan-y;
   animation: excal-fade-in 520ms var(--ease-out) both;
 }
 
@@ -2162,6 +2143,10 @@ html[data-theme='dark'] .excal-stage svg {
   text-align: center;
 }
 
+.excal-pill-zoom::before {
+  content: attr(data-zoom);
+}
+
 .excal-pill-sep {
   width: 1px;
   height: 16px;
@@ -2173,12 +2158,17 @@ html[data-theme='dark'] .excal-stage svg {
 .excal-modal {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  /* Above .chrome-bar (100) and .socials-menu-panel (200), below .kbar (1000) */
+  z-index: 300;
   display: grid;
   place-items: center;
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: blur(6px);
   animation: excal-backdrop-in var(--dur) var(--ease-out) both;
+}
+
+.excal-modal .excal-viewport {
+  touch-action: none;
 }
 
 @keyframes excal-backdrop-in {
