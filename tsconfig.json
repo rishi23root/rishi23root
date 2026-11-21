@@ -2,18 +2,11 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "CommonJS",
-    "sourceMap": false,
-    "declaration": false,
-    "outDir": "./dist",
+    "strict": true,
+    "noEmit": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
-  },
-  "ts-node": {
-    "moduleTypes": {
-      "web/src/lib/site.ts": "cjs",
-      "web/src/components/command-palette/palette.ts": "cjs",
-      "web/src/components/command-palette/actions.ts": "cjs"
-    }
+    "resolveJsonModule": true,
+    "types": ["node"]
   },
   "include": ["*.ts"],
   "exclude": ["web", "dist", "node_modules"]

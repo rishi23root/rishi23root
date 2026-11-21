@@ -1,4 +1,5 @@
-import { defineCollection, z } from 'astro:content'
+import { defineCollection } from 'astro:content'
+import { z } from 'astro/zod'
 import { glob } from 'astro/loaders'
 
 /** kebab-case slug; must also equal the file name (checked in lib/posts.ts). */

@@ -1,6 +1,7 @@
 /**
- * Classic `node:module` `register()` hooks so `@excalidraw/excalidraw`
- * can be imported from Node 20 and Node 26.
+ * Synchronous `node:module` `registerHooks()` hooks so `@excalidraw/excalidraw`
+ * can be imported on Node 22.15+ and Node 26 without the DEP0205 `register()`
+ * deprecation warning.
  *
  * The package imports `open-color/open-color.json` without an import
  * attribute, which Node rejects, and it imports CSS, which Node cannot load.
@@ -48,18 +49,18 @@ function moduleFieldResolution(specifier, context) {
   return { url: pathToFileURL(esmPath).href, shortCircuit: true, format: 'module' }
 }
 
-export async function resolve(specifier, context, nextResolve) {
+export function resolve(specifier, context, nextResolve) {
   const viaModuleField = moduleFieldResolution(specifier, context)
   if (viaModuleField) return viaModuleField
   try {
-    return await nextResolve(specifier, context)
+    return nextResolve(specifier, context)
   } catch (err) {
     if (err?.code !== 'ERR_MODULE_NOT_FOUND' || HAS_EXT.test(specifier)) throw err
     return nextResolve(`${specifier}.js`, context)
   }
 }
 
-export async function load(url, context, nextLoad) {
+export function load(url, context, nextLoad) {
   if (url.endsWith('.json')) {
     const text = readFileSync(fileURLToPath(url), 'utf8')
     return { format: 'module', source: 'export default ' + text, shortCircuit: true }

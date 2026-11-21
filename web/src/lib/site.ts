@@ -64,7 +64,7 @@ export function getProjectTags(projects: Project[]): { tag: string; count: numbe
 export function absoluteUrl(path: string): string {
   const url = new URL(path, `${site.siteUrl}/`)
   const isFile = /\.[a-z0-9]+$/i.test(url.pathname.split('/').pop() ?? '')
-  if (!isFile && !url.pathname.endsWith('/')) {
+  if (url.origin === new URL(site.siteUrl).origin && !isFile && !url.pathname.endsWith('/')) {
     url.pathname = `${url.pathname}/`
   }
   return url.toString()

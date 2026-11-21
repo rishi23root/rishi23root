@@ -5,9 +5,6 @@ export const github = {
   name: site.github.name,
 }
 
-/** Same handle used in social profile URLs. */
-export const socialHandle = github.name
-
 /** Canonical site URL (landing + blog). */
 export const siteUrl = site.siteUrl
 
