@@ -433,17 +433,14 @@ html[data-theme='light'] .theme-icon-moon {
   font-size: 0.95rem;
   line-height: 1;
   color: var(--muted);
-  opacity: 0.55;
   text-decoration: none;
   transition:
     color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
 }
 
 .home-section-more:is(:hover, :focus-visible) {
   color: var(--fg);
-  opacity: 1;
   transform: translateX(2px);
 }
 
@@ -455,7 +452,7 @@ html[data-theme='light'] .theme-icon-moon {
 @media (prefers-reduced-motion: reduce) {
   .home-section-more,
   .home-section-more:is(:hover, :focus-visible) {
-    transition: color var(--dur) var(--ease-out), opacity var(--dur) var(--ease-out);
+    transition: color var(--dur) var(--ease-out);
     transform: none;
   }
 }

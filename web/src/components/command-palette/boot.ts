@@ -15,8 +15,24 @@ let chordMap: Map<string, CommandAction> | null = null
 let firstKeys: Set<string> | null = null
 
 function load() {
-  if (!loading) loading = import('./palette')
+  if (!loading) {
+    loading = import('./palette').catch((err) => {
+      loading = null
+      throw err
+    })
+  }
   return loading
+}
+
+function hasOpenModal(): boolean {
+  if (document.documentElement.classList.contains('kbar-open')) return true
+  const dialogs = document.querySelectorAll('[role="dialog"][aria-modal="true"]')
+  for (const dialog of dialogs) {
+    if (!dialog.closest('[hidden]') && dialog.getAttribute('aria-hidden') !== 'true') {
+      return true
+    }
+  }
+  return Boolean(document.querySelector('dialog[open]'))
 }
 
 function isTypingTarget(t: EventTarget | null): boolean {
@@ -86,7 +102,13 @@ window.addEventListener('keydown', (e) => {
   if (meta && key === 'k') {
     e.preventDefault()
     clearChord()
-    load().then((m) => m.togglePalette())
+    load().then((m) => m.togglePalette(), () => {})
+    return
+  }
+
+  // Ignore bare shortcuts while any modal dialog (e.g. Excalidraw or palette) is open
+  if (hasOpenModal()) {
+    clearChord()
     return
   }
 
@@ -94,7 +116,7 @@ window.addEventListener('keydown', (e) => {
   if (!meta && e.key === '?' && !isTypingTarget(e.target)) {
     e.preventDefault()
     clearChord()
-    load().then((m) => m.openPalette())
+    load().then((m) => m.openPalette(), () => {})
     return
   }
 
