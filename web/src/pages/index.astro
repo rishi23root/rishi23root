@@ -40,17 +40,49 @@ const personJsonLd = {
   }
   {
     /* Hold centered await until the first still is ready (lib/settleMood.ts
-       FLIPs mood out from behind the text). Skip when no moods. */
+       FLIPs mood out from behind the text). Skip when no moods.
+       The 2.5s failsafe and viewport listener live here so failed/blocked
+       React hydration or shrinking below 1024px can never stick in await. */
     moods.length ? (
       <script is:inline slot="head" define:vars={{ desktopMq: DESKTOP_MQ }}>
         try {
+          var root = document.documentElement
+          var mq = window.matchMedia(desktopMq)
           if (
-            window.matchMedia(desktopMq).matches &&
+            mq.matches &&
             !window.matchMedia('(prefers-reduced-motion: reduce)').matches
           ) {
-            document.documentElement.classList.add('mood-await')
+            var timer = 0
+            var onMq = function () {
+              if (!mq.matches) clearAwait()
+            }
+            var cleanup = function () {
+              if (timer) {
+                window.clearTimeout(timer)
+                timer = 0
+              }
+              if (mq.removeEventListener) mq.removeEventListener('change', onMq)
+              else if (mq.removeListener) mq.removeListener(onMq)
+              window.__moodAwaitCleanup = undefined
+            }
+            var clearAwait = function () {
+              if (root.classList.contains('mood-await')) {
+                root.classList.add('mood-settled')
+                root.classList.remove('mood-await')
+              }
+              cleanup()
+            }
+            root.classList.add('mood-await')
+            timer = window.setTimeout(clearAwait, 2500)
+            if (mq.addEventListener) mq.addEventListener('change', onMq)
+            else if (mq.addListener) mq.addListener(onMq)
+            window.__moodAwaitCleanup = cleanup
           }
-        } catch (e) {}
+        } catch (e) {
+          try {
+            document.documentElement.classList.remove('mood-await')
+          } catch (e2) {}
+        }
         window.addEventListener('pagereveal', function (e) {
           if (e.viewTransition) window.__homePageVt = e.viewTransition.finished
         })

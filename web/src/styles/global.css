@@ -558,8 +558,9 @@ html[data-theme='light'] .theme-icon-moon {
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     column-gap: var(--home-gap);
     align-items: start;
-    /* Width of the settled text column (the 3fr track), from the split. */
+    /* Width of the settled columns (2fr mood / 3fr text), from the split. */
     container-type: inline-size;
+    --home-mood-col: calc((100cqi - var(--home-gap)) * 2 / 5);
     --home-col: calc((100cqi - var(--home-gap)) * 3 / 5);
   }
 
@@ -608,9 +609,10 @@ html[data-theme='light'] .theme-icon-moon {
     max-width: var(--home-col);
   }
 
-  /* Before the mood still is ready: text+nav sit centered at the Writing
-     / post-group measure. Mood stacks behind; settleMood.ts FLIPs both
-     into the split (plate emerges from behind text). */
+  /* Before the mood still is ready: text+nav sit centered at the settled
+     text track (--home-col) so await → split only translates on the
+     compositor with zero width animation or text reflow. Mood sits behind
+     at its settled track width (--home-mood-col) so it stays fully covered. */
   html.mood-await .home-split {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -618,7 +620,7 @@ html[data-theme='light'] .theme-icon-moon {
   html.mood-await .home-text {
     grid-column: 1;
     grid-row: 1;
-    width: min(100%, var(--post-group));
+    width: var(--home-col);
     margin-inline: auto;
     z-index: 2;
     position: relative;
@@ -628,6 +630,8 @@ html[data-theme='light'] .theme-icon-moon {
   html.mood-await .home-mood {
     grid-column: 1;
     grid-row: 1;
+    width: var(--home-mood-col);
+    margin-inline: auto;
     z-index: 1;
     pointer-events: none;
   }
@@ -650,16 +654,12 @@ html[data-theme='light'] .theme-icon-moon {
   }
 
   /* During the slide (lib/settleMood.ts): opaque text covers the plate
-     until it eases out from under the text's left edge into the gap.
-     Width is WAAPI-driven (may briefly exceed the settled track). */
+     until it eases out from under the text's left edge into the gap. */
   html.mood-settling .home-text {
     position: relative;
     z-index: 2;
     background: var(--bg);
-    max-width: none;
-    margin-inline: 0;
-    overflow: visible;
-    will-change: transform, width;
+    will-change: transform;
   }
 
   html.mood-settling .home-mood {
@@ -669,6 +669,7 @@ html[data-theme='light'] .theme-icon-moon {
   }
 
   html.mood-settling .home-mood .hero-shell-stage {
+    transform-origin: 0 0;
     will-change: transform, opacity;
   }
 
