@@ -36,10 +36,18 @@ function score(hay: string, needle: string): number {
   return 0
 }
 
-function filterActions(q: string): CommandAction[] {
-  if (!q.trim()) return actions.slice()
-  return actions
-    .map((a) => ({ a, s: Math.max(score(a.name, q), score(a.section ?? '', q)) }))
+export function filterActions(q: string, list: CommandAction[] = actions): CommandAction[] {
+  const trimmed = q.trim()
+  if (!trimmed) return list.slice()
+  const atMode = trimmed.startsWith('@')
+  const needle = atMode ? trimmed.slice(1).trim() : trimmed
+  const pool = atMode ? list.filter((a) => a.section === 'Socials') : list
+  if (!needle) return pool.slice()
+  return pool
+    .map((a) => ({
+      a,
+      s: Math.max(score(a.name, needle), score(a.section ?? '', needle), score(a.meta ?? '', needle)),
+    }))
     .filter((x) => x.s > 0)
     .sort((x, y) => y.s - x.s)
     .map((x) => x.a)
@@ -53,7 +61,11 @@ function run(action: CommandAction) {
     return
   }
   if (action.href) {
-    window.location.assign(action.href)
+    if (/^https?:\/\//i.test(action.href)) {
+      window.open(action.href, '_blank', 'noopener,noreferrer')
+    } else {
+      window.location.assign(action.href)
+    }
   }
 }
 
@@ -84,6 +96,22 @@ function renderList(listEl: HTMLElement) {
     btn.setAttribute('aria-selected', i === active ? 'true' : 'false')
     btn.dataset.index = String(i)
 
+    if (action.iconPath) {
+      const icon = document.createElement('span')
+      icon.className = 'kbar-item-icon'
+      icon.setAttribute('aria-hidden', 'true')
+      const svgNS = 'http://www.w3.org/2000/svg'
+      const svg = document.createElementNS(svgNS, 'svg')
+      svg.setAttribute('viewBox', '0 0 24 24')
+      svg.setAttribute('focusable', 'false')
+      const path = document.createElementNS(svgNS, 'path')
+      path.setAttribute('fill', 'currentColor')
+      path.setAttribute('d', action.iconPath)
+      svg.appendChild(path)
+      icon.appendChild(svg)
+      btn.appendChild(icon)
+    }
+
     const name = document.createElement('span')
     name.className = 'kbar-item-name'
     name.textContent = action.name
@@ -98,6 +126,11 @@ function renderList(listEl: HTMLElement) {
         keys.appendChild(kbd)
       })
       btn.appendChild(keys)
+    } else if (action.meta) {
+      const meta = document.createElement('span')
+      meta.className = 'kbar-meta'
+      meta.textContent = action.meta
+      btn.appendChild(meta)
     }
 
     btn.addEventListener('click', () => run(action))
@@ -163,7 +196,7 @@ function ensureRoot(): HTMLElement {
     <div class="kbar-dialog" role="dialog" aria-modal="true" aria-label="Command palette">
       <input class="kbar-input" type="text" autocomplete="off" spellcheck="false" placeholder="Jump to…" aria-label="Filter commands" />
       <div class="kbar-list" role="listbox"></div>
-      <p class="kbar-hint"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>↵</kbd> open · <kbd>esc</kbd> close</p>
+      <p class="kbar-hint"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>↵</kbd> open · <kbd>@</kbd> socials · <kbd>esc</kbd> close</p>
     </div>
   `
   document.body.appendChild(root)

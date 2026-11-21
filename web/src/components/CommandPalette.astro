@@ -4,6 +4,7 @@
  * Boot script is tiny; the UI chunk loads only on first open.
  */
 import { getPublishedPosts, postPath } from '../lib/posts'
+import { socialLinks } from '../lib/site'
 import type { CommandAction } from './command-palette/types'
 
 const posts = await getPublishedPosts()
@@ -19,6 +20,14 @@ const actions: CommandAction[] = [
     name: p.data.title,
     section: 'Writing',
     href: postPath(p.data.slug),
+  })),
+  ...socialLinks.map((s) => ({
+    id: `social-${s.id}`,
+    name: s.label,
+    section: 'Socials',
+    href: s.href,
+    iconPath: s.iconPath,
+    meta: s.meta,
   })),
 ]
 ---

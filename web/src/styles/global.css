@@ -3160,11 +3160,40 @@ html[data-theme='dark'] .excal-stage svg {
   background: var(--row-hover);
 }
 
+.kbar-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  color: var(--muted);
+}
+
+.kbar-item-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.kbar-item.is-active .kbar-item-icon,
+.kbar-item:hover .kbar-item-icon {
+  color: var(--fg);
+}
+
 .kbar-item-name {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.kbar-meta {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
 }
 
 .kbar-keys {

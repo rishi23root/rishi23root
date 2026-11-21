@@ -16,8 +16,11 @@ import {
   getOrderedProjects,
   getProjectTags,
   normalizeProjectTags,
+  socialLinks,
   type Project,
 } from './web/src/lib/site'
+import { filterActions } from './web/src/components/command-palette/palette'
+import type { CommandAction } from './web/src/components/command-palette/types'
 
 async function main() {
   // 1. config.ts derives opensource from unified projects[]
@@ -220,6 +223,50 @@ async function main() {
     { tag: 'beta', count: 1 },
     { tag: 'zeta', count: 1 },
   ])
+
+  // 8. socialLinks single source of truth + kbar @ filter
+  assert.deepStrictEqual(
+    socialLinks.map((s) => ({ id: s.id, label: s.label, meta: s.meta })),
+    [
+      { id: 'email', label: 'Email', meta: 'hi@rishi23root.in' },
+      { id: 'x', label: 'X', meta: '@rishi23root ↗' },
+      { id: 'linkedin', label: 'LinkedIn', meta: 'in/rishi23root ↗' },
+      { id: 'github', label: 'GitHub', meta: 'rishi23root ↗' },
+      { id: 'pypi', label: 'PyPI', meta: 'rishi23root ↗' },
+    ],
+  )
+  assert.ok(socialLinks.every((s) => s.iconPath.length > 0))
+
+  const kbarActions: CommandAction[] = [
+    { id: 'home', name: 'Home', section: 'Navigate', href: '/' },
+    { id: 'post-x', name: 'XPost', section: 'Writing', href: '/writing/x/' },
+    ...socialLinks.map((s) => ({
+      id: `social-${s.id}`,
+      name: s.label,
+      section: 'Socials',
+      href: s.href,
+      iconPath: s.iconPath,
+      meta: s.meta,
+    })),
+  ]
+  assert.strictEqual(filterActions('', kbarActions).length, kbarActions.length)
+  assert.deepStrictEqual(
+    filterActions('@', kbarActions).map((a) => a.id),
+    ['social-email', 'social-x', 'social-linkedin', 'social-github', 'social-pypi'],
+  )
+  assert.deepStrictEqual(
+    filterActions('  @  ', kbarActions).map((a) => a.id),
+    ['social-email', 'social-x', 'social-linkedin', 'social-github', 'social-pypi'],
+  )
+  assert.deepStrictEqual(
+    filterActions('@git', kbarActions).map((a) => a.id),
+    ['social-github'],
+  )
+  assert.deepStrictEqual(
+    filterActions('@hi@', kbarActions).map((a) => a.id),
+    ['social-email'],
+  )
+  assert.deepStrictEqual(filterActions('@nonexistent', kbarActions), [])
 
   console.log('scripts.test.ts: all assertions passed')
 }
