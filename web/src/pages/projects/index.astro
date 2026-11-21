@@ -1,11 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PageIntro from '../../components/PageIntro.astro'
-import { site } from '../../lib/site'
+import { getOrderedProjects } from '../../lib/site'
 
-const projects = (site.projects ?? [])
-  .slice()
-  .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+const projects = getOrderedProjects()
 ---
 
 <BaseLayout

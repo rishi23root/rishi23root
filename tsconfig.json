@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "module": "CommonJS",
     "sourceMap": false,
     "declaration": false,
     "outDir": "./dist",
     "esModuleInterop": true,
     "resolveJsonModule": true
-  }
+  },
+  "include": ["*.ts"],
+  "exclude": ["web", "dist", "node_modules"]
 }

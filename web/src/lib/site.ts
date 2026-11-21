@@ -2,6 +2,22 @@ import siteJson from '../../../content/site.json'
 
 export const site = siteJson
 
+export type Project = {
+  title: string
+  blurb?: string
+  url: string
+  order?: number
+  repo?: string
+  featured?: boolean
+}
+
+/** Projects sorted by explicit `order` ascending (unordered items last). */
+export function getOrderedProjects(): Project[] {
+  return [...((site.projects ?? []) as Project[])].sort(
+    (a, b) => (a.order ?? 99) - (b.order ?? 99),
+  )
+}
+
 /**
  * Absolute URL on the canonical site (canonical links, OG, JSON-LD).
  * Directory-style paths keep a trailing slash to match `trailingSlash: 'always'`;

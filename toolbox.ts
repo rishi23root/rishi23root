@@ -107,7 +107,8 @@ export const toolbox: Shield[] = [
 /** Render Toolbox <p> of flat shields.io badges. */
 export function renderToolbox(shields: Shield[] = toolbox): string {
   const imgs = shields.map(({ label, color, logo, logoColor }) => {
-    const encoded = encodeURIComponent(label)
+    const escaped = label.replace(/-/g, '--').replace(/_/g, '__')
+    const encoded = encodeURIComponent(escaped)
     let src = `https://img.shields.io/badge/${encoded}-${color}?style=flat`
     if (logo) src += `&logo=${logo}`
     if (logoColor) src += `&logoColor=${logoColor}`
