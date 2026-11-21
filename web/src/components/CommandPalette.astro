@@ -4,6 +4,7 @@
  * Boot script is tiny; the UI chunk loads only on first open.
  */
 import { getPublishedPosts, postPath } from '../lib/posts'
+import { safeJson } from '../lib/safeJson'
 import { socialLinks } from '../lib/site'
 import type { CommandAction } from './command-palette/types'
 
@@ -32,11 +33,7 @@ const actions: CommandAction[] = [
 ]
 ---
 
-<script
-  type="application/json"
-  id="site-kbar-actions"
-  set:html={JSON.stringify(actions).replace(/</g, '\\u003c')}
-/>
+<script type="application/json" id="site-kbar-actions" set:html={safeJson(actions)} />
 <script>
   import './command-palette/boot.ts'
 </script>

@@ -3,6 +3,7 @@ import '../styles/global.css'
 import CommandPalette from '../components/CommandPalette.astro'
 import SiteChrome from '../components/SiteChrome.astro'
 import { absoluteUrl, site } from '../lib/site'
+import { safeJson } from '../lib/safeJson'
 
 type Props = {
   title?: string
@@ -72,7 +73,7 @@ const isHome = path === '/'
 
     {
       jsonLdBlocks.map((block) => (
-        <script type="application/ld+json" set:html={JSON.stringify(block)} />
+        <script type="application/ld+json" set:html={safeJson(block)} />
       ))
     }
 

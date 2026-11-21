@@ -13,11 +13,11 @@ import { fileURLToPath } from 'node:url'
 type Props = {
   src: string
   height?: number | string
+  caption?: string
   class?: string
-  className?: string
 }
 
-const { src, height, class: className, className: classNameAlt } = Astro.props
+const { src, height, caption, class: className } = Astro.props
 
 const file = src.split(/[/\\]/).pop() ?? ''
 if (!/^[a-z0-9-]+\.json$/.test(file)) {
@@ -49,6 +49,7 @@ function readSvgSize(markup: string) {
 
 const size = readSvgSize(svg)
 const heightCss = height == null || height === '' ? undefined : typeof height === 'number' ? `${height}px` : height
+const captionText = caption?.trim() || undefined
 const label = `Diagram: ${file.replace(/\.json$/, '').replace(/[-_]/g, ' ')}`
 const stageStyle = `width:${size.w}px;height:${size.h}px;transform:translate(-50%, -50%)`
 
@@ -61,18 +62,17 @@ locals.excalScript = true
 ---
 
 <figure
-  class:list={['excal-board', 'is-ready', className, classNameAlt]}
+  class:list={['excal-board', className]}
   style={heightCss ? `--excal-h: ${heightCss}` : undefined}
 >
   <div class="excal-board-frame">
-    <div class="excal-board-placeholder" aria-hidden="true"><span>Whiteboard</span></div>
-    <div class="excal-viewport" role="group" aria-label={label}>
+    <div class="excal-viewport">
       <div class="excal-stage" role="img" aria-label={label} data-w={size.w} data-h={size.h} style={stageStyle} set:html={svg} />
       <div class="excal-pill" role="toolbar" aria-label="Diagram controls">
         <button type="button" data-excal="out" aria-label="Zoom out">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M8.5 11h5M16 16l4 4" /></svg>
         </button>
-        <span class="excal-pill-zoom" aria-live="polite">100%</span>
+        <span class="excal-pill-zoom" data-zoom="100%" aria-hidden="true"></span>
         <button type="button" data-excal="in" aria-label="Zoom in">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M8.5 11h5M11 8.5v5M16 16l4 4" /></svg>
         </button>
@@ -84,185 +84,228 @@ locals.excalScript = true
         <button type="button" data-excal="expand" aria-label="Expand">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg>
         </button>
+        <span class="visually-hidden" aria-live="polite" data-excal="status"></span>
       </div>
     </div>
   </div>
+  {captionText && <figcaption class="excal-caption">{captionText}</figcaption>}
 </figure>
 
 {emitScript && (
 <script is:inline>
-  const MIN_ZOOM = 0.1
-  const MAX_ZOOM = 4
-  const ZOOM_STEP = 1.25
-  const UNPIN_DELAY = 1200
-  const CLOSE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>'
+  ;(() => {
+    const MIN_ZOOM = 0.1
+    const MAX_ZOOM = 4
+    const ZOOM_STEP = 1.25
+    const UNPIN_DELAY = 1200
+    const EXPAND_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg>'
+    const CLOSE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>'
+    const FOCUSABLE = 'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
 
-  const boards = new WeakMap()
+    function bindBoard(board) {
+      if (board.dataset.excalInit === '1') return
+      const frame = board.querySelector('.excal-board-frame')
+      const viewport = frame?.querySelector(':scope > .excal-viewport')
+      const stage = viewport?.querySelector('.excal-stage')
+      if (!frame || !viewport || !stage) return
+      board.dataset.excalInit = '1'
 
-  function bindViewer(viewport, onClose) {
-    const stage = viewport.querySelector('.excal-stage')
-    if (!stage) return
-    const size = { w: Number(stage.dataset.w) || 0, h: Number(stage.dataset.h) || 0 }
-    let frame = { w: 0, h: 0 }
-    let zoom = null
-    let pan = { x: 0, y: 0 }
-    let drag = null
-    let pinned = false
-    let hovering = false
-    let hold = false
-    let unpinTimer = 0
+      const label = stage.getAttribute('aria-label') || 'Diagram'
+      const size = { w: Number(stage.dataset.w) || 0, h: Number(stage.dataset.h) || 0 }
+      let frameSize = { w: 0, h: 0 }
+      let zoom = null
+      let pan = { x: 0, y: 0 }
+      let drag = null
+      let pinned = false
+      let onModalClose = null
+      let unpinTimer = 0
 
-    const zoomLabel = viewport.querySelector('.excal-pill-zoom')
-    const cancelUnpin = () => window.clearTimeout(unpinTimer)
-    const fit = () =>
-      size.w && size.h && frame.w && frame.h ? Math.min(frame.w / size.w, frame.h / size.h, 1) : 1
-    const scale = () => zoom ?? fit()
-    const apply = () => {
-      const s = scale()
-      stage.style.transform = `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${s})`
-      if (zoomLabel) zoomLabel.textContent = `${Math.round(s * 100)}%`
-    }
-    const setScale = (next) => {
-      zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next))
-      apply()
-    }
+      const pill = viewport.querySelector('.excal-pill')
+      const zoomLabel = viewport.querySelector('.excal-pill-zoom')
+      const statusEl = viewport.querySelector('[data-excal="status"]')
+      const actionBtn = pill?.querySelector('[data-excal="expand"]')
 
-    const measure = () => {
-      frame = { w: viewport.clientWidth, h: viewport.clientHeight }
-      apply()
-    }
-    const ro = new ResizeObserver(measure)
-    ro.observe(viewport)
-    measure()
-
-    viewport.addEventListener('pointerenter', () => {
-      hovering = true
-      cancelUnpin()
-    })
-    viewport.addEventListener('pointerleave', () => {
-      hovering = false
-      if (pinned && !hold) scheduleUnpin()
-    })
-
-    const pill = viewport.querySelector('.excal-pill')
-    pill?.addEventListener(
-      'click',
-      () => {
+      const cancelUnpin = () => {
+        if (unpinTimer) {
+          window.clearTimeout(unpinTimer)
+          unpinTimer = 0
+        }
+      }
+      const fit = () =>
+        size.w && size.h && frameSize.w && frameSize.h
+          ? Math.min(frameSize.w / size.w, frameSize.h / size.h, 1)
+          : 1
+      const scale = () => zoom ?? fit()
+      const apply = (announce = false) => {
+        const s = scale()
+        const pct = `${Math.round(s * 100)}%`
+        stage.style.transform = `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) scale(${s})`
+        if (zoomLabel) zoomLabel.dataset.zoom = pct
+        if (announce && statusEl) statusEl.textContent = `Zoom ${pct}`
+      }
+      const setScale = (next) => {
+        zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next))
+        apply(true)
+      }
+      const measure = (announce = false) => {
+        frameSize = { w: viewport.clientWidth, h: viewport.clientHeight }
+        apply(announce)
+      }
+      const resetView = (announce = false) => {
+        zoom = null
+        pan = { x: 0, y: 0 }
+        measure(announce)
+      }
+      const scheduleUnpin = () => {
         cancelUnpin()
-        pinned = true
-        viewport.classList.add('is-pinned')
-      },
-      true,
-    )
+        unpinTimer = window.setTimeout(() => {
+          unpinTimer = 0
+          pinned = false
+          viewport.classList.remove('is-pinned')
+        }, UNPIN_DELAY)
+      }
 
-    viewport.addEventListener('pointerdown', (e) => {
-      if (e.button !== 0 || (e.target instanceof Element && e.target.closest('.excal-pill'))) return
-      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, px: pan.x, py: pan.y }
-      viewport.setPointerCapture(e.pointerId)
-    })
-    viewport.addEventListener('pointermove', (e) => {
-      if (!drag || drag.id !== e.pointerId) return
-      pan = { x: drag.px + e.clientX - drag.x, y: drag.py + e.clientY - drag.y }
-      apply()
-    })
-    const endDrag = (e) => {
-      if (drag?.id === e.pointerId) drag = null
-    }
-    viewport.addEventListener('pointerup', endDrag)
-    viewport.addEventListener('pointercancel', endDrag)
+      new ResizeObserver(() => measure()).observe(viewport)
+      measure()
 
-    pill?.querySelector('[data-excal="out"]')?.addEventListener('click', () => setScale(scale() / ZOOM_STEP))
-    pill?.querySelector('[data-excal="in"]')?.addEventListener('click', () => setScale(scale() * ZOOM_STEP))
-    pill?.querySelector('[data-excal="reset"]')?.addEventListener('click', () => {
-      zoom = null
-      pan = { x: 0, y: 0 }
-      apply()
-    })
+      viewport.addEventListener('pointerenter', cancelUnpin)
+      viewport.addEventListener('pointerleave', () => {
+        if (pinned && !onModalClose) scheduleUnpin()
+      })
 
-    const closeBtn = pill?.querySelector('[data-excal="close"]')
-    if (onClose && closeBtn) closeBtn.addEventListener('click', onClose)
+      pill?.addEventListener(
+        'click',
+        () => {
+          if (onModalClose) return
+          cancelUnpin()
+          pinned = true
+          viewport.classList.add('is-pinned')
+        },
+        true,
+      )
 
-    function scheduleUnpin() {
-      cancelUnpin()
-      unpinTimer = window.setTimeout(() => {
+      viewport.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 || (e.target instanceof Element && e.target.closest('.excal-pill'))) return
+        // Inline mobile viewports allow vertical page scroll; touch panning runs in the modal.
+        if (e.pointerType !== 'mouse' && !onModalClose) return
+        drag = { id: e.pointerId, x: e.clientX, y: e.clientY, px: pan.x, py: pan.y }
+        viewport.setPointerCapture(e.pointerId)
+      })
+      viewport.addEventListener('pointermove', (e) => {
+        if (!drag || drag.id !== e.pointerId) return
+        pan = { x: drag.px + e.clientX - drag.x, y: drag.py + e.clientY - drag.y }
+        apply()
+      })
+      viewport.addEventListener('pointerup', (e) => {
+        if (drag?.id === e.pointerId) drag = null
+      })
+      viewport.addEventListener('pointercancel', (e) => {
+        if (drag?.id === e.pointerId) drag = null
+      })
+
+      pill?.querySelector('[data-excal="out"]')?.addEventListener('click', () => setScale(scale() / ZOOM_STEP))
+      pill?.querySelector('[data-excal="in"]')?.addEventListener('click', () => setScale(scale() * ZOOM_STEP))
+      pill?.querySelector('[data-excal="reset"]')?.addEventListener('click', () => resetView(true))
+
+      function setExpanded(closeFn) {
+        onModalClose = closeFn
+        drag = null
+        cancelUnpin()
         pinned = false
         viewport.classList.remove('is-pinned')
-      }, UNPIN_DELAY)
+        if (statusEl) statusEl.textContent = ''
+        if (actionBtn) {
+          actionBtn.dataset.excal = closeFn ? 'close' : 'expand'
+          actionBtn.setAttribute('aria-label', closeFn ? 'Close' : 'Expand')
+          actionBtn.innerHTML = closeFn ? CLOSE_ICON : EXPAND_ICON
+        }
+        resetView()
+      }
+
+      function openModal() {
+        if (document.querySelector('.excal-modal')) return
+        const opener = document.activeElement
+
+        const dialog = document.createElement('div')
+        dialog.className = 'excal-modal-board'
+        dialog.tabIndex = -1
+        dialog.setAttribute('role', 'dialog')
+        dialog.setAttribute('aria-modal', 'true')
+        dialog.setAttribute('aria-label', label)
+
+        const modal = document.createElement('div')
+        modal.className = 'excal-modal'
+        modal.append(dialog)
+        document.body.append(modal)
+
+        const prevOverflow = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+        dialog.append(viewport)
+
+        let closed = false
+        const close = () => {
+          if (closed) return
+          closed = true
+          document.removeEventListener('keydown', onKey)
+          frame.append(viewport)
+          setExpanded(null)
+          modal.remove()
+          document.body.style.overflow = prevOverflow
+          if (opener instanceof HTMLElement && opener.isConnected) opener.focus()
+        }
+        const onKey = (e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault()
+            close()
+            return
+          }
+          if (e.key !== 'Tab') return
+          const focusables = Array.from(dialog.querySelectorAll(FOCUSABLE)).filter(
+            (el) => typeof el.focus === 'function' && !el.closest('[hidden], [inert]'),
+          )
+          if (!focusables.length) {
+            e.preventDefault()
+            dialog.focus()
+            return
+          }
+          const first = focusables[0]
+          const last = focusables[focusables.length - 1]
+          const active = document.activeElement
+          if (!dialog.contains(active) || active === dialog) {
+            e.preventDefault()
+            ;(e.shiftKey ? last : first).focus()
+          } else if (e.shiftKey && active === first) {
+            e.preventDefault()
+            last.focus()
+          } else if (!e.shiftKey && active === last) {
+            e.preventDefault()
+            first.focus()
+          }
+        }
+        document.addEventListener('keydown', onKey)
+        let backdropDown = false
+        modal.addEventListener('pointerdown', (e) => {
+          backdropDown = e.target === modal
+        })
+        modal.addEventListener('click', (e) => {
+          if (backdropDown && e.target === modal) close()
+        })
+
+        setExpanded(close)
+        actionBtn?.focus()
+      }
+
+      actionBtn?.addEventListener('click', () => {
+        if (onModalClose) onModalClose()
+        else openModal()
+      })
     }
 
-    return {
-      setHold(next) {
-        hold = next
-        if (hold) cancelUnpin()
-        else if (pinned && !hovering) scheduleUnpin()
-      },
-      focusClose() {
-        closeBtn?.focus()
-      },
+    function boot() {
+      document.querySelectorAll('.excal-board').forEach(bindBoard)
     }
-  }
-
-  function openModal(board, source) {
-    const opener = document.activeElement
-    const label = source.getAttribute('aria-label') || 'Diagram'
-    const viewport = source.cloneNode(true)
-    viewport.classList.remove('is-pinned')
-    const expand = viewport.querySelector('[data-excal="expand"]')
-    if (expand) {
-      expand.dataset.excal = 'close'
-      expand.setAttribute('aria-label', 'Close')
-      expand.innerHTML = CLOSE_ICON
-    }
-
-    const dialog = document.createElement('div')
-    dialog.className = 'excal-modal-board'
-    dialog.setAttribute('role', 'dialog')
-    dialog.setAttribute('aria-modal', 'true')
-    dialog.setAttribute('aria-label', label)
-    dialog.append(viewport)
-
-    const modal = document.createElement('div')
-    modal.className = 'excal-modal'
-    modal.append(dialog)
-    document.body.append(modal)
-
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const api = boards.get(board)
-    api?.setHold(true)
-
-    const close = () => {
-      document.removeEventListener('keydown', onKey)
-      modal.remove()
-      document.body.style.overflow = prevOverflow
-      api?.setHold(false)
-      if (opener instanceof HTMLElement) opener.focus()
-    }
-    const onKey = (e) => {
-      if (e.key === 'Escape') close()
-    }
-    document.addEventListener('keydown', onKey)
-    modal.addEventListener('pointerdown', (e) => {
-      if (e.target === modal) close()
-    })
-
-    bindViewer(viewport, close)?.focusClose()
-  }
-
-  function initBoard(board) {
-    if (board.dataset.excalInit === '1') return
-    board.dataset.excalInit = '1'
-    const viewport = board.querySelector(':scope > .excal-board-frame > .excal-viewport')
-    if (!viewport) return
-    const api = bindViewer(viewport)
-    if (api) boards.set(board, api)
-    viewport.querySelector('[data-excal="expand"]')?.addEventListener('click', () => openModal(board, viewport))
-  }
-
-  function boot() {
-    document.querySelectorAll('.excal-board').forEach(initBoard)
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot)
-  else boot()
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot)
+    else boot()
+  })()
 </script>
 )}

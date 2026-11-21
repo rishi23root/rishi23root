@@ -13,5 +13,7 @@ declare global {
     __heroMoodFirst?: string
     /** Cross-document view transition into the homepage (index.astro), awaited by settleMood. */
     __homePageVt?: Promise<unknown>
+    /** Cancels the inline <head> mood-await failsafe timer and viewport listener. */
+    __moodAwaitCleanup?: () => void
   }
 }

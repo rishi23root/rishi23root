@@ -1,4 +1,6 @@
 import assert from 'assert'
+import { execFileSync } from 'child_process'
+import { join } from 'path'
 import { opensource } from './config'
 import {
   escapeMd,
@@ -297,6 +299,19 @@ async function main() {
     filterActions('socials', kbarActions).map((a) => a.id),
     ['social-email', 'social-x', 'social-linkedin', 'social-github', 'social-pypi'],
   )
+
+  // 9. Run web helper tests (ESM modules under web/) via esbuild + Node
+  const esbuild = join(__dirname, 'web', 'node_modules', '.bin', 'esbuild')
+  const bundled = execFileSync(
+    esbuild,
+    [join(__dirname, 'web', 'scripts', 'web.test.ts'), '--bundle', '--platform=node', '--format=esm', '--external:jsdom'],
+    { encoding: 'utf8' },
+  )
+  execFileSync(process.execPath, ['--input-type=module'], {
+    input: bundled,
+    stdio: ['pipe', 'inherit', 'inherit'],
+    cwd: join(__dirname, 'web'),
+  })
 
   console.log('scripts.test.ts: all assertions passed')
 }

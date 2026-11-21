@@ -1,10 +1,14 @@
+import { DESKTOP_MQ } from '../components/moods/media'
+
 /**
  * Settles the homepage from the centered "await" layout into the split.
  *
- * Mood emerges from behind the text (measured FLIP). Text eases to the
- * right track first; the plate follows a beat later at slightly lower
- * opacity so a clear gap opens — no flush edge, no vertical offset.
- * Soft ease, continuous width (`fill: 'both'`), no snap / bounce.
+ * `mood-await` matches inner pages' `--post-group` width so coming back from
+ * `/writing`, `/projects`, or `/mood` keeps `site-chrome` and the centered
+ * measure seamless. `slide()` moves `.home-text` (`translate`), the mood plate,
+ * and trailing right-aligned elements (`.chrome-end`, `.home-section-more`,
+ * `.home-writing-list time` via `translateX`) purely on the compositor with zero
+ * `width` animation or text reflow.
  */
 
 /** Fallback for --mood-settle / --ease-settle in global.css; keep in sync. */
@@ -16,6 +20,10 @@ const PLATE_DELAY_MS = 120
 const PLATE_TRAVEL_OPACITY = 0.72
 
 let started = false
+
+function clearHeadFailsafe() {
+  window.__moodAwaitCleanup?.()
+}
 
 function pageVtFinished(): Promise<void> {
   return Promise.resolve(window.__homePageVt).then(
@@ -47,12 +55,6 @@ function slide(text: HTMLElement, plate: HTMLElement): Promise<unknown> {
   const lastText = text.getBoundingClientRect()
   const lastPlate = plate.getBoundingClientRect()
 
-  // Hold await width as an inline style through the first paint so content
-  // cannot snap to the settled track before WAAPI's from-keyframe applies.
-  text.style.boxSizing = 'border-box'
-  text.style.width = `${firstText.width}px`
-  text.style.maxWidth = 'none'
-
   const { duration, easing } = motion()
   // `both` = apply from-keyframe immediately (no flash) and hold the end
   // until we cancel in finally.
@@ -68,16 +70,18 @@ function slide(text: HTMLElement, plate: HTMLElement): Promise<unknown> {
   const dx = firstPlate.left - lastPlate.left
   const dy = firstPlate.top - lastPlate.top
   const scale = lastPlate.width ? firstPlate.width / lastPlate.width : 1
+  const plateFrom =
+    Math.abs(scale - 1) > 0.001
+      ? `translate(${dx}px, ${dy}px) scale(${scale})`
+      : `translate(${dx}px, ${dy}px)`
 
   const plateAnim = plate.animate(
     [
       {
-        transformOrigin: '0 0',
-        transform: `translate(${dx}px, ${dy}px) scale(${scale})`,
+        transform: plateFrom,
         opacity: PLATE_TRAVEL_OPACITY,
       },
       {
-        transformOrigin: '0 0',
         transform: 'none',
         opacity: 1,
       },
@@ -85,34 +89,45 @@ function slide(text: HTMLElement, plate: HTMLElement): Promise<unknown> {
     plateTiming,
   )
 
+  const textDx = firstText.left - lastText.left
+  const textDy = firstText.top - lastText.top
   const textAnim = text.animate(
     [
-      {
-        transform: `translate(${firstText.left - lastText.left}px, ${firstText.top - lastText.top}px)`,
-        width: `${firstText.width}px`,
-      },
-      { transform: 'none', width: `${lastText.width}px` },
+      { transform: `translate(${textDx}px, ${textDy}px)` },
+      { transform: 'none' },
     ],
     textTiming,
   )
 
-  // WAAPI now owns width; drop the inline pin on the next frame.
-  requestAnimationFrame(() => {
-    text.style.width = ''
-    text.style.maxWidth = ''
-    text.style.boxSizing = ''
-  })
+  const anims: Animation[] = [plateAnim, textAnim]
+  const widthDelta = firstText.width - lastText.width
+  if (Math.abs(widthDelta) > 0.5) {
+    text
+      .querySelectorAll<HTMLElement>('.chrome-end, .home-section-more, .home-writing-list time')
+      .forEach((el) => {
+        anims.push(
+          el.animate([{ transform: `translateX(${widthDelta}px)` }, { transform: 'none' }], textTiming),
+        )
+      })
+  }
 
-  return Promise.all([plateAnim.finished, textAnim.finished])
+  // If the viewport drops below desktop mid-slide, abort immediately so
+  // mobile layout is never held offset by a desktop transform.
+  const mq = window.matchMedia(DESKTOP_MQ)
+  const onMqChange = () => {
+    if (!mq.matches) {
+      anims.forEach((a) => a.cancel())
+    }
+  }
+  mq.addEventListener('change', onMqChange)
+
+  return Promise.all(anims.map((a) => a.finished))
     .catch(() => undefined)
     .finally(() => {
+      mq.removeEventListener('change', onMqChange)
       html.classList.remove('mood-settling')
-      text.style.width = ''
-      text.style.maxWidth = ''
-      text.style.boxSizing = ''
-      // Drop fill:both so normal grid width takes over cleanly.
-      textAnim.cancel()
-      plateAnim.cancel()
+      // Drop fill:both so resting layout owns transform/opacity cleanly.
+      anims.forEach((a) => a.cancel())
     })
 }
 
@@ -121,16 +136,18 @@ async function run() {
   if (!html.classList.contains('mood-await')) return
 
   await pageVtFinished()
-  // A short beat so the centered, writing-like layout is actually seen.
+  // A short beat so the centered layout is actually seen.
   await new Promise((r) => window.setTimeout(r, 240))
 
   if (!html.classList.contains('mood-await')) return
+  clearHeadFailsafe()
 
   const text = document.querySelector<HTMLElement>('.home-text')
   const plate = document.querySelector<HTMLElement>('.home-mood .hero-shell-stage')
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const desktop = window.matchMedia(DESKTOP_MQ).matches
 
-  if (reduced || !text || !plate || typeof text.animate !== 'function') {
+  if (reduced || !desktop || !text || !plate || typeof text.animate !== 'function') {
     html.classList.add('mood-settled')
     html.classList.remove('mood-await')
     return
