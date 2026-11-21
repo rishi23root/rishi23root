@@ -16,7 +16,7 @@ export function rehypePublicImageSize() {
       if (!isImg(node)) return
       const src = getAttr(node, 'src')
       if (typeof src !== 'string') return
-      if (hasPositive(getAttr(node, 'width')) && hasPositive(getAttr(node, 'height'))) return
+      if (hasDimension(getAttr(node, 'width')) || hasDimension(getAttr(node, 'height'))) return
       const size = publicImageSize(src)
       if (!size) return
       setAttr(node, 'width', size.width)
@@ -25,31 +25,43 @@ export function rehypePublicImageSize() {
   }
 }
 
+function isMdxJsx(node: Node): boolean {
+  return node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement'
+}
+
 function isImg(node: Node): boolean {
   if (node.tagName === 'img') return true
-  return (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') && node.name === 'img'
+  return isMdxJsx(node) && node.name === 'img'
 }
 
 function getAttr(node: Node, name: string): unknown {
-  if (node.properties && name in node.properties) return node.properties[name]
-  const attr = node.attributes?.find((a) => a && a.name === name)
-  return attr?.value
+  if (isMdxJsx(node)) {
+    const attr = node.attributes?.find((a) => a && a.name === name)
+    return attr?.value
+  }
+  return node.properties?.[name]
 }
 
 function setAttr(node: Node, name: string, value: number) {
-  if (node.properties) {
-    node.properties[name] = value
+  if (isMdxJsx(node)) {
+    if (!node.attributes) node.attributes = []
+    const str = String(value)
+    const attr = node.attributes.find((a) => a && a.name === name)
+    if (attr) attr.value = str
+    else node.attributes.push({ type: 'mdxJsxAttribute', name, value: str })
     return
   }
-  if (!node.attributes) node.attributes = []
-  const attr = node.attributes.find((a) => a && a.name === name)
-  if (attr) attr.value = value
-  else node.attributes.push({ type: 'mdxJsxAttribute', name, value })
+  if (!node.properties) node.properties = {}
+  node.properties[name] = value
 }
 
-function hasPositive(value: unknown): boolean {
-  const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : Number.NaN
-  return Number.isFinite(n) && n > 0
+function hasDimension(value: unknown): boolean {
+  if (typeof value === 'number') return Number.isFinite(value) && value > 0
+  if (typeof value === 'string') return value.trim().length > 0
+  if (typeof value === 'object' && value !== null) {
+    return (value as { type?: unknown }).type === 'mdxJsxAttributeValueExpression'
+  }
+  return false
 }
 
 function walk(node: Node, visit: (node: Node) => void) {

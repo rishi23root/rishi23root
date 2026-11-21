@@ -173,6 +173,8 @@ function excerpt(body: unknown, max = 180): string | null {
     .replace(/[*_`~]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
+  if (!plain) return null
   if (plain.length <= max) return plain
-  return plain.slice(0, plain.lastIndexOf(' ', max)).replace(/[,.;:]$/, '') + '…'
+  const cut = plain.lastIndexOf(' ', max)
+  return plain.slice(0, cut > 0 ? cut : max).replace(/[,.;:]$/, '') + '…'
 }

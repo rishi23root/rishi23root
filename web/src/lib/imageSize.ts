@@ -1,10 +1,28 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { join, normalize, relative, sep } from 'node:path'
+import { isAbsolute, join, normalize, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 export type ImageSize = { width: number; height: number }
 
-const publicDir = fileURLToPath(new URL('../../public', import.meta.url))
+function findDir(dirName: string): string | undefined {
+  // `astro build` bundles pages under `dist/`, so a URL relative to
+  // `import.meta.url` no longer points at `web/`. Mirror ExcalidrawBoard's
+  // candidate resolution so both dev and bundled builds resolve `web/public`.
+  const candidates = [
+    resolve(process.cwd(), dirName),
+    resolve(process.cwd(), 'web', dirName),
+    fileURLToPath(new URL(`../../${dirName}`, import.meta.url)),
+  ]
+  return candidates.find((dir) => existsSync(dir))
+}
+
+function resolveInside(baseDir: string, rel: string): string | undefined {
+  const file = normalize(join(baseDir, rel))
+  const inside = relative(baseDir, file)
+  if (!inside || inside === '..' || inside.startsWith(`..${sep}`) || isAbsolute(inside)) return
+  if (!existsSync(file)) return
+  return file
+}
 
 /**
  * Width/height for a root-relative file under web/public, so post images
@@ -14,14 +32,25 @@ export function publicImageSize(src: string | undefined | null): ImageSize | und
   if (!src) return
   const raw = src.trim()
   if (!raw.startsWith('/') || raw.startsWith('//') || raw.includes('://')) return
-  const rel = decodeURIComponent(raw.split(/[?#]/, 1)[0] ?? '')
-  if (!rel || rel === '/') return
-  const file = normalize(join(publicDir, rel))
-  const inside = relative(publicDir, file)
-  if (!inside || inside.startsWith('..') || inside.startsWith(sep)) return
-  if (!existsSync(file)) return
+  let rel: string
   try {
-    return sniff(readFileSync(file))
+    rel = decodeURIComponent(raw.split(/[?#]/, 1)[0] ?? '')
+  } catch {
+    return
+  }
+  if (!rel || rel === '/') return
+
+  const publicDir = findDir('public')
+  let file = publicDir ? resolveInside(publicDir, rel) : undefined
+  if (!file && process.env.NODE_ENV !== 'production') {
+    const draftDir = findDir('draft-assets')
+    if (draftDir) file = resolveInside(draftDir, rel)
+  }
+  if (!file) return
+
+  try {
+    const size = sniff(readFileSync(file))
+    return size && size.width > 0 && size.height > 0 ? size : undefined
   } catch {
     return
   }
@@ -66,21 +95,29 @@ function webp(buf: Buffer): ImageSize | undefined {
 
 function jpeg(buf: Buffer): ImageSize | undefined {
   let i = 2
-  while (i + 9 < buf.length) {
+  while (i < buf.length) {
     if (buf[i] !== 0xff) return
-    const marker = buf[i + 1]
-    if (marker === 0xd8 || marker === 0x00 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd9)) {
-      i += 2
+    while (i < buf.length && buf[i] === 0xff) i++
+    if (i >= buf.length) return
+    const marker = buf[i]
+    i++
+    if (marker === 0xd8 || marker === 0x00 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
       continue
     }
-    const len = buf.readUInt16BE(i + 2)
+    if (marker === 0xd9 || marker === 0xda) return
+    if (i + 2 > buf.length) return
+    const len = buf.readUInt16BE(i)
+    if (len < 2 || i + len > buf.length) return
     const sof =
       (marker >= 0xc0 && marker <= 0xc3) ||
       (marker >= 0xc5 && marker <= 0xc7) ||
       (marker >= 0xc9 && marker <= 0xcb) ||
       (marker >= 0xcd && marker <= 0xcf)
-    if (sof) return { height: buf.readUInt16BE(i + 5), width: buf.readUInt16BE(i + 7) }
-    i += 2 + len
+    if (sof) {
+      if (len < 7 || i + 7 > buf.length) return
+      return { height: buf.readUInt16BE(i + 3), width: buf.readUInt16BE(i + 5) }
+    }
+    i += len
   }
   return
 }

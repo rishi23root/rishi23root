@@ -52,18 +52,32 @@ const previews = Object.entries(await getLinkPreviews(Astro.props.refs))
     let showTimer = 0
     let hideTimer = 0
 
+    const hide = () => {
+      clearTimeout(showTimer)
+      clearTimeout(hideTimer)
+      pop.classList.remove('is-open')
+      current?.removeAttribute('aria-describedby')
+      current = null
+    }
+
     // Fixed positioning, under the hovered line of the link; flips above near the bottom edge.
     const place = () => {
-      if (!current) return
+      if (!current) return false
+      const bounds = current.getBoundingClientRect()
+      if (bounds.bottom < 0 || bounds.top > innerHeight || bounds.right < 0 || bounds.left > innerWidth) {
+        hide()
+        return false
+      }
       const rects = [...current.getClientRects()]
-      const rect = rects.find((r) => anchorY >= r.top && anchorY <= r.bottom) ?? rects[0] ?? current.getBoundingClientRect()
+      const rect = rects.find((r) => anchorY >= r.top && anchorY <= r.bottom) ?? rects[0] ?? bounds
       const w = pop.offsetWidth
       const h = pop.offsetHeight
       let top = rect.bottom + GAP
       if (top + h > innerHeight - EDGE && rect.top - GAP - h > EDGE) top = rect.top - GAP - h
-      const left = Math.min(Math.max(rect.left, EDGE), innerWidth - w - EDGE)
+      const left = Math.max(EDGE, Math.min(rect.left, innerWidth - w - EDGE))
       pop.style.top = `${Math.round(top)}px`
       pop.style.left = `${Math.round(left)}px`
+      return true
     }
 
     const show = (link: HTMLAnchorElement, key: string) => {
@@ -76,16 +90,7 @@ const previews = Object.entries(await getLinkPreviews(Astro.props.refs))
       pop.replaceChildren(tpl.content.cloneNode(true))
       current = link
       link.setAttribute('aria-describedby', pop.id)
-      place()
-      pop.classList.add('is-open')
-    }
-
-    const hide = () => {
-      clearTimeout(showTimer)
-      clearTimeout(hideTimer)
-      pop.classList.remove('is-open')
-      current?.removeAttribute('aria-describedby')
-      current = null
+      if (place()) pop.classList.add('is-open')
     }
 
     const scheduleHide = () => {

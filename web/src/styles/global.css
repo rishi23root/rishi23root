@@ -1884,7 +1884,7 @@ html[data-theme='light'] .gh-card-del {
 
 .gh-pop {
   position: fixed;
-  z-index: 60;
+  z-index: 120;
   width: min(23rem, calc(100vw - 24px));
   opacity: 0;
   visibility: hidden;

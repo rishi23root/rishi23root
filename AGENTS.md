@@ -19,7 +19,7 @@ Generate `README.md` from `readme.template.md` + `content/site.json` (via `confi
 | `web/public/og-default.png` | Default Open Graph / Twitter card image |
 | `web/public/favicon.svg` | Site favicon |
 | `web/src/components/ExcalidrawBoard.astro` | Read-only Excalidraw diagram for Writing posts. SVG is baked at dev/build; the component inlines it (see **Excalidraw boards**) |
-| `web/public/diagrams/*.json` | Excalidraw scene files the boards load |
+| `web/diagrams/*.json` | Excalidraw scene files the boards load |
 | `web/public/fonts/excalidraw/` | Self-hosted Excalifont + Virgil for board text |
 | `web/src/components/github/` + `web/src/lib/github.ts` | `<RepoCard>` / `<PrCard>` and GitHub link hover previews in Writing posts, from build-time API data (see **GitHub cards and link previews**) |
 | `.github/workflows/build.yml` | README: on-demand `push` to `master` + `workflow_dispatch` |
@@ -38,7 +38,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Featured Work | `content/site.json` → `opensource.active` + `blurbs` | `owner/repo` strings |
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
 | Writing post | `content/posts/<slug>.mdx` | Frontmatter required. Lists, RSS, `llms.txt` and the palette use `getPublishedPosts()` (never drafts, dev included); only `writing/[slug].astro` uses `getRenderablePosts()`, so a `draft: true` post is previewable at its URL in dev and nowhere else |
-| Excalidraw board in a post | `web/public/diagrams/<name>.json` + `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX | No import needed; see **Excalidraw boards** below |
+| Excalidraw board in a post | `web/diagrams/<name>.json` + `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX | No import needed; see **Excalidraw boards** below |
 | GitHub card in a post | `<RepoCard owner="…" repo="…" />` or `<PrCard owner="…" repo="…" number={21} />` in the MDX | No import; plain github.com repo/PR links get hover previews automatically; see **GitHub cards and link previews** |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
 | Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; chrome actions: theme then `@` socials; mood-left / text-right; `HeroMoodShell` island; no on-site avatar |
@@ -77,7 +77,7 @@ Writing posts can embed Excalidraw diagrams. `astro dev` and `astro build` rende
 
 How it fits together:
 
-- **Scenes:** `web/public/diagrams/<name>.json`. A scene is a full Excalidraw document (`type`, `version`, `elements`, `appState`, `files`). A `.excalidraw` download is already this format; just rename it. The JSON is the source; it is not fetched by the browser.
+- **Scenes:** `web/diagrams/<name>.json`. A scene is a full Excalidraw document (`type`, `version`, `elements`, `appState`, `files`). A `.excalidraw` download is already this format; just rename it. The JSON is the source; it is not fetched by the browser or copied to `web/dist/`.
 - **Bake:** `web/scripts/bake-diagrams.mjs` calls `register('./excalidraw-loader.mjs', import.meta.url)` and only then imports `@excalidraw/excalidraw`. The loader is the classic `node:module` `register()` API (Node 20 on GitHub Pages, and Node 26 locally). It turns `.json` imports into modules and `.css` imports into empty modules. The script installs a jsdom `window` / `document` (plus `DOMParser`, `XMLSerializer`, `SVGElement`, `HTMLElement`, `navigator`) and calls `exportToSvg` with `exportBackground: false`, `exportWithDarkMode: false`, `viewBackgroundColor: 'transparent'`, `exportPadding: 16`, and `skipInliningFonts: true`. Output is `web/.generated/diagrams/<name>.svg`, gitignored. `web/scripts/excalidraw-integration.mjs` runs that bake from `astro:config:setup` on both `dev` and `build`. A scene that fails to export fails the build. No native `canvas` module. `@excalidraw/excalidraw` stays a dependency only for this Node bake. Do not use `module.registerHooks` — Node 20 does not have it.
 - **Component:** `web/src/components/ExcalidrawBoard.astro` reads the baked SVG and inlines it for `<ExcalidrawBoard src="/diagrams/<name>.json" />`. A small inline script (MDX does not hoist a processed `<script>`) does pan, zoom, the pill, and the modal. One copy of that script per page.
 - **MDX wiring:** `web/src/pages/writing/[slug].astro` passes `components={{ Callout, ExcalidrawBoard, RepoCard, PrCard }}` to `<Content />`, so posts use the tag with no import.
@@ -88,7 +88,7 @@ Adding a board:
 
 1. Draw at excalidraw.com in the **light** theme with **dark** strokes and the hand-drawn font (Excalifont, the default). Dark mode inverts colours, so light strokes go faint on the dark site.
 2. Main menu → "Save to…" to download the `.excalidraw` file.
-3. Save it as `web/public/diagrams/<name>.json` (kebab-case name).
+3. Save it as `web/diagrams/<name>.json` (kebab-case name).
 4. Embed it in the post: `<ExcalidrawBoard src="/diagrams/<name>.json" />`. Optional `height={360}` (number = px).
 5. `npm run dev:web` → check both themes, the hover pill and Expand → `npm run build:web`.
 
