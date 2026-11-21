@@ -43,7 +43,6 @@ export const githubReq = axios.create({
 githubReq.defaults.raxConfig = {
   instance: githubReq,
   retry: 5,
-  retryDelay: 4000,
   onRetryAttempt: (err) => {
     const cfg = raxGetConfig(err)
     const url = err.config?.url ?? 'unknown'
@@ -56,8 +55,6 @@ githubReq.defaults.raxConfig = {
 raxAttach(githubReq)
 
 export type GHItem = {
-  name?: string
-  id?: number
   full_name: string
   description: string | null
   html_url: string

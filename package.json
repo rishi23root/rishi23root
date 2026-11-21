@@ -7,7 +7,8 @@
     "build:readme": "ts-node index.ts",
     "build:web": "npm run build --prefix web",
     "dev:web": "npm run dev --prefix web",
-    "check": "tsc --noEmit && npm run check --prefix web"
+    "check": "tsc --noEmit && npm run check --prefix web",
+    "test": "ts-node scripts.test.ts"
   },
   "repository": {
     "type": "git",
