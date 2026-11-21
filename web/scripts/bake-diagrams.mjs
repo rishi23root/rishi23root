@@ -27,7 +27,11 @@ for (const existing of readdirSync(outDir)) {
   }
 }
 
-const scriptMtime = statSync(fileURLToPath(import.meta.url)).mtimeMs
+const loaderPath = fileURLToPath(new URL('./excalidraw-loader.mjs', import.meta.url))
+const scriptMtime = Math.max(
+  statSync(fileURLToPath(import.meta.url)).mtimeMs,
+  statSync(loaderPath).mtimeMs,
+)
 const staleScenes = scenes.filter((name) => {
   const svgPath = path.join(outDir, name.replace(/\.json$/, '.svg'))
   if (!existsSync(svgPath)) return true

@@ -12,7 +12,6 @@ import {
   type GHItem,
 } from './index'
 import {
-  escapeMdTitle,
   listPosts,
   parseFrontmatter,
   renderRecentPosts,
@@ -231,7 +230,7 @@ async function main() {
   assert.strictEqual(fmBlockLiteralStrip.summary, 'Line 1\nLine 2')
 
   assert.strictEqual(
-    escapeMdTitle('Using <ExcalidrawBoard> for [draft] foo_bar *bold*'),
+    escapeMd('Using <ExcalidrawBoard> for [draft] foo_bar *bold*'),
     'Using \\<ExcalidrawBoard\\> for \\[draft\\] foo\\_bar \\*bold\\*',
   )
 

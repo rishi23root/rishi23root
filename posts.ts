@@ -172,7 +172,7 @@ export async function listPosts(opts?: {
   })
 }
 
-export function escapeMdTitle(text: string): string {
+export function escapeMd(text: string): string {
   return text
     .replace(/\r?\n/g, ' ')
     .trim()
@@ -190,7 +190,7 @@ export async function renderRecentPosts(
   return posts
     .map((p) => {
       const url = `${base}/writing/${p.slug}/`
-      return `- **[${escapeMdTitle(p.title)}](${url})** — ${p.date}`
+      return `- **[${escapeMd(p.title)}](${url})** — ${p.date}`
     })
     .join('\n')
 }

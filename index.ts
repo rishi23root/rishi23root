@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { readFile, rm, writeFile } from 'fs/promises'
+import { readFile, writeFile } from 'fs/promises'
 import { attach as raxAttach, getConfig as raxGetConfig } from 'retry-axios'
 import {
   github,
@@ -12,8 +12,10 @@ import {
   recentLikedCount,
   siteUrl,
 } from './config'
-import { renderRecentPosts } from './posts'
+import { escapeMd, renderRecentPosts } from './posts'
 import { renderToolbox } from './toolbox'
+
+export { escapeMd }
 
 /** HTML comment markers in readme.template.md replaced at build time. */
 const inject = {
@@ -62,13 +64,6 @@ export type GHItem = {
 
 function marker(token: (typeof inject)[keyof typeof inject]) {
   return `<!-- ${token} -->`
-}
-
-export function escapeMd(text: string): string {
-  return text
-    .replace(/\r?\n/g, ' ')
-    .trim()
-    .replace(/([\\[\]*_<>])/g, '\\$1')
 }
 
 /** Innei-style: **[name](url)** — blurb ★stars */
@@ -216,7 +211,6 @@ async function main() {
     recentStarred.map(likedMarkdown).join('\n'),
   )
 
-  await rm('./README.md', { force: true })
   await writeFile('./README.md', out, { encoding: 'utf-8' })
 }
 
