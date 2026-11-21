@@ -52,7 +52,7 @@ const heightCss = height == null || height === '' ? undefined : typeof height ==
 const label = `Diagram: ${file.replace(/\.json$/, '').replace(/[-_]/g, ' ')}`
 const stageStyle = `width:${size.w}px;height:${size.h}px;transform:translate(-50%, -50%)`
 
-// MDX does not hoist a processed <script>, so the behavior ships inline.
+// MDX does not hoist a processed script tag, so the behavior ships inline.
 // One copy per page: later boards on the same render skip it. The script
 // waits for DOMContentLoaded, so it still sees every board.
 const locals = Astro.locals as { excalScript?: boolean }

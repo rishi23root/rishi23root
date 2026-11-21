@@ -14,11 +14,36 @@ export const siteUrl = site.siteUrl
 /** Mail + socials (bottom text links). */
 export const contact = site.contact
 
-/** Curated featured repos (Innei-style Featured Work). */
+type SiteProject = {
+  title: string
+  blurb?: string
+  url: string
+  order?: number
+  repo?: string
+  featured?: boolean
+  tags?: string[]
+}
+
+const featuredProjects = [...((site.projects ?? []) as SiteProject[])]
+  .filter(
+    (p): p is SiteProject & { repo: string } =>
+      Boolean(p.repo) && p.featured !== false,
+  )
+  .sort(
+    (a, b) =>
+      (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
+  )
+
+const opensourceBlurbs: Record<string, string> = {}
+for (const project of featuredProjects) {
+  if (project.blurb) opensourceBlurbs[project.repo] = project.blurb
+}
+
+/** Curated featured repos (Innei-style Featured Work), derived from site.projects. */
 export const opensource = {
-  active: site.opensource.active,
+  active: featuredProjects.map((p) => p.repo),
   /** Short value props; fall back to GitHub description when missing. */
-  blurbs: site.opensource.blurbs as Record<string, string>,
+  blurbs: opensourceBlurbs,
 }
 
 /** Centered Innei-style motto lines (「 samp 」). */

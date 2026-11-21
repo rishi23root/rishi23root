@@ -1,11 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "module": "CommonJS",
     "sourceMap": false,
     "declaration": false,
     "outDir": "./dist",
     "esModuleInterop": true,
     "resolveJsonModule": true
-  }
+  },
+  "ts-node": {
+    "moduleTypes": {
+      "web/src/lib/site.ts": "cjs",
+      "web/src/components/command-palette/palette.ts": "cjs"
+    }
+  },
+  "include": ["*.ts"],
+  "exclude": ["web", "dist", "node_modules"]
 }

@@ -13,24 +13,6 @@
       "pypi": "https://pypi.org/user/rishi23root"
     }
   },
-  "opensource": {
-    "active": [
-      "saeeddhqan/Maryam",
-      "EpicGames/PixelStreamingInfrastructure",
-      "rishi23root/opencv_wrap",
-      "rishi23root/pyblink",
-      "rishi23root/resume-editor",
-      "rishi23root/selenium-automations"
-    ],
-    "blurbs": {
-      "saeeddhqan/Maryam": "Open-source OSINT framework",
-      "EpicGames/PixelStreamingInfrastructure": "Epic Games Unreal Pixel Streaming servers and frontend",
-      "rishi23root/opencv_wrap": "Thin OpenCV wrappers for everyday CV scripts",
-      "rishi23root/pyblink": "Blink-counter automation to ease eye strain",
-      "rishi23root/resume-editor": "Web app for crafting professional resumes fast",
-      "rishi23root/selenium-automations": "Selenium scripts for repetitive browser workflows"
-    }
-  },
   "mottos": [
     "timshel",
     "fac quod debes"
@@ -88,39 +70,57 @@
   "projects": [
     {
       "title": "Maryam",
+      "repo": "saeeddhqan/Maryam",
       "blurb": "Open-source OSINT framework",
       "url": "https://github.com/saeeddhqan/Maryam",
-      "order": 1
+      "tags": ["open-source", "security", "python"],
+      "order": 1,
+      "featured": true
     },
     {
       "title": "Pixel Streaming Infrastructure",
+      "repo": "EpicGames/PixelStreamingInfrastructure",
       "blurb": "Unreal Pixel Streaming servers and frontend",
       "url": "https://github.com/EpicGames/PixelStreamingInfrastructure",
-      "order": 2
+      "tags": ["open-source", "infrastructure", "web"],
+      "order": 2,
+      "featured": true
     },
     {
       "title": "opencv_wrap",
+      "repo": "rishi23root/opencv_wrap",
       "blurb": "Thin OpenCV wrappers for everyday CV scripts",
       "url": "https://github.com/rishi23root/opencv_wrap",
-      "order": 3
+      "tags": ["open-source", "python", "cv"],
+      "order": 3,
+      "featured": true
     },
     {
       "title": "pyblink",
+      "repo": "rishi23root/pyblink",
       "blurb": "Blink-counter automation to ease eye strain",
       "url": "https://github.com/rishi23root/pyblink",
-      "order": 4
+      "tags": ["open-source", "python", "automation"],
+      "order": 4,
+      "featured": true
     },
     {
       "title": "resume-editor",
+      "repo": "rishi23root/resume-editor",
       "blurb": "Web app for crafting professional resumes fast",
       "url": "https://github.com/rishi23root/resume-editor",
-      "order": 5
+      "tags": ["open-source", "web-app"],
+      "order": 5,
+      "featured": true
     },
     {
       "title": "selenium-automations",
+      "repo": "rishi23root/selenium-automations",
       "blurb": "Selenium scripts for repetitive browser workflows",
       "url": "https://github.com/rishi23root/selenium-automations",
-      "order": 6
+      "tags": ["open-source", "python", "automation"],
+      "order": 6,
+      "featured": true
     }
   ],
   "capabilities": [

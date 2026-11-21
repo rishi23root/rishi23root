@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Use Node.js from .nvmrc
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix web ci
+
+      - name: Typecheck root and web
+        run: npm run check
+
+      - name: Test README scripts
+        run: npm test
+
+      - name: Build site
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build:web
+
+      - name: Smoke-check web/dist artifacts
+        run: |
+          for file in \
+            index.html \
+            projects/index.html \
+            writing/index.html \
+            rss.xml \
+            llms.txt \
+            sitemap-index.xml \
+            404.html; do
+            path="web/dist/$file"
+            if [ ! -s "$path" ]; then
+              echo "Missing or empty build artifact: $path" >&2
+              exit 1
+            fi
+          done
+          echo "All required web/dist artifacts exist and are non-empty."

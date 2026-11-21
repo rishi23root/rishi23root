@@ -26,36 +26,35 @@ const inject = {
   CONTACT: 'contact_inject',
 } as const
 
-raxAttach()
-axios.defaults.raxConfig = {
-  retry: 5,
-  retryDelay: 4000,
-  onRetryAttempt: (err) => {
-    const cfg = raxGetConfig(err)
-    console.log('request: \n', err.request)
-    console.log(`Retry attempt #${cfg?.currentRetryAttempt}`)
-  },
-}
-
-axios.defaults.headers.common['User-Agent'] =
-  'Mozilla/5.0 (compatible; rishi23root-readme-build)'
-
 const githubHeaders: Record<string, string> = {
   Accept: 'application/vnd.github+json',
+  'User-Agent': 'Mozilla/5.0 (compatible; rishi23root-readme-build)',
 }
 if (process.env.GITHUB_TOKEN) {
   githubHeaders.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
 }
 
-const githubReq = axios.create({
+export const githubReq = axios.create({
   baseURL: 'https://api.github.com',
   timeout: 10000,
   headers: githubHeaders,
 })
 
-type GHItem = {
-  name: string
-  id: number
+githubReq.defaults.raxConfig = {
+  instance: githubReq,
+  retry: 5,
+  onRetryAttempt: (err) => {
+    const cfg = raxGetConfig(err)
+    const url = err.config?.url ?? 'unknown'
+    const status = err.response?.status ?? err.code ?? 'network error'
+    console.warn(
+      `GitHub API retry #${cfg?.currentRetryAttempt ?? 1} for ${url} (${status})`,
+    )
+  },
+}
+raxAttach(githubReq)
+
+export type GHItem = {
   full_name: string
   description: string | null
   html_url: string
@@ -66,20 +65,22 @@ function marker(token: (typeof inject)[keyof typeof inject]) {
   return `<!-- ${token} -->`
 }
 
-function escapeMd(text: string) {
-  return text.replace(/\r?\n/g, ' ').trim()
+export function escapeMd(text: string): string {
+  return text
+    .replace(/\r?\n/g, ' ')
+    .trim()
+    .replace(/([\\[\]*_<>])/g, '\\$1')
 }
 
 /** Innei-style: **[name](url)** — blurb ★stars */
-function featuredMarkdown(list: GHItem[], blurbs: Record<string, string>) {
+export function featuredMarkdown(list: GHItem[], blurbs: Record<string, string>) {
   return list
     .map((cur) => {
-      const blurb =
-        blurbs[cur.full_name] ||
-        (cur.description ? escapeMd(cur.description) : '')
+      const rawBlurb = blurbs[cur.full_name] || cur.description || ''
+      const blurb = rawBlurb ? escapeMd(rawBlurb) : ''
       const desc = blurb ? ` — ${blurb}` : ''
       const stars =
-        typeof cur.stargazers_count === 'number'
+        typeof cur.stargazers_count === 'number' && cur.stargazers_count > 0
           ? ` ★${cur.stargazers_count}`
           : ''
       return `- **[${cur.full_name}](${cur.html_url})**${desc}${stars}`
@@ -87,7 +88,7 @@ function featuredMarkdown(list: GHItem[], blurbs: Record<string, string>) {
     .join('\n')
 }
 
-function likedMarkdown(item: GHItem) {
+export function likedMarkdown(item: GHItem) {
   const desc = item.description ? ` — ${escapeMd(item.description)}` : ''
   return `- [${item.full_name}](${item.html_url})${desc}`
 }
@@ -126,6 +127,46 @@ function renderMottos(): string {
     .join(' · ')}\n</p>`
 }
 
+export async function fetchFeaturedRepos(
+  names: string[],
+  blurbs: Record<string, string>,
+): Promise<GHItem[]> {
+  const results = await Promise.allSettled(
+    names.map((name) =>
+      githubReq.get<GHItem>('/repos/' + name).then((r) => r.data),
+    ),
+  )
+
+  return results.map((result, idx) => {
+    const name = names[idx]
+    if (result.status === 'fulfilled') return result.value
+    const status = axios.isAxiosError(result.reason)
+      ? (result.reason.response?.status ??
+        result.reason.code ??
+        result.reason.message)
+      : String(result.reason)
+    console.warn(
+      `Failed to fetch featured repo ${name} (${status}); using fallback`,
+    )
+    return {
+      full_name: name,
+      html_url: `https://github.com/${name}`,
+      description: blurbs[name] ?? null,
+    }
+  })
+}
+
+export function filterStarredRepos(
+  starred: GHItem[],
+  user: string,
+  limit: number,
+): GHItem[] {
+  const selfPrefix = `${user.toLowerCase()}/`
+  return starred
+    .filter((item) => !item.full_name.toLowerCase().startsWith(selfPrefix))
+    .slice(0, limit)
+}
+
 async function main() {
   let out = await readFile('./readme.template.md', { encoding: 'utf-8' })
 
@@ -136,16 +177,14 @@ async function main() {
     stackLine,
   }
   for (const [key, value] of Object.entries(text)) {
-    out = out.replace(new RegExp(`\\{${key}\\}`, 'g'), value)
+    out = out.replace(new RegExp(`\\{${key}\\}`, 'g'), () => value)
   }
 
-  out = out.replace(marker(inject.MOTTOS), renderMottos())
-  out = out.replace(marker(inject.TOOLBOX), renderToolbox())
-  out = out.replace(marker(inject.CONTACT), renderContact())
-  out = out.replace(
-    marker(inject.RECENT_POSTS),
-    await renderRecentPosts(siteUrl, 5),
-  )
+  out = out.replace(marker(inject.MOTTOS), () => renderMottos())
+  out = out.replace(marker(inject.TOOLBOX), () => renderToolbox())
+  out = out.replace(marker(inject.CONTACT), () => renderContact())
+  const recentPosts = await renderRecentPosts(siteUrl, 5)
+  out = out.replace(marker(inject.RECENT_POSTS), () => recentPosts)
 
   const user = github.name
   const [commits, prs, issues] = await Promise.all([
@@ -158,32 +197,33 @@ async function main() {
 
   out = out.replace(
     marker(inject.GH_STATS),
-    `${formatCount(commits)} commits · ${formatCount(prs)} PRs · ${formatCount(issues)} issues`,
+    () =>
+      `${formatCount(commits)} commits · ${formatCount(prs)} PRs · ${formatCount(issues)} issues`,
   )
 
-  const featured = await Promise.all(
-    opensource.active.map((name) =>
-      githubReq.get<GHItem>('/repos/' + name).then((r) => r.data),
-    ),
-  )
-  out = out.replace(
-    marker(inject.OPENSOURCE),
+  const featured = await fetchFeaturedRepos(opensource.active, opensource.blurbs)
+  out = out.replace(marker(inject.OPENSOURCE), () =>
     featuredMarkdown(featured, opensource.blurbs),
   )
 
   const starred: GHItem[] = await githubReq
-    .get('/users/' + user + '/starred', {
-      params: { per_page: recentLikedCount },
+    .get<GHItem[]>('/users/' + user + '/starred', {
+      params: { per_page: Math.min(100, recentLikedCount + 10) },
     })
     .then((r) => r.data)
 
-  out = out.replace(
-    marker(inject.RECENT_STAR),
-    starred.slice(0, recentLikedCount).map(likedMarkdown).join('\n'),
+  const recentStarred = filterStarredRepos(starred, user, recentLikedCount)
+  out = out.replace(marker(inject.RECENT_STAR), () =>
+    recentStarred.map(likedMarkdown).join('\n'),
   )
 
   await rm('./README.md', { force: true })
   await writeFile('./README.md', out, { encoding: 'utf-8' })
 }
 
-main()
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err)
+    process.exitCode = 1
+  })
+}

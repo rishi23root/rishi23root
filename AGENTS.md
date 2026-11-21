@@ -35,7 +35,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Mottos | `content/site.json` → `mottos` | Rendered as 「samp」 |
 | Socials / email / site URL | `content/site.json` → `contact`, `siteUrl` | README: bottom text links (incl. Website). Site: chrome `@` `SocialsMenu` **after** theme toggle; hover opens / click pins; no website self-link (`web/src/lib/site.ts` `socialLinks`) |
 | Home section order | `web/src/pages/index.astro` | Voice bio → Capabilities → Writing (5, `→` to `/writing/`) → Work (3, `→` to `/projects/`). No under-bio contact strip |
-| Featured Work | `content/site.json` → `opensource.active` + `blurbs` | `owner/repo` strings |
+| Featured Work / Projects | `content/site.json` → `projects` | Single source for `/`, `/projects/`, README Featured Work, and `llms.txt` (`title`, `blurb`, `url`, `order`, optional `repo` `owner/repo`, optional `featured` flag, optional `tags[]` for `/projects/` filtering) |
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
 | Writing post | `content/posts/<slug>.mdx` | Frontmatter required. Lists, RSS, `llms.txt` and the palette use `getPublishedPosts()` (never drafts, dev included); only `writing/[slug].astro` uses `getRenderablePosts()`, so a `draft: true` post is previewable at its URL in dev and nowhere else |
 | Excalidraw board in a post | `web/public/diagrams/<name>.json` + `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX | No import needed; see **Excalidraw boards** below |
@@ -43,7 +43,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
 | Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; chrome actions: theme then `@` socials; mood-left / text-right; `HeroMoodShell` island; no on-site avatar |
 | Command palette (kbar) | `web/src/components/CommandPalette.astro` | Hidden UI; Cmd/Ctrl+K or `?`; chords `gh`/`gp`/`gw`/`gm` navigate, `tt` toggles theme; boot is tiny, palette chunk lazy-loaded |
-| Site-only content | `content/site.json` → `voiceBio`, `moods`, `projects`, `capabilities` | README loaders ignore these; README shape unchanged |
+| Site-only content | `content/site.json` → `voiceBio`, `moods`, `capabilities` | README loaders ignore these; README shape unchanged |
 | OG / Twitter / JSON-LD | `web/src/layouts/BaseLayout.astro` (+ page props) | Default OG image in `web/public`; posts use `og:type=article` |
 | RSS / llms.txt | `web/src/pages/rss.xml.ts`, `llms.txt.ts` | Built from content — no stale hand copy in `public/` |
 | Regenerate README locally | `GITHUB_TOKEN=… npm run build:readme` | Needs network + token for stats/featured/liked |
