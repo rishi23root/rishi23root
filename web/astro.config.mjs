@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config'
+import { unified } from '@astrojs/markdown-remark'
 import { rehypePublicImageSize } from './src/lib/rehypePublicImageSize.ts'
 import { rehypeTableLabels } from './src/lib/rehypeTableLabels.ts'
 import mdx from '@astrojs/mdx'
@@ -12,7 +13,7 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [
     excalidrawBake(),
-    mdx({ rehypePlugins: [rehypePublicImageSize, rehypeTableLabels] }),
+    mdx(),
     react(),
     sitemap({
       filter: (page) => {
@@ -34,6 +35,8 @@ export default defineConfig({
     '/writing/on-shared-content': '/writing/how-this-site-works/',
   },
   markdown: {
-    rehypePlugins: [rehypePublicImageSize, rehypeTableLabels],
+    processor: unified({
+      rehypePlugins: [rehypePublicImageSize, rehypeTableLabels],
+    }),
   },
 })

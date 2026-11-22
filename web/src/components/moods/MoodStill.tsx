@@ -22,7 +22,7 @@ export default function MoodStill({ src, className = '', onReady }: Props) {
   useEffect(() => {
     const img = imgRef.current
     if (!img) return
-    if (img.complete && img.naturalWidth > 0) {
+    if (img.complete) {
       ready()
       return
     }
