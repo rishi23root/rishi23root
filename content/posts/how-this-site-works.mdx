@@ -1,9 +1,10 @@
 ---
 title: How rishi23root.in is put together
+seoTitle: "One content folder, two builds: GitHub profile README + Astro site"
 date: 2026-11-14
-updated: 2026-11-17
+updated: 2026-11-24
 slug: how-this-site-works
-summary: rishi23root.in and my GitHub profile README are built from one content folder; this is how the writing, diagrams, mood images, projects, RSS and SEO fit together.
+summary: One content folder feeds both my GitHub profile README and this Astro site, with a single source of truth, build-time SVG diagrams, zero React on posts, and generated feeds that cannot drift.
 draft: false
 author: Rishabh
 tags: [meta, astro, excalidraw]
@@ -12,19 +13,21 @@ secondaryKeywords: [github profile readme generator, excalidraw svg astro, astro
 faq:
   - q: Do the README and the website share any layout code?
     a: No. They share data only. The README is filled in from a short markdown template, and the site is an Astro project with its own pages and styles.
-  - q: How does a draft post stay private?
-    a: A post with draft set to true renders when I run the dev server, but the build leaves it out of pages, RSS, the sitemap, llms.txt and the README list.
+  - q: Can an Astro content collection also generate a GitHub profile README?
+    a: Yes, by keeping posts as plain Markdown or MDX outside the Astro app and reading their frontmatter directly in Node. Here, Astro loads content/posts/ as a content collection while a separate Node script parses the same files to refresh README.md on push.
   - q: Why are the diagrams SVG instead of a live Excalidraw canvas?
     a: The live canvas flashed an empty whiteboard on load and pushed about 145 KB of editor CSS onto every post. An SVG export loads cleanly, stays sharp at any zoom and follows the theme with one CSS rule.
-  - q: Does every page load React?
-    a: No. Plain posts ship no React. React loads for the home page mood on desktop. A diagram is SVG baked when the site builds, so a post that has one still does not load React or Excalidraw.
+  - q: How do you export Excalidraw diagrams to static SVG in Node without a browser?
+    a: Install jsdom globals for window, document, SVG elements, and a minimal canvas measureText stub, register Node module hooks to handle Excalidraw's JSON and CSS imports, then call exportToSvg with skipInliningFonts enabled. Each scene bakes to a local SVG before Astro builds pages, so posts ship zero Excalidraw or React JavaScript.
 ---
 
-I keep one folder of content in the repo, and two builds read it: one writes my GitHub profile README, the other builds this site. Everything else here (the writing pipeline, the diagrams, the small touches on the home page) is built so that folder stays the only place I edit.
+I keep one folder of content in the repo, and two builds read it: one writes my GitHub profile README, the other builds this site. Everything else here (the writing pipeline, the diagrams, the small touches on the home page) is built so my bio and my posts live in that folder and nowhere else.
 
 ## TL;DR
 
 <Callout tone="answer">Put the words in one place and let each surface render them its own way. Here `content/site.json` and `content/posts/` feed both the README and an Astro site; JavaScript is opt-in per page; diagrams are Excalidraw scenes turned into SVG; and the feeds machines read (RSS, `llms.txt`, sitemap, structured data) come from the same files.</Callout>
+
+Short on time? Read [What worked](#what-worked) and [What I recommend](#what-i-recommend). Want the pitfalls first? Jump to [What failed](#what-failed).
 
 ## What problem I had
 
@@ -50,7 +53,7 @@ The shared folder. Each surface owns its layout, and neither owns the words.
 
 `readme.template.md` is about thirty lines: a fenced `whoami` block and a handful of HTML comment markers like `<!-- recent_posts_inject -->`. `index.ts` loads `content/site.json` (through a thin `config.ts`), fetches stats, featured repos and recent stars from the GitHub API, renders each block, and swaps it in for its marker.
 
-The posts list doesn't need Astro. `posts.ts` reads the MDX files directly, pulls `title`, `date`, `slug`, `summary` and `draft` out of the frontmatter, skips drafts, and writes links to `/writing/<slug>` on this site. A GitHub Action runs the build on every push to `master` and commits `README.md` only if it changed.
+The posts list doesn't need Astro. `posts.ts` reads the MDX files directly, pulls `title`, `date`, `slug`, `summary` and `draft` out of the frontmatter, skips drafts, and writes links to `/writing/<slug>` on this site. A GitHub Action runs the build when a push to `master` touches the content or the build scripts, and commits `README.md` only if it changed.
 
 ### The writing pipeline
 
@@ -58,9 +61,9 @@ On the site, posts are an Astro content collection loaded straight from `../cont
 
 - `title` is at most 90 characters and `summary` at most 220, because the summary is reused as the meta description, the social card text, the RSS line and the `llms.txt` entry.
 - `slug` must be kebab-case and must equal the file name. A small check fails the build otherwise, so a renamed file can't quietly change a URL.
-- `draft: true` shows the post in `npm run dev:web` and hides it everywhere else.
+- `draft: true` shows the post on the home page, `/writing/`, and its URL in `npm run dev:web`; lists mark it `Draft`, while production builds and feeds leave it out.
 
-Every post follows the same section order: TL;DR, the problem, what I tried, what worked, what failed, architecture, code, results, and what I'd recommend. You're reading one. The order forces me to write down the failures, which is usually the part worth reading. A private draft template in the repo has the skeleton, and the post page builds its "On this page" rail, reading time and FAQ from the headings and frontmatter.
+Every post follows the same section order: TL;DR, the problem, what I tried, what worked, what failed, architecture, code, results, and what I'd recommend. You're reading one. The order forces me to write down the failures, which is usually the part worth reading. A draft template in the repo, one that never ships, has the skeleton, and the post page builds its "On this page" rail, reading time and FAQ from the headings and frontmatter.
 
 ### Diagrams as SVG
 
@@ -72,21 +75,31 @@ A diagram is an Excalidraw scene saved as JSON under `web/diagrams/`, and in a p
 
 That line renders this:
 
-<ExcalidrawBoard src="/diagrams/board-pipeline.json" height={420} />
+<ExcalidrawBoard
+  src="/diagrams/board-pipeline.json"
+  height={420}
+  caption="Build-time diagram pipeline: scene JSON bakes to SVG in Node, then inlines into static post HTML with zero React or Excalidraw shipped to the browser."
+/>
 
-The site bakes every scene to SVG before the pages render, and the board inlines that file. The browser never downloads Excalidraw. Hover the board and a small control bar shows up for zoom, reset and expand. Drag pans; the scroll wheel stays with the page.
+In words: when `astro dev` or `astro build` starts, `web/scripts/bake-diagrams.mjs` runs in Node with `jsdom`, calls Excalidraw's `exportToSvg` on each scene under `web/diagrams/`, and writes the SVG to `web/.generated/diagrams/`. When a post renders `<ExcalidrawBoard />`, the Astro component reads that baked SVG and inlines it into the post HTML alongside a small pan-and-zoom script, so the browser never downloads Excalidraw or React. Hover the board and a small control bar shows up for zoom, reset and expand. Drag pans; the scroll wheel stays with the page.
 
 Dark mode is one CSS filter on the SVG, the same invert-and-rotate Excalidraw uses for its own dark theme, so I draw every scene in light mode with dark strokes. The hand-drawn fonts are hosted here, so a board never reaches out to a CDN.
 
-### Small things that make it feel like mine
+### A mood image on the home page
 
-**Mood images.** On desktop, the home page shows one still image next to the text, and it changes every visit. It's the most personal part of the site and the one with the most moving parts, so it gets its own section under Architecture.
+On desktop, the home page shows one still image next to the text, and it changes every visit. It's the most personal part of the site and the one with the most moving parts, so it gets its own section under Architecture.
 
-**Command palette.** Press <kbd>⌘K</kbd>, <kbd>Ctrl</kbd>+<kbd>K</kbd> or <kbd>?</kbd> anywhere for a palette of pages, projects and posts, plus "Toggle theme". There's no button for it. A 1.1 KB listener ships on every page; the palette itself is 3.7 KB of plain TypeScript, fetched on first open. Two-key chords (<kbd>G</kbd> then <kbd>W</kbd> for Writing) work without loading it at all.
+### Command palette
 
-**Themes.** Pages ship dark. A tiny inline script in `<head>` applies a saved light choice before the first paint, so there's no flash of the wrong theme. The toggle writes to `localStorage`, and everything that has colour, including the diagrams, follows the `data-theme` attribute on `<html>`.
+Press <kbd>⌘K</kbd>, <kbd>Ctrl</kbd>+<kbd>K</kbd> or <kbd>?</kbd> anywhere for a palette of pages, posts and social links, plus "Toggle theme". There's no button for it. A 3.6 KB listener ships on every page; the palette itself is 5.4 KB of plain TypeScript, fetched on first open. Two-key chords (<kbd>G</kbd> then <kbd>W</kbd> for Writing) work without loading it at all.
 
-**GitHub cards.** When a post talks about a repository or a pull request, I can drop in a card instead of a bare link:
+### Themes without a flash
+
+Pages ship dark. A tiny inline script in `<head>` applies a saved light choice before the first paint, so there's no flash of the wrong theme. The toggle writes to `localStorage`, and everything that has colour, including the diagrams, follows the `data-theme` attribute on `<html>`.
+
+### GitHub cards and link previews
+
+When a post talks about a repository or a pull request, I can drop in a card instead of a bare link:
 
 ```mdx
 <RepoCard owner="rishi23root" repo="rishi23root" />
@@ -101,27 +114,39 @@ Both are filled in from the GitHub API when the site builds, so your browser nev
 
 Plain links get a lighter version. Hover a link to [this site's repository](https://github.com/rishi23root/rishi23root) or to [the pull request that added the diagrams and these cards](https://github.com/rishi23root/rishi23root/pull/21), and a small preview opens under it. The post page scans its own source for GitHub links at build time and renders a preview for each into the HTML. A short script shows the right one on hover or keyboard focus. On a phone, a tap just follows the link.
 
-**Feeds and search.** RSS, the sitemap, structured data and `llms.txt` are all generated from the same posts and `site.json`, so there's nothing hand-kept to go stale. The details are under Architecture.
+### Feeds and structured data
+
+RSS, the sitemap, structured data and `llms.txt` are all generated from the same posts and `site.json`, so there's nothing hand-kept to go stale. The details are under Architecture.
 
 ## What failed
 
-**The live Excalidraw canvas.** My first version embedded the real Excalidraw app in view mode. Every board flashed an empty white canvas before the drawing appeared. The editor's stylesheet, about 145 KB, landed in the CSS shared by every post, with or without a board. I spent more CSS hiding Excalidraw's menus than styling the board. Swapping to SVG fixed all three.
+### The live Excalidraw canvas
 
-**A CSS import that only worked sometimes.** Excalidraw exports its stylesheet under `development` and `production` conditions, with no default. A plain `import '@excalidraw/excalidraw/index.css'` built fine and then failed in local dev with "Cannot find module". A Vite alias fixed it for me and not for everyone else. The real fix was not importing the package statically at all: the component loads it with a dynamic `import()` in the browser, so the server never tries to resolve it.
+My first version embedded the real Excalidraw app in view mode. Every board flashed an empty white canvas before the drawing appeared. The editor's stylesheet, about 145 KB, landed in the CSS shared by every post, with or without a board. I spent more CSS hiding Excalidraw's menus than styling the board. Swapping to SVG fixed all three.
 
-**Letting the export inline its fonts.** By default `exportToSvg` embeds the hand-drawn font inside the SVG. That means a 1.8 MB font-subsetting script, a worker that failed and fell back to the main thread, and a font fetched from a CDN. Turning that off and hosting the two fonts myself (about 140 KB, split by character range so a page fetches only what it uses) removed all of it.
+### A CSS import that only worked sometimes
 
-**Trusting the first error message.** After a dependency change, the dev server threw `jsxDEV is not a function` and the boards stayed blank. It looked like a broken component. It was a stale Vite pre-bundle cache. `rm -rf web/node_modules/.vite` and a restart fixed it. When a dev-only error makes no sense, clear the cache before reading the stack trace.
+Excalidraw exports its stylesheet under `development` and `production` conditions, with no default. A plain `import '@excalidraw/excalidraw/index.css'` built fine and then failed in local dev with "Cannot find module". A Vite alias fixed it for me and not for everyone else. At the time, the real fix was not importing the package statically at all: loading it with a dynamic `import()` in the browser meant the server never tried to resolve it, before I moved the export to Node altogether.
 
-**Two lists for the same six repos.** The Projects page reads `projects` from `site.json`. The README's Featured Work and the `llms.txt` summary read `opensource.active` and `opensource.blurbs`. Those are the same six repositories, typed twice, and one blurb has already drifted. That's exactly the problem this whole setup exists to prevent, sitting in the middle of it. Merging them into one list is on my short list.
+### Letting the export inline its fonts
+
+By default `exportToSvg` embeds the hand-drawn font inside the SVG. That means a 1.8 MB font-subsetting script, a worker that failed and fell back to the main thread, and a font fetched from a CDN. Turning that off and hosting the two fonts myself (118 KB total on disk, split by character range so a page fetches only the 24 KB Latin subset it uses) removed all of it.
+
+### Trusting the first error message
+
+After a dependency change, the dev server threw `jsxDEV is not a function` and the boards stayed blank. It looked like a broken component. It was a stale Vite pre-bundle cache. `rm -rf web/node_modules/.vite` and a restart fixed it. When a dev-only error makes no sense, clear the cache before reading the stack trace.
 
 <Callout>A headless test browser can also lie to you: Chrome in headless mode reports `hover: none`, so styles meant for touch screens apply and hover-only UI looks permanently visible. Force a mouse pointer before trusting a hover test.</Callout>
+
+### Two lists for the same six repos (fixed)
+
+In the first version, the Projects page read `projects` from `site.json` while the README's Featured Work and `llms.txt` read a separate `opensource.active` and `opensource.blurbs` block. Those were the same six repositories typed twice, and one blurb drifted before I noticed. Commit `a7ae886e` removed `opensource` from `site.json` and moved `repo` and `featured` onto `projects[]`, so `config.ts` and `llms.txt.ts` now derive Featured Work from that single list.
 
 ## Architecture
 
 <ExcalidrawBoard src="/diagrams/site-architecture.json" height={460} />
 
-In words: `content/` holds the data. The README build reads the bio and post titles and writes `README.md`, which GitHub shows on my profile. The Astro site reads everything and deploys to GitHub Pages. Two workflows, both triggered by pushing to `master`: one only rewrites the README, the other only deploys the site, and the deploy runs only when `web/` or `content/` changed.
+In words: `content/` holds the data. The README build reads the bio and post titles and writes `README.md`, which GitHub shows on my profile. The Astro site reads everything and deploys to GitHub Pages. Two workflows run on pushes to `master`, each only when the files it depends on changed: one rewrites the README, the other deploys the site. Either can also be started by hand.
 
 | Piece | Reads | Writes |
 | --- | --- | --- |
@@ -149,7 +174,7 @@ This is the whole data side of the site, trimmed to one item per list. The comme
   "stackLine": "TypeScript · Python · Node.js · React · React Native",
   "mottos": ["timshel", "fac quod debes"],
 
-  // README contact links; site footer icons, sameAs, llms.txt
+  // README contact links; site @ menu, kbar, sameAs, llms.txt
   "contact": {
     "email": "hi@rishi23root.in",
     "socials": {
@@ -158,13 +183,18 @@ This is the whole data side of the site, trimmed to one item per list. The comme
     }
   },
 
-  // README Featured Work (live stars); llms.txt featured line
-  "opensource": {
-    "active": ["rishi23root/pyblink"],
-    "blurbs": {
-      "rishi23root/pyblink": "Blink-counter automation to ease eye strain"
+  // README Featured Work (via config.ts), /, /projects and llms.txt, by `order`
+  "projects": [
+    {
+      "title": "pyblink",
+      "repo": "rishi23root/pyblink",
+      "blurb": "Blink-counter automation to ease eye strain",
+      "url": "https://github.com/rishi23root/pyblink",
+      "tags": ["open-source", "python", "automation"],
+      "order": 4,
+      "featured": true
     }
-  },
+  ],
   // README: how many recently starred repos to list
   "recentLikedCount": 8,
 
@@ -177,15 +207,6 @@ This is the whole data side of the site, trimmed to one item per list. The comme
       "alt": "Cyclist in green hills under drifting clouds"
     }
   ],
-  // Site only: /projects and the command palette, by `order`
-  "projects": [
-    {
-      "title": "pyblink",
-      "blurb": "Blink-counter automation to ease eye strain",
-      "url": "https://github.com/rishi23root/pyblink",
-      "order": 4
-    }
-  ],
   // Site only: the short "what I do" list on the home page
   "capabilities": [
     { "heading": "Automation & systems", "body": "Python tooling, browser…" }
@@ -193,7 +214,7 @@ This is the whole data side of the site, trimmed to one item per list. The comme
 }
 ```
 
-The real file is plain JSON with no comments. The README build only knows the first half. It reads through `config.ts`, which re-exports the keys it needs and ignores `voiceBio`, `moods`, `projects` and `capabilities`, so adding something for the site can't change the README's shape. The site imports the file directly through `site.ts`. You can also spot the duplication from What failed here: `opensource` and `projects` describe the same repositories.
+The real file is plain JSON with no comments. The README build reads through `config.ts`, which re-exports the bio, links and derived Featured Work (`opensource`) from `projects` while ignoring `voiceBio`, `moods` and `capabilities`, so adding site-only fields can't change the README's shape. The site imports the file directly through `site.ts`.
 
 ### Mood images
 
@@ -203,7 +224,7 @@ The catalogue is a list in `site.json`. Each entry has an `id`, a short activity
 { "id": "shore", "label": "sitting", "src": "/mood/shore.webp", "alt": "Figure sitting on a beach shore under open sky" }
 ```
 
-There are seven right now: cycling, wandering, roaming, exploring, tennis, sitting and sketching. Each is a portrait WebP between 15 and 170 KB in `web/public/mood/`. Adding one is an image and four lines of JSON.
+As of November 2026, the catalogue holds seven moods: cycling, wandering, roaming, exploring, tennis, sitting and sketching. Each is a portrait WebP between 15 and 80 KB in `web/public/mood/`. Adding one is an image and four lines of JSON.
 
 On the home page they sit in a plate beside the text, and the caption has two controls: "next" and a link to every mood. Three decisions keep that cheap:
 
@@ -215,13 +236,13 @@ On the home page they sit in a plate beside the text, and the caption has two co
 
 ### Projects and Featured Work
 
-The Projects page is a plain list from `site.json`: a title, a one-line blurb, a link, and an `order` field to sort by. It's static HTML with no client code, and the command palette lists the same projects. Two of the six are upstream projects I contribute to; the rest are mine.
+The Projects page reads `projects` from `site.json`: a title, a one-line blurb, a link, optional tags, and an `order` field to sort by, rendered as static HTML with a small search and tag-filter script. Two of the entries are upstream projects I contribute to; the rest are mine.
 
-The README's Featured Work is built from repository names (`owner/repo`) instead. The build asks the GitHub API for each one, so the star counts are live on every rebuild, and uses my blurb if I wrote one or the repo's own description if I didn't. The same names and blurbs feed the "Featured work" line in `llms.txt`.
+The README's Featured Work derives from the same list. `config.ts` keeps entries that define a `repo` (`owner/repo`) and don't set `featured: false`, ordered by `order`. On rebuild, `index.ts` asks the GitHub API for each repo's live star count and uses my `blurb` or falls back to the repo's own description. `llms.txt` and the home page's Work section read from the same list via `getFeaturedProjects()`.
 
 ### RSS
 
-`/rss.xml` is a short endpoint. It takes the published posts, newest first, and maps each to a title, the post's `summary` as the description, the publish date and its link. Because it calls the same `getPublishedPosts()` as the home page, a draft can't appear in the feed by accident. Every page advertises it with `<link rel="alternate" type="application/rss+xml">`, so feed readers find it from any URL.
+`/rss.xml` is a short endpoint. It takes the published posts, newest first, and maps each to a title, the post's `summary` as the description, the publish date and its link. Because it calls the same `getPublishedPosts()` as `llms.txt` and the redirects, a draft can't appear in the feed by accident. Every page advertises it with `<link rel="alternate" type="application/rss+xml">`, so feed readers find it from any URL.
 
 ### SEO and answer engines
 
@@ -241,12 +262,18 @@ The AEO part is mostly the writing, not the markup. Every post opens with an ans
 The README side is plain string work. This is the whole posts block:
 
 ```ts
-export async function renderRecentPosts(siteUrl: string, limit = 5): Promise<string> {
+export async function renderRecentPosts(
+  siteUrl: string,
+  limit = 5,
+): Promise<string> {
   const posts = (await listPosts()).slice(0, limit)
   if (!posts.length) return '_No posts yet._'
   const base = siteUrl.replace(/\/$/, '')
   return posts
-    .map((p) => `- **[${p.title}](${base}/writing/${p.slug})** — ${p.date}`)
+    .map((p) => {
+      const url = `${base}/writing/${p.slug}/`
+      return `- **[${escapeMd(p.title)}](${url})** — ${p.date}`
+    })
     .join('\n')
 }
 ```
@@ -267,10 +294,11 @@ const posts = defineCollection({
 })
 ```
 
-And the diagram export, which runs in Node while the site builds. `register()` has to run before the import, or Node rejects a JSON file inside the package:
+And the diagram export, which runs in Node while the site builds, trimmed to its two ends. `registerHooks()` has to run before the package import, or Node rejects a JSON file inside the package:
 
 ```js
-await register('./excalidraw-loader.mjs', import.meta.url)
+registerHooks({ resolve, load })
+// …install jsdom's window, document and friends as globals…
 const { exportToSvg } = await import('@excalidraw/excalidraw')
 const svg = await exportToSvg({
   elements: scene.elements,
@@ -291,13 +319,13 @@ The mood preload is the one slightly unusual trick. The shuffle-bag function is 
 ```ts
 export function firstMoodPreloadScript(moods: MoodSlot[]): string {
   const args = [moods.map(({ id, src }) => ({ id, src })), MOOD_CYCLE_KEY, DESKTOP_MQ]
-    .map((v) => JSON.stringify(v).replace(/</g, '\\u003c'))
+    .map((v) => safeJson(v))
     .join(',')
   return `(${preloadFirstMood})(${args},${createMoodBag})`
 }
 ```
 
-The head script and the React island run literally the same shuffle code, so they can't disagree about which mood comes next. Escaping `<` keeps a stray character in the data from closing the script tag.
+The head script and the React island run literally the same shuffle code, so they can't disagree about which mood comes next. `safeJson` is `JSON.stringify` with `<` escaped, which keeps a stray character in the data from closing the script tag.
 
 The RSS endpoint, nearly in full:
 
@@ -322,6 +350,8 @@ And the legacy redirect, which is the whole file:
 
 ```astro
 ---
+import { getPublishedPosts, postPath } from '../../lib/posts'
+
 export async function getStaticPaths() {
   const posts = await getPublishedPosts()
   return posts.map((post) => ({ params: { slug: post.data.slug } }))
@@ -334,24 +364,31 @@ The full files are `posts.ts`, `web/src/content.config.ts`, `web/scripts/bake-di
 
 ## Results
 
-I measured these from the production build (`npm run build:web`) and the browser's network panel:
+I measured these from the production build (`npm run build:web`) and the browser's network panel. Sizes are uncompressed unless marked gzipped. The first column is the earlier live-canvas version of the boards; the second is what ships now:
+
+| Metric | Live Excalidraw canvas (before) | Build-time baked SVG (now) |
+| --- | --- | --- |
+| Editor CSS on posts | ~145 KB | 0 KB |
+| Client JS for boards | React + Excalidraw bundle | 7.6 KB inline pan/zoom (2.3 KB gzipped) |
+| Font-subsetting worker | ~1.8 MB + CDN font fetch | 0 KB (24.4 KB Latin WOFF2 self-hosted) |
+| Initial paint | Empty whiteboard flash | Immediate SVG in HTML, works without JS |
 
 - **One edit, both surfaces.** Changing my bio or publishing a post is one commit. The README and the site both pick it up on the next push to `master`, with no copy step.
-- **A plain post ships no React.** I measured `web/dist` after `npm run build` in `web/`. `hello-world` references one external script, the palette listener at 2.3 KB (1.2 KB gzipped). The shared stylesheet is 45.0 KB (9.5 KB gzipped). The home page HTML is 25.8 KB (8.1 KB gzipped).
-- **Diagrams do not ship the editor.** None of the client JS files in `web/dist/_astro` contain `@excalidraw/excalidraw`. The writing post's HTML does not reference the React chunk (210.5 KB, 65.5 KB gzipped). Pan and zoom are one 5.6 KB inline script (1.8 KB gzipped). The SVG is already in the HTML.
-- **GitHub cards are plain HTML.** They ship no script at all. Link previews add a 2.4 KB inline script, and only to posts that link to a repo or PR.
-- **Diagrams got lighter.** Moving from the live canvas to SVG took 145 KB of CSS off every post. Self-hosting fonts took a 1.8 MB script and a CDN request off every board.
-- **Mood images cost phones nothing.** The seven stills total about 540 KB, but a desktop visit downloads one up front plus one low-priority prefetch after load, and a phone downloads none.
-- **Feeds stay in sync for free.** RSS, `llms.txt` and the sitemap are rebuilt on every deploy. The sitemap has five URLs today: home, Projects, Writing and the two published posts. Moods, redirects and drafts stay out.
+- **A plain post ships no React.** Measured from `web/dist/` after `npm run build:web`: `hello-world` references two small external scripts — the post rail script at 9.1 KB (3.8 KB gzipped) and the command palette listener at 3.6 KB (1.6 KB gzipped) — and no React. The shared stylesheet is 43.9 KB (9.4 KB gzipped), and the home page HTML is 27.3 KB (8.6 KB gzipped).
+- **Diagrams do not ship the editor.** None of the client JS files in `web/dist/_astro/` contain `@excalidraw/excalidraw`. The writing post's HTML does not reference the React chunk (207.8 KB, 64.3 KB gzipped). Pan and zoom are one 7.6 KB inline script (2.3 KB gzipped). The SVG is already in the HTML.
+- **GitHub cards are plain HTML.** They ship no script at all. Link previews add a 2.7 KB inline script (1.2 KB gzipped), and only to posts that link to a repo or PR.
+- **Diagrams got lighter.** Moving from the live canvas to SVG took ~145 KB of CSS off every post. Self-hosting fonts took a ~1.8 MB script and a CDN request off every board.
+- **Mood images cost phones nothing.** The seven stills total about 400 KB, but a desktop visit downloads one up front plus one low-priority prefetch after load, and a phone downloads none.
+- **Feeds stay in sync for free.** RSS, `llms.txt` and [the sitemap](/sitemap-index.xml) rebuild on every deploy. The sitemap lists the home page, Projects, Writing and every published post. `web/astro.config.mjs` filters out `/mood/`, `/blog/` and `/404`, and a draft never shows up because production doesn't build its page.
 - **Every post ships three kinds of structured data** when it has an FAQ (`BlogPosting`, `BreadcrumbList`, `FAQPage`), all from frontmatter I was writing anyway.
-- **Drafts can't leak.** One flag hides a post from pages, RSS, the sitemap, `llms.txt` and the README list, because all five read the same field.
+- **Drafts can't leak.** One flag hides a post from pages, RSS, the sitemap, `llms.txt` and the README list, because all five are built from the same field.
 
 ## What I recommend
 
 Share data, not layout. A JSON file and a folder of MDX are boring on purpose: any build can read them, and none of them owns the others. The README generator here is a template, a few markers and string replacement. Keep yours that dumb.
 
-Make JavaScript earn its place per page. Astro's `client:visible` and `client:media` did most of the work. A feature that only matters on desktop shouldn't cost a phone anything.
+Make JavaScript earn its place per page. Here, Astro's `client:media` directive keeps the desktop-only mood plate off phones, and everything else either bakes at build time or ships as a tiny targeted script.
 
-If you embed diagrams, bake them to SVG when the site builds. The page has the drawing with no editor library, and a browser with JavaScript off still shows it. Keep Excalidraw installed for that bake and nowhere else. Import it from Node only after a loader that can read its JSON and CSS, and don't inline the fonts.
+If you embed diagrams, bake them to SVG when the site builds. The page has the drawing with no editor library, and a browser with JavaScript off still shows it. Keep Excalidraw installed for that bake and nowhere else. Import it from Node only after registering module hooks that can handle its JSON and CSS, and don't inline the fonts.
 
 Don't do this if you only want a blog. A hosted platform will get you writing sooner. This setup pays off when you have more than one surface to keep in sync and you'd rather edit a file than a dashboard.

@@ -10,7 +10,7 @@ async function postsNewestFirst(filter: (entry: Post) => boolean): Promise<Post[
 }
 
 /**
- * Published posts only, newest first, in dev and build alike. Used by home,
+ * Published posts only, newest first, in dev and build alike. Used by the
  * command palette, RSS, llms.txt, and redirects.
  */
 export function getPublishedPosts(): Promise<Post[]> {
@@ -18,9 +18,9 @@ export function getPublishedPosts(): Promise<Post[]> {
 }
 
 /**
- * Posts visible on `/writing/` and `/writing/[slug]/`. Drafts are included
- * only in `astro dev`, so they can be seen and previewed locally without
- * leaking into builds, home, command palette, RSS, llms.txt, or redirects.
+ * Posts visible on home, `/writing/`, and `/writing/[slug]/`. Drafts are included
+ * only in `astro dev`, so they can be seen on home and `/writing/` without
+ * leaking into builds, command palette, RSS, llms.txt, or redirects.
  */
 export function getRenderablePosts(): Promise<Post[]> {
   return postsNewestFirst((entry) => import.meta.env.DEV || isPublished(entry))

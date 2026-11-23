@@ -11,6 +11,7 @@ export default defineConfig({
   site: 'https://rishi23root.in',
   output: 'static',
   trailingSlash: 'always',
+  server: { host: '0.0.0.0' },
   integrations: [
     excalidrawBake(),
     mdx(),

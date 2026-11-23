@@ -37,7 +37,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Home section order | `web/src/pages/index.astro` | Voice bio → Capabilities → Writing (5, `→` to `/writing/`) → Work (3, `→` to `/projects/`). No under-bio contact strip |
 | Featured Work / Projects | `content/site.json` → `projects` | Single source for `/`, `/projects/`, README Featured Work, and `llms.txt` (`title`, `blurb`, `url`, `order`, optional `repo` `owner/repo`, optional `featured` flag, optional `tags[]` for `/projects/` filtering) |
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
-| Writing post | `content/posts/<slug>.mdx` | Frontmatter required. Home, RSS, `llms.txt`, redirects and the palette use `getPublishedPosts()` (never drafts, dev included); `writing/index.astro` and `writing/[slug].astro` use `getRenderablePosts()`, so `draft: true` posts appear on `/writing/` (badged `Draft`) and at their URL in `astro dev` only |
+| Writing post | `content/posts/<slug>.mdx` | Frontmatter required. Home and the Writing pages use `getRenderablePosts()`, so `draft: true` posts appear there (badged `Draft`) in `astro dev` only; RSS, `llms.txt`, redirects and the palette use `getPublishedPosts()` and never include drafts |
 | Excalidraw board in a post | `web/diagrams/<name>.json` + `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX | No import needed; see **Excalidraw boards** below |
 | GitHub card in a post | `<RepoCard owner="…" repo="…" />` or `<PrCard owner="…" repo="…" number={21} />` in the MDX | No import; plain github.com repo/PR links get hover previews automatically; see **GitHub cards and link previews** |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
@@ -47,7 +47,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | OG / Twitter / JSON-LD | `web/src/layouts/BaseLayout.astro` (+ page props) | Default OG image in `web/public`; posts use `og:type=article` |
 | RSS / llms.txt | `web/src/pages/rss.xml.ts`, `llms.txt.ts` | Built from content — no stale hand copy in `public/` |
 | Regenerate README locally | `GITHUB_TOKEN=… npm run build:readme` | Needs network + token for stats/featured/liked |
-| Preview site locally | `npm run dev:web` (from repo root) | Serves Astro at localhost |
+| Preview site locally | `npm run dev:web` (from repo root) | Astro binds to `0.0.0.0`; open it at localhost or another reachable interface |
 | Build site locally | `npm run build:web` | Output: `web/dist` |
 | Regenerate README on GitHub | Actions → **README build** → **Run workflow** | Or push to `master` |
 | Deploy site on GitHub | Actions → **Deploy site** → **Run workflow** | Or push `web/` / `content/` to `master` |
@@ -115,7 +115,7 @@ Writing posts can show a repository or pull request as a card, and plain github.
 
 - **Data:** `web/src/lib/github.ts` fetches `GET /repos/{owner}/{repo}` and `GET /repos/{owner}/{repo}/pulls/{n}` once per build each (promise cache shared by cards and previews), with `GITHUB_TOKEN` when it's set. The Pages workflow passes the built-in `secrets.GITHUB_TOKEN`; locally it works unauthenticated (60 requests/hour). Any failure (offline, rate limit, 404) logs one warning and the card falls back to a plain labelled link, so the build never fails on GitHub.
 - **Cards:** `web/src/components/github/RepoCard.astro` / `PrCard.astro`, sharing `GithubCardBody.astro`: mono eyebrow (Repository · owner / Pull request · owner/repo), stars (hidden at 0) or PR state, title, description or the first paragraph of the PR body, then language or `+adds −dels · files · commits · author · date`. The whole card is a link. No avatars (the site has no on-site avatar).
-- **Previews:** `[slug].astro` scans the post's MDX source (`findGithubRefs` in `web/src/lib/githubRefs.ts`, fenced code ignored) and renders `GithubLinkPreviews.astro` only when it finds repo or PR links. That component pre-renders one `<template>` per link with the same card body, plus a ~2.4 KB inline script: hover with a mouse (280 ms delay) or keyboard focus opens it under the link; leaving, blur or Escape closes it; it stays open while the pointer is on it. Touch devices just follow the link. Cards themselves never get previews.
+- **Previews:** `[slug].astro` scans the post's MDX source (`findGithubRefs` in `web/src/lib/githubRefs.ts`, fenced code ignored) and renders `GithubLinkPreviews.astro` only when it finds repo or PR links. That component pre-renders one `<template>` per link with the same card body, plus a ~2.7 KB inline script: hover with a mouse (280 ms delay) or keyboard focus opens it under the link; leaving, blur or Escape closes it; it stays open while the pointer is on it. Touch devices just follow the link. Cards themselves never get previews.
 - **Styles:** `.gh-card*` and `.gh-pop` in `web/src/styles/global.css`.
 
 Don't:
