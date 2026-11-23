@@ -125,8 +125,13 @@ const personJsonLd = {
                   <li class="hover-row">
                     <a class="row-link" href={postPath(post.data.slug)}>{post.data.title}</a>
                     <p class="post-list-meta">
-                      {post.data.draft && <span class="post-draft">Draft</span>}
                       <time datetime={post.data.date.toISOString()}>{isoDay(post.data.date)}</time>
+                      {post.data.draft && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span class="post-draft">Draft</span>
+                        </>
+                      )}
                     </p>
                   </li>
                 ))}
