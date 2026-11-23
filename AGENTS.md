@@ -47,7 +47,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | OG / Twitter / JSON-LD | `web/src/layouts/BaseLayout.astro` (+ page props) | Default OG image in `web/public`; posts use `og:type=article` |
 | RSS / llms.txt | `web/src/pages/rss.xml.ts`, `llms.txt.ts` | Built from content — no stale hand copy in `public/` |
 | Regenerate README locally | `GITHUB_TOKEN=… npm run build:readme` | Needs network + token for stats/featured/liked |
-| Preview site locally | `npm run dev:web` (from repo root) | Serves Astro at localhost |
+| Preview site locally | `npm run dev:web` (from repo root) | Astro binds to `0.0.0.0`; open it at localhost or another reachable interface |
 | Build site locally | `npm run build:web` | Output: `web/dist` |
 | Regenerate README on GitHub | Actions → **README build** → **Run workflow** | Or push to `master` |
 | Deploy site on GitHub | Actions → **Deploy site** → **Run workflow** | Or push `web/` / `content/` to `master` |
