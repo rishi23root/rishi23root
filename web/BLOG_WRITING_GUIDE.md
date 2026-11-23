@@ -51,7 +51,7 @@ Use the names as the `##` headings, in this order. A short qualifier after a col
 | `date` | yes | `YYYY-MM-DD`, the publish date |
 | `slug` | yes | kebab-case, **must equal the file name** (the build fails otherwise) |
 | `summary` | yes | One sentence, ≤ 220 chars. Used for meta description, OG/Twitter, RSS, `llms.txt` and the README |
-| `draft` | no | `true` hides the post from the build, RSS, sitemap, `llms.txt` and the README. In `npm run dev:web`, drafts appear on `/writing/` (marked `Draft`) and render at their URL, while staying hidden from the home page, command palette, RSS, sitemap, `llms.txt` and README |
+| `draft` | no | `true` hides the post from the build, RSS, sitemap, `llms.txt` and the README. In `npm run dev:web`, drafts appear on the home page and `/writing/` (marked `Draft`) and render at their URL, while staying hidden from the command palette, RSS, sitemap, `llms.txt` and README |
 | `author` | no | Defaults to `Rishabh` |
 | `updated` | no | Set it when a published post materially changes (adds `dateModified`) |
 | `tags` | no | 1-4 short lowercase tags |

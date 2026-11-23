@@ -61,7 +61,7 @@ On the site, posts are an Astro content collection loaded straight from `../cont
 
 - `title` is at most 90 characters and `summary` at most 220, because the summary is reused as the meta description, the social card text, the RSS line and the `llms.txt` entry.
 - `slug` must be kebab-case and must equal the file name. A small check fails the build otherwise, so a renamed file can't quietly change a URL.
-- `draft: true` shows the post in `npm run dev:web` and hides it everywhere else.
+- `draft: true` shows the post on the home page, `/writing/`, and its URL in `npm run dev:web`; lists mark it `Draft`, while production builds and feeds leave it out.
 
 Every post follows the same section order: TL;DR, the problem, what I tried, what worked, what failed, architecture, code, results, and what I'd recommend. You're reading one. The order forces me to write down the failures, which is usually the part worth reading. A private draft template in the repo has the skeleton, and the post page builds its "On this page" rail, reading time and FAQ from the headings and frontmatter.
 
