@@ -1893,6 +1893,32 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   font-size: inherit;
 }
 
+/* Shiki dual themes (defaultColor: false): tokens carry --shiki-dark / --shiki-light;
+   html[data-theme] picks one, so blocks follow the toggle without a reload.
+   No inline background is emitted, so .prose pre's --frame-bg shows through. */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+  font-weight: var(--shiki-dark-font-weight);
+}
+
+html[data-theme='light'] .astro-code,
+html[data-theme='light'] .astro-code span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+  font-weight: var(--shiki-light-font-weight);
+}
+
+/* Theme token colours that miss 4.5:1 on --frame-bg (comments in both themes,
+   plus github-light's red, orange and green): same hue, darkened or lightened
+   just past AA. Matched on Shiki's inline vars; !important beats inline style. */
+.astro-code span[style*='--shiki-dark:#768390' i] { --shiki-dark: #8b96a1 !important; }
+.astro-code span[style*='--shiki-light:#6a737d' i] { --shiki-light: #5b626b !important; }
+.astro-code span[style*='--shiki-light:#d73a49' i] { --shiki-light: #bb2634 !important; }
+.astro-code span[style*='--shiki-light:#e36209' i] { --shiki-light: #a34606 !important; }
+.astro-code span[style*='--shiki-light:#22863a' i] { --shiki-light: #1c7030 !important; }
+
 .prose hr {
   margin: 2rem 0;
   border: 0;
