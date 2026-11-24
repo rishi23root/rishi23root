@@ -1748,30 +1748,12 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   scroll-margin-top: var(--space-7);
 }
 
-/* Rail clicks move focus to the heading, so it needs a visible ring (WCAG 2.4.7).
-   The ring holds for ~1.5s, then fades; reduced motion keeps it until blur. */
-.post-body :is(h2, h3)[tabindex='-1']:focus,
-.post-faq h2[tabindex='-1']:focus {
+/* Rail links move focus to the heading, so keyboard users get a ring on it (WCAG 2.4.7).
+   :focus-visible keeps it off for mouse clicks; it stays until focus moves on. */
+.post-body :is(h2, h3)[tabindex='-1']:focus-visible,
+.post-faq h2[tabindex='-1']:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
-  animation: toc-ring-fade 2.5s ease-out forwards;
-}
-
-@keyframes toc-ring-fade {
-  0%,
-  60% {
-    outline-color: var(--accent);
-  }
-  100% {
-    outline-color: transparent;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .post-body :is(h2, h3)[tabindex='-1']:focus,
-  .post-faq h2[tabindex='-1']:focus {
-    animation: none;
-  }
 }
 
 /* Long-form body (MDX). Spacing and type instead of rules.
@@ -2220,6 +2202,7 @@ html[data-theme='light'] .gh-card-del {
    Only then, because overflow would clip the card's shadow. */
 .gh-pop.is-scroll {
   max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
   overflow-y: auto;
 }
 

@@ -93,6 +93,7 @@ const previews = Object.entries(await getLinkPreviews(Astro.props.refs))
             if (!tpl) return
             current?.removeAttribute('aria-describedby')
             pop.replaceChildren(tpl.content.cloneNode(true))
+            pop.scrollTop = 0
             pop.querySelector<HTMLAnchorElement>('a.gh-card')?.setAttribute('href', link.href)
             current = link
             link.setAttribute('aria-describedby', pop.id)
