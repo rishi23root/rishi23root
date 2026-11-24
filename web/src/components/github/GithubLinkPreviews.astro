@@ -71,10 +71,14 @@ const previews = Object.entries(await getLinkPreviews(Astro.props.refs))
             }
             const rects = [...current.getClientRects()]
             const rect = rects[lineIndex] ?? rects[0] ?? bounds
+            pop.classList.toggle('is-scroll', pop.scrollHeight > innerHeight - 2 * EDGE)
             const w = pop.offsetWidth
             const h = pop.offsetHeight
             let top = rect.bottom + GAP
             if (top + h > innerHeight - EDGE && rect.top - GAP - h > EDGE) top = rect.top - GAP - h
+            // Fits neither way (short viewport): keep it on screen. A card taller than the
+            // viewport is capped by .is-scroll, so this puts it at EDGE.
+            top = Math.max(EDGE, Math.min(top, innerHeight - EDGE - h))
             const left = Math.max(EDGE, Math.min(rect.left, innerWidth - w - EDGE))
             pop.style.top = `${Math.round(top)}px`
             pop.style.left = `${Math.round(left)}px`

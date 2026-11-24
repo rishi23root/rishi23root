@@ -2216,6 +2216,13 @@ html[data-theme='light'] .gh-card-del {
     visibility 0s linear var(--dur-fast);
 }
 
+/* Taller than the viewport: cap and scroll inside. 24px = 2 × EDGE in GithubLinkPreviews.astro.
+   Only then, because overflow would clip the card's shadow. */
+.gh-pop.is-scroll {
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+}
+
 .gh-pop.is-open {
   opacity: 1;
   visibility: visible;
@@ -2377,7 +2384,7 @@ html[data-theme='dark'] .excal-stage svg {
   filter: invert(93%) hue-rotate(180deg);
 }
 
-/* Control pill: hidden until the board is hovered or focused */
+/* Control pill: faint at rest on desktop so readers can see it exists; full on hover or focus */
 .excal-pill {
   --pill-bg: color-mix(in srgb, var(--fg) 12%, var(--bg));
   position: absolute;
@@ -2394,7 +2401,7 @@ html[data-theme='dark'] .excal-stage svg {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
   color: var(--fg);
   cursor: default;
-  opacity: 0;
+  opacity: 0.45;
   transform: translateY(4px);
   pointer-events: none;
   transition:
@@ -2416,6 +2423,14 @@ html[data-theme='dark'] .excal-stage svg {
     opacity: 1;
     transform: none;
     pointer-events: auto;
+  }
+}
+
+/* Reduced motion: two states, no transition */
+@media (prefers-reduced-motion: reduce) {
+  .excal-pill {
+    transform: none;
+    transition: none;
   }
 }
 
