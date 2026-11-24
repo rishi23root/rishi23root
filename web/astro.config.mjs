@@ -6,6 +6,7 @@ import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 import { excalidrawBake } from './scripts/excalidraw-integration.mjs'
+import { homeModulepreload } from './scripts/home-modulepreload-integration.mjs'
 
 export default defineConfig({
   site: 'https://rishi23root.in',
@@ -14,6 +15,7 @@ export default defineConfig({
   server: { host: '0.0.0.0' },
   integrations: [
     excalidrawBake(),
+    homeModulepreload(),
     mdx(),
     react(),
     sitemap({
