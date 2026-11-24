@@ -11,6 +11,7 @@ type Props = {
   path?: string
   type?: 'website' | 'article'
   publishedTime?: Date | string
+  modifiedTime?: Date | string
   image?: string
   /** e.g. `noindex` for unlisted pages like /mood */
   robots?: string
@@ -23,6 +24,7 @@ const {
   path = '/',
   type = 'website',
   publishedTime,
+  modifiedTime,
   image = '/og-default.png',
   robots,
   jsonLd,
@@ -32,7 +34,9 @@ const pageTitle = title ? `${title} · ${site.github.name}` : site.github.name
 const canonical = absoluteUrl(path)
 const ogImage = absoluteUrl(image)
 const published = publishedTime ? new Date(publishedTime).toISOString() : undefined
+const modified = modifiedTime ? new Date(modifiedTime).toISOString() : undefined
 const jsonLdBlocks = jsonLd ? [jsonLd].flat() : []
+const noindex = robots?.split(',').some((directive) => directive.trim().toLowerCase() === 'noindex')
 
 const isHome = path === '/'
 ---
@@ -45,7 +49,7 @@ const isHome = path === '/'
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     {robots ? <meta name="robots" content={robots} /> : null}
-    <link rel="canonical" href={canonical} />
+    {!noindex ? <link rel="canonical" href={canonical} /> : null}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link
@@ -69,6 +73,7 @@ const isHome = path === '/'
         <meta property="article:published_time" content={published} />
       ) : null
     }
+    {modified ? <meta property="article:modified_time" content={modified} /> : null}
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />

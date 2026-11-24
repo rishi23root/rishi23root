@@ -25,7 +25,7 @@ $ stats
 
 ### Writing
 
-- **[How rishi23root.in is put together](https://rishi23root.in/writing/how-this-site-works/)** — 2026-11-14
+- **[How I run my GitHub README and Astro site from one content folder](https://rishi23root.in/writing/how-this-site-works/)** — 2026-11-14
 - **[Hello world](https://rishi23root.in/writing/hello-world/)** — 2026-11-01
 
 ### Recently liked
