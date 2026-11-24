@@ -1,0 +1,5 @@
+<url><loc>https://rishi23root.in/</loc><lastmod>2026-11-14T00:00:00.000Z</lastmod></url>
+<url><loc>https://rishi23root.in/projects/</loc></url>
+<url><loc>https://rishi23root.in/writing/</loc><lastmod>2026-11-14T00:00:00.000Z</lastmod></url>
+<url><loc>https://rishi23root.in/writing/hello-world/</loc><lastmod>2026-11-01T00:00:00.000Z</lastmod></url>
+<url><loc>https://rishi23root.in/writing/how-this-site-works/</loc><lastmod>2026-11-24T00:00:00.000Z</lastmod></url>

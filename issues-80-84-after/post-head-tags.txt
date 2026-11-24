@@ -1,0 +1,41 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One content folder for a GitHub README and Astro site · rishi23root</title>
+<meta name="description" content="One content folder feeds both my GitHub profile README and this Astro site, with a single source of truth, build-time SVG diagrams, zero React on posts, and generated feeds that cannot drift.">
+<link rel="canonical" href="https://rishi23root.in/writing/how-this-site-works/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="alternate" type="application/rss+xml" title="rishi23root RSS" href="https://rishi23root.in/rss.xml">
+<meta property="og:title" content="One content folder for a GitHub README and Astro site · rishi23root">
+<meta property="og:description" content="One content folder feeds both my GitHub profile README and this Astro site, with a single source of truth, build-time SVG diagrams, zero React on posts, and generated feeds that cannot drift.">
+<meta property="og:url" content="https://rishi23root.in/writing/how-this-site-works/">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://rishi23root.in/og-default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Rishabh (rishi23root): software engineer, AI, SaaS and automation">
+<meta property="og:site_name" content="rishi23root">
+<meta property="article:published_time" content="2026-11-14T00:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-24T00:00:00.000Z">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="One content folder for a GitHub README and Astro site · rishi23root">
+<meta name="twitter:description" content="One content folder feeds both my GitHub profile README and this Astro site, with a single source of truth, build-time SVG diagrams, zero React on posts, and generated feeds that cannot drift.">
+<meta name="twitter:image" content="https://rishi23root.in/og-default.png">
+<meta name="twitter:image:alt" content="Rishabh (rishi23root): software engineer, AI, SaaS and automation">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"One content folder for a GitHub README and Astro site","description":"One content folder feeds both my GitHub profile README and this Astro site, with a single source of truth, build-time SVG diagrams, zero React on posts, and generated feeds that cannot drift.","datePublished":"2026-11-14T00:00:00.000Z","dateModified":"2026-11-24T00:00:00.000Z","url":"https://rishi23root.in/writing/how-this-site-works/","mainEntityOfPage":"https://rishi23root.in/writing/how-this-site-works/","image":"https://rishi23root.in/og-default.png","keywords":"astro personal site architecture, github profile readme generator, excalidraw svg astro, astro mdx blog, meta, astro, excalidraw","author":{"@type":"Person","name":"Rishabh","alternateName":"rishi23root","url":"https://rishi23root.in"},"publisher":{"@type":"Person","name":"Rishabh","alternateName":"rishi23root","url":"https://rishi23root.in"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://rishi23root.in"},{"@type":"ListItem","position":2,"name":"Writing","item":"https://rishi23root.in/writing/"},{"@type":"ListItem","position":3,"name":"How I run my GitHub README and Astro site from one content folder","item":"https://rishi23root.in/writing/how-this-site-works/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do the README and the website share any layout code?","acceptedAnswer":{"@type":"Answer","text":"No. They share data only. The README is filled in from a short markdown template, and the site is an Astro project with its own pages and styles."}},{"@type":"Question","name":"Can an Astro content collection also generate a GitHub profile README?","acceptedAnswer":{"@type":"Answer","text":"Yes, by keeping posts as plain Markdown or MDX outside the Astro app and reading their frontmatter directly in Node. Here, Astro loads content/posts/ as a content collection while a separate Node script parses the same files to refresh README.md on push."}},{"@type":"Question","name":"Why are the diagrams SVG instead of a live Excalidraw canvas?","acceptedAnswer":{"@type":"Answer","text":"The live canvas flashed an empty whiteboard on load and pushed about 145 KB of editor CSS onto every post. An SVG export loads cleanly, stays sharp at any zoom and follows the theme with one CSS rule."}},{"@type":"Question","name":"How do you export Excalidraw diagrams to static SVG in Node without a browser?","acceptedAnswer":{"@type":"Answer","text":"Install jsdom globals for window, document, SVG elements, and a minimal canvas measureText stub, register Node module hooks to handle Excalidraw's JSON and CSS imports, then call exportToSvg with skipInliningFonts enabled. Each scene bakes to a local SVG before Astro builds pages, so posts ship zero Excalidraw or React JavaScript."}}]}</script>
+<link rel="preload" href="/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin="">
+<script>
+      // <html> ships as dark; only a saved light choice needs applying.
+      try {
+        if (localStorage.getItem('theme') === 'light')
+          document.documentElement.setAttribute('data-theme', 'light')
+      } catch (e) {}
+    </script>
+<noscript><style>
+      .post-body img {
+        opacity: 1;
+      }
+    </style></noscript>
+<link rel="stylesheet" href="/_astro/BaseLayout.BtNn2QfX.css">

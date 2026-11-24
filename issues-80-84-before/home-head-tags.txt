@@ -1,0 +1,133 @@
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>rishi23root</title><meta name="description" content="I build useful things at the intersection of AI, SaaS, and automation."><link rel="canonical" href="https://rishi23root.in/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="rishi23root RSS" href="https://rishi23root.in/rss.xml"><meta property="og:title" content="rishi23root"><meta property="og:description" content="I build useful things at the intersection of AI, SaaS, and automation."><meta property="og:url" content="https://rishi23root.in/"><meta property="og:type" content="website"><meta property="og:image" content="https://rishi23root.in/og-default.png"><meta property="og:site_name" content="rishi23root"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="rishi23root"><meta name="twitter:description" content="I build useful things at the intersection of AI, SaaS, and automation."><meta name="twitter:image" content="https://rishi23root.in/og-default.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"rishi23root","url":"https://rishi23root.in","email":"hi@rishi23root.in","description":"I build useful things at the intersection of AI, SaaS, and automation.","image":"https://github.com/rishi23root.png?size=320","sameAs":["https://x.com/rishi23root","https://www.linkedin.com/in/rishi23root","https://github.com/rishi23root","https://pypi.org/user/rishi23root"]}</script><link rel="preload" href="/fonts/source-sans-3-latin.woff2" as="font" type="font/woff2" crossorigin><script>
+      // <html> ships as dark; only a saved light choice needs applying.
+      try {
+        if (localStorage.getItem('theme') === 'light')
+          document.documentElement.setAttribute('data-theme', 'light')
+      } catch (e) {}
+    </script><script>(function preloadFirstMood(moods, key, desktopMq, makeBag) {
+	try {
+		if (!window.matchMedia(desktopMq).matches) return;
+		const ids = moods.map((m) => m.id);
+		const forced = new URLSearchParams(window.location.search).get("mood");
+		let id = forced && ids.indexOf(forced) !== -1 ? forced : null;
+		if (!id) {
+			const bag = makeBag(key);
+			const next = bag.advance(ids, bag.read(ids));
+			id = next.order[next.index];
+		}
+		window.__heroMoodFirst = id;
+		const hit = moods.find((m) => m.id === id);
+		if (hit && hit.src) {
+			const link = document.createElement("link");
+			link.rel = "preload";
+			link.as = "image";
+			link.href = hit.src;
+			if (/\.webp$/.test(hit.src)) link.type = "image/webp";
+			link.setAttribute("fetchpriority", "high");
+			link.setAttribute("data-hero-mood", id);
+			document.head.appendChild(link);
+		}
+	} catch {}
+})([{"id":"cyclist","src":"/mood/cyclist.webp"},{"id":"park","src":"/mood/park.webp"},{"id":"building","src":"/mood/building.webp"},{"id":"warehouse","src":"/mood/warehouse.webp"},{"id":"tennis","src":"/mood/tennis.webp"},{"id":"shore","src":"/mood/shore.webp"},{"id":"sketch","src":"/mood/sketch.webp"}],"mood-cycle:v1","(min-width: 1024px)",function createMoodBag(key) {
+	const freshOrder = (ids, avoidFirst) => {
+		const order = ids.slice();
+		for (let i = order.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[order[i], order[j]] = [order[j], order[i]];
+		}
+		if (avoidFirst && order.length > 1 && order[0] === avoidFirst) {
+			const swap = 1 + Math.floor(Math.random() * (order.length - 1));
+			[order[0], order[swap]] = [order[swap], order[0]];
+		}
+		return order;
+	};
+	const sameSet = (a, b) => {
+		if (a.length !== b.length) return false;
+		const set = new Set(a);
+		return b.every((id) => set.has(id));
+	};
+	const read = (ids) => {
+		try {
+			const raw = window.localStorage.getItem(key);
+			if (!raw) return null;
+			const parsed = JSON.parse(raw);
+			if (!Array.isArray(parsed.order) || typeof parsed.index !== "number") return null;
+			if (!sameSet(parsed.order, ids)) return null;
+			return parsed;
+		} catch {
+			return null;
+		}
+	};
+	/**
+	* Step past `prev` (null starts a new bag) and persist the result.
+	* `pending` is a next bag already drawn by a peek, reused so it matches.
+	*/
+	const advance = (ids, prev, pending) => {
+		let next;
+		if (!prev) next = {
+			order: freshOrder(ids),
+			index: 0
+		};
+		else if (prev.index + 1 >= prev.order.length) next = {
+			order: pending && sameSet(pending, ids) ? pending : freshOrder(ids, prev.order[prev.index]),
+			index: 0
+		};
+		else next = {
+			order: prev.order,
+			index: prev.index + 1
+		};
+		try {
+			window.localStorage.setItem(key, JSON.stringify(next));
+		} catch {}
+		return next;
+	};
+	return {
+		freshOrder,
+		sameSet,
+		read,
+		advance
+	};
+})</script><script>(function(){const desktopMq = "(min-width: 1024px)";
+
+        try {
+          var root = document.documentElement
+          var mq = window.matchMedia(desktopMq)
+          if (
+            mq.matches &&
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ) {
+            var timer = 0
+            var onMq = function () {
+              if (!mq.matches) clearAwait()
+            }
+            var cleanup = function () {
+              if (timer) {
+                window.clearTimeout(timer)
+                timer = 0
+              }
+              if (mq.removeEventListener) mq.removeEventListener('change', onMq)
+              else if (mq.removeListener) mq.removeListener(onMq)
+              window.__moodAwaitCleanup = undefined
+            }
+            var clearAwait = function () {
+              if (root.classList.contains('mood-await')) {
+                root.classList.add('mood-settled')
+                root.classList.remove('mood-await')
+              }
+              cleanup()
+            }
+            root.classList.add('mood-await')
+            timer = window.setTimeout(clearAwait, 2500)
+            if (mq.addEventListener) mq.addEventListener('change', onMq)
+            else if (mq.addListener) mq.addListener(onMq)
+            window.__moodAwaitCleanup = cleanup
+          }
+        } catch (e) {
+          try {
+            document.documentElement.classList.remove('mood-await')
+          } catch (e2) {}
+        }
+        window.addEventListener('pagereveal', function (e) {
+          if (e.viewTransition) window.__homePageVt = e.viewTransition.finished
+        })
+      })();</script><link rel="stylesheet" href="/_astro/BaseLayout.BtNn2QfX.css"></head>
