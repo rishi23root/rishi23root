@@ -220,7 +220,7 @@ async function main() {
 
   const starred: GHItem[] = await githubReq
     .get<GHItem[]>('/users/' + user + '/starred', {
-      params: { per_page: Math.min(100, recentLikedCount + 10) },
+      params: { per_page: Math.min(100, recentLikedCount + 10 + opensource.active.length) },
     })
     .then((r) => r.data)
 

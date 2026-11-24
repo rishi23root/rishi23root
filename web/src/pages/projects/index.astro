@@ -125,73 +125,63 @@ const showFilters = projects.length >= PROJECT_FILTER_MIN
   {
     showFilters ? (
       <script is:inline>
-        ;(function () {
-          var filtersRoot = document.querySelector('[data-project-filters]')
-          var list = document.querySelector('[data-project-list]')
+        ;(() => {
+          const filtersRoot = document.querySelector('[data-project-filters]')
+          const list = document.querySelector('[data-project-list]')
           if (!filtersRoot || !list) return
 
-          var searchInput = filtersRoot.querySelector('[data-project-search]')
-          var countEl = filtersRoot.querySelector('[data-project-count]')
-          var tagButtons = Array.from(filtersRoot.querySelectorAll('[data-project-tag]'))
-          var items = Array.from(list.querySelectorAll('[data-project-item]'))
-          var emptyEl = document.querySelector('[data-project-empty]')
-          var resetBtn = document.querySelector('[data-project-reset]')
+          const searchInput = filtersRoot.querySelector('[data-project-search]')
+          const countEl = filtersRoot.querySelector('[data-project-count]')
+          const tagButtons = Array.from(filtersRoot.querySelectorAll('[data-project-tag]'))
+          const items = Array.from(list.querySelectorAll('[data-project-item]'))
+          const emptyEl = document.querySelector('[data-project-empty]')
+          const resetBtn = document.querySelector('[data-project-reset]')
 
-          var validTags = new Set(
-            tagButtons.map(function (btn) {
-              return btn.dataset.projectTag || ''
-            }),
-          )
-          var params = new URLSearchParams(window.location.search)
-          var initialTag = (params.get('tag') || '').trim().toLowerCase()
-          var activeTag = validTags.has(initialTag) ? initialTag : ''
-          var query = (params.get('q') || '').trim()
+          const validTags = new Set(tagButtons.map((btn) => btn.dataset.projectTag ?? ''))
+          const params = new URLSearchParams(window.location.search)
+          const initialTag = (params.get('tag') ?? '').trim().toLowerCase()
+          let activeTag = validTags.has(initialTag) ? initialTag : ''
+          let query = (params.get('q') ?? '').trim()
 
           if (searchInput && query) {
             searchInput.value = query
           }
 
-          function syncUrl() {
-            var next = new URLSearchParams()
+          const syncUrl = () => {
+            const next = new URLSearchParams()
             if (activeTag) next.set('tag', activeTag)
             if (query) next.set('q', query)
-            var qs = next.toString()
-            var target = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash
+            const qs = next.toString()
+            const target = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`
             window.history.replaceState(null, '', target)
           }
 
-          function apply(updateUrl) {
-            var tokens = query.toLowerCase().split(/\s+/).filter(Boolean)
-            var shown = 0
+          const apply = (updateUrl) => {
+            const tokens = query.toLowerCase().split(/\s+/).filter(Boolean)
+            let shown = 0
 
-            for (var i = 0; i < items.length; i++) {
-              var item = items[i]
-              var itemTags = JSON.parse(item.dataset.tags || '[]')
-              var itemSearch = item.dataset.search || ''
-              var tagMatch = !activeTag || itemTags.indexOf(activeTag) !== -1
-              var queryMatch =
-                !tokens.length ||
-                tokens.every(function (token) {
-                  return itemSearch.indexOf(token) !== -1
-                })
-              var match = tagMatch && queryMatch
+            for (const item of items) {
+              const itemTags = JSON.parse(item.dataset.tags || '[]')
+              const itemSearch = item.dataset.search ?? ''
+              const tagMatch = !activeTag || itemTags.includes(activeTag)
+              const queryMatch = !tokens.length || tokens.every((token) => itemSearch.includes(token))
+              const match = tagMatch && queryMatch
               item.hidden = !match
               if (match) shown++
             }
 
-            for (var j = 0; j < tagButtons.length; j++) {
-              var btn = tagButtons[j]
-              var isCurrent = (btn.dataset.projectTag || '') === activeTag
+            for (const btn of tagButtons) {
+              const isCurrent = (btn.dataset.projectTag ?? '') === activeTag
               btn.classList.toggle('is-active', isCurrent)
               btn.setAttribute('aria-pressed', String(isCurrent))
             }
 
             if (countEl) {
-              var total = items.length
+              const total = items.length
               countEl.textContent =
                 activeTag || tokens.length
-                  ? shown + ' of ' + total
-                  : total + (total === 1 ? ' project' : ' projects')
+                  ? `${shown} of ${total}`
+                  : `${total} ${total === 1 ? 'project' : 'projects'}`
             }
 
             if (emptyEl) {
@@ -201,37 +191,33 @@ const showFilters = projects.length >= PROJECT_FILTER_MIN
             if (updateUrl) syncUrl()
           }
 
-          tagButtons.forEach(function (btn) {
-            btn.addEventListener('click', function () {
-              activeTag = btn.dataset.projectTag || ''
+          for (const btn of tagButtons) {
+            btn.addEventListener('click', () => {
+              activeTag = btn.dataset.projectTag ?? ''
               apply(true)
             })
+          }
+
+          searchInput?.addEventListener('input', () => {
+            query = searchInput.value.trim()
+            apply(true)
           })
 
-          if (searchInput) {
-            searchInput.addEventListener('input', function () {
-              query = searchInput.value.trim()
-              apply(true)
-            })
-
-            searchInput.addEventListener('keydown', function (event) {
-              if (event.key === 'Escape' && searchInput.value) {
-                searchInput.value = ''
-                query = ''
-                apply(true)
-              }
-            })
-          }
-
-          if (resetBtn) {
-            resetBtn.addEventListener('click', function () {
-              activeTag = ''
+          searchInput?.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && searchInput.value) {
+              searchInput.value = ''
               query = ''
-              if (searchInput) searchInput.value = ''
               apply(true)
-              if (searchInput) searchInput.focus()
-            })
-          }
+            }
+          })
+
+          resetBtn?.addEventListener('click', () => {
+            activeTag = ''
+            query = ''
+            if (searchInput) searchInput.value = ''
+            apply(true)
+            searchInput?.focus()
+          })
 
           apply(false)
         })()
