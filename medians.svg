@@ -4,21 +4,21 @@
   <text x="48" y="80" fill="#b8b1a6" font-family="system-ui,sans-serif" font-size="14">1280 × 800 · 4× CPU · Fast 3G-like · same mood image in both variants</text>
   <g font-family="system-ui,sans-serif" font-size="15">
     <text x="48" y="150" fill="#f2eee7" font-weight="600">Time to visible image (ms)</text>
-    <rect x="320" y="120" width="480" height="24" rx="5" fill="#608c8a"/><text x="812" y="138" fill="#f2eee7">3,592 before</text>
-    <rect x="320" y="152" width="420" height="24" rx="5" fill="#d28a4e"/><text x="752" y="170" fill="#f2eee7">3,143 after</text>
+    <rect x="320" y="120" width="332" height="24" rx="5" fill="#608c8a"/><text x="812" y="138" fill="#f2eee7">2,493 before</text>
+    <rect x="320" y="152" width="342" height="24" rx="5" fill="#d28a4e"/><text x="752" y="170" fill="#f2eee7">2,570 after</text>
 
     <text x="48" y="250" fill="#f2eee7" font-weight="600">Largest Contentful Paint (ms)</text>
     <text x="48" y="271" fill="#b8b1a6" font-size="13">paragraph in both runs</text>
-    <rect x="320" y="220" width="389" height="24" rx="5" fill="#608c8a"/><text x="721" y="238" fill="#f2eee7">1,214 before</text>
-    <rect x="320" y="252" width="403" height="24" rx="5" fill="#d28a4e"/><text x="735" y="270" fill="#f2eee7">1,259 after</text>
+    <rect x="320" y="220" width="268" height="24" rx="5" fill="#608c8a"/><text x="721" y="238" fill="#f2eee7">1,005 before</text>
+    <rect x="320" y="252" width="299" height="24" rx="5" fill="#d28a4e"/><text x="735" y="270" fill="#f2eee7">1,120 after</text>
 
     <text x="48" y="350" fill="#f2eee7" font-weight="600">JavaScript transferred (bytes)</text>
-    <rect x="320" y="320" width="400" height="24" rx="5" fill="#608c8a"/><text x="732" y="338" fill="#f2eee7">232,873 before</text>
-    <rect x="320" y="352" width="400" height="24" rx="5" fill="#d28a4e"/><text x="732" y="370" fill="#f2eee7">232,873 after</text>
+    <rect x="320" y="320" width="371" height="24" rx="5" fill="#608c8a"/><text x="732" y="338" fill="#f2eee7">232,099 before</text>
+    <rect x="320" y="352" width="371" height="24" rx="5" fill="#d28a4e"/><text x="732" y="370" fill="#f2eee7">232,099 after</text>
   </g>
   <g font-family="system-ui,sans-serif" font-size="13" fill="#b8b1a6">
     <rect x="48" y="415" width="14" height="14" rx="3" fill="#608c8a"/><text x="70" y="427">Before</text>
     <rect x="140" y="415" width="14" height="14" rx="3" fill="#d28a4e"/><text x="162" y="427">After modulepreload</text>
-    <text x="48" y="460">Image median improved by 449 ms (12.5%); LCP remained a paragraph.</text>
+    <text x="48" y="460">Image median changed by +77 ms (3.1%); LCP remained a paragraph.</text>
   </g>
 </svg>
