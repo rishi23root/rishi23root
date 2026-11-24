@@ -293,6 +293,21 @@ async function main() {
     { tag: 'zeta', count: 1 },
   ])
 
+  // Tags that match every project are dropped (e.g. open-source on site.json)
+  assert.deepStrictEqual(
+    getProjectTags([
+      { title: 'A', url: 'https://example.com/a', tags: ['open-source', 'python'] },
+      { title: 'B', url: 'https://example.com/b', tags: ['Open-Source', 'web'] },
+    ]),
+    [
+      { tag: 'python', count: 1 },
+      { tag: 'web', count: 1 },
+    ],
+  )
+  assert.ok(
+    !getProjectTags(getOrderedProjects()).some((entry) => entry.tag === 'open-source'),
+  )
+
   assert.strictEqual(absoluteUrl('/writing'), 'https://rishi23root.in/writing/')
   assert.strictEqual(
     absoluteUrl('/og-default.png'),

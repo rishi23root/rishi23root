@@ -43,7 +43,9 @@ export function getFeaturedProjects(
   return getOrderedProjects(projects).filter((project) => project.featured !== false)
 }
 
-/** Unique project tags with counts, sorted by count descending then alphabetically. */
+/** Unique project tags with counts, sorted by count descending then alphabetically.
+ * Drops tags that match every project (a filter that selects all items is a no-op).
+ */
 export function getProjectTags(projects: Project[]): { tag: string; count: number }[] {
   const counts = new Map<string, number>()
   for (const project of projects) {
@@ -52,6 +54,7 @@ export function getProjectTags(projects: Project[]): { tag: string; count: numbe
     }
   }
   return [...counts.entries()]
+    .filter(([, count]) => count < projects.length)
     .map(([tag, count]) => ({ tag, count }))
     .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
 }
