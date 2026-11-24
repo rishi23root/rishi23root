@@ -23,6 +23,7 @@ export function homeModulepreload() {
         if (!reactImport) throw new Error('Could not find the React chunk imported by HeroMoodShell')
 
         const reactUrl = new URL(reactImport, `https://build.invalid${componentUrl}`).pathname
+        // Astro requests renderer-url with component-url during hydration; preload the late component and React hop.
         const urls = [componentUrl, reactUrl]
         const script = `<script>(()=>{if(!matchMedia(${JSON.stringify(DESKTOP_MQ)}).matches)return;for(const href of ${JSON.stringify(urls)}){const link=document.createElement('link');link.rel='modulepreload';link.href=href;document.head.append(link)}})()</script>`
         if (!html.includes('<head>')) throw new Error('Could not find <head> in the built home page')
