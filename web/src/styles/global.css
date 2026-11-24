@@ -22,9 +22,15 @@ html[data-theme='dark'] {
   --fg: #f2ebe0;
   --muted: rgba(242, 235, 224, 0.68);
   --border: rgba(242, 235, 224, 0.16);
-  --frame-bg: #262421;
-  --accent: #e6dccb;
+  --frame-bg: #2e2c28; /* 1.24:1 vs --bg: a visible but quiet surface step */
+  /* Muted teal, only for interactive emphasis (focus, active nav, prose link
+     underline, reading progress). Not gold: it would blur "link" with --warn. */
+  --accent: #8fc4c0;
+  /* Edge for controls whose boundary identifies them (WCAG 1.4.11, >= 3:1).
+     --border stays the decorative hairline. */
+  --edge: #6f6a62;
   --row-hover: rgba(242, 235, 224, 0.05);
+  --warn: #e0b25c;
   color-scheme: dark;
 }
 
@@ -34,7 +40,8 @@ html[data-theme='light'] {
   --muted: rgba(28, 27, 25, 0.64);
   --border: rgba(28, 27, 25, 0.14);
   --frame-bg: #e8dfd0;
-  --accent: #2a2825;
+  --accent: #286b68;
+  --edge: #847d72;
   --row-hover: rgba(28, 27, 25, 0.05);
   /* Darker amber so warning labels clear AA on beige (~4.6:1). */
   --warn: #8a6410;
@@ -47,7 +54,6 @@ html[data-theme='light'] {
 :root {
   --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
   --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  --warn: #e0b25c;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -132,7 +138,7 @@ a {
 }
 
 a:hover {
-  color: var(--accent);
+  color: var(--fg);
 }
 
 .visually-hidden {
@@ -240,7 +246,7 @@ a:hover {
 }
 
 .wordmark:hover {
-  color: var(--accent);
+  color: var(--fg);
 }
 
 .wordmark:focus-visible {
@@ -304,6 +310,7 @@ a:hover {
 
 .nav a[aria-current='page']::after {
   transform: scaleX(1);
+  background: var(--accent);
 }
 
 .nav a:hover,
@@ -400,7 +407,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .hover-row:hover .row-link {
-  color: var(--accent);
+  color: var(--fg);
 }
 
 /* ---------------------------------------------------------------
@@ -1001,14 +1008,6 @@ html[data-theme='light'] .socials-menu-trigger {
     transform var(--socials-panel-dur) var(--ease-out);
 }
 
-html[data-theme='dark'] .socials-menu-panel {
-  background-color: #1c1b19;
-}
-
-html[data-theme='light'] .socials-menu-panel {
-  background-color: #f2ebe0;
-}
-
 .socials-menu-panel[hidden] {
   display: none;
 }
@@ -1577,7 +1576,7 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   font-size: 0.92rem;
   color: var(--fg);
   background: color-mix(in srgb, var(--fg) 3%, transparent);
-  border: 1px solid var(--border);
+  border: 1px solid var(--edge);
   border-radius: 6px;
   padding: 0.45rem 0.7rem;
   transition: border-color 140ms ease, background-color 140ms ease;
@@ -1587,8 +1586,9 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   color: var(--muted);
 }
 
+.project-search:hover,
 .project-search:focus {
-  border-color: color-mix(in srgb, var(--fg) 34%, transparent);
+  border-color: color-mix(in srgb, var(--fg) 40%, var(--edge));
   background: color-mix(in srgb, var(--fg) 5%, transparent);
 }
 
@@ -1839,6 +1839,7 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
 
 .prose a {
   color: var(--fg);
+  text-decoration-color: var(--accent);
   text-underline-offset: 0.12em;
 }
 
