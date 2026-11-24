@@ -16,7 +16,7 @@ Generate `README.md` from `readme.template.md` + `content/site.json` (via `confi
 | `web/` | Astro static site (landing, `/writing`, SEO) → `web/dist` |
 | `web/src/pages/rss.xml.ts` | RSS feed from published posts |
 | `web/src/pages/llms.txt.ts` | Generated `llms.txt` from `site.json` + posts (do not hand-edit a public copy) |
-| `web/public/og-default.png` | Default Open Graph / Twitter card image |
+| `web/public/og-default.png` | Default Open Graph / Twitter card image; regenerate with `npm run og:image --prefix web` |
 | `web/public/favicon.svg` | Site favicon |
 | `web/src/components/ExcalidrawBoard.astro` | Read-only Excalidraw diagram for Writing posts. SVG is baked at dev/build; the component inlines it (see **Excalidraw boards**) |
 | `web/diagrams/*.json` | Excalidraw scene files the boards load |
