@@ -1227,6 +1227,20 @@ html[data-theme='light'] .socials-menu-item {
   }
 }
 
+/* Phones: the wordmark keeps row 1; nav + icons wrap to row 2, edge to edge */
+@media (max-width: 30rem) {
+  .chrome {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    row-gap: 0;
+  }
+
+  .chrome-end {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+}
+
 /* ---------------------------------------------------------------
  * PageIntro (listing pages only) + empty state
  * ------------------------------------------------------------- */
@@ -1789,6 +1803,11 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   padding: 0.12em 0.35em;
   border-radius: 4px;
   background: var(--frame-bg);
+}
+
+/* Long paths and imports in running text break anywhere instead of pushing the page wider */
+.prose :not(pre) > code {
+  overflow-wrap: anywhere;
 }
 
 .prose pre {
