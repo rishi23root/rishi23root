@@ -1,0 +1,163 @@
+base=http://localhost:4331 out=/tmp/claude-1000/-mnt-projects-worktrees-rishi23root-audit-layout-a11y-b302abd5d8fab2e4/7a326f92-15ec-4401-978e-c205d7f48b49/scratchpad/shots/before dist=/tmp/claude-1000/-mnt-projects-worktrees-rishi23root-audit-layout-a11y-b302abd5d8fab2e4/7a326f92-15ec-4401-978e-c205d7f48b49/scratchpad/before-dist
+== A.1 sweep (route width theme scrollWidth/clientWidth) ==
+/ 320 dark 390/320 FAIL
+/projects/ 320 dark 390/320 FAIL
+/writing/ 320 dark 390/320 FAIL
+/writing/hello-world/ 320 dark 390/320 FAIL
+/writing/how-this-site-works/ 320 dark 451/320 FAIL
+/mood/ 320 dark 390/320 FAIL
+/404.html 320 dark 390/320 FAIL
+/ 360 dark 390/360 FAIL
+/projects/ 360 dark 390/360 FAIL
+/writing/ 360 dark 390/360 FAIL
+/writing/hello-world/ 360 dark 390/360 FAIL
+/writing/how-this-site-works/ 360 dark 451/360 FAIL
+/mood/ 360 dark 390/360 FAIL
+/404.html 360 dark 390/360 FAIL
+/ 375 dark 390/375 FAIL
+/projects/ 375 dark 390/375 FAIL
+/writing/ 375 dark 390/375 FAIL
+/writing/hello-world/ 375 dark 390/375 FAIL
+/writing/how-this-site-works/ 375 dark 451/375 FAIL
+/mood/ 375 dark 390/375 FAIL
+/404.html 375 dark 390/375 FAIL
+/ 390 dark 390/390 PASS
+/projects/ 390 dark 390/390 PASS
+/writing/ 390 dark 390/390 PASS
+/writing/hello-world/ 390 dark 390/390 PASS
+/writing/how-this-site-works/ 390 dark 451/390 FAIL
+/mood/ 390 dark 390/390 PASS
+/404.html 390 dark 390/390 PASS
+/ 414 dark 414/414 PASS
+/projects/ 414 dark 414/414 PASS
+/writing/ 414 dark 414/414 PASS
+/writing/hello-world/ 414 dark 414/414 PASS
+/writing/how-this-site-works/ 414 dark 451/414 FAIL
+/mood/ 414 dark 414/414 PASS
+/404.html 414 dark 414/414 PASS
+/ 768 dark 768/768 PASS
+/projects/ 768 dark 768/768 PASS
+/writing/ 768 dark 768/768 PASS
+/writing/hello-world/ 768 dark 768/768 PASS
+/writing/how-this-site-works/ 768 dark 768/768 PASS
+/mood/ 768 dark 768/768 PASS
+/404.html 768 dark 768/768 PASS
+/ 320 light 390/320 FAIL
+/projects/ 320 light 390/320 FAIL
+/writing/ 320 light 390/320 FAIL
+/writing/hello-world/ 320 light 390/320 FAIL
+/writing/how-this-site-works/ 320 light 451/320 FAIL
+/mood/ 320 light 390/320 FAIL
+/404.html 320 light 390/320 FAIL
+/ 360 light 390/360 FAIL
+/projects/ 360 light 390/360 FAIL
+/writing/ 360 light 390/360 FAIL
+/writing/hello-world/ 360 light 390/360 FAIL
+/writing/how-this-site-works/ 360 light 451/360 FAIL
+/mood/ 360 light 390/360 FAIL
+/404.html 360 light 390/360 FAIL
+/ 375 light 390/375 FAIL
+/projects/ 375 light 390/375 FAIL
+/writing/ 375 light 390/375 FAIL
+/writing/hello-world/ 375 light 390/375 FAIL
+/writing/how-this-site-works/ 375 light 451/375 FAIL
+/mood/ 375 light 390/375 FAIL
+/404.html 375 light 390/375 FAIL
+/ 390 light 390/390 PASS
+/projects/ 390 light 390/390 PASS
+/writing/ 390 light 390/390 PASS
+/writing/hello-world/ 390 light 390/390 PASS
+/writing/how-this-site-works/ 390 light 451/390 FAIL
+/mood/ 390 light 390/390 PASS
+/404.html 390 light 390/390 PASS
+/ 414 light 414/414 PASS
+/projects/ 414 light 414/414 PASS
+/writing/ 414 light 414/414 PASS
+/writing/hello-world/ 414 light 414/414 PASS
+/writing/how-this-site-works/ 414 light 451/414 FAIL
+/mood/ 414 light 414/414 PASS
+/404.html 414 light 414/414 PASS
+/ 768 light 768/768 PASS
+/projects/ 768 light 768/768 PASS
+/writing/ 768 light 768/768 PASS
+/writing/hello-world/ 768 light 768/768 PASS
+/writing/how-this-site-works/ 768 light 768/768 PASS
+/mood/ 768 light 768/768 PASS
+/404.html 768 light 768/768 PASS
+sweep combos: 84  FAIL: 46  errors: 0
+FAIL counts by route@width (both themes summed): {"/ @320":2,"/projects/ @320":2,"/writing/ @320":2,"/writing/hello-world/ @320":2,"/writing/how-this-site-works/ @320":2,"/mood/ @320":2,"/404.html @320":2,"/ @360":2,"/projects/ @360":2,"/writing/ @360":2,"/writing/hello-world/ @360":2,"/writing/how-this-site-works/ @360":2,"/mood/ @360":2,"/404.html @360":2,"/ @375":2,"/projects/ @375":2,"/writing/ @375":2,"/writing/hello-world/ @375":2,"/writing/how-this-site-works/ @375":2,"/mood/ @375":2,"/404.html @375":2,"/writing/how-this-site-works/ @390":2,"/writing/how-this-site-works/ @414":2}
+theme check: html[data-theme] seen on dark runs=dark light runs=light
+scrollbar width (innerWidth - clientWidth) seen: 0 px (0 = headless hides scrollbars, so clientWidth equals viewport)
+== A.2 header crops ==
+wrote 76-header-home-320-dark.png
+wrote 76-header-home-375-dark.png
+wrote 76-header-writing-320-dark.png
+wrote 76-header-writing-375-dark.png
+wrote 76-header-post-320-dark.png
+wrote 76-header-post-375-dark.png
+wrote 76-header-404-320-dark.png
+wrote 76-header-404-375-dark.png
+wrote 76-header-home-320-light.png
+== A.3 full pages 375 dark ==
+wrote 76-full-home-375-dark.png
+wrote 76-full-projects-375-dark.png
+wrote 76-full-writing-375-dark.png
+wrote 76-full-hello-375-dark.png
+wrote 76-full-post-375-dark.png
+wrote 76-full-mood-375-dark.png
+wrote 76-full-404-375-dark.png
+wrote 76-post-inline-code-375-dark.png
+== A.4 1280 shots ==
+wrote 76-home-1280-dark.png, 76-home-1280-light.png
+wrote 76-post-1280-dark.png
+== A.5 tap targets ==
+/ 320 theme toggle: x=312.1 y=32 w=36 h=36 right=348.1 viewport=320 OVERFLOWS
+/ 320 @ socials: x=354.5 y=32 w=36 h=36 right=390.5 viewport=320 OVERFLOWS
+/writing/how-this-site-works/ 320 theme toggle: x=312.1 y=32 w=36 h=36 right=348.1 viewport=320 OVERFLOWS
+/writing/how-this-site-works/ 320 @ socials: x=354.5 y=32 w=36 h=36 right=390.5 viewport=320 OVERFLOWS
+/ 375 theme toggle: x=312.1 y=32 w=36 h=36 right=348.1 viewport=375 INSIDE
+/ 375 @ socials: x=354.5 y=32 w=36 h=36 right=390.5 viewport=375 OVERFLOWS
+/writing/how-this-site-works/ 375 theme toggle: x=312.1 y=32 w=36 h=36 right=348.1 viewport=375 INSIDE
+/writing/how-this-site-works/ 375 @ socials: x=354.5 y=32 w=36 h=36 right=390.5 viewport=375 OVERFLOWS
+== B.1 post kbd sentence ==
+kbd texts in post: ["⌘K","Ctrl","K","?","G","W"]
+wrote 81-post-kbd-sentence-dark.png
+== B.2 palette footer ==
+palette footer text: "↑↓ move · ↵ open · @ socials · esc close"
+palette footer kbd texts: ["↑","↓","↵","@","esc"]
+wrote 81-palette-footer-dark.png
+== B.3 skip link ==
+[home] first Tab activeElement outerHTML: <a class="wordmark" href="/">@rishi23root</a>
+[home] first Tab activeElement text: "@rishi23root"
+wrote 81-skiplink-home-dark.png
+[home] skip link: no skip link (a.skip-link not found)
+[post] first Tab activeElement outerHTML: <a class="wordmark" href="/">@rishi23root</a>
+[post] first Tab activeElement text: "@rishi23root"
+wrote 81-skiplink-post-dark.png
+[post] skip link: no skip link (a.skip-link not found)
+== B.4 TOC focus ==
+[dark] TOC links: 28
+[dark] TOC activeElement: A "What problem I had" href=#what-problem-i-had
+[dark] TOC activeElement outline: style=auto width=1px color=rgb(16, 16, 16)
+wrote 81-toc-focus-dark.png
+[dark] TOC outline 1.5s after Enter: style=none width=0px color=rgb(242, 235, 224)
+wrote 81-toc-focus-late-dark.png
+light theme check: html[data-theme]=light
+[light] TOC links: 28
+[light] TOC activeElement: A "What problem I had" href=#what-problem-i-had
+[light] TOC activeElement outline: style=auto width=1px color=rgb(16, 16, 16)
+wrote 81-toc-focus-light.png
+== B.5 aria-current on crumbs ==
+.post-crumbs-current aria-current = null (absent)
+== B.6 glyph grep ==
+glyph matches in /tmp/claude-1000/-mnt-projects-worktrees-rishi23root-audit-layout-a11y-b302abd5d8fab2e4/7a326f92-15ec-4401-978e-c205d7f48b49/scratchpad/before-dist: 2 files
+  writing/how-this-site-works/index.html
+  _astro/palette.iGwtOlYq.js
+== C.1 Excalidraw pill ==
+[dark] .excal-pill opacity at rest: 0
+[dark] .excal-pill opacity on hover: 1
+wrote 82-pill-rest-dark.png, 82-pill-hover-dark.png
+[light] .excal-pill opacity at rest: 0
+[light] .excal-pill opacity on hover: 1
+wrote 82-pill-rest-light.png, 82-pill-hover-light.png
+(C.2 preview bounds: run preview-bounds.mjs separately, report -> <out>/preview-bounds.txt)

@@ -1,0 +1,8 @@
+before 1280 .wordmark:551,57,110x35 .nav:1000,62,154x24 .chrome-actions:1175,56,81x36
+before 768 .wordmark:20,39,110x35 .nav:492,44,154x24 .chrome-actions:667,39,81x36
+before 600 .wordmark:20,33,110x35 .nav:332,38,154x24 .chrome-actions:502,32,78x36
+before 481 .wordmark:20,33,110x35 .nav:213,38,154x24 .chrome-actions:383,32,78x36
+after 1280 .wordmark:551,57,110x35 .nav:1000,62,154x24 .chrome-actions:1175,56,81x36
+after 768 .wordmark:20,39,110x35 .nav:492,44,154x24 .chrome-actions:667,39,81x36
+after 600 .wordmark:20,33,110x35 .nav:332,38,154x24 .chrome-actions:502,32,78x36
+after 481 .wordmark:20,33,110x35 .nav:213,38,154x24 .chrome-actions:383,32,78x36

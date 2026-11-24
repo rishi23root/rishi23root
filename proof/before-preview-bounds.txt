@@ -1,0 +1,134 @@
+== viewport 375x300 ==
+candidate github.com links in article: 3
+[mid] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=137 linkBottom=165
+[mid] pop rect top=173.0 left=12.0 bottom=299.4 right=363.0 (w=351 h=126) innerHeight=300 innerWidth=375
+[mid] top >= 0: PASS
+[mid] left >= 0: PASS
+[mid] bottom <= innerHeight: PASS
+[mid] right <= innerWidth: PASS
+[mid] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-375x300.png
+[top] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=41 linkBottom=69
+[top] pop rect top=77.0 left=12.0 bottom=203.4 right=363.0 (w=351 h=126) innerHeight=300 innerWidth=375
+[top] top >= 0: PASS
+[top] left >= 0: PASS
+[top] bottom <= innerHeight: PASS
+[top] right <= innerWidth: PASS
+[top] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-375x300-top.png
+[bottom] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=233 linkBottom=261
+[bottom] pop rect top=99.0 left=12.0 bottom=225.4 right=363.0 (w=351 h=126) innerHeight=300 innerWidth=375
+[bottom] top >= 0: PASS
+[bottom] left >= 0: PASS
+[bottom] bottom <= innerHeight: PASS
+[bottom] right <= innerWidth: PASS
+[bottom] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-375x300-bottom.png
+== viewport 1280x360 ==
+candidate github.com links in article: 3
+[mid] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=167 linkBottom=195
+[mid] pop rect top=203.0 left=434.0 bottom=329.4 right=802.0 (w=368 h=126) innerHeight=360 innerWidth=1280
+[mid] top >= 0: PASS
+[mid] left >= 0: PASS
+[mid] bottom <= innerHeight: PASS
+[mid] right <= innerWidth: PASS
+[mid] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-1280x360.png
+[top] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=41 linkBottom=69
+[top] pop rect top=77.0 left=434.0 bottom=203.4 right=802.0 (w=368 h=126) innerHeight=360 innerWidth=1280
+[top] top >= 0: PASS
+[top] left >= 0: PASS
+[top] bottom <= innerHeight: PASS
+[top] right <= innerWidth: PASS
+[top] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-1280x360-top.png
+[bottom] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=293 linkBottom=321
+[bottom] pop rect top=159.0 left=434.0 bottom=285.4 right=802.0 (w=368 h=126) innerHeight=360 innerWidth=1280
+[bottom] top >= 0: PASS
+[bottom] left >= 0: PASS
+[bottom] bottom <= innerHeight: PASS
+[bottom] right <= innerWidth: PASS
+[bottom] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-1280x360-bottom.png
+== viewport 375x200 ==
+candidate github.com links in article: 3
+[mid] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=87 linkBottom=115
+[mid] pop rect top=123.0 left=12.0 bottom=249.4 right=363.0 (w=351 h=126) innerHeight=200 innerWidth=375
+[mid] top >= 0: PASS
+[mid] left >= 0: PASS
+[mid] bottom <= innerHeight: FAIL
+[mid] right <= innerWidth: PASS
+[mid] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-375x200.png
+[top] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=41 linkBottom=69
+[top] pop rect top=77.0 left=12.0 bottom=203.4 right=363.0 (w=351 h=126) innerHeight=200 innerWidth=375
+[top] top >= 0: PASS
+[top] left >= 0: PASS
+[top] bottom <= innerHeight: FAIL
+[top] right <= innerWidth: PASS
+[top] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-375x200-top.png
+[bottom] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=133 linkBottom=161
+[bottom] pop rect top=169.0 left=12.0 bottom=295.4 right=363.0 (w=351 h=126) innerHeight=200 innerWidth=375
+[bottom] top >= 0: PASS
+[bottom] left >= 0: PASS
+[bottom] bottom <= innerHeight: FAIL
+[bottom] right <= innerWidth: PASS
+[bottom] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-375x200-bottom.png
+== viewport 1280x200 ==
+candidate github.com links in article: 3
+[mid] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=87 linkBottom=115
+[mid] pop rect top=123.0 left=434.0 bottom=249.4 right=802.0 (w=368 h=126) innerHeight=200 innerWidth=1280
+[mid] top >= 0: PASS
+[mid] left >= 0: PASS
+[mid] bottom <= innerHeight: FAIL
+[mid] right <= innerWidth: PASS
+[mid] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-1280x200.png
+[top] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=41 linkBottom=69
+[top] pop rect top=77.0 left=434.0 bottom=203.4 right=802.0 (w=368 h=126) innerHeight=200 innerWidth=1280
+[top] top >= 0: PASS
+[top] left >= 0: PASS
+[top] bottom <= innerHeight: FAIL
+[top] right <= innerWidth: PASS
+[top] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-1280x200-top.png
+[bottom] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=133 linkBottom=161
+[bottom] pop rect top=169.0 left=434.0 bottom=295.4 right=802.0 (w=368 h=126) innerHeight=200 innerWidth=1280
+[bottom] top >= 0: PASS
+[bottom] left >= 0: PASS
+[bottom] bottom <= innerHeight: FAIL
+[bottom] right <= innerWidth: PASS
+[bottom] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-1280x200-bottom.png
+== viewport 375x110 ==
+candidate github.com links in article: 3
+[mid] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=42 linkBottom=70
+[mid] pop rect top=78.0 left=12.0 bottom=204.4 right=363.0 (w=351 h=126) innerHeight=110 innerWidth=375
+[mid] top >= 0: PASS
+[mid] left >= 0: PASS
+[mid] bottom <= innerHeight: FAIL
+[mid] right <= innerWidth: PASS
+[mid] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-375x110.png
+[mid] .gh-pop scrollHeight=126 clientHeight=126 overflow-y=visible
+[top] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=41 linkBottom=69
+[top] pop rect top=77.0 left=12.0 bottom=203.4 right=363.0 (w=351 h=126) innerHeight=110 innerWidth=375
+[top] top >= 0: PASS
+[top] left >= 0: PASS
+[top] bottom <= innerHeight: FAIL
+[top] right <= innerWidth: PASS
+[top] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-375x110-top.png
+[top] .gh-pop scrollHeight=126 clientHeight=126 overflow-y=visible
+[bottom] hovered link #0 https://github.com/rishi23root/rishi23root linkTop=43 linkBottom=71
+[bottom] pop rect top=79.0 left=12.0 bottom=205.4 right=363.0 (w=351 h=126) innerHeight=110 innerWidth=375
+[bottom] top >= 0: PASS
+[bottom] left >= 0: PASS
+[bottom] bottom <= innerHeight: FAIL
+[bottom] right <= innerWidth: PASS
+[bottom] pop scrollable (scrollHeight 126 > clientHeight 126): false
+wrote 82-preview-375x110-bottom.png
+[bottom] .gh-pop scrollHeight=126 clientHeight=126 overflow-y=visible
+SUMMARY: 9 FAIL of 60 checks
