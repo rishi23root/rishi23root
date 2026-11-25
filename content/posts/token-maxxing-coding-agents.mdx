@@ -1,0 +1,186 @@
+---
+title: "I cut my coding agents' skill overhead by 76%: 58 skills down to 7"
+seoTitle: "Coding agent skills and context: cutting 58 skills to 7 (−76% per turn)"
+date: 2026-11-25
+slug: token-maxxing-coding-agents
+summary: Skills were taking about a fifth of my coding agent's context before any work started, so I measured the catalogue, cut 58 skills to 7 and dropped the per-turn description text by 76%.
+draft: true
+author: Rishabh
+tags: [ai-agents, context-engineering, developer-workflow]
+image: /writing/token-maxxing-coding-agents/og.png
+primaryKeyword: coding agent context optimization
+secondaryKeywords: [agent skills context size, skill description tokens, cursor plugins context]
+faq:
+  - q: Why do skills use context before the agent uses them?
+    a: The host puts every linked skill's name and description into the prompt on every turn, wrapped in tags and file paths. The full SKILL.md body is only read when the agent opens that skill.
+  - q: How do I estimate what my skills cost per turn?
+    a: Add up the description text of every skill the tool offers and divide the characters by four for a rough token count. Then count the whole prompt block too; in my Cursor session the tags and paths took it from 25,705 to 38,499 characters.
+  - q: What is a role router skill?
+    a: A small skill named after a seat, such as senior-dev, that only loads when I name it and then reads the few playbooks that seat needs. The playbooks stay on disk and out of the prompt.
+  - q: Does parking a skill delete it?
+    a: No. A parked skill stays on disk and is left off the list the tools load, so its description stops being sent. A router can still read it by path.
+---
+
+I installed a few popular skill packs for my coding agents and stopped looking at what they cost. Then Cursor's context ring told me skills were taking about a fifth of the window before I had typed anything. This is what I measured, what I cut and what I still haven't verified.
+
+## TL;DR
+
+<Callout tone="answer">My own skill list went from 58 skills to 7, and the description text sent with every turn went from 8,509 characters to 2,039, which is 76% less. The larger cost was somewhere else: four marketplace plugins I wasn't using made up 84% of the skill text Cursor was sending. Count before you cut.</Callout>
+
+All token figures here are estimates: characters ÷ 4.
+
+## What problem I had
+
+A skill is a folder with a `SKILL.md` file. The tool puts each skill's name and description into the prompt on every turn so the model knows the skill exists. The body is only read when the model opens it. So the standing cost of a skill is its description, and I pay it every turn whether the skill is used or not.
+
+I had installed four upstream skill repos in full. That linked 58 skills into every session: 8,509 description characters per turn (about 2,127 tokens) backed by 239,309 bytes of `SKILL.md` files.
+
+The count wasn't the only problem. Some skills fired on ordinary English. Three different review skills overlapped. A few were setup and account skills for a hosted product.
+
+Then the number that made me count properly. Even after my first trim, Cursor's context ring showed a Skills row of about 90K, roughly 20% of the window, on every chat.
+
+{/* TODO(Rishabh): confirm what the ring's "~90K" counts. My own count of the skill block was 38,499 chars (about 9,600 tokens), which is far below 90K tokens. Say here whether the ring also counts skill bodies or something else, or add the screenshot reading. */}
+
+## What I tried
+
+1. **An allowlist.** One profile file lists the skills I keep and why each of the others is parked. A link script exposes only the kept ones to the tools.
+2. **Trimming my own list harder.** I assumed that would shrink the 20%. It didn't, so I stopped guessing and counted what was in the prompt.
+3. **A usefulness audit** of the 25 skills that were live by then.
+4. **Four role routers** in place of the live stack.
+
+## What worked
+
+### An allowlist instead of "install everything"
+
+Parked skills stay on disk and are left out of the linked folder. That one change took the stack from 58 skills to 24, description text from 8,509 to 4,098 characters (−51.8%), and `SKILL.md` bytes from 239,309 to 82,069 (−65.7%).
+
+### Counting the real prompt
+
+I compared the skills block in a live Cursor prompt against the skill folders on disk. Cursor was offering 81 skills: 25,705 description characters, about 6,400 tokens. With the tags and file paths around each entry it was 38,499 characters, about 9,600 tokens, and the files behind them came to about 1.0 MB.
+
+Four marketplace plugins (Vercel, Neon, Slack and Cloudflare) made up 21,601 of those 25,705 characters, which is 84%, and about 900 KB of the files. I wasn't using any of them. My own 24 skills were 4,098 characters, so I had been trimming the small pile.
+
+### Asking which skills earn their place
+
+The audit went through all 25 personal skills. The verdict: 9 keep, 7 trim, 9 park. It also found things a count can't show:
+
+- One skill called two others that I had already parked.
+- Five micro-skills from the same pack overlapped.
+- Two review skills competed for the same trigger words.
+- A help skill advertised three skills that were parked.
+- My own glue skill pulled 6 skills, about 18 KB, into a single task.
+
+### Four role routers
+
+I replaced the live stack with four routers: `junior-dev`, `mid-dev`, `senior-dev` and `10x-dev`. Each loads only when I name it, and it points at the few playbooks that seat needs. 65 upstream playbooks are parked behind them.
+
+That left 7 live skills: 2,039 description characters per turn and 35,952 bytes. Against the 58-skill baseline that is 76% fewer characters every turn. Against the 25 skills from the day before (4,539 characters) it is 55% fewer.
+
+{/* TODO(Rishabh): name the other live skills. The log gives the four routers and the model allocator; that leaves two of the 7 unnamed. Also say in one line why 65 parked is more than the original 58. */}
+
+## What failed
+
+### Trimming the wrong list
+
+My first move was to cut my own list further. The count showed 4,098 characters of mine against 25,705 from the plugin catalogue. The pile I was about to trim was a sixth the size of the one I hadn't looked at.
+
+### No off switch for a plugin
+
+Cursor had no per-plugin disable when I looked, only Uninstall. I asked the agent to uninstall the four plugins through Cursor's account API. It failed twice because the API rejected the saved CLI login token. The uninstall became a manual job.
+
+### The "after" number is still a projection
+
+Removing the four plugins should take the catalogue from 25,705 to 4,104 characters. That is arithmetic, not a measurement. When I checked two days later, all four were still in the plugin cache on disk. I haven't yet seen the ring drop.
+
+{/* TODO(Rishabh): uninstall the four plugins, open a new chat and record the context ring's Skills row. Replace this paragraph with the measured before and after. */}
+
+### Skills didn't follow me to another tool
+
+My linked folder fed three tools. A fourth, Antigravity, looked somewhere else and loaded none of my 25 skills; it ran on 4 built-ins and 1,345 description characters. A trimmed list doesn't help a tool that never sees it.
+
+I also dropped one new skill straight into the linked folder and skipped the allowlist. The footprint report kept saying 24, and the next relink could have pruned the skill.
+
+### A parallel trim agent that stopped halfway
+
+Before the skills work I had four subagents trimming my project notes in parallel. One was interrupted mid-run and had to be dealt with by hand. It was an early sign that parallel jobs need checking, not trusting.
+
+### A log that existed only as a sentence
+
+The routers' dispatch loop ended with "log it", written as an instruction in a skill. A review found the per-task stats file had zero rows. On Nov 24 it still didn't exist. Prose is not a mechanism. The fix was a hook that writes events without being asked; it logged 1.6 MB of events in about 80 minutes.
+
+{/* TODO(Rishabh): real spend before and after. I have no cost or quota numbers for this change yet, only character counts. */}
+
+## Architecture
+
+<ExcalidrawBoard
+  src="/diagrams/skill-context-budget.json"
+  height={440}
+  caption="Skill description text per turn, to scale: Cursor's plugin catalogue against my own stack at each stage."
+/>
+
+In words: two separate catalogues were adding skill text to my prompts. Cursor's marketplace plugins were the big one at 25,705 characters, 84% of it from four plugins. My own stack was the small one, and it went from 8,509 to 4,098 to 2,039 characters.
+
+<ExcalidrawBoard
+  src="/diagrams/role-routers.json"
+  height={400}
+  caption="A request names a seat, that router loads, and it reads only the playbooks it needs from the parked set."
+/>
+
+In words: the prompt carries 7 short descriptions. When a request names a seat, that router loads and reads the playbooks it needs by path. The other 65 stay on disk and cost nothing per turn.
+
+| Piece | In the prompt every turn | Loaded when |
+| --- | --- | --- |
+| Live skills (7) | name and description | the model opens one |
+| Role routers (4 of the 7) | counted in the 2,039 characters | I name the seat |
+| Parked playbooks (65) | nothing | a router reads one by path |
+
+## Code
+
+The part of a router that matters is one frontmatter flag:
+
+```yaml
+---
+name: senior-dev
+# description trimmed
+disable-model-invocation: true
+---
+```
+
+With that flag the model can't decide on its own to open the skill. It loads when I name it.
+
+{/* TODO(Rishabh): paste the real frontmatter of one router and the measuring part of the footprint script. The log names the script but doesn't contain its code, so there are no commands here. */}
+
+How each number was measured:
+
+1. **Description characters.** A script reads the `description` field from each linked `SKILL.md` and adds up the lengths. It compares against a baseline file saved on Nov 17.
+2. **Bytes.** The same script sums the size of each linked `SKILL.md`.
+3. **Cursor's catalogue.** I compared the skills block from a live prompt with the built-in skills folder and the plugin cache, then grouped the description lengths by plugin.
+4. **Tokens.** Characters ÷ 4. I didn't run a tokenizer.
+
+## Results
+
+| Stage | Skills | Description chars per turn | ≈ tokens | `SKILL.md` bytes |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline, Nov 17 | 58 | 8,509 | 2,127 | 239,309 |
+| Allowlist trim | 24 | 4,098 | 1,025 | 82,069 |
+| One skill added, Nov 20 | 25 | 4,539 | 1,135 | 86,703 |
+| Four role routers, Nov 21 | 7 live, 65 parked | 2,039 | 510 | 35,952 |
+
+From baseline to routers that is −76.0% description characters and −85.0% `SKILL.md` bytes.
+
+On the Cursor side: 81 skills and 25,705 description characters, with 21,601 (84.0%) from four plugins. The projected figure after uninstalling them is 4,104. It is not verified.
+
+The saving on my own stack is about 1,600 tokens a turn, which is small next to the window. I still think it was worth doing, for two reasons. It is paid on every turn of every thread, and a new thread pays it again from cold. And the audit found skills that collided on triggers or pointed at parked ones, which is a worse problem than the text itself.
+
+## What I recommend
+
+- **Count the prompt before you cut anything.** Total the description characters per source. I assumed my own skills were the problem, and they were a sixth the size of the plugin catalogue.
+- **Check marketplace plugins first.** Each one brings its own skills. Uninstall the ones for products you aren't using right now.
+- **Keep an allowlist with a reason for every parked skill.** Then I know why it's off the next time I see it.
+- **Make heavy skills named-only**, and put a few routers in front of the playbooks instead of exposing all of them.
+- **If something has to happen every time, make it a hook or a script.** A sentence in a skill is a request.
+- **Check each tool separately.** A skill folder one tool reads may be invisible to the next.
+
+When not to bother: if you have a handful of skills and no marketplace plugins, the saving is a few hundred tokens a turn. Count once and move on.
+
+The routers are one part of a larger setup for running agents across several providers. That's a separate post.
