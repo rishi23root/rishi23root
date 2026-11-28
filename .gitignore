@@ -8,3 +8,10 @@ web/.generated/
 .DS_Store
 *.tsbuildinfo
 .npm
+# agent-skills factory: skill links are per machine (scripts/install.mjs),
+# ledger and previews are local run state. .factory/profile.md is tracked.
+.claude/skills/
+.agents/skills/
+.factory/*
+!.factory/profile.md
+!.factory/README.md
