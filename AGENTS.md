@@ -42,7 +42,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Excalidraw board in a post | `web/diagrams/<name>.json` + `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX | No import needed; see **Excalidraw boards** below |
 | GitHub card in a post | `<RepoCard owner="…" repo="…" />` or `<PrCard owner="…" repo="…" number={21} />` in the MDX | No import; plain github.com repo/PR links get hover previews automatically; see **GitHub cards and link previews** |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
-| Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; chrome actions: theme then `@` socials; mood-left / text-right; `HeroMoodShell` island; no on-site avatar; skip link first in `BaseLayout.astro` targets `#content` (`<main>`, or `.home-copy` on home, below the header); header wraps to two rows at ≤30rem |
+| Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; chrome actions: theme then `@` socials; mood-left / text-right; `HeroMoodShell` island; no on-site avatar; skip link first in `BaseLayout.astro` targets `#content` (`<main>`, or `.home-copy` on home, below the header) |
 | Command palette (kbar) | `web/src/components/CommandPalette.astro` | Hidden UI; Cmd/Ctrl+K or `?`; chords `gh`/`gp`/`gw`/`gm` navigate, `tt` toggles theme; boot is tiny, palette chunk lazy-loaded |
 | Site-only content | `content/site.json` → `voiceBio`, `moods`, `capabilities` | README loaders ignore these; README shape unchanged |
 | OG / Twitter / JSON-LD | `web/src/layouts/BaseLayout.astro` (+ page props) | Default OG image in `web/public`; posts use `og:type=article` |
