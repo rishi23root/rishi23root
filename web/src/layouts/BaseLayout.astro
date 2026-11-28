@@ -11,6 +11,7 @@ type Props = {
   path?: string
   type?: 'website' | 'article'
   publishedTime?: Date | string
+  modifiedTime?: Date | string
   image?: string
   /** e.g. `noindex` for unlisted pages like /mood */
   robots?: string
@@ -23,6 +24,7 @@ const {
   path = '/',
   type = 'website',
   publishedTime,
+  modifiedTime,
   image = '/og-default.png',
   robots,
   jsonLd,
@@ -32,7 +34,9 @@ const pageTitle = title ? `${title} · ${site.github.name}` : site.github.name
 const canonical = absoluteUrl(path)
 const ogImage = absoluteUrl(image)
 const published = publishedTime ? new Date(publishedTime).toISOString() : undefined
+const modified = modifiedTime ? new Date(modifiedTime).toISOString() : undefined
 const jsonLdBlocks = jsonLd ? [jsonLd].flat() : []
+const noindex = robots?.split(',').some((directive) => directive.trim().toLowerCase() === 'noindex')
 
 const isHome = path === '/'
 ---
@@ -45,8 +49,9 @@ const isHome = path === '/'
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     {robots ? <meta name="robots" content={robots} /> : null}
-    <link rel="canonical" href={canonical} />
+    {!noindex ? <link rel="canonical" href={canonical} /> : null}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link
       rel="alternate"
       type="application/rss+xml"
@@ -59,17 +64,22 @@ const isHome = path === '/'
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content={type} />
     <meta property="og:image" content={ogImage} />
+    {image === '/og-default.png' ? <meta property="og:image:width" content="1200" /> : null}
+    {image === '/og-default.png' ? <meta property="og:image:height" content="630" /> : null}
+    <meta property="og:image:alt" content="Rishabh (rishi23root): software engineer, AI, SaaS and automation" />
     <meta property="og:site_name" content={site.github.name} />
     {
       published ? (
         <meta property="article:published_time" content={published} />
       ) : null
     }
+    {modified ? <meta property="article:modified_time" content={modified} /> : null}
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="Rishabh (rishi23root): software engineer, AI, SaaS and automation" />
 
     {
       jsonLdBlocks.map((block) => (

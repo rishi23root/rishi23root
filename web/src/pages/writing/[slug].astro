@@ -55,7 +55,7 @@ const jsonLd: Record<string, unknown>[] = [
   {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
-    headline: d.title,
+    headline: d.seoTitle ?? d.title,
     description: d.summary,
     datePublished: d.date.toISOString(),
     ...(d.updated ? { dateModified: d.updated.toISOString() } : {}),
@@ -95,6 +95,7 @@ if (d.faq.length) {
   path={path}
   type="article"
   publishedTime={d.date}
+  modifiedTime={d.updated}
   image={ogImage}
   jsonLd={jsonLd}
 >
