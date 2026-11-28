@@ -71,6 +71,26 @@ async function main() {
     }),
     '- [x/y](https://github.com/x/y) — Fast \\[CLI\\] \\<tool\\>',
   )
+  // Long liked descriptions truncate at a word boundary (<= 100 chars) + ellipsis
+  const longDesc =
+    'A local multi-agent harness that works with your existing Claude Code, Codex subscriptions, allows you to run an office of agents'
+  assert.strictEqual(
+    likedMarkdown({
+      full_name: 'x/long',
+      html_url: 'https://github.com/x/long',
+      description: longDesc,
+    }),
+    '- [x/long](https://github.com/x/long) — A local multi-agent harness that works with your existing Claude Code, Codex subscriptions, allows…',
+  )
+  const exact100 = 'a'.repeat(100)
+  assert.strictEqual(
+    likedMarkdown({
+      full_name: 'x/exact',
+      html_url: 'https://github.com/x/exact',
+      description: exact100,
+    }),
+    `- [x/exact](https://github.com/x/exact) — ${exact100}`,
+  )
 
   // 3. index.ts retry-axios on githubReq + 404 fallback via Promise.allSettled
   const origAdapter = githubReq.defaults.adapter
@@ -183,7 +203,7 @@ async function main() {
     githubReq.defaults.raxConfig = origRaxConfig
   }
 
-  // 4. index.ts excludes self-owned repos case-insensitively
+  // 4. index.ts excludes self-owned and featured repos case-insensitively
   const filtered = filterStarredRepos(
     [
       { full_name: 'rishi23root/opencv_wrap', html_url: 'u1', description: null },
@@ -197,6 +217,23 @@ async function main() {
   assert.deepStrictEqual(
     filtered.map((item) => item.full_name),
     ['other/one'],
+  )
+
+  const filteredWithExcludes = filterStarredRepos(
+    [
+      { full_name: 'EpicGames/PixelStreamingInfrastructure', html_url: 'u1', description: null },
+      { full_name: 'saeeddhqan/MARYAM', html_url: 'u2', description: null },
+      { full_name: 'other/one', html_url: 'u3', description: null },
+      { full_name: 'other/two', html_url: 'u4', description: null },
+      { full_name: 'other/three', html_url: 'u5', description: null },
+    ],
+    'rishi23root',
+    2,
+    ['epicgames/pixelstreaminginfrastructure', 'saeeddhqan/Maryam'],
+  )
+  assert.deepStrictEqual(
+    filteredWithExcludes.map((item) => item.full_name),
+    ['other/one', 'other/two'],
   )
 
   // 5. posts.ts frontmatter parser + trailing-slash links + draft exclusion
@@ -292,6 +329,21 @@ async function main() {
     { tag: 'beta', count: 1 },
     { tag: 'zeta', count: 1 },
   ])
+
+  // Tags that match every project are dropped (e.g. open-source on site.json)
+  assert.deepStrictEqual(
+    getProjectTags([
+      { title: 'A', url: 'https://example.com/a', tags: ['open-source', 'python'] },
+      { title: 'B', url: 'https://example.com/b', tags: ['Open-Source', 'web'] },
+    ]),
+    [
+      { tag: 'python', count: 1 },
+      { tag: 'web', count: 1 },
+    ],
+  )
+  assert.ok(
+    !getProjectTags(getOrderedProjects()).some((entry) => entry.tag === 'open-source'),
+  )
 
   assert.strictEqual(absoluteUrl('/writing'), 'https://rishi23root.in/writing/')
   assert.strictEqual(

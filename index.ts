@@ -82,8 +82,21 @@ export function featuredMarkdown(list: GHItem[], blurbs: Record<string, string>)
     .join('\n')
 }
 
+const LIKED_DESC_MAX = 100
+
+function truncateDescription(text: string, max = LIKED_DESC_MAX): string {
+  const clean = text.replace(/\r?\n+/g, ' ').trim()
+  if (clean.length <= max) return clean
+  const slice = clean.slice(0, max)
+  if (/\s/.test(clean[max])) return `${slice.trimEnd()}…`
+  const cut = slice.lastIndexOf(' ')
+  return `${(cut > 0 ? slice.slice(0, cut) : slice).trimEnd()}…`
+}
+
 export function likedMarkdown(item: GHItem) {
-  const desc = item.description ? ` — ${escapeMd(item.description)}` : ''
+  const desc = item.description
+    ? ` — ${escapeMd(truncateDescription(item.description))}`
+    : ''
   return `- [${item.full_name}](${item.html_url})${desc}`
 }
 
@@ -154,10 +167,15 @@ export function filterStarredRepos(
   starred: GHItem[],
   user: string,
   limit: number,
+  exclude: string[] = [],
 ): GHItem[] {
   const selfPrefix = `${user.toLowerCase()}/`
+  const excluded = new Set(exclude.map((name) => name.toLowerCase()))
   return starred
-    .filter((item) => !item.full_name.toLowerCase().startsWith(selfPrefix))
+    .filter((item) => {
+      const lower = item.full_name.toLowerCase()
+      return !lower.startsWith(selfPrefix) && !excluded.has(lower)
+    })
     .slice(0, limit)
 }
 
@@ -202,11 +220,16 @@ async function main() {
 
   const starred: GHItem[] = await githubReq
     .get<GHItem[]>('/users/' + user + '/starred', {
-      params: { per_page: Math.min(100, recentLikedCount + 10) },
+      params: { per_page: Math.min(100, recentLikedCount + 10 + opensource.active.length) },
     })
     .then((r) => r.data)
 
-  const recentStarred = filterStarredRepos(starred, user, recentLikedCount)
+  const recentStarred = filterStarredRepos(
+    starred,
+    user,
+    recentLikedCount,
+    opensource.active,
+  )
   out = out.replace(marker(inject.RECENT_STAR), () =>
     recentStarred.map(likedMarkdown).join('\n'),
   )
