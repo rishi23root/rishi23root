@@ -85,6 +85,8 @@ const isHome = path === '/'
       crossorigin
     />
     <script is:inline>
+      // Gates the phone header menu (global.css) before first paint.
+      document.documentElement.classList.add('js')
       // <html> ships as dark; only a saved light choice needs applying.
       try {
         if (localStorage.getItem('theme') === 'light')
