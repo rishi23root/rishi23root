@@ -131,10 +131,14 @@ locals.excalScript = true
           unpinTimer = 0
         }
       }
-      const fit = () =>
-        size.w && size.h && frameSize.w && frameSize.h
-          ? Math.min(frameSize.w / size.w, frameSize.h / size.h, 1)
-          : 1
+      const fit = () => {
+        if (!size.w || !size.h || !frameSize.w || !frameSize.h) return 1
+        const padX = onModalClose ? Math.min(40, Math.round(frameSize.w * 0.04)) * 2 : 0
+        const padY = onModalClose ? 88 : 0
+        const w = Math.max(1, frameSize.w - padX)
+        const h = Math.max(1, frameSize.h - padY)
+        return Math.min(w / size.w, h / size.h, onModalClose ? MAX_ZOOM : 1)
+      }
       const scale = () => zoom ?? fit()
       const apply = (announce = false) => {
         const s = scale()
