@@ -1,9 +1,9 @@
 ---
-title: "How I run a multi-provider agent team in T3 Code: 5 helpers, 549k tokens"
-seoTitle: "Running a multi-provider agent team in T3 Code: rules, token numbers, failures"
+title: "How I split agent work across threads in T3 Code: 5 helpers, 549k tokens"
+seoTitle: "Splitting coding-agent work across threads in T3 Code: rules, token numbers, failures"
 date: 2026-11-25
 slug: t3-code-multi-provider-agent-team
-summary: One orchestrator thread in T3 Code hands work to child agents on other models and providers; here are the rules I use, a five-helper build that cost about 549,000 tokens, and what went wrong.
+summary: The rules I use to hand coding-agent work to child threads in T3 Code, measured on one Claude-only build where five helpers used 548,808 tokens and a cold review found 25 issues.
 draft: true
 author: Rishabh
 tags: [agents, t3-code, workflow]
@@ -21,11 +21,11 @@ faq:
     a: My written cap is 4 builds and 2 reviews in flight, and 1 of each while I am still piloting. Only the manager starts workers; a worker never starts its own.
 ---
 
-I use [T3 Code](https://github.com/pingdotgg/t3code) as the one place where my coding agents live. It is an open-source (MIT) app that drives the agent CLIs already signed in on my machine. I have Claude Code, Codex, Cursor and Antigravity connected. This post is the set of rules I run a small agent team by, the numbers from one real build, and the parts that broke.
+I use [T3 Code](https://github.com/pingdotgg/t3code) as the one place where my coding agents live. It is an open-source (MIT) app that drives the agent CLIs already signed in on my machine. I have Claude Code, Codex, Cursor and Antigravity connected.
 
 ## TL;DR
 
-<Callout tone="answer">One orchestrator thread reads the task, rewrites the brief, picks a model and hands the work to a child. The build I measured used five helpers and about 549,000 helper tokens. An Opus review that read the result cold found 25 issues, 1 of them critical, that the author model had written straight past.</Callout>
+<Callout tone="answer">One orchestrator thread reads the task, rewrites the brief, picks a model and hands the work to a child. The rules are written for any provider, but the one build I have measured ran on Claude models only: five helpers used 548,808 tokens. An Opus review that read the result cold found 25 issues, 1 of them critical, and all were fixed before the first commit.</Callout>
 
 The rules, short: the manager hires and workers never do; spend by how hard the thinking is; hand off at 50–65% of the context window; and never let a model review its own work.
 
@@ -43,10 +43,7 @@ I needed three things: small contexts, a deliberate choice of model per task, an
 
 1. **One long thread for everything.** It works until the window fills. Then the cost is compaction and drift.
 2. **A fixed lookup from role to model.** Simple, but it ignored quota. One run went to two models on the same provider, and both failed with "Individual quota reached… resets in 164h30m".
-3. **A big process on paper.** My first design had an eight-stage loop, seven labels and the manager as a fifth seat. It duplicated skills and a label I already had, so I cut it.
-4. **One orchestrator thread with a few hard rules.** This is what I kept.
-
-I also thought about letting workers start their own helpers and decided against it before trying. Nobody reviews a tree of agents three levels deep.
+3. **One orchestrator thread with a few hard rules.** This is what I kept.
 
 ## What worked
 
@@ -78,7 +75,7 @@ Task size is a poor guide to model choice. A large task is mostly reading, and r
 | 2 | Features, tests, bug fixes in known modules | mid |
 | 1 | Architecture, security, a cold review, a stuck decision | senior, 10x |
 
-One quota rule sits on top: at 15% remaining or below, no new work starts on that model. I switch provider at the same tier first and drop a tier only if nobody has room. I had three different thresholds written down before this (10%, 15% and 5%), which is two too many.
+One quota rule sits on top: at 15% remaining or below, no new work starts on that model. I switch provider at the same tier first and drop a tier only if nobody has room. Before this I had three thresholds written in three places (10%, 15% and 5%) and they disagreed. I picked 15% and deleted the other two.
 
 <ExcalidrawBoard
   src="/diagrams/model-tier-ladder.json"
@@ -86,19 +83,13 @@ One quota rule sits on top: at 15% remaining or below, no new work starts on tha
   caption="Three model tiers mapped to seats and kinds of work, with one quota floor at 15%."
 />
 
-In words: tier 1 goes to the senior and 10x seats for decisions, tier 2 to the mid seat for building, tier 3 to juniors and helpers for reading. Work is delegated down and escalated up one step at a time.
+The board shows the same three rows as the table. Work is delegated down and escalated up one step at a time.
 
 ### Hand off at 50–65% context
 
-When a thread reaches 50–65% of its window, it writes a memory note on the GitHub issue or PR: goal, decisions, open questions, links, next action and files in play. Then the work continues in a fresh context that reads only the issue, the PR and that note. The note lives on GitHub, so any model on any provider can pick it up.
+This rule is written but I have not yet measured a handoff. When a thread reaches 50–65% of its window, it writes a memory note on the GitHub issue or PR: goal, decisions, open questions, links, next action and files in play. Then the work continues in a fresh context that reads only the issue, the PR and that note. The note lives on GitHub, so any model on any provider can pick it up.
 
 {/* TODO(Rishabh): one real handoff. Which thread, how full the window was, and whether the fresh session continued cleanly from the note alone. */}
-
-### A council for decisions
-
-For a decision I can't settle, the 10x seat asks three models from three providers the same question in parallel and scores the answers. It is for choices, not for building.
-
-{/* TODO(Rishabh): have you run the council on a real decision yet? If yes, add the question, the three models and what you chose. If not, say it is designed but untested, or cut this subsection. */}
 
 ## What failed
 
@@ -114,7 +105,7 @@ While one agent set up a server, I had a second one keeping notes. It wrote "dis
 
 ### Quota died mid-run
 
-Covered above, and it is why the quota floor exists. A related surprise: one provider looked broken when it was simply not logged in.
+The two quota failures above are why the floor exists. Both happened in the middle of a run, not at the start, so the work in progress was lost. A related surprise: one provider looked broken when it was simply not logged in.
 
 ### An agent deleted `.gitignore`
 
@@ -190,7 +181,7 @@ The numbers are what the agent harness reported for each child run when it finis
 | Independent review of the whole repo | Opus | 160,826 | 323 s |
 | Behaviour test: follow the skills on 5 requests | Sonnet | 71,215 | 78 s |
 
-That is 548,808 tokens across 5 runs, about 549,000. The one tier 1 run, the Opus review, was 29% of it.
+That is 548,808 tokens across 5 runs. The one tier 1 run, the Opus review, was 29% of it.
 
 {/* TODO(Rishabh): the manager thread's own token count and the wall-clock time for the whole build. The 549,000 figure is helpers only. */}
 
@@ -198,13 +189,13 @@ That review found 25 issues, 1 critical: one kind of task had no step that wrote
 
 What is not proven: this build ran on Claude models only, and no real ticket has yet gone through build, review and ship under these rules. The pilot is one issue, one thread, one PR.
 
-{/* TODO(Rishabh): add the pilot result when it has run, and one cross-provider run with numbers (for example a Codex or Cursor builder reviewed by Claude). */}
+{/* TODO(Rishabh): this paragraph may be out of date. Since it was written, PRs #102 to #104 on this repo went through build, review and merge. If that was the pilot, replace the paragraph with its result, and add one cross-provider run with numbers (for example a Claude builder reviewed by Codex). */}
 
 ## What I recommend
 
 Keep one manager and make it small. It should see conclusions, not file dumps. Send the reading to a cheap model and keep the strong one for judgement.
 
-Have a different context review the work. The author model missed a critical gap that a cold reader found in 323 seconds. That review cost 160,826 tokens and I would pay it again.
+Have a different context review the work. The author model missed a critical gap that a cold reader found. That review was the most expensive run in the build and I would pay it again.
 
 Turn any rule that matters into a mechanism. A sentence that says "log the run" produced zero rows.
 
