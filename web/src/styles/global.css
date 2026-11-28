@@ -1239,19 +1239,16 @@ html[data-theme='light'] .socials-menu-item {
     height: max(44px, 2.75rem);
   }
 
-  /* Open menu: dim + blur the page under the header (chrome-menu.ts).
-     Below .chrome (20) and .chrome-bar (100), above ordinary page content
-     (popovers/modals such as .gh-pop and .kbar sit higher on purpose). */
+  /* Open menu: dim + blur the whole viewport (chrome-menu.ts). Above
+     ordinary page content and the header bar's background; only .chrome
+     (z 20: wordmark, toggle, panel) sits above it. Popovers/modals such as
+     .gh-pop and .kbar sit higher on purpose. */
   html.js .chrome-backdrop {
     display: block;
     position: fixed;
-    top: var(--chrome-backdrop-top, 0px);
-    right: 0;
-    bottom: 0;
-    left: 0;
+    inset: 0;
     z-index: 19;
     background: rgba(0, 0, 0, 0.16);
-    -webkit-backdrop-filter: blur(3px);
     backdrop-filter: blur(3px);
     visibility: hidden;
     opacity: 0;
@@ -1268,6 +1265,23 @@ html[data-theme='light'] .socials-menu-item {
     visibility: visible;
     opacity: 1;
     transition: opacity 180ms var(--ease-out);
+  }
+
+  /* While open, .chrome-bar stops being a stacking context, so its background
+     goes under the backdrop (no seam) and .chrome (20) rises above it. */
+  html.js.chrome-menu-open .chrome-bar {
+    z-index: auto;
+  }
+}
+
+/* Safari < 18 only has the prefixed property. In its own @supports block
+   because the CSS minifier drops a -webkit- line sitting next to the
+   unprefixed one. */
+@media (max-width: 40rem) {
+  @supports (-webkit-backdrop-filter: blur(1px)) {
+    html.js .chrome-backdrop {
+      -webkit-backdrop-filter: blur(3px);
+    }
   }
 }
 
