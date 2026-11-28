@@ -248,6 +248,33 @@ a:hover {
   outline-offset: 2px;
 }
 
+/* Skip link: first Tab stop, hidden until focused. #content is <main>, or the
+   home text block below the header. It's a focus target only, so no ring. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  /* Above .chrome-bar (100) and the socials panel (200), below .kbar (1000) */
+  z-index: 300;
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: var(--nav-font);
+  text-decoration: none;
+  transform: translateY(-300%);
+}
+
+.skip-link:focus {
+  transform: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+#content:focus {
+  outline: none;
+}
+
 .nav {
   display: flex;
   gap: var(--nav-gap);
@@ -1757,10 +1784,12 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   scroll-margin-top: var(--space-7);
 }
 
-/* Rail clicks focus the heading for keyboard continuity; no ring on the heading itself. */
-.post-body :is(h2, h3)[tabindex='-1']:focus,
-.post-faq h2[tabindex='-1']:focus {
-  outline: none;
+/* Rail links move focus to the heading, so keyboard users get a ring on it (WCAG 2.4.7).
+   :focus-visible keeps it off for mouse clicks; it stays until focus moves on. */
+.post-body :is(h2, h3)[tabindex='-1']:focus-visible,
+.post-faq h2[tabindex='-1']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
 }
 
 /* Long-form body (MDX). Spacing and type instead of rules.
@@ -1839,6 +1868,11 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   padding: 0.12em 0.35em;
   border-radius: 4px;
   background: var(--frame-bg);
+}
+
+/* Long paths and imports in running text break anywhere instead of pushing the page wider */
+.prose :not(pre) > code {
+  overflow-wrap: anywhere;
 }
 
 .prose pre {
@@ -2200,6 +2234,14 @@ html[data-theme='light'] .gh-card-del {
     visibility 0s linear var(--dur-fast);
 }
 
+/* Taller than the viewport: cap and scroll inside. 24px = 2 × EDGE in GithubLinkPreviews.astro.
+   Only then, because overflow would clip the card's shadow. */
+.gh-pop.is-scroll {
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+}
+
 .gh-pop.is-open {
   opacity: 1;
   visibility: visible;
@@ -2361,7 +2403,7 @@ html[data-theme='dark'] .excal-stage svg {
   filter: invert(93%) hue-rotate(180deg);
 }
 
-/* Control pill: hidden until the board is hovered or focused */
+/* Control pill: faint at rest on desktop so readers can see it exists; full on hover or focus */
 .excal-pill {
   --pill-bg: color-mix(in srgb, var(--fg) 12%, var(--bg));
   position: absolute;
@@ -2378,7 +2420,7 @@ html[data-theme='dark'] .excal-stage svg {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
   color: var(--fg);
   cursor: default;
-  opacity: 0;
+  opacity: 0.45;
   transform: translateY(4px);
   pointer-events: none;
   transition:
@@ -2400,6 +2442,14 @@ html[data-theme='dark'] .excal-stage svg {
     opacity: 1;
     transform: none;
     pointer-events: auto;
+  }
+}
+
+/* Reduced motion: two states, no transition */
+@media (prefers-reduced-motion: reduce) {
+  .excal-pill {
+    transform: none;
+    transition: none;
   }
 }
 

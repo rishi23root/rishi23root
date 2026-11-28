@@ -204,7 +204,7 @@ function ensureRoot(): HTMLElement {
       />
       <div id="${LIST_ID}" class="kbar-list" role="listbox" aria-label="Commands"></div>
       <p class="kbar-empty" role="status" aria-live="polite" hidden>No matches</p>
-      <p class="kbar-hint"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>↵</kbd> open · <kbd>@</kbd> socials · <kbd>esc</kbd> close</p>
+      <p class="kbar-hint"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>enter</kbd> open · <kbd>@</kbd> socials · <kbd>esc</kbd> close</p>
     </div>
   `
   document.body.appendChild(root)

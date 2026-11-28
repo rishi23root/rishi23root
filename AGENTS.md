@@ -42,7 +42,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Excalidraw board in a post | `web/diagrams/<name>.json` + `<ExcalidrawBoard src="/diagrams/<name>.json" />` in the MDX | No import needed; see **Excalidraw boards** below |
 | GitHub card in a post | `<RepoCard owner="…" repo="…" />` or `<PrCard owner="…" repo="…" number={21} />` in the MDX | No import; plain github.com repo/PR links get hover previews automatically; see **GitHub cards and link previews** |
 | Add/remove Toolbox badge | `toolbox.ts` → `toolbox` array | `{ label, color, logo?, logoColor? }` |
-| Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; chrome actions: theme then `@` socials; mood-left / text-right; `HeroMoodShell` island; no on-site avatar |
+| Landing / writing / projects UI | `web/src/` | Lee soft-dark folio; nav Home · Projects · Writing; chrome actions: theme then `@` socials; mood-left / text-right; `HeroMoodShell` island; no on-site avatar; skip link first in `BaseLayout.astro` targets `#content` (`<main>`, or `.home-copy` on home, below the header) |
 | Command palette (kbar) | `web/src/components/CommandPalette.astro` | Hidden UI; Cmd/Ctrl+K or `?`; chords `gh`/`gp`/`gw`/`gm` navigate, `tt` toggles theme; boot is tiny, palette chunk lazy-loaded |
 | Site-only content | `content/site.json` → `voiceBio`, `moods`, `capabilities` | README loaders ignore these; README shape unchanged |
 | OG / Twitter / JSON-LD | `web/src/layouts/BaseLayout.astro` (+ page props) | Default OG image in `web/public`; posts use `og:type=article` |
@@ -74,7 +74,7 @@ Keep the order. A short qualifier after a colon is fine (`## What failed: export
 
 ## Excalidraw boards
 
-Writing posts can embed Excalidraw diagrams. `astro dev` and `astro build` render each scene to SVG with `exportToSvg` before pages render, and the board inlines that SVG. There's no editor canvas, and the browser does not download `@excalidraw/excalidraw`. A control pill (zoom out, %, zoom in, reset, expand) appears on hover or keyboard focus and stays pinned after any control is used, until the pointer has been off the board for ~1.2 s (or the modal closes). Drag pans. Expand shows the same SVG in a modal at ~70% of the viewport that closes on backdrop click, Escape or Close. Dark mode is a CSS `invert(93%) hue-rotate(180deg)` filter on the SVG, so theme switches are instant.
+Writing posts can embed Excalidraw diagrams. `astro dev` and `astro build` render each scene to SVG with `exportToSvg` before pages render, and the board inlines that SVG. There's no editor canvas, and the browser does not download `@excalidraw/excalidraw`. A control pill (zoom out, %, zoom in, reset, expand) rests faintly visible (opacity 0.45; always full on touch), goes to full on hover or keyboard focus, and stays pinned after any control is used, until the pointer has been off the board for ~1.2 s (or the modal closes). Drag pans. Expand shows the same SVG in a modal at ~70% of the viewport that closes on backdrop click, Escape or Close. Dark mode is a CSS `invert(93%) hue-rotate(180deg)` filter on the SVG, so theme switches are instant.
 
 How it fits together:
 
