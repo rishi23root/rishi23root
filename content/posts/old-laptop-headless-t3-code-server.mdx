@@ -21,13 +21,13 @@ faq:
     a: Mine has about 11 GB plus 10.9 GB of zstd zram swap. It sat at 9% RAM when idle, and the T3 Code service has peaked at 7.8 GB with agents running.
 ---
 
-I had a Dell Inspiron 3501 doing nothing. It now sits in a back room with the lid closed and runs [T3 Code](https://github.com/pingdotgg/t3code), the open-source app I use to run coding agents, all day. This is the build log: the exact setup, and the parts that went wrong.
+I had a Dell Inspiron 3501 doing nothing. It now sits in a spare room with the lid closed and runs [T3 Code](https://github.com/pingdotgg/t3code), the open-source app I use to run coding agents, all day. This is the build log: the exact setup, and the parts that went wrong.
 
 ## TL;DR
 
 <Callout tone="answer">Ubuntu Server 26.04.1 on the laptop's 256 GB NVMe, projects on its 1 TB hard drive, T3 Code as a systemd user service, and Tailscale Serve in front of it. Zero router ports are open. Once I had a shell on the box, an agent did the server setup in about 16 minutes, and the box idled at 3.8% disk and 9% RAM.</Callout>
 
-{/* TODO(Rishabh): add a photo of the laptop in the back room, lid closed (web/public/writing/old-laptop-headless-t3-code-server/). */}
+{/* TODO(Rishabh): add a photo of the laptop in the spare room, lid closed (web/public/writing/old-laptop-headless-t3-code-server/). */}
 
 ## What problem I had
 
