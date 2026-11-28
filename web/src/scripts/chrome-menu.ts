@@ -1,6 +1,8 @@
 /**
  * Phone header menu: .menu-toggle discloses .chrome-end as an overlay.
  * Non-modal, no focus trap. Above the breakpoint .chrome-end is the plain header.
+ * While open, .chrome-backdrop dims and blurs the page below the header;
+ * a tap on it is an outside tap, so it closes the menu.
  */
 
 // Mirrors the "Phone chrome" media query in styles/global.css.
@@ -17,6 +19,18 @@ export function initChromeMenu(header: HTMLElement) {
 
   const narrow = window.matchMedia(NARROW_MQ)
 
+  // On <body>, outside any page stacking context. Decorative only.
+  const backdrop = document.createElement('div')
+  backdrop.className = 'chrome-backdrop'
+  backdrop.setAttribute('aria-hidden', 'true')
+  document.body.append(backdrop)
+
+  // Starts under the header so the header itself stays sharp.
+  function placeBackdrop() {
+    const top = Math.max(0, header.getBoundingClientRect().bottom)
+    backdrop.style.setProperty('--chrome-backdrop-top', `${top}px`)
+  }
+
   function isOpen(): boolean {
     return button.getAttribute('aria-expanded') === 'true'
   }
@@ -25,6 +39,16 @@ export function initChromeMenu(header: HTMLElement) {
     button.setAttribute('aria-expanded', String(open))
     panel.classList.toggle('is-open', open)
     panel.inert = narrow.matches && !open
+    const shown = narrow.matches && open
+    backdrop.classList.toggle('is-open', shown)
+    if (shown) {
+      placeBackdrop()
+      window.addEventListener('scroll', placeBackdrop, { passive: true })
+      window.addEventListener('resize', placeBackdrop)
+    } else {
+      window.removeEventListener('scroll', placeBackdrop)
+      window.removeEventListener('resize', placeBackdrop)
+    }
   }
 
   function close() {

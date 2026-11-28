@@ -1084,7 +1084,8 @@ html[data-theme='light'] .socials-menu-item {
  * Phone chrome (40rem query mirrored in scripts/chrome-menu.ts).
  * With JS: wordmark + menu button; .chrome-end drops down as an overlay.
  * ------------------------------------------------------------- */
-.menu-toggle {
+.menu-toggle,
+.chrome-backdrop {
   display: none;
 }
 
@@ -1217,12 +1218,61 @@ html[data-theme='light'] .socials-menu-item {
     width: max(44px, 2.75rem);
     height: max(44px, 2.75rem);
   }
+
+  /* Open menu: dim + blur the page under the header (chrome-menu.ts).
+     Below .chrome (20) and .chrome-bar (100), above ordinary page content
+     (popovers/modals such as .gh-pop and .kbar sit higher on purpose). */
+  html.js .chrome-backdrop {
+    display: block;
+    position: fixed;
+    top: var(--chrome-backdrop-top, 0px);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 19;
+    background: rgba(0, 0, 0, 0.16);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity 180ms var(--ease-out),
+      visibility 0s linear 180ms;
+  }
+
+  html.js[data-theme='light'] .chrome-backdrop {
+    background: rgba(28, 27, 25, 0.08);
+  }
+
+  html.js .chrome-backdrop.is-open {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 180ms var(--ease-out);
+  }
+}
+
+/* No backdrop-filter: tint only, a little stronger to make up for it */
+@media (max-width: 40rem) {
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    html.js .chrome-backdrop {
+      background: rgba(0, 0, 0, 0.26);
+    }
+
+    html.js[data-theme='light'] .chrome-backdrop {
+      background: rgba(28, 27, 25, 0.14);
+    }
+  }
 }
 
 @media (max-width: 40rem) and (prefers-reduced-motion: reduce) {
   html.js .chrome-end,
   html.js .chrome-end.is-open {
     transform: none;
+    transition: none;
+  }
+
+  html.js .chrome-backdrop,
+  html.js .chrome-backdrop.is-open {
     transition: none;
   }
 }
