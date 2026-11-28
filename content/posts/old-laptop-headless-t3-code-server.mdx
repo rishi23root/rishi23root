@@ -1,0 +1,292 @@
+---
+title: An old Dell laptop as an always-on T3 Code server, with zero router ports open
+seoTitle: "Headless T3 Code server on Ubuntu: old laptop, systemd and Tailscale Serve"
+date: 2026-11-25
+slug: old-laptop-headless-t3-code-server
+summary: How I turned a spare Dell Inspiron 3501 into a headless Ubuntu server that runs T3 Code as a systemd user service, reached over Tailscale Serve with no ports forwarded.
+draft: true
+author: Rishabh
+tags: [homelab, linux, tailscale, agents]
+image: /writing/old-laptop-headless-t3-code-server/og.png
+primaryKeyword: headless T3 Code server
+secondaryKeywords: [t3 code linux setup, tailscale serve self-hosted, old laptop home server ubuntu]
+faq:
+  - q: Do I need to open a router port to reach T3 Code on a home machine?
+    a: No. Tailscale Serve publishes the local T3 Code server at an HTTPS name that only devices on my tailnet can open, so the router forwards nothing.
+  - q: Why not use LVM or LUKS disk encryption on a headless laptop server?
+    a: I skipped LUKS because a passphrase prompt stops an unattended reboot; TPM2 or Clevis/Tang can unlock it automatically, with extra setup and trade-offs I didn't take on. I also turned LVM off, since one plain root partition was all the OS disk needed.
+  - q: How do I stop a laptop server from sleeping when the lid is closed?
+    a: Set the three HandleLidSwitch options to ignore in systemd-logind, mask the sleep, suspend, hibernate and hybrid-sleep targets, and turn on Block Sleep in the BIOS if the laptop has it.
+  - q: How much RAM does a headless coding-agent box need?
+    a: Mine has about 11 GB plus 10.9 GB of zstd zram swap. It sat at 9% RAM when idle, and the T3 Code service has peaked at 7.8 GB with agents running.
+---
+
+I had a Dell Inspiron 3501 doing nothing. It now sits in a spare room with the lid closed and runs [T3 Code](https://github.com/pingdotgg/t3code), the open-source app I use to run coding agents, all day. This is the build log: the exact setup, and the parts that went wrong.
+
+## TL;DR
+
+<Callout tone="answer">Ubuntu Server 26.04.1 on the laptop's 256 GB NVMe, projects on its 1 TB hard drive, T3 Code as a systemd user service, and Tailscale Serve in front of it. Zero router ports are open. Once I had a shell on the box, an agent did the server setup in about 16 minutes, and the box idled at 3.8% disk and 9% RAM.</Callout>
+
+{/* TODO(Rishabh): add a photo of the laptop in the spare room, lid closed (web/public/writing/old-laptop-headless-t3-code-server/). */}
+
+## What problem I had
+
+I run long agent sessions, often several threads at once. On my main Windows PC that meant heat, sessions cut short when the PC slept or lost power, and a desktop full of things I wasn't looking at.
+
+I wanted a second machine that is always on, runs the agents, and is reachable from the PC I sit at. The PC becomes the screen. The laptop does the work.
+
+{/* TODO(Rishabh): what the laptop cost (or that it was already paid off), how old it is, and its power draw at idle and under load. I have no numbers for these. */}
+
+## What I tried
+
+1. **Keep running agents on the main PC.** It works until the PC sleeps, and I didn't want it awake all day.
+2. **Make the laptop a small homelab**, with Pi-hole and a monitoring stack next to the agents. I dropped this before installing it. The reason is under What failed.
+3. **A single-purpose headless box.** Server install, no desktop, one job: T3 Code and the agent CLIs it starts. This is what I kept.
+
+## What worked
+
+### The hardware and the disk split
+
+The laptop is a Dell Inspiron 3501 with an 11th-gen Core i5 and about 11 GB of usable RAM. It has two disks, and I gave each one job:
+
+- **256 GB NVMe SSD:** Ubuntu, logins, Tailscale and the T3 Code database.
+- **1 TB hard drive:** every repo and every worktree the agents create.
+
+In the installer I chose "Use an entire disk" on the SSD and unticked "Set up this disk as an LVM group". I left LUKS off as well. With a passphrase, LUKS waits for someone to type it at every boot, so the laptop could not come back by itself after a power cut.
+
+Unattended unlock does exist: a key sealed in the machine's TPM2 chip, or a key fetched over the network with Clevis and a Tang server. The trade-off with TPM2 is that someone who steals the whole laptop may be able to boot it to an unlocked disk. Tang needs another machine that is up, and networking during early boot. I didn't set up either one.
+
+The hard drive got wiped after the install. Check the device name with `lsblk` first; this erases it.
+
+```bash
+lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,MODEL
+
+sudo wipefs -a /dev/sdX
+sudo parted /dev/sdX --script mklabel gpt mkpart primary ext4 0% 100%
+sudo mkfs.ext4 -L projects /dev/sdX1
+sudo mkdir -p /mnt/projects
+UUID=$(sudo blkid -s UUID -o value /dev/sdX1)
+echo "UUID=${UUID} /mnt/projects ext4 defaults,noatime,nofail 0 2" | sudo tee -a /etc/fstab
+sudo mount -a
+sudo chown "$USER:$USER" /mnt/projects
+
+mkdir -p /mnt/projects/worktrees
+ln -sfn /mnt/projects "$HOME/projects"
+mkdir -p "$HOME/.t3"
+ln -sfn /mnt/projects/worktrees "$HOME/.t3/worktrees"
+```
+
+`nofail` lets the laptop boot even if the hard drive is slow to appear. T3 Code looks for its extra checkouts at `~/.t3/worktrees`, so that path is a symlink onto the big disk. I made the link before installing the service, so it exists when T3 Code first starts.
+
+### Staying awake with the lid closed
+
+A laptop that suspends on lid close disappears from the network. In `/etc/systemd/logind.conf.d/lid.conf`:
+
+```ini
+[Login]
+HandleLidSwitch=ignore
+HandleLidSwitchExternalPower=ignore
+HandleLidSwitchDocked=ignore
+```
+
+Then mask every sleep target:
+
+```bash
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+sudo systemctl restart systemd-logind
+```
+
+The box is on Wi-Fi, so I turned Wi-Fi power save off too.
+
+Swap is zram, sized to match RAM, so one heavy session can spill over without the agent being killed. On a spinning disk, compressed RAM beats a swap file. With `zram-tools`, `/etc/default/zramswap` is two lines:
+
+```bash
+ALGO=zstd
+PERCENT=100
+```
+
+### Coming back after a power cut
+
+Ubuntu starts Tailscale and T3 Code on boot, but it cannot switch the hardware on. That is a BIOS setting. On this Dell it is on the Power Management page:
+
+- **Wake on AC:** ON. The laptop powers on when the charger has power.
+- **Block Sleep:** ON.
+- **Peak Shift:** OFF, so it stays on wall power instead of switching to the battery on a schedule.
+
+I also set "Continue on Warnings", so a boot warning cannot wait forever for a key press behind a closed lid, and switched off the camera, mic, speaker and Bluetooth. The battery covers short outages.
+
+{/* TODO(Rishabh): did you test Wake on AC with the battery disconnected? The vault only says the test works with the battery out, not that it was run. */}
+
+The BIOS itself went from 1.23.0 to 1.44.0 from inside Ubuntu, with `fwupdmgr`.
+
+{/* TODO(Rishabh): confirm the exact fwupdmgr commands you ran (refresh / get-updates / update?). The vault records only the tool and the two versions. */}
+
+### T3 Code as a user service
+
+Vendor docs often pipe an install script from `curl` straight into a shell. Don't: save it to a file and read it first. I installed three tools this way. I found no checksum or signature to verify any of the three script files against, so reading each one was the only check I had. Tailscale and Claude Code also have package repositories, if you'd rather use those.
+
+```bash
+curl -fsSL -o t3-install.sh https://t3.codes/install.sh
+less t3-install.sh
+```
+
+Run it once you're happy with what it does:
+
+```bash
+sh t3-install.sh
+t3 service install
+sudo t3 browser setup
+```
+
+`t3 service install` writes a systemd user unit and enables lingering, so the service survives logout and starts at boot. `t3 browser setup` is a one-time Ubuntu step that lets the agents' headless browser tabs start.
+
+The agent CLIs are installed and logged in on the box itself, so that is where the subscriptions get used:
+
+```bash
+curl -fsSL -o claude-install.sh https://claude.ai/install.sh
+less claude-install.sh
+```
+
+```bash
+bash claude-install.sh
+claude auth login
+```
+
+### Tailscale Serve instead of a port forward
+
+Both machines run the Tailscale client on the same account. There is no server of my own in between, and nothing on the router changes.
+
+```bash
+curl -fsSL -o tailscale-install.sh https://tailscale.com/install.sh
+less tailscale-install.sh
+```
+
+```bash
+sh tailscale-install.sh
+sudo tailscale up --hostname=homeserver
+sudo tailscale set --operator="$USER"
+
+t3 pair --tailscale
+```
+
+MagicDNS and HTTPS certificates are switched on in the Tailscale admin console. The `--operator` line lets my user publish the HTTPS route without root. If Serve is refused, that line is the fix. `t3 pair --tailscale` attaches Tailscale Serve to the running service, and the mapping survives restarts:
+
+```console
+$ tailscale serve status
+https://homeserver.<your-tailnet>.ts.net (tailnet only)
+|-- / proxy http://127.0.0.1:<port>
+```
+
+I open that name from the PC and pair. A browser treats the raw tailnet address as an insecure page, which is why the HTTPS name matters.
+
+## What failed
+
+### Ubuntu went onto the USB stick first
+
+My first install put Ubuntu on the installer pendrive instead of the SSD. The storage screen lists every disk. The right one is the one near 238 GB; the pendrive is the small one with a USB brand in its name. Read the summary screen before confirming.
+
+{/* TODO(Rishabh): one or two sentences on how you noticed (what happened on reboot?). The vault only records that it happened. */}
+
+### zram came up wrong
+
+The first time, zram came up as lz4 at 5.5 GB because the module was already in use. After a reset it ran as zstd at 10.9 GB. Check with `zramctl` instead of trusting the config file.
+
+### T3 Code could not see the Cursor CLI
+
+The service's `PATH` did not include `~/.local/bin`, so T3 Code never found the CLI I had just installed. A drop-in fixed it (see Code).
+
+### Pi-hole on the same box
+
+Pi-hole is house DNS. An agent that fills the RAM, or a reboot while I was still setting the box up, would take name resolution down for every device at home. An agent box is allowed to fall over; DNS is not. So Pi-hole stays off this machine.
+
+### Paired is not linked
+
+This is the one still open. The PC is paired with the box, so I can open its threads. But an agent on the PC cannot start work on the box. When I asked one to, it stopped with:
+
+> I can't start threads on homeserver from here. The only linked environment is this Windows machine, and I couldn't find a tool to link homeserver.
+
+Linking is a separate step in T3 Code (Settings → Labs → Linked environments), and a person has to do it. Links are also one-way and don't chain: A → B gives B nothing on A. As far as I can tell, that means N machines need N·(N−1) links before one agent can dispatch anywhere: 2 links for my two machines and 6 for three. I have only tried it with two. I have drafted a feature request for this and haven't posted it yet.
+
+### Smaller ones
+
+The shell dropped once when `tailscaled` restarted in the middle of `apt upgrade`. And a second agent I had taking notes in parallel wrote "disk not wiped" while the disk was being wiped. Parallel writers go stale.
+
+## Architecture
+
+<ExcalidrawBoard
+  src="/diagrams/homeserver-access-path.json"
+  height={560}
+  caption="A phone, laptop or desktop on the tailnet opens the HTTPS name; Tailscale Serve on the box proxies it to the T3 Code service on localhost, which starts the agent CLIs."
+/>
+
+In words: any device signed in to my tailnet opens `https://homeserver.<your-tailnet>.ts.net`. Traffic goes over WireGuard to the laptop. Tailscale Serve terminates HTTPS there and proxies to the T3 Code server, which listens on localhost only. T3 Code starts the agent CLIs (Claude Code, Cursor CLI), and each thread works in its own git worktree. The router forwards zero ports.
+
+<ExcalidrawBoard
+  src="/diagrams/homeserver-disk-layout.json"
+  height={440}
+  caption="The NVMe holds the OS and state; the hard drive holds repos and worktrees behind two symlinks; swap is zstd zram."
+/>
+
+The SSD holds `/` and `/boot/efi`. The hard drive is one ext4 partition at `/mnt/projects`, and `~/projects` and `~/.t3/worktrees` both point into it. Swap is 10.9 GB of zstd zram.
+
+## Code
+
+The unit that `t3 service install` wrote, shortened, with the home path written as `%h` and the version left out:
+
+```ini
+[Unit]
+Description=T3 Code server
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=%h
+ExecStart=%h/.t3/runtime/versions/<version>/t3 __service-launcher
+KillMode=mixed
+OOMPolicy=continue
+Restart=always
+RestartSec=5
+MemoryLow=1536M
+OOMScoreAdjust=100
+
+[Install]
+WantedBy=default.target
+```
+
+`Restart=always` and lingering are what make it an always-on service. My one addition is the `PATH` drop-in at `~/.config/systemd/user/t3code.service.d/path.conf`:
+
+```ini
+[Service]
+Environment=PATH=%h/.local/bin:%h/.nvm/versions/node/<version>/bin:/usr/local/bin:/usr/bin:/bin
+```
+
+Checks I run after a reboot:
+
+```bash
+t3 service status
+tailscale serve status
+zramctl
+lsblk -o NAME,SIZE,TYPE,MOUNTPOINT
+```
+
+## Results
+
+- **Setup time:** about 16 minutes (06:13 to 06:29) for the server setup after first login: disk, stay-awake settings, packages, T3 Code and Serve. A subagent ran it from the PC. Installing Ubuntu and the BIOS settings were me at the laptop keyboard, and are not in that number.
+- **Idle baseline, right after setup:** `/` at 3.8% of 232.64 GB, RAM at 9%.
+- **Five days later, with agents running:** the box has been up 5 days without a restart of the service. `/` is at 9% and the projects disk at 2% (`df -h`). The T3 Code service is using 3.7 GB and has peaked at 7.8 GB (`systemctl --user status`). zram is holding 2.6 GB of swapped data in 1.1 GB of RAM (`zramctl`).
+- **Router ports opened:** 0.
+
+That peak is why the zram matters: 7.8 GB on a machine with about 11 GB leaves little room for a second heavy session.
+
+{/* TODO(Rishabh): power draw (idle and under load) and monthly electricity cost, if you measure them. */}
+
+## What I recommend
+
+- Use a spare laptop if you have one. The battery covers short power cuts, and the BIOS can power it back on.
+- Skip LVM, and skip LUKS only if booting unattended with no unlock setup matters more to you than encryption at rest. If the disk holds things that need encryption, this layout is the wrong one: use LUKS, and either type the passphrase after each reboot or accept the trade-offs of TPM2 or Clevis/Tang unlock.
+- Put the OS on the SSD and the repos on the big disk, and make the worktree symlink before the service first starts.
+- Use zstd zram for swap, and confirm it with `zramctl`.
+- Publish with Tailscale Serve and leave the router alone.
+- Keep the box single-purpose. Anything the house depends on, like DNS, belongs on a machine that agents cannot knock over.
+- Don't expect agents to spread work across machines yet. Until the two are linked, I pick the machine by hand.
