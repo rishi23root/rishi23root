@@ -123,7 +123,7 @@ The BIOS itself went from 1.23.0 to 1.44.0 from inside Ubuntu, with `fwupdmgr`.
 
 ### T3 Code as a user service
 
-Vendor docs often pipe an install script from `curl` straight into a shell. Don't: save it to a file and read it first. I found nothing in the three scripts here to verify the script file itself against, even where a script checks what it downloads. Tailscale and Claude Code also have package repositories, if you'd rather use those.
+Vendor docs often pipe an install script from `curl` straight into a shell. Don't: save it to a file and read it first. I installed three tools this way. I found no checksum or signature to verify any of the three script files against, so reading each one was the only check I had. Tailscale and Claude Code also have package repositories, if you'd rather use those.
 
 ```bash
 curl -fsSL -o t3-install.sh https://t3.codes/install.sh
@@ -205,7 +205,7 @@ This is the one still open. The PC is paired with the box, so I can open its thr
 
 > I can't start threads on homeserver from here. The only linked environment is this Windows machine, and I couldn't find a tool to link homeserver.
 
-Linking is a separate step in T3 Code (Settings → Labs → Linked environments), and a person has to do it. Links are also one-way and don't chain: A → B gives B nothing on A. So N machines need N·(N−1) links before one agent can dispatch anywhere. That is 2 links for my two machines and 6 for three. I have drafted a feature request for this and haven't posted it yet.
+Linking is a separate step in T3 Code (Settings → Labs → Linked environments), and a person has to do it. Links are also one-way and don't chain: A → B gives B nothing on A. As far as I can tell, that means N machines need N·(N−1) links before one agent can dispatch anywhere: 2 links for my two machines and 6 for three. I have only tried it with two. I have drafted a feature request for this and haven't posted it yet.
 
 ### Smaller ones
 
