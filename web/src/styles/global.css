@@ -23,9 +23,10 @@ html[data-theme='dark'] {
   --muted: rgba(242, 235, 224, 0.68);
   --border: rgba(242, 235, 224, 0.16);
   --frame-bg: #2e2c28; /* 1.24:1 vs --bg: a visible but quiet surface step */
-  /* Muted teal, only for interactive emphasis (focus, active nav, prose link
-     underline, reading progress). Not gold: it would blur "link" with --warn. */
-  --accent: #8fc4c0;
+  /* Monochrome: interactive emphasis (focus ring, active nav, reading progress,
+     palette selection) uses the text colour; links get a faded beige underline. */
+  --accent: #f2ebe0;
+  --link-line: rgba(242, 235, 224, 0.4);
   /* Edge for controls whose boundary identifies them (WCAG 1.4.11, >= 3:1).
      --border stays the decorative hairline. */
   --edge: #6f6a62;
@@ -40,7 +41,8 @@ html[data-theme='light'] {
   --muted: rgba(28, 27, 25, 0.64);
   --border: rgba(28, 27, 25, 0.14);
   --frame-bg: #e8dfd0;
-  --accent: #286b68;
+  --accent: #1c1b19;
+  --link-line: rgba(28, 27, 25, 0.4);
   --edge: #847d72;
   --row-hover: rgba(28, 27, 25, 0.05);
   /* Darker amber so warning labels clear AA: 5.50:1 on beige, 5.35:1 on the warning wash. */
@@ -1844,12 +1846,13 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
 
 .prose a {
   color: var(--fg);
-  text-decoration-color: var(--accent);
+  text-decoration-color: var(--link-line);
   text-underline-offset: 0.12em;
+  transition: text-decoration-color var(--dur) var(--ease-out);
 }
 
 .prose a:hover {
-  color: var(--accent);
+  text-decoration-color: currentColor;
 }
 
 .prose :is(strong, b) {
