@@ -14,7 +14,7 @@ faq:
   - q: Do I need to open a router port to reach T3 Code on a home machine?
     a: No. Tailscale Serve publishes the local T3 Code server at an HTTPS name that only devices on my tailnet can open, so the router forwards nothing.
   - q: Why not use LVM or LUKS disk encryption on a headless laptop server?
-    a: Encryption asks for a passphrase at every boot, so the machine cannot come back by itself after a power cut. I also turned LVM off, since one plain root partition was all the OS disk needed.
+    a: I skipped LUKS because a passphrase prompt stops an unattended reboot; TPM2 or Clevis/Tang can unlock it automatically, with extra setup and trade-offs I didn't take on. I also turned LVM off, since one plain root partition was all the OS disk needed.
   - q: How do I stop a laptop server from sleeping when the lid is closed?
     a: Set the three HandleLidSwitch options to ignore in systemd-logind, mask the sleep, suspend, hibernate and hybrid-sleep targets, and turn on Block Sleep in the BIOS if the laptop has it.
   - q: How much RAM does a headless coding-agent box need?
@@ -52,7 +52,9 @@ The laptop is a Dell Inspiron 3501 with an 11th-gen Core i5 and about 11 GB of u
 - **256 GB NVMe SSD:** Ubuntu, logins, Tailscale and the T3 Code database.
 - **1 TB hard drive:** every repo and every worktree the agents create.
 
-In the installer I chose "Use an entire disk" on the SSD and unticked "Set up this disk as an LVM group". I left LUKS off as well. Encryption asks for a passphrase at every boot, so the laptop could not come back by itself after a power cut.
+In the installer I chose "Use an entire disk" on the SSD and unticked "Set up this disk as an LVM group". I left LUKS off as well. With a passphrase, LUKS waits for someone to type it at every boot, so the laptop could not come back by itself after a power cut.
+
+Unattended unlock does exist: a key sealed in the machine's TPM2 chip, or a key fetched over the network with Clevis and a Tang server. The trade-off with TPM2 is that someone who steals the whole laptop may be able to boot it to an unlocked disk. Tang needs another machine that is up, and networking during early boot. I didn't set up either one.
 
 The hard drive got wiped after the install. Check the device name with `lsblk` first; this erases it.
 
@@ -121,8 +123,17 @@ The BIOS itself went from 1.23.0 to 1.44.0 from inside Ubuntu, with `fwupdmgr`.
 
 ### T3 Code as a user service
 
+Vendor docs often pipe an install script from `curl` straight into a shell. Don't: save it to a file and read it first. I found nothing in the three scripts here to verify the script file itself against, even where a script checks what it downloads. Tailscale and Claude Code also have package repositories, if you'd rather use those.
+
 ```bash
-curl -fsSL https://t3.codes/install.sh | sh
+curl -fsSL -o t3-install.sh https://t3.codes/install.sh
+less t3-install.sh
+```
+
+Run it once you're happy with what it does:
+
+```bash
+sh t3-install.sh
 t3 service install
 sudo t3 browser setup
 ```
@@ -132,7 +143,12 @@ sudo t3 browser setup
 The agent CLIs are installed and logged in on the box itself, so that is where the subscriptions get used:
 
 ```bash
-curl -fsSL https://claude.ai/install.sh | bash
+curl -fsSL -o claude-install.sh https://claude.ai/install.sh
+less claude-install.sh
+```
+
+```bash
+bash claude-install.sh
 claude auth login
 ```
 
@@ -141,8 +157,13 @@ claude auth login
 Both machines run the Tailscale client on the same account. There is no server of my own in between, and nothing on the router changes.
 
 ```bash
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up --hostname=backroom
+curl -fsSL -o tailscale-install.sh https://tailscale.com/install.sh
+less tailscale-install.sh
+```
+
+```bash
+sh tailscale-install.sh
+sudo tailscale up --hostname=homeserver
 sudo tailscale set --operator="$USER"
 
 t3 pair --tailscale
@@ -152,7 +173,7 @@ MagicDNS and HTTPS certificates are switched on in the Tailscale admin console. 
 
 ```console
 $ tailscale serve status
-https://backroom.<tailnet>.ts.net (tailnet only)
+https://homeserver.<your-tailnet>.ts.net (tailnet only)
 |-- / proxy http://127.0.0.1:<port>
 ```
 
@@ -182,7 +203,7 @@ Pi-hole is house DNS. An agent that fills the RAM, or a reboot while I was still
 
 This is the one still open. The PC is paired with the box, so I can open its threads. But an agent on the PC cannot start work on the box. When I asked one to, it stopped with:
 
-> I can't start threads on backroom from here. The only linked environment is this Windows machine, and I couldn't find a tool to link backroom.
+> I can't start threads on homeserver from here. The only linked environment is this Windows machine, and I couldn't find a tool to link homeserver.
 
 Linking is a separate step in T3 Code (Settings → Labs → Linked environments), and a person has to do it. Links are also one-way and don't chain: A → B gives B nothing on A. So N machines need N·(N−1) links before one agent can dispatch anywhere. That is 2 links for my two machines and 6 for three. I have drafted a feature request for this and haven't posted it yet.
 
@@ -193,15 +214,15 @@ The shell dropped once when `tailscaled` restarted in the middle of `apt upgrade
 ## Architecture
 
 <ExcalidrawBoard
-  src="/diagrams/backroom-access-path.json"
+  src="/diagrams/homeserver-access-path.json"
   height={560}
   caption="A phone, laptop or desktop on the tailnet opens the HTTPS name; Tailscale Serve on the box proxies it to the T3 Code service on localhost, which starts the agent CLIs."
 />
 
-In words: any device signed in to my tailnet opens `https://backroom.<tailnet>.ts.net`. Traffic goes over WireGuard to the laptop. Tailscale Serve terminates HTTPS there and proxies to the T3 Code server, which listens on localhost only. T3 Code starts the agent CLIs (Claude Code, Cursor CLI), and each thread works in its own git worktree. The router forwards zero ports.
+In words: any device signed in to my tailnet opens `https://homeserver.<your-tailnet>.ts.net`. Traffic goes over WireGuard to the laptop. Tailscale Serve terminates HTTPS there and proxies to the T3 Code server, which listens on localhost only. T3 Code starts the agent CLIs (Claude Code, Cursor CLI), and each thread works in its own git worktree. The router forwards zero ports.
 
 <ExcalidrawBoard
-  src="/diagrams/backroom-disk-layout.json"
+  src="/diagrams/homeserver-disk-layout.json"
   height={440}
   caption="The NVMe holds the OS and state; the hard drive holds repos and worktrees behind two symlinks; swap is zstd zram."
 />
@@ -263,7 +284,7 @@ That peak is why the zram matters: 7.8 GB on a machine with about 11 GB leaves l
 ## What I recommend
 
 - Use a spare laptop if you have one. The battery covers short power cuts, and the BIOS can power it back on.
-- Skip LVM and LUKS on a box that has to boot unattended. If the disk holds things that need encryption, this layout is the wrong one.
+- Skip LVM, and skip LUKS only if booting unattended with no unlock setup matters more to you than encryption at rest. If the disk holds things that need encryption, this layout is the wrong one: use LUKS, and either type the passphrase after each reboot or accept the trade-offs of TPM2 or Clevis/Tang unlock.
 - Put the OS on the SSD and the repos on the big disk, and make the worktree symlink before the service first starts.
 - Use zstd zram for swap, and confirm it with `zramctl`.
 - Publish with Tailscale Serve and leave the router alone.
