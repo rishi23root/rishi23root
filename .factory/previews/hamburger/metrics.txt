@@ -1,0 +1,16 @@
+before-375-dark-closed.png  scrollWidth=390 innerWidth=375 @=[354,390,36,36] menuBtn=null aria-expanded=null
+before-375-light-closed.png  scrollWidth=390 innerWidth=375 @=[354,390,36,36] menuBtn=null aria-expanded=null
+before-412-dark-closed.png  scrollWidth=412 innerWidth=412 @=[356,392,36,36] menuBtn=null aria-expanded=null
+before-412-light-closed.png  scrollWidth=412 innerWidth=412 @=[356,392,36,36] menuBtn=null aria-expanded=null
+after-375-dark-closed.png  scrollWidth=375 innerWidth=375 @=[302,346,44,44] menuBtn=[311,355,44,44] aria-expanded=false
+after-375-dark-open.png  scrollWidth=375 innerWidth=375 @=[302,346,44,44] menuBtn=[311,355,44,44] aria-expanded=true
+after-375-light-closed.png  scrollWidth=375 innerWidth=375 @=[302,346,44,44] menuBtn=[311,355,44,44] aria-expanded=false
+after-375-light-open.png  scrollWidth=375 innerWidth=375 @=[302,346,44,44] menuBtn=[311,355,44,44] aria-expanded=true
+after-412-dark-closed.png  scrollWidth=412 innerWidth=412 @=[339,383,44,44] menuBtn=[348,392,44,44] aria-expanded=false
+after-412-dark-open.png  scrollWidth=412 innerWidth=412 @=[339,383,44,44] menuBtn=[348,392,44,44] aria-expanded=true
+after-412-light-closed.png  scrollWidth=412 innerWidth=412 @=[339,383,44,44] menuBtn=[348,392,44,44] aria-expanded=false
+after-412-light-open.png  scrollWidth=412 innerWidth=412 @=[339,383,44,44] menuBtn=[348,392,44,44] aria-expanded=true
+before-1280-dark-closed.png  scrollWidth=1280 innerWidth=1280 @=[1204,1240,36,36] menuBtn=null aria-expanded=null
+before-1280-light-closed.png  scrollWidth=1280 innerWidth=1280 @=[1205,1241,36,36] menuBtn=null aria-expanded=null
+after-1280-dark-closed.png  scrollWidth=1280 innerWidth=1280 @=[1205,1241,36,36] menuBtn="hidden" aria-expanded=false
+after-1280-light-closed.png  scrollWidth=1280 innerWidth=1280 @=[1205,1241,36,36] menuBtn="hidden" aria-expanded=false
