@@ -22,9 +22,15 @@ html[data-theme='dark'] {
   --fg: #f2ebe0;
   --muted: rgba(242, 235, 224, 0.68);
   --border: rgba(242, 235, 224, 0.16);
-  --frame-bg: #262421;
-  --accent: #e6dccb;
+  --frame-bg: #2e2c28; /* 1.24:1 vs --bg: a visible but quiet surface step */
+  /* Muted teal, only for interactive emphasis (focus, active nav, prose link
+     underline, reading progress). Not gold: it would blur "link" with --warn. */
+  --accent: #8fc4c0;
+  /* Edge for controls whose boundary identifies them (WCAG 1.4.11, >= 3:1).
+     --border stays the decorative hairline. */
+  --edge: #6f6a62;
   --row-hover: rgba(242, 235, 224, 0.05);
+  --warn: #e0b25c;
   color-scheme: dark;
 }
 
@@ -34,10 +40,11 @@ html[data-theme='light'] {
   --muted: rgba(28, 27, 25, 0.64);
   --border: rgba(28, 27, 25, 0.14);
   --frame-bg: #e8dfd0;
-  --accent: #2a2825;
+  --accent: #286b68;
+  --edge: #847d72;
   --row-hover: rgba(28, 27, 25, 0.05);
-  /* Darker amber so warning labels clear AA on beige (~4.6:1). */
-  --warn: #8a6410;
+  /* Darker amber so warning labels clear AA: 5.50:1 on beige, 5.35:1 on the warning wash. */
+  --warn: #7a5808;
   /* The dark inset ring reads as a frame on light art; keep it in dark mode only. */
   --mood-inset-shadow: none;
   color-scheme: light;
@@ -47,7 +54,6 @@ html[data-theme='light'] {
 :root {
   --sans: 'Source Sans 3', 'Segoe UI', Helvetica, sans-serif;
   --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  --warn: #e0b25c;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -132,7 +138,7 @@ a {
 }
 
 a:hover {
-  color: var(--accent);
+  color: var(--fg);
 }
 
 .visually-hidden {
@@ -240,7 +246,7 @@ a:hover {
 }
 
 .wordmark:hover {
-  color: var(--accent);
+  color: var(--fg);
 }
 
 .wordmark:focus-visible {
@@ -304,6 +310,7 @@ a:hover {
 
 .nav a[aria-current='page']::after {
   transform: scaleX(1);
+  background: var(--accent);
 }
 
 .nav a:hover,
@@ -400,7 +407,7 @@ html[data-theme='light'] .theme-icon-moon {
 }
 
 .hover-row:hover .row-link {
-  color: var(--accent);
+  color: var(--fg);
 }
 
 /* ---------------------------------------------------------------
@@ -896,16 +903,10 @@ html[data-theme='light'] .theme-icon-moon {
   outline-offset: 2px;
 }
 
-/* Touch: no hover, so keep the caption in place at a quieter opacity.
-   Tap the plate (data-revealed) or focus a control to bring it to full. */
+/* Touch: no hover, so keep the caption in place at full opacity (muted text
+   already sits near the AA floor; extra opacity drops it under 4.5:1). */
 @media (hover: none) {
   .mood-caption {
-    opacity: 0.7;
-    transform: none;
-  }
-
-  .hero-shell:focus-within .mood-caption,
-  .hero-shell[data-revealed='true'] .mood-caption {
     opacity: 1;
     transform: none;
   }
@@ -999,14 +1000,6 @@ html[data-theme='light'] .socials-menu-trigger {
   transition:
     opacity var(--socials-panel-dur) var(--ease-out),
     transform var(--socials-panel-dur) var(--ease-out);
-}
-
-html[data-theme='dark'] .socials-menu-panel {
-  background-color: #1c1b19;
-}
-
-html[data-theme='light'] .socials-menu-panel {
-  background-color: #f2ebe0;
 }
 
 .socials-menu-panel[hidden] {
@@ -1179,7 +1172,7 @@ html[data-theme='light'] .socials-menu-item {
     gap: 0;
     padding: var(--space-2);
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: 1px solid var(--edge);
     border-radius: var(--row-radius);
     box-shadow: 0 14px 32px rgba(0, 0, 0, 0.34);
     visibility: hidden;
@@ -1369,7 +1362,6 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
 @media (max-width: 40rem) {
   html.js[data-theme] body:has(.lost) .chrome-end {
     background: #061018;
-    border-color: rgba(242, 235, 224, 0.16);
   }
 
   html.js[data-theme] body:has(.lost) .chrome-actions {
@@ -1577,7 +1569,7 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   font-size: 0.92rem;
   color: var(--fg);
   background: color-mix(in srgb, var(--fg) 3%, transparent);
-  border: 1px solid var(--border);
+  border: 1px solid var(--edge);
   border-radius: 6px;
   padding: 0.45rem 0.7rem;
   transition: border-color 140ms ease, background-color 140ms ease;
@@ -1587,8 +1579,9 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   color: var(--muted);
 }
 
+.project-search:hover,
 .project-search:focus {
-  border-color: color-mix(in srgb, var(--fg) 34%, transparent);
+  border-color: color-mix(in srgb, var(--fg) 40%, var(--edge));
   background: color-mix(in srgb, var(--fg) 5%, transparent);
 }
 
@@ -1645,7 +1638,6 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
 }
 
 .project-tag-count {
-  opacity: 0.6;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1706,7 +1698,6 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  opacity: 0.75;
 }
 
 .post-header h1 {
@@ -1839,6 +1830,7 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
 
 .prose a {
   color: var(--fg);
+  text-decoration-color: var(--accent);
   text-underline-offset: 0.12em;
 }
 
@@ -1891,6 +1883,32 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   border-radius: 0;
   font-size: inherit;
 }
+
+/* Shiki dual themes (defaultColor: false): tokens carry --shiki-dark / --shiki-light;
+   html[data-theme] picks one, so blocks follow the toggle without a reload.
+   No inline background is emitted, so .prose pre's --frame-bg shows through. */
+.astro-code,
+.astro-code span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+  font-weight: var(--shiki-dark-font-weight);
+}
+
+html[data-theme='light'] .astro-code,
+html[data-theme='light'] .astro-code span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+  font-weight: var(--shiki-light-font-weight);
+}
+
+/* Theme token colours that miss 4.5:1 on --frame-bg (comments in both themes,
+   plus github-light's red, orange and green): same hue, darkened or lightened
+   just past AA. Matched on Shiki's inline vars; !important beats inline style. */
+.astro-code span[style*='--shiki-dark:#768390' i] { --shiki-dark: #8b96a1 !important; }
+.astro-code span[style*='--shiki-light:#6a737d' i] { --shiki-light: #5b626b !important; }
+.astro-code span[style*='--shiki-light:#d73a49' i] { --shiki-light: #bb2634 !important; }
+.astro-code span[style*='--shiki-light:#e36209' i] { --shiki-light: #a34606 !important; }
+.astro-code span[style*='--shiki-light:#22863a' i] { --shiki-light: #1c7030 !important; }
 
 .prose hr {
   margin: 2rem 0;
@@ -2008,7 +2026,6 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--muted);
-    opacity: 0.8;
   }
 
   .prose td code {
@@ -2203,12 +2220,13 @@ html[data-theme] body:has(.lost) :is(.wordmark, .menu-toggle, .nav a, .theme-tog
   color: color-mix(in srgb, #d9776b 75%, var(--fg));
 }
 
+/* Light: >= 4.5:1 on both the card (--frame-bg) and the hover popover */
 html[data-theme='light'] .gh-card-add {
-  color: #3d7a40;
+  color: #346836;
 }
 
 html[data-theme='light'] .gh-card-del {
-  color: #a8473b;
+  color: #8f3c32;
 }
 
 .gh-card-foot {
@@ -3170,6 +3188,11 @@ html[data-theme='dark'] .excal-stage svg {
 .kbar-item.is-active,
 .kbar-item:hover {
   background: var(--row-hover);
+}
+
+/* The selected row is the only cue for what Enter runs (focus stays in the input) */
+.kbar-item.is-active {
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
 .kbar-item-icon {

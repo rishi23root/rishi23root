@@ -64,6 +64,12 @@ export default defineConfig({
     '/writing/on-shared-content': '/writing/how-this-site-works/',
   },
   markdown: {
+    // Dual themes, no default colour: global.css picks --shiki-dark/--shiki-light
+    // from html[data-theme] and paints the block with the site's --frame-bg.
+    shikiConfig: {
+      themes: { light: 'github-light', dark: 'github-dark-dimmed' },
+      defaultColor: false,
+    },
     processor: unified({
       rehypePlugins: [rehypePublicImageSize, rehypeTableLabels],
     }),
