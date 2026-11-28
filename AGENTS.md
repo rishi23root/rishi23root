@@ -34,6 +34,7 @@ Flow: edit `content/` / toolbox / template → `GITHUB_TOKEN=… npm run build:r
 | Bio / description / `$STACK` line | `content/site.json` → `shortBio`, `fullDescription`, `stackLine` | Keep whoami inside the ```bash fence |
 | Mottos | `content/site.json` → `mottos` | Rendered as 「samp」 |
 | Socials / email / site URL | `content/site.json` → `contact`, `siteUrl` | README: bottom text links (incl. Website). Site: chrome `@` `SocialsMenu` **after** theme toggle; hover opens / click pins; no website self-link (`web/src/lib/site.ts` `socialLinks`) |
+| Phone header menu (≤ 40rem) | `web/src/scripts/chrome-menu.ts` + "Phone chrome" block in `global.css` | `.menu-toggle` opens `.chrome-end` as an overlay (`SPEC.md`); gated on `html.js` (set in `BaseLayout.astro`), no-JS wraps instead; keep the 40rem query in sync in CSS and TS |
 | Home section order | `web/src/pages/index.astro` | Voice bio → Capabilities → Writing (5, `→` to `/writing/`) → Work (3, `→` to `/projects/`). No under-bio contact strip |
 | Featured Work / Projects | `content/site.json` → `projects` | Single source for `/`, `/projects/`, README Featured Work, and `llms.txt` (`title`, `blurb`, `url`, `order`, optional `repo` `owner/repo`, optional `featured` flag, optional `tags[]` for `/projects/` filtering) |
 | Recently liked count | `content/site.json` → `recentLikedCount` | Filled from starred API |
