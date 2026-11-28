@@ -3,7 +3,7 @@ title: "I cut my coding agents' skill overhead by 76%: 58 skills down to 7"
 seoTitle: "Coding agent skills and context: cutting 58 skills to 7 (−76% per turn)"
 date: 2026-11-25
 slug: token-maxxing-coding-agents
-summary: Skills were taking about a fifth of my coding agent's context before any work started, so I measured the catalogue, cut 58 skills to 7 and dropped the per-turn description text by 76%.
+summary: I measured the skill text my coding agents receive on every turn, cut my own list from 58 skills to 7 and dropped its description text by 76%; unused marketplace plugins were the bigger cost.
 draft: true
 author: Rishabh
 tags: [ai-agents, context-engineering, developer-workflow]
@@ -21,7 +21,7 @@ faq:
     a: No. A parked skill stays on disk and is left off the list the tools load, so its description stops being sent. A router can still read it by path.
 ---
 
-I installed a few popular skill packs for my coding agents and stopped looking at what they cost. Then Cursor's context ring told me skills were taking about a fifth of the window before I had typed anything. This is what I measured, what I cut and what I still haven't verified.
+I installed a few popular skill packs for my coding agents and stopped looking at what they cost. Then Cursor's context ring showed a large Skills row before I had typed anything, so I counted.
 
 ## TL;DR
 
@@ -37,14 +37,14 @@ I had installed four upstream skill repos in full. That linked 58 skills into ev
 
 The count wasn't the only problem. Some skills fired on ordinary English. Three different review skills overlapped. A few were setup and account skills for a hosted product.
 
-Then the number that made me count properly. Even after my first trim, Cursor's context ring showed a Skills row of about 90K, roughly 20% of the window, on every chat.
+What made me count properly was Cursor's context ring. Even after my first trim it showed a Skills row of about 90K, roughly 20% of the window, on every chat. I have not reconciled that reading with my own count, which came to about 9,600 tokens of skill text, so I treat the ring as the prompt to measure and not as a result.
 
 {/* TODO(Rishabh): confirm what the ring's "~90K" counts. My own count of the skill block was 38,499 chars (about 9,600 tokens), which is far below 90K tokens. Say here whether the ring also counts skill bodies or something else, or add the screenshot reading. */}
 
 ## What I tried
 
 1. **An allowlist.** One profile file lists the skills I keep and why each of the others is parked. A link script exposes only the kept ones to the tools.
-2. **Trimming my own list harder.** I assumed that would shrink the 20%. It didn't, so I stopped guessing and counted what was in the prompt.
+2. **Trimming my own list harder.** I assumed that would shrink the ring's Skills row. It didn't, so I stopped guessing and counted what was in the prompt.
 3. **A usefulness audit** of the 25 skills that were live by then.
 4. **Four role routers** in place of the live stack.
 
@@ -64,10 +64,8 @@ Four marketplace plugins (Vercel, Neon, Slack and Cloudflare) made up 21,601 of 
 
 The audit went through all 25 personal skills. The verdict: 9 keep, 7 trim, 9 park. It also found things a count can't show:
 
-- One skill called two others that I had already parked.
-- Five micro-skills from the same pack overlapped.
-- Two review skills competed for the same trigger words.
-- A help skill advertised three skills that were parked.
+- Skills that pointed at parked ones: one called two parked skills, and a help skill advertised three.
+- Skills that collided: two review skills competed for the same trigger words.
 - My own glue skill pulled 6 skills, about 18 KB, into a single task.
 
 ### Four role routers
@@ -76,7 +74,9 @@ I replaced the live stack with four routers: `junior-dev`, `mid-dev`, `senior-de
 
 That left 7 live skills: 2,039 description characters per turn and 35,952 bytes. Against the 58-skill baseline that is 76% fewer characters every turn. Against the 25 skills from the day before (4,539 characters) it is 55% fewer.
 
-{/* TODO(Rishabh): name the other live skills. The log gives the four routers and the model allocator; that leaves two of the 7 unnamed. Also say in one line why 65 parked is more than the original 58. */}
+The 7 are the four routers, a brief-intake skill, a reference index and a model allocator. An earlier note of mine says 6 skills and 1,806 characters; that count was taken before the allocator was added the same day.
+
+{/* TODO(Rishabh): confirm the three non-router skills are described the way you want in public, and say in one line why 65 parked is more than the original 58. */}
 
 ## What failed
 
@@ -86,11 +86,11 @@ My first move was to cut my own list further. The count showed 4,098 characters 
 
 ### No off switch for a plugin
 
-Cursor had no per-plugin disable when I looked, only Uninstall. I asked the agent to uninstall the four plugins through Cursor's account API. It failed twice because the API rejected the saved CLI login token. The uninstall became a manual job.
+Cursor had no per-plugin disable when I looked, only Uninstall. The agent tried the uninstall through Cursor's account API and failed twice on a rejected login token, so it became a manual job.
 
 ### The "after" number is still a projection
 
-Removing the four plugins should take the catalogue from 25,705 to 4,104 characters. That is arithmetic, not a measurement. When I checked two days later, all four were still in the plugin cache on disk. I haven't yet seen the ring drop.
+Removing the four plugins should take the catalogue from 25,705 to 4,104 characters. That is arithmetic, not a measurement: two days later all four were still in the plugin cache on disk.
 
 {/* TODO(Rishabh): uninstall the four plugins, open a new chat and record the context ring's Skills row. Replace this paragraph with the measured before and after. */}
 
@@ -126,13 +126,13 @@ In words: two separate catalogues were adding skill text to my prompts. Cursor's
   caption="A request names a seat, that router loads, and it reads only the playbooks it needs from the parked set."
 />
 
-In words: the prompt carries 7 short descriptions. When a request names a seat, that router loads and reads the playbooks it needs by path. The other 65 stay on disk and cost nothing per turn.
+In words: the prompt carries 7 short descriptions. When a request names a seat, that router loads and reads the playbooks it needs by path. The other 65 stay on disk, and their descriptions are not in the prompt.
 
 | Piece | In the prompt every turn | Loaded when |
 | --- | --- | --- |
 | Live skills (7) | name and description | the model opens one |
 | Role routers (4 of the 7) | counted in the 2,039 characters | I name the seat |
-| Parked playbooks (65) | nothing | a router reads one by path |
+| Parked playbooks (65) | nothing; the description is not linked | a router reads one by path |
 
 ## Code
 
