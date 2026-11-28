@@ -38,8 +38,11 @@ export function initChromeMenu(header: HTMLElement) {
   }
 
   button.addEventListener('click', () => {
-    if (isOpen()) close()
-    else setOpen(true)
+    if (isOpen()) {
+      close()
+      // Safari doesn't focus a clicked button; keep focus off the now-inert panel.
+      button.focus()
+    } else setOpen(true)
   })
 
   panel.addEventListener('click', (e) => {
