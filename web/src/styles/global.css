@@ -2526,7 +2526,7 @@ html[data-theme='dark'] .excal-stage svg {
   background: color-mix(in srgb, var(--fg) 20%, transparent);
 }
 
-/* Expanded: the same SVG at ~70% of the viewport; backdrop click closes */
+/* Expanded: the same SVG at ~85% of the viewport; backdrop click closes */
 .excal-modal {
   position: fixed;
   inset: 0;
@@ -2551,8 +2551,9 @@ html[data-theme='dark'] .excal-stage svg {
 
 .excal-modal-board {
   position: relative;
-  width: 70vw;
-  height: 70vh;
+  width: 85vw;
+  height: 85vh;
+  height: 85dvh;
   border-radius: 14px;
   background: var(--bg);
   box-shadow: 0 0 0 1px var(--border), 0 24px 64px rgba(0, 0, 0, 0.32);

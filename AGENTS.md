@@ -74,7 +74,7 @@ Keep the order. A short qualifier after a colon is fine (`## What failed: export
 
 ## Excalidraw boards
 
-Writing posts can embed Excalidraw diagrams. `astro dev` and `astro build` render each scene to SVG with `exportToSvg` before pages render, and the board inlines that SVG. There's no editor canvas, and the browser does not download `@excalidraw/excalidraw`. A control pill (zoom out, %, zoom in, reset, expand) rests faintly visible (opacity 0.45; always full on touch), goes to full on hover or keyboard focus, and stays pinned after any control is used, until the pointer has been off the board for ~1.2 s (or the modal closes). Drag pans. Expand shows the same SVG in a modal at ~70% of the viewport that closes on backdrop click, Escape or Close. Dark mode is a CSS `invert(93%) hue-rotate(180deg)` filter on the SVG, so theme switches are instant.
+Writing posts can embed Excalidraw diagrams. `astro dev` and `astro build` render each scene to SVG with `exportToSvg` before pages render, and the board inlines that SVG. There's no editor canvas, and the browser does not download `@excalidraw/excalidraw`. A control pill (zoom out, %, zoom in, reset, expand) rests faintly visible (opacity 0.45; always full on touch), goes to full on hover or keyboard focus, and stays pinned after any control is used, until the pointer has been off the board for ~1.2 s (or the modal closes). Drag pans. Expand shows the same SVG in a modal at ~85% of the viewport that closes on backdrop click, Escape or Close. Dark mode is a CSS `invert(93%) hue-rotate(180deg)` filter on the SVG, so theme switches are instant.
 
 How it fits together:
 
