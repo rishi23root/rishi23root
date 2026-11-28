@@ -1,0 +1,28 @@
+before dark 375 home open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.shell shell-home","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":375}
+   tap header-corner → expanded false http://localhost:4411/
+before dark 375 projects open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.chrome-bar","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":375}
+   tap header-corner → expanded false http://localhost:4411/projects/
+before dark 375 lost open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.chrome-bar","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":375}
+   tap header-corner → expanded false http://localhost:4411/404.html
+before dark 412 home open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.shell shell-home","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":412}
+   tap header-corner → expanded false http://localhost:4411/
+before dark 412 projects open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.chrome-bar","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":412}
+   tap header-corner → expanded false http://localhost:4411/projects/
+before dark 412 lost open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.chrome-bar","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":412}
+   tap header-corner → expanded false http://localhost:4411/404.html
+before dark 1280 home closed {"bd":{"top":0,"h":0,"disp":"none","f":"none"},"headerCorner":"div.shell shell-home","wordmark":"a.wordmark","toggle":"hidden","nav":"a.","below":"div.home-section-head","sw":1280}
+before dark 1280 projects closed {"bd":{"top":0,"h":0,"disp":"none","f":"none"},"headerCorner":"div.chrome-bar","wordmark":"a.wordmark","toggle":"hidden","nav":"a.","below":"a.row-link","sw":1280}
+before light 375 home open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.shell shell-home","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":375}
+   tap header-corner → expanded false http://localhost:4411/
+before light 375 projects open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.chrome-bar","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":375}
+   tap header-corner → expanded false http://localhost:4411/projects/
+before light 375 lost open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.chrome-bar","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":375}
+   tap header-corner → expanded false http://localhost:4411/404.html
+before light 412 home open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.shell shell-home","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":412}
+   tap header-corner → expanded false http://localhost:4411/
+before light 412 projects open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.chrome-bar","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":412}
+   tap header-corner → expanded false http://localhost:4411/projects/
+before light 412 lost open {"bd":{"top":76,"h":744,"disp":"block","f":"blur(3px)"},"headerCorner":"div.chrome-bar","wordmark":"a.wordmark","toggle":"path.menu-icon-close","nav":"a.","below":"div.chrome-backdrop is-open","sw":412}
+   tap header-corner → expanded false http://localhost:4411/404.html
+before light 1280 home closed {"bd":{"top":0,"h":0,"disp":"none","f":"none"},"headerCorner":"div.shell shell-home","wordmark":"a.wordmark","toggle":"hidden","nav":"a.","below":"div.home-section-head","sw":1280}
+before light 1280 projects closed {"bd":{"top":0,"h":0,"disp":"none","f":"none"},"headerCorner":"div.chrome-bar","wordmark":"a.wordmark","toggle":"hidden","nav":"a.","below":"a.row-link","sw":1280}
