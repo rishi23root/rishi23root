@@ -1220,7 +1220,8 @@ html[data-theme='light'] .socials-menu-item {
   }
 
   /* Open menu: dim + blur the page under the header (chrome-menu.ts).
-     Below .chrome (20) and .chrome-bar (100), above page content. */
+     Below .chrome (20) and .chrome-bar (100), above ordinary page content
+     (popovers/modals such as .gh-pop and .kbar sit higher on purpose). */
   html.js .chrome-backdrop {
     display: block;
     position: fixed;
