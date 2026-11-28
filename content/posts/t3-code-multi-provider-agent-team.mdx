@@ -1,0 +1,211 @@
+---
+title: "How I run a multi-provider agent team in T3 Code: 5 helpers, 549k tokens"
+seoTitle: "Running a multi-provider agent team in T3 Code: rules, token numbers, failures"
+date: 2026-11-25
+slug: t3-code-multi-provider-agent-team
+summary: One orchestrator thread in T3 Code hands work to child agents on other models and providers; here are the rules I use, a five-helper build that cost about 549,000 tokens, and what went wrong.
+draft: true
+author: Rishabh
+tags: [agents, t3-code, workflow]
+image: /writing/t3-code-multi-provider-agent-team/og.png
+primaryKeyword: t3 code multi-agent workflow
+secondaryKeywords: [t3 code delegate_task, coding agent orchestration, model tiering for coding agents]
+faq:
+  - q: When should a T3 Code task be a subagent and when should it get its own thread?
+    a: I decide by where the result lands. Work that belongs on the pull request the session is already building runs as a delegate_task subagent; work that needs its own pull request gets its own thread with its own worktree.
+  - q: Does one thread per issue save tokens?
+    a: No. It keeps each agent's context small, which helps accuracy, but every thread pays a cold start, so total tokens go up. It only makes sense to me on flat-rate plans.
+  - q: Which model should manage and which should do the work?
+    a: I pick by how hard the thinking is, not by task size. Reading and search go to the cheapest tier, routine building to the middle tier, and decisions, security and cold reviews to the strongest one.
+  - q: How many agents do you run at once?
+    a: My written cap is 4 builds and 2 reviews in flight, and 1 of each while I am still piloting. Only the manager starts workers; a worker never starts its own.
+---
+
+I use [T3 Code](https://github.com/pingdotgg/t3code) as the one place where my coding agents live. It is an open-source (MIT) app that drives the agent CLIs already signed in on my machine. I have Claude Code, Codex, Cursor and Antigravity connected. This post is the set of rules I run a small agent team by, the numbers from one real build, and the parts that broke.
+
+## TL;DR
+
+<Callout tone="answer">One orchestrator thread reads the task, rewrites the brief, picks a model and hands the work to a child. The build I measured used five helpers and about 549,000 helper tokens. An Opus review that read the result cold found 25 issues, 1 of them critical, that the author model had written straight past.</Callout>
+
+The rules, short: the manager hires and workers never do; spend by how hard the thinking is; hand off at 50–65% of the context window; and never let a model review its own work.
+
+<RepoCard owner="pingdotgg" repo="t3code" />
+
+## What problem I had
+
+I was folding discovery, design, coding and review into one long chat. Several issues stacked in one window meant the agent had to compact, and after that it drifted or re-read history that no longer mattered.
+
+Switching providers made it worse. A run would go to one provider and die on quota in the middle of a question, with a message like "resets in 151h43m". I had no rule for which model should take which job, and nothing was written down after a run finished.
+
+I needed three things: small contexts, a deliberate choice of model per task, and a second pair of eyes that had not written the code.
+
+## What I tried
+
+1. **One long thread for everything.** It works until the window fills. Then the cost is compaction and drift.
+2. **A fixed lookup from role to model.** Simple, but it ignored quota. One run went to two models on the same provider, and both failed with "Individual quota reached… resets in 164h30m".
+3. **A big process on paper.** My first design had an eight-stage loop, seven labels and the manager as a fifth seat. It duplicated skills and a label I already had, so I cut it.
+4. **One orchestrator thread with a few hard rules.** This is what I kept.
+
+I also thought about letting workers start their own helpers and decided against it before trying. Nobody reviews a tree of agents three levels deep.
+
+## What worked
+
+### Subagent or its own thread
+
+T3 Code gives an agent two ways to hand work off. `delegate_task` starts a child inside the current thread; it gets only the task text and none of the parent's history. A new thread is a separate conversation that can be bound to its own git worktree.
+
+My rule is to decide by where the result lands:
+
+- The change belongs on the pull request this session is already building: **subagent**.
+- The change needs its own pull request: **its own thread**, with its own worktree, for one issue and one PR.
+- Review is always a different thread from the one that wrote the code.
+
+A builder thread starts empty and reads one issue. The notes, the other tickets and the original request stay with the orchestrator.
+
+### Seats and caps
+
+I use four seats: junior, mid, senior and 10x. Senior is the manager, the only seat allowed to approve a fan-out. Depth stops at manager to worker. A worker that needs help asks the manager; it does not hire.
+
+The caps are small on purpose. While piloting: 1 build and 1 review in flight. In steady state: at most 4 builds and 2 reviews, 6 coding agents in total. Before a second builder starts, the two tickets must touch different files and a review slot must be free, because my own reading of PRs is the real bottleneck.
+
+### Spend by how hard the thinking is
+
+Task size is a poor guide to model choice. A large task is mostly reading, and reading is cheap work. So the tiers follow the kind of thinking:
+
+| Tier | Work | Seat |
+| --- | --- | --- |
+| 3 | Search, reading, log parsing, intake | junior, helpers |
+| 2 | Features, tests, bug fixes in known modules | mid |
+| 1 | Architecture, security, a cold review, a stuck decision | senior, 10x |
+
+One quota rule sits on top: at 15% remaining or below, no new work starts on that model. I switch provider at the same tier first and drop a tier only if nobody has room. I had three different thresholds written down before this (10%, 15% and 5%), which is two too many.
+
+<ExcalidrawBoard
+  src="/diagrams/model-tier-ladder.json"
+  height={520}
+  caption="Three model tiers mapped to seats and kinds of work, with one quota floor at 15%."
+/>
+
+In words: tier 1 goes to the senior and 10x seats for decisions, tier 2 to the mid seat for building, tier 3 to juniors and helpers for reading. Work is delegated down and escalated up one step at a time.
+
+### Hand off at 50–65% context
+
+When a thread reaches 50–65% of its window, it writes a memory note on the GitHub issue or PR: goal, decisions, open questions, links, next action and files in play. Then the work continues in a fresh context that reads only the issue, the PR and that note. The note lives on GitHub, so any model on any provider can pick it up.
+
+{/* TODO(Rishabh): one real handoff. Which thread, how full the window was, and whether the fresh session continued cleanly from the note alone. */}
+
+### A council for decisions
+
+For a decision I can't settle, the 10x seat asks three models from three providers the same question in parallel and scores the answers. It is for choices, not for building.
+
+{/* TODO(Rishabh): have you run the council on a real decision yet? If yes, add the question, the three models and what you chose. If not, say it is designed but untested, or cut this subsection. */}
+
+## What failed
+
+### Prose is not a mechanism
+
+I wrote the whole loop as instructions: read the task, rewrite the brief, pick the model, place the run, log it. Then I asked Claude to review the design. The run log that model choice was supposed to learn from had zero rows. Its only writer was a sentence telling an agent to append a line, and agents skip bookkeeping under load. Two of the tools the instructions named did not exist in that session.
+
+The fix is boring: a hook writes the log, not the agent, and success is judged from CI and merge, not from the worker saying "done".
+
+### A parallel notes agent wrote stale facts
+
+While one agent set up a server, I had a second one keeping notes. It wrote "disk not wiped" while the disk was being wiped, and the main agent had to correct it. Two agents writing about the same moving state will disagree. Now the agent doing the work writes the notes.
+
+### Quota died mid-run
+
+Covered above, and it is why the quota floor exists. A related surprise: one provider looked broken when it was simply not logged in.
+
+### An agent deleted `.gitignore`
+
+During a sync of a private notes repo, the agent deleted `.gitignore` and restored it in a follow-up commit. A secrets scan of that repo came back clean, but an agent with write access will sometimes remove the file that protects you.
+
+{/* TODO(Rishabh): how did you notice the deleted .gitignore, and did anything get committed in between? */}
+
+<Callout tone="warning">One thread per issue costs more tokens, not fewer. Each thread pays a cold start, so per-task accuracy goes up and the total bill goes up with it. It only pays off on a flat-rate plan.</Callout>
+
+## Architecture
+
+<ExcalidrawBoard
+  src="/diagrams/agent-team-flow.json"
+  height={560}
+  caption="One orchestrator thread, a helper on the current PR, two builder threads with their own worktrees and PRs, and a separate review thread."
+/>
+
+In words: the orchestrator thread reads the issue, writes the brief and picks the model. A helper started with `delegate_task` works in the orchestrator's checkout and its result lands on the current PR. A builder thread gets its own worktree, takes one issue and opens one PR. Every PR goes to a review thread run by a different model. Arrows only go down: the manager starts workers, and workers start nothing.
+
+The provider names in the drawing are examples. Any child can run on any connected provider that has quota left.
+
+{/* TODO(Rishabh): add a screenshot of a real orchestrator thread with its children (crop out thread IDs, paths and the machine name), saved under web/public/writing/t3-code-multi-provider-agent-team/. */}
+
+## Code
+
+There is very little code. The handoff to a subagent is one tool call. The values in angle brackets are placeholders; the option names come from what each provider reports:
+
+```json
+{
+  "task": "<the rewritten brief: goal, constraints, done-when, files in play>",
+  "role": "review",
+  "mode": "async",
+  "target": {
+    "providerInstanceId": "<provider>",
+    "model": "<a tier 1 model>",
+    "options": { "effort": "high" }
+  }
+}
+```
+
+A builder thread gets a short, fixed prompt next to the issue URL:
+
+```text
+Implement this issue only. Follow the agent brief.
+Stop and comment if a needed fact is missing.
+Open one PR. Do not take a second issue. Do not launch threads.
+```
+
+And every ticket carries a block that says what it may touch, which is how the manager checks that two builders won't collide:
+
+```markdown
+### Technical Dependencies
+- **Seat:** `junior` | `mid` | `senior`
+- **Risk:** `normal` | `high`
+- **Touches:** `src/auth/*`, `src/middleware/session.ts`
+- **Must not touch:** `src/billing/*`
+- **Seam to test:** `POST /api/logout` integration test
+```
+
+## Results
+
+The numbers are what the agent harness reported for each child run when it finished; I did not ask for them.
+
+**The reader.** For the design review, a Sonnet subagent read my notes and the strong model did only the judgement. The reader used 82,788 tokens in 61 seconds across 17 tool calls.
+
+**The five-helper build.** I had a strong Claude model manage and write a new version of my agent skills (a private repo). Five helpers did the reading and checking:
+
+| Helper | Model | Tokens | Time |
+| --- | --- | --- | --- |
+| Research on four public skill setups | Sonnet | 92,163 | 117 s |
+| Findings document from my notes | Sonnet | 82,441 | 37 s |
+| Close reading of 4 upstream repos | Sonnet | 142,163 | 156 s |
+| Independent review of the whole repo | Opus | 160,826 | 323 s |
+| Behaviour test: follow the skills on 5 requests | Sonnet | 71,215 | 78 s |
+
+That is 548,808 tokens across 5 runs, about 549,000. The one tier 1 run, the Opus review, was 29% of it.
+
+{/* TODO(Rishabh): the manager thread's own token count and the wall-clock time for the whole build. The 549,000 figure is helpers only. */}
+
+That review found 25 issues, 1 critical: one kind of task had no step that wrote the list of files a ticket may touch, so the junior seat would have refused its own first ticket. All 25 were fixed before the first commit. The behaviour test passed all 5 requests and reported 13 unclear sentences.
+
+What is not proven: this build ran on Claude models only, and no real ticket has yet gone through build, review and ship under these rules. The pilot is one issue, one thread, one PR.
+
+{/* TODO(Rishabh): add the pilot result when it has run, and one cross-provider run with numbers (for example a Codex or Cursor builder reviewed by Claude). */}
+
+## What I recommend
+
+Keep one manager and make it small. It should see conclusions, not file dumps. Send the reading to a cheap model and keep the strong one for judgement.
+
+Have a different context review the work. The author model missed a critical gap that a cold reader found in 323 seconds. That review cost 160,826 tokens and I would pay it again.
+
+Turn any rule that matters into a mechanism. A sentence that says "log the run" produced zero rows.
+
+Don't do thread-per-issue if you pay per token and the tasks are small. Don't run a team at all for a change you can describe in two lines; one thread is enough. And keep the caps low until one issue has gone all the way through.
